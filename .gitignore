@@ -1,0 +1,35 @@
+# Secrets
+.env
+.env.local
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv*/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Source documents: never committed.
+# EMA / GHG Protocol / DESNZ / EPA material is third-party and not ours to
+# redistribute. Provenance lives in SOURCES.md; the files stay local.
+# Excluding the *contents* rather than the directory itself, so that the .gitkeep
+# negations below can still apply: git does not descend into an excluded directory.
+data/raw/*
+data/generated/*
+!data/raw/.gitkeep
+!data/generated/.gitkeep
+
+# Belt-and-braces: no third-party document ever enters the repo by accident,
+# whatever directory it lands in.
+*.pdf
+*.xlsx
+*.xls
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
