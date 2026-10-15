@@ -86,6 +86,13 @@ uncertainty, and says that estimates are not assured.
 
 ## Current state
 
-Tier 1 Block 1 (foundations). `GET /health` works. Extraction, factor lookup, the
-calculation and the agent loop are not built yet — see
-`Carbon R Project Checklist.md` for the sequence and its done-checks.
+See [PROGRESS.md](PROGRESS.md) — it holds the current tier/block, the environment facts
+worth not rediscovering, verification evidence, and the traps already hit. Read it before
+debugging anything environmental.
+
+`Carbon R Project Checklist.md` holds the plan and each block's done-check.
+
+**Keep the log current.** At the end of a working session, add a `PROGRESS.md` entry using
+the template at the bottom of that file, and update its "Current state at a glance" table.
+Record actual command output as evidence, counts rather than bare percentages, and any
+problem that cost more than ten minutes — including corrections to earlier conclusions.

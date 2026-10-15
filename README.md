@@ -13,7 +13,9 @@ by exact SQL. A model that is asked to multiply will sometimes produce a plausib
 number with no way to audit it; a model that is asked only to extract and to choose can be
 measured, and its mistakes show up in an eval instead of in a disclosure.
 
-See [CLAUDE.md](CLAUDE.md) for the full set of rules this repo holds itself to.
+See [CLAUDE.md](CLAUDE.md) for the full set of rules this repo holds itself to, and
+[PROGRESS.md](PROGRESS.md) for the build timeline: what was decided, what was verified
+against which source, and what broke along the way.
 
 ## Running it
 
