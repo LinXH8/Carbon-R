@@ -1,0 +1,141 @@
+{# Layout A - the only layout in synthgen v0. Tier 2 Block 2 adds more, and holds one back
+   as a never-tuned-on evaluation layout.
+
+   No arithmetic and no literal dates in here: every value is a pre-formatted string from
+   render.bill_context(), built from an ElectricityBill that already passed its validator. #}
+<!-- {{ doc_id }} / layout {{ layout_id }} / {{ generator_version }} / seed {{ generator_seed }} -->
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 9.5pt;
+         color: #1a1a1a; line-height: 1.45; }
+  .notice { border: 1.2pt dashed #8a6d00; background: #fffbe8; color: #6b5500;
+            padding: 5pt 7pt; font-size: 7.6pt; letter-spacing: .02em; margin-bottom: 11pt; }
+  header { display: flex; justify-content: space-between; align-items: flex-start;
+           border-bottom: 2pt solid #16415c; padding-bottom: 7pt; }
+  .vendor { font-size: 14pt; font-weight: 700; color: #16415c; letter-spacing: -.01em; }
+  .vendor-meta { font-size: 7.8pt; color: #5a6672; margin-top: 2pt; }
+  .doctype { text-align: right; font-size: 7.8pt; color: #5a6672; }
+  .doctype strong { display: block; font-size: 11pt; color: #16415c; letter-spacing: .06em; }
+  .panels { display: flex; gap: 14pt; margin: 11pt 0 0; }
+  .panel { flex: 1; }
+  .panel h2 { font-size: 7.4pt; text-transform: uppercase; letter-spacing: .09em;
+              color: #5a6672; margin: 0 0 3pt; font-weight: 600; }
+  .panel .body { font-size: 9pt; }
+  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; column-gap: 8pt; row-gap: 1pt; }
+  dt { color: #5a6672; font-size: 8.4pt; }
+  dd { margin: 0; font-size: 8.4pt; text-align: right; font-variant-numeric: tabular-nums; }
+  table { width: 100%; border-collapse: collapse; margin-top: 13pt; }
+  th { font-size: 7.4pt; text-transform: uppercase; letter-spacing: .08em; color: #5a6672;
+       text-align: left; border-bottom: .8pt solid #c9d2d9; padding: 0 0 3pt; font-weight: 600; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td { padding: 4.5pt 0; border-bottom: .4pt solid #e6ebef; }
+  tr.sum td { border-bottom: none; padding: 2.5pt 0; }
+  tr.sum td.label { text-align: right; color: #5a6672; }
+  tr.total td { border-top: 1.2pt solid #16415c; font-weight: 700; font-size: 11pt;
+                color: #16415c; padding-top: 5pt; }
+  .meter { margin-top: 13pt; }
+  footer { margin-top: 15pt; border-top: .4pt solid #e6ebef; padding-top: 6pt;
+           font-size: 7.2pt; color: #7a848e; }
+</style>
+
+<div class="notice">{{ notice }}</div>
+
+<header>
+  <div>
+    <div class="vendor">{{ vendor_name }}</div>
+    <div class="vendor-meta">
+      UEN {{ vendor_uen }} &middot; {{ vendor_address }}<br>
+      {{ vendor_support }}
+    </div>
+  </div>
+  <div class="doctype">
+    <strong>TAX INVOICE</strong>
+    Electricity supply<br>
+    Reference {{ doc_id }}
+  </div>
+</header>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Billed to</h2>
+    <div class="body">
+      <strong>{{ customer_name }}</strong><br>
+      {{ customer_address }}
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Account</h2>
+    <dl>
+      <dt>Account number</dt><dd>{{ account_number }}</dd>
+      <dt>Bill date</dt><dd>{{ document_date }}</dd>
+      <dt>Billing period</dt><dd>{{ period_start }} &ndash; {{ period_end }}</dd>
+      <dt>Days in period</dt><dd>{{ days_in_period }}</dd>
+      <dt>Tariff plan</dt><dd>{{ tariff_plan_name }} ({{ tariff_plan_code }})</dd>
+      <dt>Supply category</dt><dd>{{ tension }}</dd>
+    </dl>
+  </div>
+</div>
+
+<table class="meter">
+  <thead>
+    <tr>
+      <th>Meter</th>
+      <th>Basis</th>
+      <th class="num">Previous reading</th>
+      <th class="num">Present reading</th>
+      <th class="num">Consumption</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ meter_number }}</td>
+      <td>{{ reading_basis }}</td>
+      <td class="num">{{ previous_reading }} kWh</td>
+      <td class="num">{{ current_reading }} kWh</td>
+      <td class="num">{{ consumption }} kWh</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th>Charges for this period</th>
+      <th class="num">Quantity</th>
+      <th class="num">Rate</th>
+      <th class="num">Amount ({{ currency }})</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Electricity consumption</td>
+      <td class="num">{{ consumption }} kWh</td>
+      <td class="num">{{ tariff_cents_per_kwh }} c/kWh</td>
+      <td class="num">{{ energy_charge }}</td>
+    </tr>
+    <tr>
+      <td>Monthly service charge</td>
+      <td class="num">&mdash;</td>
+      <td class="num">&mdash;</td>
+      <td class="num">{{ fixed_charge }}</td>
+    </tr>
+    <tr class="sum">
+      <td colspan="3" class="label">Subtotal before GST</td>
+      <td class="num">{{ subtotal }}</td>
+    </tr>
+    <tr class="sum">
+      <td colspan="3" class="label">GST @ {{ gst_percent }}%</td>
+      <td class="num">{{ gst_amount }}</td>
+    </tr>
+    <tr class="total">
+      <td colspan="3" class="label">Total payable ({{ currency }})</td>
+      <td class="num">{{ total }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<footer>
+  {{ notice }}<br>
+  Generated by {{ generator_version }}, seed {{ generator_seed }}. Figures are computed in
+  Python from the generator's own inputs; this document carries no third-party data.
+</footer>

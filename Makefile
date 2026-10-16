@@ -1,7 +1,13 @@
 # Every recipe runs against the project's named virtualenv, not a bare .venv.
 export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 
-.PHONY: help install run test lint fmt seed models db-up db-down check
+# WeasyPrint loads pango/cairo/gdk-pixbuf through dlopen. On this machine they are present
+# via Homebrew, but anaconda shadows /opt/homebrew/lib on the dyld search path, so the load
+# fails with "cannot load library 'libpango-1.0-0'". Exported here rather than hacked into
+# the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
+export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
+
+.PHONY: help install run test lint fmt seed docs models db-up db-down check
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
@@ -27,6 +33,9 @@ check: lint test  ## Everything CI will run
 
 seed:     ## Load emission factors into DATABASE_URL (idempotent)
 	uv run python scripts/seed_factors.py
+
+docs:     ## Generate synthetic documents + answer keys into data/generated/
+	uv run python scripts/generate_docs.py
 
 models:   ## List model ids available to OPENAI_API_KEY
 	uv run python scripts/list_models.py
