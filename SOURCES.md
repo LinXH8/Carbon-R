@@ -10,8 +10,8 @@ established until then.
 | # | Source | Publisher | Used for | Retrieved | Status |
 |---|--------|-----------|----------|-----------|--------|
 | 1 | [Singapore Energy Statistics 2025, Ch. 2](https://www.ema.gov.sg/resources/singapore-energy-statistics/chapter2) | EMA | Scope 2 grid emission factor | 2026-10-15 | **verified from primary** |
-| 2 | [GHG Protocol Corporate Standard (revised)](https://ghgprotocol.org/corporate-standard) | WRI / WBCSD | Methodology; Tier 2 RAG corpus | 2026-10-16 | obtained, not yet cited |
-| 3 | [GHG Protocol Scope 2 Guidance](https://ghgprotocol.org/scope-2-guidance) | WRI / WBCSD | Location- vs market-based method | 2026-10-16 | obtained, not yet cited |
+| 2 | [GHG Protocol Corporate Standard (revised)](https://ghgprotocol.org/corporate-standard) | WRI / WBCSD | Methodology; Tier 2 RAG corpus | 2026-10-16 | obtained — skim pending, see guide |
+| 3 | [GHG Protocol Scope 2 Guidance](https://ghgprotocol.org/scope-2-guidance) | WRI / WBCSD | Location- vs market-based method | 2026-10-16 | obtained — skim pending, see guide |
 | 4 | [IRAS — 2024 GST Rate Change Guide (1st ed.)](https://www.iras.gov.sg/media/docs/default-source/e-tax/etaxguide_2024-gst-rate-change---a-guide-for-gst-registered-businesses_1st-edition.pdf) | IRAS | Synthetic bill GST line | 2026-10-16 | **verified from primary** |
 | 5 | [NCCS — Carbon tax](https://www.nccs.gov.sg/singapores-climate-action/mitigation-efforts/carbontax/) | NCCS | Tier 3 carbon-tax insight line | 2026-10-16 | **verified from primary** |
 
@@ -78,7 +78,7 @@ match exactly** (16 GEF + 16 Build Margin):
 Consequence for the code: no runtime fallback to the data.gov.sg API, ever. A missing
 factor is a `no_results`.
 
-## 2–3. GHG Protocol standards
+## 2–3. GHG Protocol standards — obtained, checklist skim still open
 
 Both PDFs are in `data/raw/ghgp/` and permanently git-ignored — redistribution is not
 ours to grant, and the Completion check requires no third-party PDFs in the repo.
@@ -86,6 +86,13 @@ ours to grant, and the Completion check requires no third-party PDFs in the repo
 Used for methodology language and, from Tier 2 Block 4, as the retrieval corpus for
 `search_methodology`, where each chunk keeps its document title and page so answers cite a
 page rather than paraphrase from memory.
+
+These are not numeric claims, so there is no VERIFY status to clear — the open item is
+Block 1's own checklist line, *"skim the contents pages,"* which only a human can do.
+[docs/ghg-protocol-skim-guide.md](docs/ghg-protocol-skim-guide.md) maps both tables of
+contents to what matters for Carbon R, so the skim is five minutes rather than twenty:
+Corporate Standard ch. 1, 4, 6 and Appendix A; Scope 2 Guidance §4 (location- vs
+market-based), §6.6 (matching factors — the fallback-year rule) and §6.10.
 
 ## 4. GST rate — verified from primary
 
