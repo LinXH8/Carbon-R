@@ -86,13 +86,16 @@ uncertainty, and says that estimates are not assured.
 
 ## Current state
 
-See [PROGRESS.md](PROGRESS.md) — it holds the current tier/block, the environment facts
-worth not rediscovering, verification evidence, and the traps already hit. Read it before
-debugging anything environmental.
+The build log and the dated plan are **local working notes, deliberately not committed**
+(see `.gitignore`). They hold the current tier/block, the environment facts worth not
+rediscovering, verification evidence, and the traps already hit. If they are present in
+the working directory, read the log before debugging anything environmental.
 
-`Carbon R Project Checklist.md` holds the plan and each block's done-check.
+**Keep the log current.** At the end of a working session, add an entry using the template
+at the bottom of it, and update its "Current state at a glance" table. Record actual
+command output as evidence, counts rather than bare percentages, and any problem that cost
+more than ten minutes — including corrections to earlier conclusions.
 
-**Keep the log current.** At the end of a working session, add a `PROGRESS.md` entry using
-the template at the bottom of that file, and update its "Current state at a glance" table.
-Record actual command output as evidence, counts rather than bare percentages, and any
-problem that cost more than ten minutes — including corrections to earlier conclusions.
+What belongs in the repo instead: decisions that explain the *code* go in docstrings and
+in [SYNTHGEN_V0.md](SYNTHGEN_V0.md); provenance and verification status go in
+[SOURCES.md](SOURCES.md).

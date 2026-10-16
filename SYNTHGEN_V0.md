@@ -8,7 +8,7 @@
 > **Companions.** [SYNTHGEN_SPEC.md](SYNTHGEN_SPEC.md) is the rulebook for all document kinds
 > (this implementation conforms to it). [CLAUDE.md](CLAUDE.md) holds the project-wide rules.
 > [SOURCES.md](SOURCES.md) records what is verified and what is not.
-> [PROGRESS.md](PROGRESS.md) records when and why each decision was made.
+> Decisions and their dates live in the author's local build log, which is not committed.
 
 ---
 
@@ -455,8 +455,8 @@ but a CSS or font fault could silently drop a column, and that guarantee is wort
 to end at least once.
 
 **Three bills are also checked by hand** each time the set changes — figures transcribed from
-the printed page, not from the keys, then recomputed with a calculator. The current numbers are
-in [PROGRESS.md](PROGRESS.md); all 15 checks pass.
+the printed page, not from the keys, then recomputed with a calculator. All 15 checks pass on
+the current set; §5 traces one of them, `elec_009`, end to end.
 
 ---
 

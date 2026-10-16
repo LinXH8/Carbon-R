@@ -460,10 +460,10 @@ All tests pass with no `.env`, no database and no API key.
 2. **Run every literal** in the plan through a scratch script and paste the output.
 3. Implement; `make docs`; `make check`.
 4. **Hand check 3 documents** with a calculator, spanning different profiles, years and layouts.
-   Record the actual figures in `PROGRESS.md`, not "checked".
+   Record the actual figures in the local build log, not "checked".
 5. Open a few PDFs/images and look: is anything implausible (addresses, scale, dates)?
-6. Update `SOURCES.md` (new VERIFY items), `PROGRESS.md` (decisions, traps, realism limits),
-   the checklist; commit.
+6. Update `SOURCES.md` (new VERIFY items) and the local build log (decisions, traps,
+   realism limits); commit.
 
 ### 9.2 Plan review checklist (Aaron, before approving)
 - [ ] Every worked-example number came from a script, and the plan says so.
@@ -497,7 +497,7 @@ All tests pass with no `.env`, no database and no API key.
 
 ## Part 11: Starter prompt for Claude Code
 
-> Read `SYNTHGEN_SPEC.md` in full, then `CLAUDE.md` and `PROGRESS.md`. We are starting
+> Read `SYNTHGEN_SPEC.md` in full, then `CLAUDE.md` and the local build log. We are starting
 > **[Tier 2 Block 1: LPG invoices and fuel-card statements]**. In plan mode, write a plan that
 > follows Parts 1, 3, 4.2, 4.3 and 8 of the spec. For each rule in Part 1, say where the plan
 > satisfies it. Start with one layout per kind and no quirks; quirks, extra layouts and

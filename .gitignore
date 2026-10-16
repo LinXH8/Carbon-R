@@ -29,6 +29,12 @@ data/generated/*
 *.xlsx
 *.xls
 
+# Personal working notes: the build log and the dated plan. These track the author's
+# progress rather than the project, and carry career notes and environment details that
+# do not belong in a public repo. They stay on disk; they are never committed.
+PROGRESS.md
+Carbon R Project Checklist.md
+
 # OS / editor
 .DS_Store
 .idea/
