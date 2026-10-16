@@ -27,9 +27,9 @@ class Settings(BaseSettings):
     # `scripts/list_models.py` prints the real list. See CLAUDE.md on unverified values.
     openai_model: str = ""
 
-    # Singapore GST, as a fraction. VERIFY against IRAS before this reaches a printed
-    # total or the README. Config rather than a literal so the generator and the
-    # extraction sanity check cannot drift apart.
+    # Singapore GST, as a fraction. Verified from IRAS's own e-Tax guide (9% effective
+    # 1 Jan 2024) — see SOURCES.md §4. Config rather than a literal so the generator and
+    # the extraction sanity check cannot drift apart; re-check if IRAS ever changes it.
     gst_rate: float = 0.09
 
     @property

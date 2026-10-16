@@ -12,8 +12,8 @@ established until then.
 | 1 | [Singapore Energy Statistics 2025, Ch. 2](https://www.ema.gov.sg/resources/singapore-energy-statistics/chapter2) | EMA | Scope 2 grid emission factor | 2026-10-15 | **verified from primary** |
 | 2 | [GHG Protocol Corporate Standard (revised)](https://ghgprotocol.org/corporate-standard) | WRI / WBCSD | Methodology; Tier 2 RAG corpus | 2026-10-16 | obtained, not yet cited |
 | 3 | [GHG Protocol Scope 2 Guidance](https://ghgprotocol.org/scope-2-guidance) | WRI / WBCSD | Location- vs market-based method | 2026-10-16 | obtained, not yet cited |
-| 4 | [IRAS — GST rate](https://www.iras.gov.sg/taxes/goods-services-tax-(gst)) | IRAS | Synthetic bill GST line | — | **secondary only — VERIFY** |
-| 5 | [NCCS — Carbon tax](https://www.nccs.gov.sg/singapores-climate-action/mitigation-efforts/carbontax/) | NCCS | Tier 3 carbon-tax insight line | — | **secondary only — VERIFY** |
+| 4 | [IRAS — 2024 GST Rate Change Guide (1st ed.)](https://www.iras.gov.sg/media/docs/default-source/e-tax/etaxguide_2024-gst-rate-change---a-guide-for-gst-registered-businesses_1st-edition.pdf) | IRAS | Synthetic bill GST line | 2026-10-16 | **verified from primary** |
+| 5 | [NCCS — Carbon tax](https://www.nccs.gov.sg/singapores-climate-action/mitigation-efforts/carbontax/) | NCCS | Tier 3 carbon-tax insight line | 2026-10-16 | **verified from primary** |
 
 ---
 
@@ -87,18 +87,34 @@ Used for methodology language and, from Tier 2 Block 4, as the retrieval corpus 
 `search_methodology`, where each chunk keeps its document title and page so answers cite a
 page rather than paraphrase from memory.
 
-## 4. GST rate — VERIFY outstanding
+## 4. GST rate — verified from primary
 
-Carried as `GST_RATE=0.09` in `.env`. Secondary sources agree Singapore's GST has been
-**9%** since 1 January 2024, with no change announced since. **Not yet read from an IRAS
-page**, so it stays flagged. It affects the printed totals on synthetic bills and the
-`kWh × rate + GST` sanity check, so confirm it before Block 2 generates documents.
+Carried as `GST_RATE=0.09` in `.env`. IRAS's site itself is client-rendered (same
+EMA-style problem: the page shell loads but the rate text does not), so the search
+instead went to IRAS's own static e-Tax guide PDF, which is not JS-walled.
 
-## 5. Carbon tax rate — VERIFY outstanding
+**Source:** IRAS, *"2024 GST Rate Change: A Guide for GST-registered Businesses"* (1st
+edition), retrieved 2026-10-16.
 
-Secondary sources give **S$45/tCO₂e for 2026–2027** (raised from S$25 on 1 January 2026,
-with a stated path toward S$50–80 by 2030). Needed only for the Tier 3 insight line.
-Confirm against NCCS, along with the offset percentage, before it appears in any output.
+**Quote, verbatim** (para. 1):
+
+> (i) from 7% to 8% with effect from 1 Jan 2023 (first rate change); and
+> (ii) from 8% to 9% with effect from 1 Jan 2024 (second rate change).
+
+No further change has been announced since. `GST_RATE=0.09` is correct.
+
+## 5. Carbon tax rate — verified from primary
+
+**Source:** NCCS, "Carbon Tax" page, retrieved 2026-10-16.
+
+**Quote, verbatim:**
+
+> It was raised to S$45/tCO2e with effect from 1 Jan 2026 for 2026 and 2027, with a view
+> to reaching S$50-80/tCO2e by 2030.
+
+Needed only for the Tier 3 insight line; the offset percentage is still unconfirmed and
+should be re-checked against NCCS when that line is built, since it was not stated on
+this page.
 
 ## Still to obtain
 
