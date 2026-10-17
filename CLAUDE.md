@@ -97,5 +97,11 @@ command output as evidence, counts rather than bare percentages, and any problem
 more than ten minutes — including corrections to earlier conclusions.
 
 What belongs in the repo instead: decisions that explain the *code* go in docstrings and
-in [SYNTHGEN_V0.md](SYNTHGEN_V0.md); provenance and verification status go in
-[SOURCES.md](SOURCES.md).
+in [SYNTHGEN_V0.md](SYNTHGEN_V0.md) and [TIER1_BLOCK3.md](TIER1_BLOCK3.md); provenance and
+verification status go in [SOURCES.md](SOURCES.md); measured results, with counts and with
+the limits of what they cover, go in [README.md](README.md).
+
+Per-block technical records (`TIER1_BLOCK3.md` and successors) are committed and are
+written for someone who was not there: the design decisions and their reasons, the defects
+found and what caught them, and the evidence behind every number. They carry no
+environment details and no career notes — those stay in the local log.
