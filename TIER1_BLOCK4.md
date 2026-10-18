@@ -121,7 +121,7 @@ smoke check asserts the list is empty; if it is ever not, the API response says 
 | `src/carbon_r/agent/audit.py` | Which numbers a reply is allowed to contain |
 | `src/carbon_r/api/models.py` | `UploadResponse`, `ChatRequest`, `ChatResponse`, `ToolCallOut` |
 | `src/carbon_r/api/uploads.py` | Where an upload goes and what is refused at the door |
-| `scripts/agent_smoke_5bills.py` | The initial end-to-end check (`make agent-smoke`) |
+| `scripts/agent_smoke_5bills.py` | The initial end-to-end check (`make agent-smoke`). Renamed to `scripts/agent_flow_check.py` in Block 5, when the same script was run over ten documents and a sample size in a filename stopped being true |
 
 `src/carbon_r/main.py` gains `/upload` and `/chat`. New dependency: `python-multipart`.
 

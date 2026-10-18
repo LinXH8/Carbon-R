@@ -7,7 +7,7 @@ export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 # the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
 export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
 
-.PHONY: help install run test lint fmt seed docs models db-up db-down check eval agent-smoke
+.PHONY: help install run test lint fmt seed docs models db-up db-down check eval agent-smoke flow-10
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
@@ -49,5 +49,11 @@ db-down:  ## Stop local Postgres
 eval:     ## Score extraction and the pipeline against the answer keys
 	uv run python scripts/eval_extraction.py
 
-agent-smoke:  ## Initial end-to-end check of /upload + /chat on 5 bills (NOT an accuracy measurement)
-	uv run python scripts/agent_smoke_5bills.py
+agent-smoke:  ## End-to-end flow check of /upload + /chat on 5 bills (NOT an accuracy measurement)
+	uv run python scripts/agent_flow_check.py
+
+# Ten documents chosen to span both factor years, so the factor-year substitution
+# disclosure is actually exercised. The first five bills all fall in 2024 and never hit it.
+flow-10:  ## Flow check on 10 bills across both factor years (NOT an accuracy measurement)
+	uv run python scripts/agent_flow_check.py --docs \
+	  elec_001,elec_002,elec_003,elec_004,elec_005,elec_010,elec_013,elec_016,elec_017,elec_018

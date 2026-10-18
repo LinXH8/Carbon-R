@@ -1,4 +1,4 @@
-"""FastAPI application: /health, /upload, /chat.
+"""FastAPI application: the page, /health, /upload, /chat, /chat/stream.
 
 /chat is a thin shell on purpose. It resolves the session, tells the agent which
 documents exist, runs one turn of the loop and returns the result with its tool
@@ -7,15 +7,19 @@ handles, the arithmetic, the audit - lives in `carbon_r.agent`, which has no HTT
 and is tested without a server.
 """
 
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from carbon_r import __version__
 from carbon_r.agent.loop import run_agent
 from carbon_r.agent.session import Session, get_or_create_session, get_session
 from carbon_r.api.models import ChatRequest, ChatResponse, UploadResponse
+from carbon_r.api.stream import SSE_HEADERS, SSE_MEDIA_TYPE, stream_chat
 from carbon_r.api.uploads import UploadRejected, save_upload
 from carbon_r.config import get_settings
 from carbon_r.db import check_connection
@@ -25,6 +29,17 @@ app = FastAPI(
     version=__version__,
     summary="Cited, deterministic GHG accounting from uploaded documents",
 )
+
+STATIC_DIR = Path(__file__).parent / "static"
+
+# Mounted at /static rather than at /, which would shadow every route declared after it.
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def index() -> FileResponse:
+    """The single-page UI. No build step: the files under static/ are served as written."""
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 class HealthResponse(BaseModel):
@@ -81,6 +96,32 @@ async def upload(
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
     """One turn of the agent loop."""
+    session, message = _prepare_turn(request)
+    return ChatResponse.from_run(run_agent(session, message))
+
+
+@app.post("/chat/stream", include_in_schema=False)
+def chat_stream(request: ChatRequest) -> StreamingResponse:
+    """The same turn, streamed: each tool result as it lands, then one `final` event.
+
+    Not in the schema because the body and the terminal event are `/chat`'s contract; this
+    endpoint only changes when the client learns about them. Scripts and tests use /chat.
+    """
+    session, message = _prepare_turn(request)
+    return StreamingResponse(
+        stream_chat(session, message),
+        media_type=SSE_MEDIA_TYPE,
+        headers=SSE_HEADERS,
+    )
+
+
+def _prepare_turn(request: ChatRequest) -> tuple[Session, str]:
+    """Everything both chat routes must do before the agent runs.
+
+    Shared so the streaming route cannot drift into accepting a request the plain route
+    would have refused - an unknown document or a missing API key must fail the same way
+    whichever route is called.
+    """
     settings = get_settings()
     if not settings.llm_configured or not settings.openai_model:
         raise HTTPException(
@@ -102,8 +143,7 @@ def chat(request: ChatRequest) -> ChatResponse:
         )
 
     document_ids = request.document_ids or list(session.documents)
-    run = run_agent(session, _with_document_context(request.message, session, document_ids))
-    return ChatResponse.from_run(run)
+    return session, _with_document_context(request.message, session, document_ids)
 
 
 def _require_session(session_id: str) -> Session:

@@ -56,6 +56,11 @@ structural rather than a matter of prompt wording:
 The loop is bounded at 8 turns. On `no_results`, on an error, or when the turns run out,
 it reports what is missing and asks — it never assembles a figure to look finished.
 
+The same property holds all the way to the screen: `/chat` returns the structured output of
+each `calculate_emissions` alongside the prose, and the page renders the figure from that.
+A number a user reads has come from the Python that computed it, not from the model's
+transcription of it.
+
 ## Running it
 
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.13 (uv will fetch it).
@@ -66,14 +71,30 @@ export UV_PROJECT_ENVIRONMENT=.venv-carbon-r   # or just use `make`, which sets 
 uv sync
 
 cp .env.example .env     # then fill in OPENAI_API_KEY and DATABASE_URL
-uv run uvicorn carbon_r.main:app --reload
-curl localhost:8000/health
+uv run uvicorn carbon_r.main:app --reload   # or: make run
+open http://localhost:8000
 ```
 
 `/health` reports whether the database and the model provider are configured, so a partly
 configured checkout tells you what is missing instead of crashing.
 
-### Asking a question about a bill
+### The page
+
+`http://localhost:8000` is a single page with no build step: drop a bill on it, ask a
+question, and watch the tool calls arrive as they happen — the steps on screen are the
+real tool transcript being built, not a progress bar on a timer.
+
+The answer panel shows the figure in kg and tonnes, the arithmetic written out, and the
+factor with its publisher, both years, source document and page or table, followed by the
+disclosures the result must carry. **Those numbers are read from the structured output of
+`calculate_emissions`, never parsed out of the agent's prose** — the agent's wording is
+shown separately and nothing is extracted from it. Pull up the audit sheet to see every
+tool call with its arguments and its result.
+
+If the figure audit ever finds a number in the reply that no tool produced, the page says
+so above the figure rather than below it.
+
+### Asking a question about a bill from the shell
 
 ```bash
 curl -F file=@data/generated/electricity_bill/clean/elec_010.pdf localhost:8000/upload
@@ -85,9 +106,13 @@ curl -s localhost:8000/chat -H 'content-type: application/json' -d '{
 }'
 ```
 
-The reply comes back with the tool transcript that produced it, the turn count, and
-`unverified_figures` — which must be empty. Sessions are in-memory, so they do not
-survive a restart; persistence is a Tier 3 concern.
+The reply comes back with `figures` — the structured output of each
+`calculate_emissions`, with the factor and its provenance — alongside the prose, the tool
+transcript that produced it, the turn count, and `unverified_figures`, which must be empty.
+`POST /chat/stream` is the same turn as server-sent events, emitting each tool result as it
+lands and then exactly one `final` event carrying the whole response.
+
+Sessions are in-memory, so they do not survive a restart; persistence is a Tier 3 concern.
 
 ### Database
 
@@ -108,16 +133,17 @@ uv run python scripts/seed_factors.py        # or: make seed
 ```bash
 make docs         # 18 synthetic bills + answer keys into data/generated/ (git-ignored)
 make eval         # score extraction and the pipeline against those answer keys
-make agent-smoke  # initial end-to-end check of /upload + /chat on 5 bills
-make check        # ruff + the full test suite (207 tests)
+make agent-smoke  # end-to-end flow check of /upload + /chat on 5 bills
+make flow-10      # the same flow on 10 bills spanning both factor years
+make check        # ruff + the full test suite (228 tests)
 ```
 
-`make agent-smoke` is a smoke check, not a measurement: five documents of one layout
-cannot measure accuracy, and its output says so on every line. It checks that the loop
-finishes, that its figure equals the answer key's, that the factor is cited, that the
-disclosures are stated, and that no number appears which no tool produced. It is 5 of 5
-on all five checks, run both over the first five bills and over five whose activity year
-forces a factor-year substitution.
+`make flow-10` is a flow check, not a measurement: ten documents of one layout asked one
+question cannot measure accuracy, and the script says so on every line it prints. It checks
+that the loop finishes, that its figure equals the answer key's, that the factor is cited,
+that the disclosures are stated, and that no number appears which no tool produced. It is
+**10 of 10 on all five checks**, four turns per document, with the factor year substituted
+on 5 of the 10. `make eval` (18 of 18 on 24 fields) remains the measured number.
 
 `make eval` caches each model reply, keyed on the document, model, DPI and a hash of the
 prompt *and* the response schema. A cache hit skips only the model call — every step after
@@ -143,9 +169,13 @@ Stated plainly, because they bound what any number here means:
 - **Three runs is a small sample.** Both defects found during Block 3 appeared in exactly
   one run of three, so a defect at that frequency is roughly as likely to be missed as
   found. A clean three-run range is weak evidence of determinism, not proof of it.
-- **The agent has been exercised on one question over twelve live replies.** The
+- **The agent has been exercised on one question over twenty-two live replies.** The
   honesty paths — a missing factor, a failed read, an exhausted turn budget — are covered
   by offline tests with a scripted provider, not yet by live misbehaviour.
+- **The interface has no automated interaction coverage.** The page's figure panel and
+  streamed steps are tested against the shape of the response; the drag behaviour of the
+  audit sheet has been reviewed and used by hand, not instrumented.
+- **Sessions and uploads accumulate** with no eviction, and a restart loses every session.
 - **No holdout layout exists yet.** With a single layout there is no honest unseen-layout
   number to quote; Tier 2 holds one layout out and reports it separately.
 - Where no factor is published for a bill's activity year, the latest factor at or before
@@ -158,16 +188,17 @@ Stated plainly, because they bound what any number here means:
 src/carbon_r/
   config.py    settings from the environment
   db.py        connection helper
-  main.py      FastAPI app: /health, /upload, /chat
+  main.py      FastAPI app: the page, /health, /upload, /chat, /chat/stream
   money.py     one definition of "round to cents", shared by generator and extraction
   models/      Pydantic domain models: answer keys, extraction targets, factor citations
   synthgen/    the synthetic-document generator (answer first, then the document)
   tools/       the tools the agent is allowed to call
   agent/       the tool-calling loop, the session workspace, the figure audit
-  api/         request and response models, upload storage
+  api/         request and response models, upload storage, the SSE stream
+  static/      the page: one HTML file, its stylesheet, its script, and a spring
 db/migrations/ schema, applied in filename order
-scripts/       operational scripts: factor loading, document generation, the eval, the smoke check
-tests/         207 tests, every one of them offline: no .env, no database, no API key
+scripts/       operational scripts: factor loading, document generation, the eval, the flow check
+tests/         228 tests, every one of them offline: no .env, no database, no API key
 data/uploads/  documents uploaded at runtime — git-ignored, never committed
 data/raw/      source documents — git-ignored, never committed
 data/generated/ synthetic documents, answer keys, eval runs — git-ignored

@@ -22,6 +22,7 @@ scripts a sequence of tool calls - see `tests/test_agent_loop.py`.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -63,6 +64,12 @@ class AgentRun:
     stopped_reason: str = "completed"  # completed | max_turns | provider_error
     unverified_figures: list[str] = field(default_factory=list)
 
+    # The `calculate_emissions` payloads produced by THIS run, in order. Collected here
+    # rather than read from `session.calculations` because that dict accumulates across
+    # turns: a follow-up question would otherwise re-display the previous turn's figure as
+    # though the agent had just computed it.
+    figures: list[dict] = field(default_factory=list)
+
 
 OUT_OF_STEPS = (
     "I ran out of steps before I could finish this answer ({used} of {allowed} turns "
@@ -100,8 +107,16 @@ def run_agent(
     model: str | None = None,
     toolkit: Toolkit | None = None,
     max_turns: int = MAX_TURNS,
+    on_event: Callable[[dict], None] | None = None,
 ) -> AgentRun:
-    """One user message in, one answer out, with every tool call it took on the way."""
+    """One user message in, one answer out, with every tool call it took on the way.
+
+    `on_event` is called as the run progresses - `{"type": "turn"}` before each provider
+    call and `{"type": "tool", ...}` after each tool result - so a streaming caller can
+    show the audit trail being built instead of inventing progress while it waits. It is
+    optional and defaults to doing nothing, which is what every non-streaming caller wants.
+    """
+    emit = on_event or (lambda event: None)
     settings = get_settings()
     model = model or settings.openai_model
     if client is None:
@@ -111,12 +126,14 @@ def run_agent(
     conversation: list[dict] = [*session.history, {"role": "user", "content": message}]
     calls: list[ToolCallRecord] = []
     schemas = tool_schemas()
+    figures: list[dict] = []
     turns = 0
     reply = ""
     stopped = "completed"
 
     while turns < max_turns:
         turns += 1
+        emit({"type": "turn", "n": turns, "of": max_turns})
         try:
             response = client.responses.create(
                 model=model,
@@ -150,6 +167,16 @@ def run_agent(
                     message=result.message,
                 )
             )
+            if call.name == "calculate_emissions" and result.status == "ok" and result.data:
+                figures.append(result.data)
+            emit(
+                {
+                    "type": "tool",
+                    "tool": call.name,
+                    "status": result.status,
+                    "message": result.message,
+                }
+            )
             conversation.append(
                 {
                     "type": "function_call_output",
@@ -170,4 +197,5 @@ def run_agent(
         turns_used=turns,
         stopped_reason=stopped,
         unverified_figures=audit_figures(reply, session.tool_payloads),
+        figures=figures,
     )

@@ -1,0 +1,467 @@
+/* Carbon R - one page, no build step.
+ *
+ * Two ideas run through this file. Type is sized *and tracked* together: tracking is
+ * negative on display sizes and slightly positive on small labels, because one
+ * letter-spacing value is wrong at some size by definition. And chrome is a translucent
+ * material that content passes under, with weight used to say what is structural and what
+ * is interactive - never two light translucent surfaces stacked, which destroys legibility.
+ *
+ * Restraint is deliberate. This is an audit trail: the sheet is directly manipulated and
+ * so it is animated, and everything else is still. A figure that bounces is a figure that
+ * invites less trust.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  --ground: #f5f5f7;
+  --ground-deep: #ebebf0;
+  --surface: #ffffff;
+  --surface-sunken: #f7f7f9;
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.5);
+  --line: rgba(0, 0, 0, 0.1);
+  --line-strong: rgba(0, 0, 0, 0.18);
+
+  --ink: #1d1d1f;
+  --ink-soft: #5c5c66;
+  --ink-faint: #86868b;
+
+  --accent: #0a7d4b;          /* the figure, and the one primary action */
+  --accent-soft: rgba(10, 125, 75, 0.1);
+  --warn: #9a5b00;
+  --warn-soft: rgba(154, 91, 0, 0.1);
+  --bad: #b3261e;
+  --bad-soft: rgba(179, 38, 30, 0.1);
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+  /* A bigger surface reads as thicker: a deeper, wider shadow than any card. */
+  --shadow-sheet: 0 -1px 0 var(--glass-edge), 0 -8px 40px rgba(0, 0, 0, 0.18);
+
+  --radius: 14px;
+  --radius-lg: 20px;
+  --gap: 1rem;
+  --bar-height: 4.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #000000;
+    --ground-deep: #0a0a0c;
+    --surface: #1c1c1e;
+    --surface-sunken: #141416;
+    --glass: rgba(28, 28, 30, 0.72);
+    --glass-edge: rgba(255, 255, 255, 0.12);
+    --line: rgba(255, 255, 255, 0.12);
+    --line-strong: rgba(255, 255, 255, 0.22);
+
+    --ink: #f5f5f7;
+    --ink-soft: #a1a1a8;
+    --ink-faint: #8a8a8f;
+
+    --accent: #3ddc97;
+    --accent-soft: rgba(61, 220, 151, 0.12);
+    --warn: #f5b544;
+    --warn-soft: rgba(245, 181, 68, 0.12);
+    --bad: #ff6b60;
+    --bad-soft: rgba(255, 107, 96, 0.12);
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-sheet: 0 -1px 0 var(--glass-edge), 0 -8px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  /* The platform font already ships optical sizing and tracking tables. Overriding it
+     would mean re-deriving all of that by hand for no gain here. */
+  font: 100%/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Spacing in rem so a larger text setting scales the layout with the text instead of
+   breaking it. */
+main {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: calc(var(--bar-height) + 1.5rem) 1.25rem 7rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+/* --- chrome ----------------------------------------------------------------------- */
+
+.bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+  height: var(--bar-height);
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  /* A bright top edge is the material catching light; the bottom is a fading mask rather
+     than a hard 1px divider, so the boundary only exists where content is behind it. */
+  border-top: 1px solid var(--glass-edge);
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent);
+}
+
+.bar h1 {
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* Over a translucent surface, flat grey text loses legibility as the backdrop changes.
+   Slightly heavier and slightly tracked out instead. */
+.bar-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--ink-soft);
+}
+
+/* --- cards ------------------------------------------------------------------------ */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.25rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  /* Small text wants a touch more tracking, not less. */
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.5rem;
+}
+
+/* --- dropzone --------------------------------------------------------------------- */
+
+.dropzone {
+  text-align: center;
+  cursor: pointer;
+  border-style: dashed;
+  border-color: var(--line-strong);
+  /* Only the press feedback transitions, and only for 100ms: this is on the input path. */
+  transition: transform 100ms ease-out, background-color 120ms ease-out,
+              border-color 120ms ease-out;
+}
+
+/* Feedback on pointer-DOWN, not on click. Waiting for the release feels dead. */
+.dropzone[data-pressed] { transform: scale(0.99); background: var(--surface-sunken); }
+.dropzone[data-dragging] { border-color: var(--accent); background: var(--accent-soft); }
+.dropzone:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dropzone[data-busy] { opacity: 0.6; pointer-events: none; }
+
+.dropzone-glyph {
+  width: 1.75rem; height: 1.75rem;
+  stroke: var(--ink-faint); stroke-width: 1.5; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.dropzone-title { margin: 0.5rem 0 0.25rem; font-weight: 600; letter-spacing: -0.005em; }
+.dropzone-hint {
+  margin: 0; font-size: 0.8125rem; color: var(--ink-faint);
+  max-width: 28rem; margin-inline: auto;
+}
+
+/* --- document chips --------------------------------------------------------------- */
+
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chips:empty { display: none; }
+
+.chip {
+  display: inline-flex; align-items: baseline; gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  box-shadow: var(--shadow-card);
+}
+.chip code { color: var(--ink-faint); font-size: 0.75rem; }
+
+/* --- buttons ---------------------------------------------------------------------- */
+
+.button {
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 560;
+  letter-spacing: -0.005em;
+  padding: 0.5rem 1.125rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 100ms ease-out, opacity 100ms ease-out;
+}
+.button.primary { background: var(--accent); border-color: transparent; color: #fff; }
+@media (prefers-color-scheme: dark) { .button.primary { color: #06130d; } }
+
+.button:active { transform: scale(0.97); }
+.button:disabled { opacity: 0.45; cursor: default; transform: none; }
+.button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* --- ask -------------------------------------------------------------------------- */
+
+textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  resize: vertical;
+}
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.ask-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem; }
+.ask-note { font-size: 0.8125rem; color: var(--ink-faint); }
+
+/* --- steps ------------------------------------------------------------------------ */
+
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.375rem; }
+.steps:empty { display: none; }
+
+.step {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  gap: 0.625rem;
+  align-items: start;
+  padding: 0.625rem 0.875rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  /* Blur and scale together, so the row arrives as a surface rather than fading in flat.
+     Not gesture-driven and not interruptible, so a keyframe is the right tool here. */
+  animation: materialize 320ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+@keyframes materialize {
+  from { opacity: 0; transform: scale(0.97) translateY(4px); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+.step-mark { font-size: 0.875rem; line-height: 1.45; text-align: center; }
+.step-tool { font-weight: 600; letter-spacing: -0.005em; }
+.step-message { color: var(--ink-soft); }
+.step[data-status="ok"] .step-mark { color: var(--accent); }
+/* A gap is a legitimate outcome, not a failure: styled as information. */
+.step[data-status="no_results"] .step-mark { color: var(--warn); }
+.step[data-status="error"] .step-mark { color: var(--bad); }
+.step[data-status="running"] .step-mark { color: var(--ink-faint); }
+
+/* --- the figure ------------------------------------------------------------------- */
+
+.figure-card { padding: 1.5rem 1.25rem 1.25rem; }
+
+.figure-value {
+  /* Large text: tight leading and negative tracking. Letters read too far apart as they
+     grow, and generous leading on one short line is just a hole in the layout. */
+  font-size: clamp(2rem, 7vw, 2.75rem);
+  font-weight: 680;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+.figure-unit { font-size: 0.5em; font-weight: 600; letter-spacing: -0.01em; color: var(--ink-soft); }
+.figure-tonnes {
+  margin: 0.25rem 0 0; color: var(--ink-soft); font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.derivation {
+  margin-top: 1rem;
+  padding: 0.75rem 0.875rem;
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+/* Proximity implies relationship: the citation sits immediately under the number it
+   belongs to, not in a panel elsewhere. */
+.cite { margin-top: 1.25rem; display: grid; gap: 0.75rem 1.25rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+.cite div { min-width: 0; }
+.cite dt {
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.cite dd {
+  margin: 0.125rem 0 0; font-size: 0.875rem; line-height: 1.4;
+  overflow-wrap: break-word;
+}
+.cite a { color: var(--accent); }
+
+.badge {
+  display: inline-block; margin-left: 0.375rem; padding: 0.0625rem 0.4375rem;
+  border-radius: 999px; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.01em;
+  background: var(--warn-soft); color: var(--warn);
+}
+
+.disclosures { margin: 1.25rem 0 0; padding: 0.875rem 1rem 0.875rem 2rem; background: var(--surface-sunken); border-radius: var(--radius); }
+.disclosures li { font-size: 0.8125rem; line-height: 1.5; color: var(--ink-soft); }
+.disclosures li + li { margin-top: 0.375rem; }
+
+.audit-line {
+  margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem; color: var(--ink-faint);
+}
+
+.notice {
+  display: flex; flex-direction: column; gap: 0.375rem;
+  padding: 0.875rem 1rem; border-radius: var(--radius);
+  border: 1px solid var(--line); font-size: 0.875rem; line-height: 1.5;
+  margin-bottom: var(--gap);
+}
+.notice strong { letter-spacing: -0.005em; }
+.notice[data-kind="warn"] { background: var(--warn-soft); border-color: transparent; color: var(--warn); }
+.notice[data-kind="bad"] { background: var(--bad-soft); border-color: transparent; color: var(--bad); }
+.notice[data-kind="plain"] { background: var(--surface); box-shadow: var(--shadow-card); }
+
+.reply { margin-top: var(--gap); }
+.reply-text { margin: 0; white-space: pre-wrap; font-size: 0.9375rem; line-height: 1.55; }
+
+/* --- sheet ------------------------------------------------------------------------ */
+
+.scrim {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;              /* driven per-frame from the sheet's position */
+  will-change: opacity;
+}
+
+.sheet {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 21;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+
+  /* Heavier material than the cards: this is a structural layer over content, and it
+     never sits on another translucent surface. */
+  background: var(--glass);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-sheet);
+
+  /* Only transform and opacity are animated, and only transform is driven by the drag. */
+  transform: translate3d(0, 100%, 0);
+  touch-action: none;
+}
+.sheet[data-dragging] { will-change: transform; }
+
+.grabber { padding: 0.75rem 0; cursor: grab; flex: none; touch-action: none; }
+.grabber::after {
+  content: ""; display: block; width: 2.25rem; height: 0.3125rem;
+  margin: 0 auto; border-radius: 999px; background: var(--line-strong);
+}
+.sheet[data-dragging] .grabber { cursor: grabbing; }
+
+.sheet-head {
+  flex: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0 1.25rem 0.75rem;
+  cursor: grab;
+  touch-action: none;
+}
+.sheet-head h2 { margin: 0; font-size: 1.0625rem; font-weight: 650; letter-spacing: -0.01em; }
+
+.sheet-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
+  touch-action: pan-y;
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+
+.call {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+}
+.call-head { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+.call-tool { font-weight: 620; letter-spacing: -0.005em; font-size: 0.9375rem; }
+.call-status { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
+.call[data-status="ok"] .call-status { color: var(--accent); }
+.call[data-status="no_results"] .call-status { color: var(--warn); }
+.call[data-status="error"] .call-status { color: var(--bad); }
+.call-message { margin: 0.375rem 0 0; font-size: 0.875rem; line-height: 1.5; color: var(--ink-soft); }
+.call pre {
+  margin: 0.625rem 0 0; padding: 0.625rem 0.75rem;
+  background: var(--surface-sunken); border-radius: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem; line-height: 1.5;
+  overflow-x: auto;
+}
+
+.empty { color: var(--ink-faint); font-size: 0.875rem; }
+
+/* --- accessibility: three independent signals, not just one ----------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Not "no feedback" - a gentler, non-vestibular equivalent. Opacity still carries the
+     change; travel, scale and blur do not. The sheet's drag keeps working: spring.js
+     jumps to the target instead of springing to it. */
+  .step { animation: fade-in 180ms ease-out both; }
+  .button:active, .dropzone[data-pressed] { transform: none; }
+  * { scroll-behavior: auto !important; }
+}
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-transparency: reduce) {
+  .bar, .sheet {
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .bar { -webkit-mask-image: none; mask-image: none; border-bottom: 1px solid var(--line); }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --glass: var(--surface);
+    --line: var(--line-strong);
+    --ink-soft: var(--ink);
+    --ink-faint: var(--ink);
+  }
+  .bar, .sheet { backdrop-filter: none; -webkit-backdrop-filter: none; border: 1px solid var(--line-strong); }
+  .card, .step, .call { border-width: 1px; border-color: var(--line-strong); }
+}

@@ -1,9 +1,15 @@
-"""INITIAL END-TO-END SMOKE CHECK over 5 bills. Not an accuracy measurement.
+"""END-TO-END FLOW CHECK. Not an accuracy measurement, at any document count.
 
-Read that line again before quoting anything this prints. Five documents from the single
-`clean` layout cannot measure accuracy; `scripts/eval_extraction.py` is the measured
-number (18 of 18 on 24 fields), and this script exists to answer a different, cruder
-question: does the whole thing work when a person uploads a bill and asks?
+Read that line again before quoting anything this prints. Documents from the single
+`clean` layout, asked one question, cannot measure accuracy however many of them there
+are; `scripts/eval_extraction.py` is the measured number (18 of 18 on 24 fields), and this
+script exists to answer a different, cruder question: does the whole thing work when a
+person uploads a bill and asks?
+
+The count is deliberately not in the filename. It was `agent_smoke_5bills.py` in Block 4,
+and the rename happened the moment the same script was run over ten - a filename that
+states a sample size becomes a lie the first time the sample changes, and the honesty of
+the banner is the whole point of this script.
 
     upload -> chat -> tool loop -> cited answer
 
@@ -18,8 +24,9 @@ Five checks per document, each a count, never a percentage:
 
 Run it with a live OPENAI_API_KEY and DATABASE_URL:
 
-    make agent-smoke
-    uv run python scripts/agent_smoke_5bills.py --docs elec_001,elec_002
+    make agent-smoke          # the first five, as Block 4 ran it
+    make flow-10              # ten documents spanning both factor years
+    uv run python scripts/agent_flow_check.py --docs elec_001,elec_002
 
 The API is exercised in-process through FastAPI's TestClient rather than over a socket.
 It is the same routing, validation and response model a curl would hit, with one fewer
@@ -132,7 +139,7 @@ def report(run: dict) -> int:
     rows = run["documents"]
     total = len(rows)
 
-    print(f"\nSMOKE ({total} documents, NOT an accuracy measurement)")
+    print(f"\nFLOW CHECK ({total} documents, NOT an accuracy measurement)")
     print(f"  model {run['model']}  question {QUESTION!r}\n")
 
     for check in CHECKS:
@@ -157,7 +164,7 @@ def report(run: dict) -> int:
 
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = run["run_at"].replace(":", "").replace("-", "")
-    path = RUNS_DIR / f"{stamp}-smoke.json"
+    path = RUNS_DIR / f"{stamp}-flow-{len(rows)}.json"
     path.write_text(json.dumps(run, indent=2) + "\n", encoding="utf-8")
     print(f"\nRun written to {path.relative_to(PROJECT_ROOT)}")
 
@@ -166,7 +173,7 @@ def report(run: dict) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--docs", help="comma-separated doc ids; default the first 5")
+    parser.add_argument("--docs", help="comma-separated doc ids; default the first --count")
     parser.add_argument("--count", type=int, default=5, help="how many documents (default 5)")
     args = parser.parse_args()
 
@@ -198,8 +205,11 @@ def main() -> int:
     return report(
         {
             "run_at": datetime.now(UTC).isoformat(timespec="seconds"),
-            "kind": "smoke",
-            "note": "Initial end-to-end check on 5 documents. Not an accuracy measurement.",
+            "kind": "flow_check",
+            "note": (
+                f"End-to-end flow check on {len(rows)} documents of one layout, one "
+                "question. Not an accuracy measurement."
+            ),
             "model": settings.openai_model,
             "question": QUESTION,
             "document_count": len(rows),
