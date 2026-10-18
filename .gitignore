@@ -31,6 +31,11 @@ data/uploads/*
 *.xlsx
 *.xls
 
+# Third-party reference material: distilled from Apple's WWDC design talks, used as the
+# design brief for the Tier 1 Block 5 interface. Not ours to redistribute, same as the
+# source documents above. The reasoning it led to is recorded in TIER1_BLOCK5.md instead.
+apple-design/
+
 # Personal working notes: the build log and the dated plan. These track the author's
 # progress rather than the project, and carry career notes and environment details that
 # do not belong in a public repo. They stay on disk; they are never committed.
