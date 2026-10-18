@@ -20,8 +20,10 @@ dist/
 # negations below can still apply: git does not descend into an excluded directory.
 data/raw/*
 data/generated/*
+data/uploads/*
 !data/raw/.gitkeep
 !data/generated/.gitkeep
+!data/uploads/.gitkeep
 
 # Belt-and-braces: no third-party document ever enters the repo by accident,
 # whatever directory it lands in.

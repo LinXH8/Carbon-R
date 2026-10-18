@@ -15,6 +15,7 @@ dependencies = [
     "jinja2>=3.1",
     "weasyprint>=63",
     "faker>=30",
+    "python-multipart>=0.0.32",
 ]
 
 [dependency-groups]

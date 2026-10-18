@@ -7,7 +7,7 @@ export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 # the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
 export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
 
-.PHONY: help install run test lint fmt seed docs models db-up db-down check eval
+.PHONY: help install run test lint fmt seed docs models db-up db-down check eval agent-smoke
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
@@ -48,3 +48,6 @@ db-down:  ## Stop local Postgres
 
 eval:     ## Score extraction and the pipeline against the answer keys
 	uv run python scripts/eval_extraction.py
+
+agent-smoke:  ## Initial end-to-end check of /upload + /chat on 5 bills (NOT an accuracy measurement)
+	uv run python scripts/agent_smoke_5bills.py
