@@ -41,4 +41,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+# `scripts` is on the path so the loaders and the eval can be imported by their tests.
+# They are entry points rather than library code, but their row-building and parsing is
+# exactly the part worth testing without a database.
+pythonpath = ["src", "scripts"]

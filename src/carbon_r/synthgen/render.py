@@ -1,14 +1,19 @@
 """HTML layout -> PDF for synthetic documents.
 
-Two rules hold here:
+Two rules hold here, for every document kind:
 
-1. **No arithmetic in the template.** Every figure arrives as a pre-formatted string in
-   `bill_context()`, derived from an already-validated ElectricityBill. The page can only
+1. **No arithmetic in the template.** Every figure arrives as a pre-formatted string from
+   a context builder, derived from an already-validated answer key. The page can only
    print numbers that passed the model validator.
 2. **No hand-written dates in the template.** Every date is formatted from the model's
-   period_start / period_end / bill_date, which come from `calendar.monthrange` and so can
-   never name a day their month does not have. A literal date in a layout is an
+   period_start / period_end / document_date, which come from `calendar.monthrange` and so
+   can never name a day their month does not have. A literal date in a layout is an
    unvalidated number on a document whose whole job is to be trustworthy.
+
+One context builder per kind, dispatched by `context_for`. They are separate functions
+rather than one with branches because the three kinds share almost no fields, and a single
+builder would be a long sequence of `if doc_kind ==` with every kind's quirks visible to
+every other kind.
 
 WeasyPrint is imported lazily, inside `write_pdf`, so the test suite can render and compare
 HTML without needing pango/cairo present. On macOS with Homebrew, WeasyPrint needs
@@ -16,14 +21,20 @@ HTML without needing pango/cairo present. On macOS with Homebrew, WeasyPrint nee
 dyld search path. The Makefile's `docs` target exports it.
 """
 
+from decimal import Decimal
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 
 from carbon_r.models.electricity_bill import ElectricityBill
+from carbon_r.models.fuel_card_statement import FuelCardStatement
+from carbon_r.models.lpg_invoice import LPGInvoice
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 DEFAULT_TEMPLATE = "electricity_bill_a.html.j2"
+
+# Any answer key this module can render.
+Document = ElectricityBill | LPGInvoice | FuelCardStatement
 
 # Wording fixed by SYNTHGEN_SPEC.md 1.7; identical on every document kind.
 SYNTHETIC_NOTICE = (
@@ -90,14 +101,161 @@ def bill_context(bill: ElectricityBill) -> dict:
     }
 
 
-def template_for(bill: ElectricityBill) -> str:
+def _quantity(value) -> str:
+    """A quantity as a page prints it: trailing zeros dropped, separators kept.
+
+    `50` rather than `50.0`, and `12.7` rather than `12.70`. A cylinder size printed as
+    "50.0 kg" would be a figure the answer key does not contain, and the eval compares the
+    two as strings for the text fields.
+    """
+    trimmed = value.normalize()
+    if trimmed == trimmed.to_integral_value():
+        trimmed = trimmed.quantize(Decimal(1))
+    return f"{trimmed:,}"
+
+
+def lpg_context(invoice: LPGInvoice) -> dict:
+    """Pre-format every value the LPG layout prints. All strings; no numbers to manipulate.
+
+    Note what is NOT in here: a total weight of gas. The layout cannot print one because
+    this context does not carry one - which is the `lpg_cylinders` case enforced
+    structurally rather than by remembering to leave a field out of the template.
+    """
+    from carbon_r.synthgen.profiles import LPG_VENDOR_ADDRESS, LPG_VENDOR_SUPPORT
+
+    return {
+        "notice": SYNTHETIC_NOTICE,
+        "doc_id": invoice.doc_id,
+        "layout_id": invoice.layout_id,
+        "vendor_name": invoice.vendor_name,
+        "vendor_uen": invoice.vendor_uen,
+        "vendor_address": LPG_VENDOR_ADDRESS,
+        "vendor_support": LPG_VENDOR_SUPPORT,
+        "customer_name": invoice.customer_name,
+        "customer_address": invoice.customer_address,
+        "account_number": invoice.account_number,
+        "invoice_number": invoice.invoice_number,
+        "document_date": _date(invoice.document_date),
+        "period_start": _date(invoice.period_start),
+        "period_end": _date(invoice.period_end),
+        "days_in_period": f"{invoice.days_in_period}",
+        "price_list_code": invoice.price_list_code,
+        "cylinder_lines": [
+            {
+                "count": f"{line.count}",
+                "size_kg": _quantity(line.size_kg),
+                "price_per_cylinder": _money(line.price_per_cylinder_sgd),
+                "amount": _money(line.amount_sgd),
+            }
+            for line in invoice.cylinders
+        ],
+        "cylinder_count": f"{invoice.cylinder_count}",
+        "returned_cylinders": f"{invoice.returned_cylinders}",
+        "currency": invoice.currency,
+        "delivery_charge": _money(invoice.delivery_charge_sgd),
+        "rental_per_cylinder": _money(invoice.rental_per_cylinder_sgd),
+        "rental_charge": _money(invoice.rental_charge_sgd),
+        "subtotal": _money(invoice.subtotal_sgd),
+        "gst_percent": f"{invoice.gst_rate * 100:.0f}",
+        "gst_amount": _money(invoice.gst_amount_sgd),
+        "total": _money(invoice.total_sgd),
+        "generator_version": invoice.generator_version,
+        "generator_seed": f"{invoice.generator_seed}",
+    }
+
+
+def fuel_context(statement: FuelCardStatement) -> dict:
+    """Pre-format every value the fuel-card layout prints.
+
+    `product_totals` is built from `litres_by_product`, which the validator has already
+    checked against the transactions - so the summary rows on the page cannot disagree
+    with the rows above them.
+    """
+    from carbon_r.synthgen.profiles import FUEL_VENDOR_ADDRESS, FUEL_VENDOR_SUPPORT
+
+    amount_by_product: dict[str, Decimal] = {}
+    for transaction in statement.transactions:
+        amount_by_product[transaction.product] = (
+            amount_by_product.get(transaction.product, Decimal(0)) + transaction.amount_sgd
+        )
+
+    return {
+        "notice": SYNTHETIC_NOTICE,
+        "doc_id": statement.doc_id,
+        "layout_id": statement.layout_id,
+        "vendor_name": statement.vendor_name,
+        "vendor_uen": statement.vendor_uen,
+        "vendor_address": FUEL_VENDOR_ADDRESS,
+        "vendor_support": FUEL_VENDOR_SUPPORT,
+        "customer_name": statement.customer_name,
+        "customer_address": statement.customer_address,
+        "account_number": statement.account_number,
+        "card_number": statement.card_number,
+        "statement_number": statement.statement_number,
+        "document_date": _date(statement.document_date),
+        "period_start": _date(statement.period_start),
+        "period_end": _date(statement.period_end),
+        "price_list_code": statement.price_list_code,
+        "transactions": [
+            {
+                "date": _date(t.date),
+                "time": t.time,
+                "vehicle": t.vehicle,
+                "station": t.station,
+                "product": t.product,
+                "litres": f"{t.litres:,.2f}",
+                "unit_price": f"{t.unit_price_sgd:.2f}",
+                "amount": _money(t.amount_sgd),
+            }
+            for t in statement.transactions
+        ],
+        "product_totals": [
+            {
+                "product": product,
+                "litres": f"{statement.litres_by_product[product]:,.2f}",
+                "amount": _money(amount_by_product[product]),
+            }
+            for product in statement.products
+        ],
+        "currency": statement.currency,
+        "gross_amount": _money(statement.gross_amount_sgd),
+        "discount_per_litre": f"{statement.discount_per_litre_sgd:.2f}",
+        "discount_amount": _money(statement.discount_amount_sgd),
+        "subtotal": _money(statement.subtotal_sgd),
+        "gst_percent": f"{statement.gst_rate * 100:.0f}",
+        "gst_amount": _money(statement.gst_amount_sgd),
+        "total": _money(statement.total_sgd),
+        "generator_version": statement.generator_version,
+        "generator_seed": f"{statement.generator_seed}",
+    }
+
+
+# doc_kind -> the builder for that kind's layout context.
+CONTEXT_BUILDERS = {
+    "electricity_bill": bill_context,
+    "lpg_invoice": lpg_context,
+    "fuel_card_statement": fuel_context,
+}
+
+
+def context_for(document: Document) -> dict:
+    """The layout context for any answer key. Raises on a kind with no builder."""
+    builder = CONTEXT_BUILDERS.get(document.doc_kind)
+    if builder is None:
+        raise ValueError(
+            f"No layout context builder for {document.doc_kind!r}; have {sorted(CONTEXT_BUILDERS)}"
+        )
+    return builder(document)
+
+
+def template_for(document: Document) -> str:
     """Templates are named <doc_kind>_<layout letter>.html.j2 (spec 3.1)."""
-    return f"{bill.doc_kind}_{bill.layout_id.rsplit('_', 1)[-1]}.html.j2"
+    return f"{document.doc_kind}_{document.layout_id.rsplit('_', 1)[-1]}.html.j2"
 
 
-def render_html(bill: ElectricityBill, template_name: str | None = None) -> str:
-    name = template_name or template_for(bill)
-    return environment().get_template(name).render(**bill_context(bill))
+def render_html(document: Document, template_name: str | None = None) -> str:
+    name = template_name or template_for(document)
+    return environment().get_template(name).render(**context_for(document))
 
 
 def write_pdf(html: str, path: Path) -> int:

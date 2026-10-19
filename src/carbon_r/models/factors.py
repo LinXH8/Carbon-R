@@ -13,6 +13,7 @@ which is deliberate - a test that could skip provenance would stop testing the r
 
 from datetime import date
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -45,7 +46,34 @@ class FactorCitation(BaseModel):
     verified: bool = False
     notes: str | None = None
 
+    # What the factor classifies as, carried from the row rather than assumed by the
+    # caller. Before Tier 2 these were module constants in `tools/calculate.py`, which was
+    # tenable only while every factor in the table was Singapore grid electricity: METHOD =
+    # "location-based" is a Scope 2 term, and printing it beside a fuel-combustion figure
+    # is a wrong label on an otherwise correct number.
+    #
+    # Nullable to match the schema, where a column added to a populated table could not be
+    # NOT NULL without inventing a default for rows the migration had not read. Both
+    # loaders set them explicitly; `calculate_emissions` refuses a factor missing either.
+    scope: int | None = Field(default=None, ge=1, le=3)
+    method: str | None = None
+
+    # 'CO2' or 'CO2e'. EMA's grid factor is carbon dioxide only; DESNZ's fuel factors
+    # include methane and nitrous oxide. Totalling one with the other understates the
+    # CO2-only line, so the basis has to be known per factor to be disclosed per result.
+    gas_basis: Literal["CO2", "CO2e"] | None = None
+
     @property
     def is_non_singapore(self) -> bool:
         """Drives the 'non-Singapore factor' disclosure (CLAUDE.md rule 7)."""
         return self.jurisdiction != "SG"
+
+    @property
+    def classification(self) -> str:
+        """`'Scope 1, combustion, CO2e'` - for a citation line, never for a calculation."""
+        parts = [f"Scope {self.scope}" if self.scope else "scope not recorded"]
+        if self.method:
+            parts.append(self.method)
+        if self.gas_basis:
+            parts.append(self.gas_basis)
+        return ", ".join(parts)

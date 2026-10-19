@@ -6,6 +6,10 @@ an independent integer route - 0.402 kg/kWh is 402 thousandths, so 4016 kWh is
 assert. A test that asserted whatever the function returned would pass just as happily
 with a broken multiplication.
 
+Since Tier 2 Block 1 the function takes a LIST of (activity, factor) pairs and returns the
+lines plus a total. Three groups of tests exist because of that change: the per-line
+arithmetic (unchanged in substance), the totalling, and the all-or-nothing rule.
+
 No database, no API key, no `.env` (spec Part 8).
 """
 
@@ -14,8 +18,9 @@ from decimal import Decimal
 
 import pytest
 
+from carbon_r.models.activity import Activity
 from carbon_r.models.factors import FactorCitation
-from carbon_r.tools.calculate import METHOD, calculate_emissions
+from carbon_r.tools.calculate import calculate_emissions
 
 # The real EMA provenance, as `lookup_emission_factor` will supply it.
 EMA_PROVENANCE = {
@@ -28,6 +33,27 @@ EMA_PROVENANCE = {
     "retrieved_at": date(2026, 10, 15),
     "jurisdiction": "SG",
     "verified": True,
+    "scope": 2,
+    "method": "location-based",
+    "gas_basis": "CO2",
+}
+
+# The real DESNZ provenance, for the Scope 1 fuel rows.
+DESNZ_PROVENANCE = {
+    "publisher": "Department for Energy Security and Net Zero",
+    "source_document": (
+        "UK Government GHG Conversion Factors for Company Reporting 2026, full set, sheet 'Fuels'"
+    ),
+    "source_url": (
+        "https://www.gov.uk/government/publications/"
+        "greenhouse-gas-reporting-conversion-factors-2026"
+    ),
+    "retrieved_at": date(2026, 10, 18),
+    "jurisdiction": "UK",
+    "verified": True,
+    "scope": 1,
+    "method": "combustion",
+    "gas_basis": "CO2e",
 }
 
 
@@ -42,7 +68,62 @@ def factor_2024(**overrides) -> FactorCitation:
     return FactorCitation(**{**defaults, **overrides})
 
 
-# --- the arithmetic ---------------------------------------------------------------------
+def factor_lpg(**overrides) -> FactorCitation:
+    """DESNZ's 2026 LPG factor. Published per TONNE, which forces the conversion."""
+    defaults = {
+        **DESNZ_PROVENANCE,
+        "category": "fuel_lpg",
+        "factor": Decimal("2939.36095"),
+        "unit": "kg CO2e / tonnes",
+        "year_requested": 2026,
+        "year_used": 2026,
+        "source_page": "sheet 'Fuels', row 35, column D (LPG, tonnes)",
+    }
+    return FactorCitation(**{**defaults, **overrides})
+
+
+def factor_diesel(**overrides) -> FactorCitation:
+    defaults = {
+        **DESNZ_PROVENANCE,
+        "category": "fuel_diesel",
+        "factor": Decimal("2.66155"),
+        "unit": "kg CO2e / litres",
+        "year_requested": 2026,
+        "year_used": 2026,
+        "source_page": "sheet 'Fuels', row 76, column D",
+    }
+    return FactorCitation(**{**defaults, **overrides})
+
+
+def factor_petrol(**overrides) -> FactorCitation:
+    defaults = {
+        **DESNZ_PROVENANCE,
+        "category": "fuel_petrol",
+        "factor": Decimal("2.35372"),
+        "unit": "kg CO2e / litres",
+        "year_requested": 2026,
+        "year_used": 2026,
+        "source_page": "sheet 'Fuels', row 100, column D",
+    }
+    return FactorCitation(**{**defaults, **overrides})
+
+
+def electricity(kwh, **overrides) -> Activity:
+    defaults = {
+        "kind": "electricity",
+        "amount": Decimal(kwh),
+        "unit": "kWh",
+        "source_field": "consumption",
+    }
+    return Activity(**{**defaults, **overrides})
+
+
+def one(activity, factor):
+    """The common case: a single line."""
+    return calculate_emissions(pairs=[{"activity": activity, "factor": factor}])
+
+
+# --- the per-line arithmetic ------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -58,166 +139,336 @@ def factor_2024(**overrides) -> FactorCitation:
     ],
 )
 def test_kwh_times_factor_matches_hand_computed_answer(kwh, expected_kg, expected_tonnes):
-    result = calculate_emissions(
-        activity_amount=Decimal(kwh), activity_unit="kWh", factor=factor_2024()
-    )
+    result = one(electricity(kwh), factor_2024())
     assert result.status == "ok"
-    assert Decimal(result.data["kg_co2e"]) == Decimal(expected_kg)
-    assert Decimal(result.data["tonnes_co2e"]) == Decimal(expected_tonnes)
+    assert result.data["kg_co2e"] == expected_kg
+    assert result.data["tonnes_co2e"] == expected_tonnes
 
 
 def test_the_exact_product_is_published_alongside_the_rounded_figures():
-    """A figure that rounds must still be re-derivable, so the exact product is kept.
-
-    At 3 decimal places for kg and 6 for tonnes the two rounded views agree by
-    construction (round6(x/1000) is round3(x)/1000), so this does not test that they
-    cannot diverge - it tests that nothing is lost: 0.4025 kg is reported exactly, and
-    the rounded view rounds half UP rather than to even.
-    """
-    result = calculate_emissions(
-        activity_amount=Decimal(1),
-        activity_unit="kWh",
-        factor=factor_2024(factor=Decimal("0.4025")),
-    )
-    assert result.data["kg_co2e_exact"] == "0.4025"
-    assert Decimal(result.data["kg_co2e"]) == Decimal("0.403")  # half up, not half even
-    assert Decimal(result.data["tonnes_co2e"]) == Decimal("0.000403")
-    # The published rounding never loses the input: 0.4025 is still there to re-derive from.
-    assert Decimal(result.data["kg_co2e_exact"]) == Decimal(1) * Decimal("0.4025")
+    """56,119.2 exactly. `tonnes` comes from the exact product, not from the rounded kg."""
+    result = one(electricity(139600), factor_2024())
+    line = result.data["lines"][0]
+    assert line["kg_co2e_exact"] == "56119.200"
+    assert Decimal(result.data["kg_co2e_exact"]) == Decimal("56119.2")
+    assert Decimal(result.data["tonnes_co2e"]) == Decimal(result.data["kg_co2e_exact"]) / 1000
 
 
 def test_the_derivation_reads_as_a_hand_check():
-    result = calculate_emissions(
-        activity_amount=Decimal(139600), activity_unit="kWh", factor=factor_2024()
+    result = one(electricity(4423), factor_2024())
+    assert result.data["derivation"] == "4,423 kWh x 0.402 kg CO2 / kWh = 1,778.046 kg CO2e"
+
+
+# --- the LPG conversion -----------------------------------------------------------------
+
+
+def test_kg_is_converted_to_tonnes_before_a_per_tonne_factor_is_applied():
+    """200 kg = 0.2 t; 0.2 x 2939.36095 = 587.87219. Hand-computed, independently.
+
+    DESNZ publishes no per-kg LPG row, so this conversion is the only route from an LPG
+    invoice to a figure. It is also the only conversion the project performs.
+    """
+    activity = Activity(
+        kind="lpg",
+        amount=Decimal(200),
+        unit="kg",
+        source_field="cylinder_deliveries",
+        derivation="4 cylinders x 50 kg = 200 kg",
     )
-    assert result.data["derivation"] == ("139,600 kWh x 0.402 kg CO2 / kWh = 56,119.2 kg CO2e")
-    assert METHOD in result.message
+    result = one(activity, factor_lpg())
+    assert result.status == "ok"
+    assert result.data["kg_co2e"] == "587.872"
+    # Numerically, not as a string: the exact product's trailing-zero count follows from
+    # the operands' precision (3 dp on the converted tonnes, 5 on the factor), which is an
+    # artefact of Decimal rather than a property worth pinning.
+    assert Decimal(result.data["lines"][0]["kg_co2e_exact"]) == Decimal("587.87219")
 
 
-# --- rule 2: the result carries everything it was computed from -------------------------
+def test_the_conversion_is_shown_with_its_authority_rather_than_absorbed():
+    """A conversion that did not appear in the output would be a hidden step."""
+    activity = Activity(
+        kind="lpg", amount=Decimal(200), unit="kg", source_field="cylinder_deliveries"
+    )
+    result = one(activity, factor_lpg())
+    conversion = result.data["lines"][0]["conversion"]
+    assert conversion["from_unit"] == "kg"
+    assert conversion["to_unit"] == "tonnes"
+    assert conversion["statement"] == "1 tonne = 1000 kg"
+    assert "Conversions" in conversion["source"]
+    assert "200 kg = 0.2 tonnes (1 tonne = 1000 kg)" in result.data["derivation"]
+    assert result.data["disclosures"]["unit_converted"] is True
+
+
+def test_no_conversion_is_recorded_when_the_units_already_agree():
+    result = one(electricity(4016), factor_2024())
+    assert result.data["lines"][0]["conversion"] is None
+    assert result.data["disclosures"]["unit_converted"] is False
+
+
+# --- totalling --------------------------------------------------------------------------
+
+
+def diesel_and_petrol():
+    """A mixed fuel-card statement: 62.41 L diesel and 41.08 L petrol."""
+    return [
+        {
+            "activity": Activity(
+                kind="diesel",
+                amount=Decimal("62.41"),
+                unit="litres",
+                source_field="transactions.litres",
+            ),
+            "factor": factor_diesel(),
+        },
+        {
+            "activity": Activity(
+                kind="petrol",
+                amount=Decimal("41.08"),
+                unit="litres",
+                source_field="transactions.litres",
+            ),
+            "factor": factor_petrol(),
+        },
+    ]
+
+
+def test_two_products_are_totalled_in_python():
+    """62.41 x 2.66155 = 166.1073355; 41.08 x 2.35372 = 96.6908176. Sum 262.7981531.
+
+    Both products computed by hand from the published factors, then added. This is the
+    number the model is never allowed to produce.
+    """
+    result = calculate_emissions(pairs=diesel_and_petrol())
+    assert result.status == "ok"
+    assert [line["kg_co2e_exact"] for line in result.data["lines"]] == [
+        "166.1073355",
+        "96.6908176",
+    ]
+    assert result.data["kg_co2e_exact"] == "262.7981531"
+    assert result.data["kg_co2e"] == "262.798"
+
+
+def test_the_total_is_summed_from_the_exact_products_not_the_rounded_lines():
+    """Rounding each line and then adding would let the total disagree with its addends."""
+    result = calculate_emissions(pairs=diesel_and_petrol())
+    exact_sum = sum(Decimal(line["kg_co2e_exact"]) for line in result.data["lines"])
+    assert Decimal(result.data["kg_co2e_exact"]) == exact_sum
+    # And the rounded total is the rounding of that sum, not the sum of the roundings.
+    assert Decimal(result.data["kg_co2e"]) == exact_sum.quantize(Decimal("0.001"))
+
+
+def test_the_multi_line_derivation_writes_out_every_line_and_the_sum():
+    result = calculate_emissions(pairs=diesel_and_petrol())
+    derivation = result.data["derivation"]
+    assert "62.41 litres x 2.66155 kg CO2e / litres = 166.1073355 kg CO2e" in derivation
+    assert "41.08 litres x 2.35372 kg CO2e / litres = 96.6908176 kg CO2e" in derivation
+    assert "= 262.798 kg CO2e in total" in derivation
+
+
+def test_a_single_line_keeps_a_single_line_derivation():
+    """No "in total" on a figure with one line: there is nothing it is a total of."""
+    result = one(electricity(4016), factor_2024())
+    assert "in total" not in result.data["derivation"]
+    assert result.data["derivation"] == result.data["lines"][0]["derivation"]
+
+
+def test_mixed_scopes_are_broken_out_as_well_as_totalled():
+    """4016 kWh -> 1614.432 kg Scope 2; 62.41 L diesel -> 166.1073355 kg Scope 1."""
+    result = calculate_emissions(
+        pairs=[
+            {"activity": electricity(4016), "factor": factor_2024()},
+            *diesel_and_petrol()[:1],
+        ]
+    )
+    assert result.data["scopes"] == [1, 2]
+    assert result.data["kg_co2e_by_scope"] == {"1": "166.107", "2": "1614.432"}
+    assert result.data["disclosures"]["mixed_scopes"] is True
+
+
+def test_mixing_a_co2_factor_with_a_co2e_factor_is_disclosed():
+    """EMA's factor is CO2 only; DESNZ's is CO2e. A total of both understates the first."""
+    result = calculate_emissions(
+        pairs=[
+            {"activity": electricity(4016), "factor": factor_2024()},
+            *diesel_and_petrol()[:1],
+        ]
+    )
+    assert result.data["gas_bases"] == ["CO2", "CO2e"]
+    assert result.data["disclosures"]["mixed_gas_basis"] is True
+
+
+def test_one_basis_throughout_is_not_a_mix():
+    result = calculate_emissions(pairs=diesel_and_petrol())
+    assert result.data["gas_bases"] == ["CO2e"]
+    assert result.data["disclosures"]["mixed_gas_basis"] is False
+    assert result.data["disclosures"]["mixed_scopes"] is False
+
+
+# --- all or nothing ---------------------------------------------------------------------
+
+
+def test_one_bad_line_fails_the_whole_call_and_returns_no_figure():
+    """A total over the lines that worked would look like an answer and be short.
+
+    This is the most important behaviour in the module: a partial total is worse than an
+    error, because nothing on its face says a line is missing.
+    """
+    pairs = diesel_and_petrol()
+    # Petrol litres against a factor published per kWh: no conversion is declared.
+    pairs[1]["factor"] = factor_2024()
+    result = calculate_emissions(pairs=pairs)
+
+    assert result.status == "error"
+    assert result.data is None
+    assert "line 2" in result.message
+    assert "short" in result.message
+
+
+def test_every_bad_line_is_named_in_one_message():
+    """One turn should be enough to fix them all, so they are not reported one at a time."""
+    pairs = diesel_and_petrol()
+    pairs[0]["factor"] = factor_2024()
+    pairs[1]["factor"] = factor_2024()
+    result = calculate_emissions(pairs=pairs)
+    assert result.status == "error"
+    assert "line 1" in result.message
+    assert "line 2" in result.message
+    assert "2 of 2 line(s)" in result.message
+
+
+def test_no_pairs_is_an_error_not_a_zero():
+    """A total of nothing is 0, which would be a figure nobody asked for."""
+    result = calculate_emissions(pairs=[])
+    assert result.status == "error"
+    assert result.data is None
+
+
+def test_a_pair_missing_a_side_is_refused():
+    result = calculate_emissions(pairs=[{"activity": electricity(10)}])
+    assert result.status == "error"
+    assert "both an activity and a factor" in result.message
+
+
+# --- provenance and refusals ------------------------------------------------------------
 
 
 def test_result_returns_the_inputs_it_used():
-    result = calculate_emissions(
-        activity_amount=Decimal(4016), activity_unit="kWh", factor=factor_2024()
-    )
-    inputs = result.data["inputs"]
-    assert inputs["activity_amount"] == "4016"
-    assert inputs["activity_unit"] == "kWh"
+    """Rule 2: a figure travels with everything needed to re-derive it."""
+    result = one(electricity(4016), factor_2024())
+    line = result.data["lines"][0]
+    assert line["activity"]["amount"] == "4016"
+    assert line["activity"]["unit"] == "kWh"
+    assert line["factor"]["factor"] == "0.402"
+    assert line["factor"]["publisher"] == "EMA"
+    assert line["factor"]["source_document"] == "Singapore Energy Statistics 2025, Table 2.4"
+    assert line["factor"]["source_page"] == "Table 2.4"
+    assert line["factor"]["year_used"] == 2024
 
-    cited = inputs["factor"]
-    for required in (
-        "factor",
-        "unit",
-        "year_used",
-        "year_requested",
-        "publisher",
-        "source_document",
-        "source_url",
-        "source_page",
-        "retrieved_at",
-    ):
-        assert cited[required] not in (None, ""), f"{required} missing from the citation"
-    assert cited["factor"] == "0.402"
-    assert cited["publisher"] == "EMA"
-    assert cited["source_page"] == "Table 2.4"
+
+def test_scope_and_method_come_from_the_factor_not_from_a_constant():
+    """They were module constants until Tier 2; `location-based` on an LPG line is wrong."""
+    electric = one(electricity(4016), factor_2024()).data["lines"][0]
+    assert (electric["scope"], electric["method"], electric["gas_basis"]) == (
+        2,
+        "location-based",
+        "CO2",
+    )
+
+    gas = one(
+        Activity(kind="lpg", amount=Decimal(200), unit="kg", source_field="c"), factor_lpg()
+    ).data["lines"][0]
+    assert (gas["scope"], gas["method"], gas["gas_basis"]) == (1, "combustion", "CO2e")
 
 
 def test_a_factor_without_provenance_is_refused():
     result = calculate_emissions(
-        activity_amount=Decimal(4016),
-        activity_unit="kWh",
-        factor={"factor": "0.402", "unit": "kg CO2 / kWh"},
+        pairs=[{"activity": electricity(4016), "factor": {"factor": "0.402"}}]
     )
     assert result.status == "error"
-    assert "provenance" in result.message
     assert result.data is None
+    assert "provenance" in result.message
+
+
+def test_a_factor_that_does_not_record_its_scope_is_refused():
+    """Without a scope the figure could not say what it is a figure OF."""
+    payload = factor_2024().model_dump(mode="json")
+    payload["scope"] = None
+    result = calculate_emissions(pairs=[{"activity": electricity(4016), "factor": payload}])
+    assert result.status == "error"
+    assert "scope or gas basis" in result.message
 
 
 def test_a_factor_dict_from_lookup_is_accepted_whole():
-    """The agent passes `data["factor"]` straight through; it must validate as-is."""
+    """The agent layer passes the tool payload straight through; it is still validated."""
     payload = factor_2024().model_dump(mode="json")
-    result = calculate_emissions(activity_amount=Decimal(4016), activity_unit="kWh", factor=payload)
+    result = calculate_emissions(pairs=[{"activity": electricity(4016), "factor": payload}])
     assert result.status == "ok"
-    assert Decimal(result.data["kg_co2e"]) == Decimal("1614.432")
-
-
-# --- units are never converted silently -------------------------------------------------
+    assert result.data["kg_co2e"] == "1614.432"
 
 
 def test_unit_mismatch_is_an_error_not_a_conversion():
-    result = calculate_emissions(
-        activity_amount=Decimal(100), activity_unit="litres", factor=factor_2024()
+    activity = Activity(
+        kind="diesel", amount=Decimal(100), unit="litres", source_field="transactions.litres"
     )
+    result = one(activity, factor_2024())
     assert result.status == "error"
-    assert "Unit mismatch" in result.message
-    assert "litres" in result.message
+    assert "no conversion between them is declared" in result.message
 
 
 def test_an_unrecognised_factor_unit_is_refused_rather_than_guessed():
-    result = calculate_emissions(
-        activity_amount=Decimal(100),
-        activity_unit="tonne-km",
-        factor=factor_2024(unit="kg CO2 / tonne-km"),
-    )
+    result = one(electricity(100), factor_2024(unit="kg CO2 / therm"))
     assert result.status == "error"
-    assert "No known activity unit" in result.message
-
-
-def test_float_activity_amounts_are_refused():
-    result = calculate_emissions(activity_amount=100.0, activity_unit="kWh", factor=factor_2024())
-    assert result.status == "error"
-    assert "Decimal" in result.message
+    assert "no known activity unit" in result.message.lower()
 
 
 def test_negative_activity_is_refused():
-    result = calculate_emissions(
-        activity_amount=Decimal(-1), activity_unit="kWh", factor=factor_2024()
-    )
-    assert result.status == "error"
+    """A credit line is not negative consumption; `Activity` rejects it at construction."""
+    with pytest.raises(ValueError):
+        electricity(-100)
 
 
-# --- disclosures are flags the prompt renders, not prose -------------------------------
+# --- disclosures ------------------------------------------------------------------------
 
 
 def test_a_clean_singapore_verified_factor_discloses_only_non_assurance():
-    result = calculate_emissions(
-        activity_amount=Decimal(4016), activity_unit="kWh", factor=factor_2024()
-    )
+    result = one(electricity(4016), factor_2024())
     assert result.data["disclosures"] == {
         "estimated_reading": False,
         "factor_year_substituted": False,
         "non_singapore_factor": False,
         "factor_unverified": False,
+        "unit_converted": False,
+        "mixed_scopes": False,
+        "mixed_gas_basis": False,
         "not_assured": True,
     }
-    assert result.data["method"] == "location-based"
-    assert result.data["basis"] == "activity-based"
 
 
 def test_substitution_estimate_and_jurisdiction_each_raise_their_flag():
-    result = calculate_emissions(
-        activity_amount=Decimal(4016),
-        activity_unit="kWh",
-        factor=factor_2024(
+    result = one(
+        electricity(4016, is_estimated=True),
+        factor_2024(
             year_requested=2026,
             year_used=2024,
             substituted=True,
-            substitution_note="No 2026 factor published; used 2024 (gap 2 years).",
+            substitution_note="used 2024",
             jurisdiction="UK",
             verified=False,
         ),
-        is_estimated_reading=True,
     )
-    assert result.data["disclosures"] == {
-        "estimated_reading": True,
-        "factor_year_substituted": True,
-        "non_singapore_factor": True,
-        "factor_unverified": True,
-        "not_assured": True,
-    }
-    # The substitution travels with the figure, naming both years.
-    cited = result.data["inputs"]["factor"]
-    assert cited["year_requested"] == 2026
-    assert cited["year_used"] == 2024
-    assert "2024" in cited["substitution_note"]
+    disclosures = result.data["disclosures"]
+    assert disclosures["estimated_reading"] is True
+    assert disclosures["factor_year_substituted"] is True
+    assert disclosures["non_singapore_factor"] is True
+    assert disclosures["factor_unverified"] is True
+
+
+def test_a_flag_on_any_line_raises_it_for_the_whole_result():
+    """One UK factor among several makes the result a non-Singapore result."""
+    result = calculate_emissions(
+        pairs=[
+            {"activity": electricity(4016), "factor": factor_2024()},
+            *diesel_and_petrol()[:1],
+        ]
+    )
+    assert result.data["disclosures"]["non_singapore_factor"] is True

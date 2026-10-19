@@ -37,6 +37,10 @@ ROW_2024 = {
     "jurisdiction": "SG",
     "verified": True,
     "notes": "Grid Emission Factor (GEF). Location-based.",
+    # Added by migration 0002. CO2 rather than CO2e: EMA's own unit string says so.
+    "scope": 2,
+    "method": "location-based",
+    "gas_basis": "CO2",
 }
 AVAILABLE = {"earliest": 2005, "latest": 2024, "rows": 20}
 
@@ -138,7 +142,14 @@ def test_every_ok_result_carries_full_provenance(requested):
 
 
 def test_a_non_singapore_factor_is_flagged_for_disclosure():
-    uk_row = {**ROW_2024, "jurisdiction": "UK", "publisher": "DESNZ"}
+    uk_row = {
+        **ROW_2024,
+        "jurisdiction": "UK",
+        "publisher": "DESNZ",
+        "scope": 1,
+        "method": "combustion",
+        "gas_basis": "CO2e",
+    }
     result = resolve(uk_row, 2024)
     assert result.data["is_non_singapore"] is True
     assert resolve(ROW_2024, 2024).data["is_non_singapore"] is False

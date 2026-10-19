@@ -1,0 +1,164 @@
+{# Layout A for fuel-card statements - the only layout in Tier 2 Block 1.
+
+   No arithmetic and no literal dates in here: every value is a pre-formatted string from
+   render.fuel_context(), built from a FuelCardStatement that already passed its validator.
+
+   Three things this layout prints on purpose, all of which extraction has to get right:
+   a per-product summary (so a litre total can be checked against the transactions), a
+   per-litre rebate that reduces the money and not the litres, and gross and net amounts
+   that are both money rather than quantities of fuel. #}
+<!-- {{ doc_id }} / layout {{ layout_id }} / {{ generator_version }} / seed {{ generator_seed }} -->
+<style>
+  @page { size: A4; margin: 15mm 13mm; }
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 9pt;
+         color: #1a1a1a; line-height: 1.4; }
+  .notice { border: 1.2pt dashed #8a6d00; background: #fffbe8; color: #6b5500;
+            padding: 5pt 7pt; font-size: 7.6pt; letter-spacing: .02em; margin-bottom: 10pt; }
+  header { display: flex; justify-content: space-between; align-items: flex-start;
+           border-bottom: 2pt solid #1f4b3f; padding-bottom: 7pt; }
+  .vendor { font-size: 14pt; font-weight: 700; color: #1f4b3f; letter-spacing: -.01em; }
+  .vendor-meta { font-size: 7.8pt; color: #5c6b66; margin-top: 2pt; }
+  .doctype { text-align: right; font-size: 7.8pt; color: #5c6b66; }
+  .doctype strong { display: block; font-size: 11pt; color: #1f4b3f; letter-spacing: .06em; }
+  .panels { display: flex; gap: 14pt; margin: 10pt 0 0; }
+  .panel { flex: 1; }
+  .panel h2 { font-size: 7.4pt; text-transform: uppercase; letter-spacing: .09em;
+              color: #5c6b66; margin: 0 0 3pt; font-weight: 600; }
+  .panel .body { font-size: 9pt; }
+  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; column-gap: 8pt; row-gap: 1pt; }
+  dt { color: #5c6b66; font-size: 8.4pt; }
+  dd { margin: 0; font-size: 8.4pt; text-align: right; font-variant-numeric: tabular-nums; }
+  table { width: 100%; border-collapse: collapse; margin-top: 11pt; }
+  th { font-size: 7.2pt; text-transform: uppercase; letter-spacing: .07em; color: #5c6b66;
+       text-align: left; border-bottom: .8pt solid #c6d2ce; padding: 0 0 3pt; font-weight: 600; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td { padding: 3.2pt 0; border-bottom: .4pt solid #e8edeb; font-size: 8.4pt; }
+  h3 { font-size: 7.4pt; text-transform: uppercase; letter-spacing: .09em; color: #5c6b66;
+       margin: 13pt 0 0; font-weight: 600; }
+  table.summary { margin-top: 4pt; }
+  tr.sum td { border-bottom: none; padding: 2.5pt 0; }
+  tr.sum td.label { text-align: right; color: #5c6b66; }
+  tr.total td { border-top: 1.2pt solid #1f4b3f; font-weight: 700; font-size: 11pt;
+                color: #1f4b3f; padding-top: 5pt; }
+  .note { margin-top: 9pt; font-size: 7.8pt; color: #5c6b66; }
+  footer { margin-top: 13pt; border-top: .4pt solid #e8edeb; padding-top: 6pt;
+           font-size: 7.2pt; color: #7e8b86; }
+</style>
+
+<div class="notice">{{ notice }}</div>
+
+<header>
+  <div>
+    <div class="vendor">{{ vendor_name }}</div>
+    <div class="vendor-meta">
+      UEN {{ vendor_uen }} &middot; {{ vendor_address }}<br>
+      {{ vendor_support }}
+    </div>
+  </div>
+  <div class="doctype">
+    <strong>CARD STATEMENT</strong>
+    Fleet fuel purchases<br>
+    Reference {{ doc_id }}
+  </div>
+</header>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Account holder</h2>
+    <div class="body">
+      <strong>{{ customer_name }}</strong><br>
+      {{ customer_address }}
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Statement details</h2>
+    <dl>
+      <dt>Statement no</dt><dd>{{ statement_number }}</dd>
+      <dt>Account no</dt><dd>{{ account_number }}</dd>
+      <dt>Card no</dt><dd>{{ card_number }}</dd>
+      <dt>Statement date</dt><dd>{{ document_date }}</dd>
+      <dt>Period</dt><dd>{{ period_start }} &ndash; {{ period_end }}</dd>
+      <dt>Price list</dt><dd>{{ price_list_code }}</dd>
+    </dl>
+  </div>
+</div>
+
+<h3>Transactions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Time</th>
+      <th>Vehicle</th>
+      <th>Station</th>
+      <th>Product</th>
+      <th class="num">Litres</th>
+      <th class="num">Price/L</th>
+      <th class="num">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in transactions %}
+    <tr>
+      <td>{{ row.date }}</td>
+      <td>{{ row.time }}</td>
+      <td>{{ row.vehicle }}</td>
+      <td>{{ row.station }}</td>
+      <td>{{ row.product }}</td>
+      <td class="num">{{ row.litres }}</td>
+      <td class="num">{{ row.unit_price }}</td>
+      <td class="num">{{ row.amount }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Summary by product</h3>
+<table class="summary">
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th class="num">Litres</th>
+      <th class="num">Amount ({{ currency }})</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in product_totals %}
+    <tr>
+      <td>{{ row.product }}</td>
+      <td class="num">{{ row.litres }}</td>
+      <td class="num">{{ row.amount }}</td>
+    </tr>
+    {% endfor %}
+    <tr class="sum">
+      <td class="label" colspan="2">Gross amount</td>
+      <td class="num">{{ gross_amount }}</td>
+    </tr>
+    <tr class="sum">
+      <td class="label" colspan="2">Fleet rebate, {{ discount_per_litre }} per litre</td>
+      <td class="num">&minus;{{ discount_amount }}</td>
+    </tr>
+    <tr class="sum">
+      <td class="label" colspan="2">Amount before GST</td>
+      <td class="num">{{ subtotal }}</td>
+    </tr>
+    <tr class="sum">
+      <td class="label" colspan="2">GST {{ gst_percent }}%</td>
+      <td class="num">{{ gst_amount }}</td>
+    </tr>
+    <tr class="total">
+      <td colspan="2">Net payable</td>
+      <td class="num">{{ currency }} {{ total }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="note">
+  Pump prices shown are exclusive of GST. The fleet rebate is applied to the amount
+  payable; it does not change the volume of fuel drawn.
+</p>
+
+<footer>
+  {{ vendor_name }} &middot; UEN {{ vendor_uen }} &middot; price list {{ price_list_code }}<br>
+  {{ notice }}
+</footer>

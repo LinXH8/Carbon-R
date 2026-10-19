@@ -39,6 +39,65 @@ FACTOR_2024 = {
     "jurisdiction": "SG",
     "verified": True,
     "notes": None,
+    "scope": 2,
+    "method": "location-based",
+    "gas_basis": "CO2",
+}
+
+# DESNZ's 2026 LPG factor, as `lookup_emission_factor` returns it. Published per TONNE,
+# which is why a kg activity has to be converted before it can be applied - the one
+# conversion in the project, and the reason this fixture exists.
+FACTOR_LPG_2026 = {
+    "category": "fuel_lpg",
+    "factor": "2939.36095",
+    "unit": "kg CO2e / tonnes",
+    "year_requested": 2026,
+    "year_used": 2026,
+    "substituted": False,
+    "substitution_note": None,
+    "publisher": "Department for Energy Security and Net Zero",
+    "source_document": (
+        "UK Government GHG Conversion Factors for Company Reporting 2026, full set, sheet 'Fuels'"
+    ),
+    "source_url": (
+        "https://www.gov.uk/government/publications/"
+        "greenhouse-gas-reporting-conversion-factors-2026"
+    ),
+    "source_page": "sheet 'Fuels', row 35, column D (LPG, tonnes)",
+    "retrieved_at": "2026-10-18",
+    "jurisdiction": "UK",
+    "verified": True,
+    "notes": "LPG combustion, all greenhouse gases as CO2e.",
+    "scope": 1,
+    "method": "combustion",
+    "gas_basis": "CO2e",
+}
+
+# DESNZ's 2026 diesel and petrol factors, per litre. Two rows because a fuel-card
+# statement needs both at once, which is the case the pairs-based calculation exists for.
+FACTOR_DIESEL_2026 = dict(
+    FACTOR_LPG_2026,
+    category="fuel_diesel",
+    factor="2.66155",
+    unit="kg CO2e / litres",
+    source_page="sheet 'Fuels', row 76, column D (Diesel (100% mineral diesel), litres)",
+    notes="Diesel combustion, all greenhouse gases as CO2e.",
+)
+FACTOR_PETROL_2026 = dict(
+    FACTOR_LPG_2026,
+    category="fuel_petrol",
+    factor="2.35372",
+    unit="kg CO2e / litres",
+    source_page="sheet 'Fuels', row 100, column D (Petrol (100% mineral petrol), litres)",
+    notes="Petrol combustion, all greenhouse gases as CO2e.",
+)
+
+# Keyed by the category the agent asks for, so a fake lookup can serve any of them.
+FACTORS_BY_CATEGORY = {
+    "electricity_grid_sg": FACTOR_2024,
+    "fuel_lpg": FACTOR_LPG_2026,
+    "fuel_diesel": FACTOR_DIESEL_2026,
+    "fuel_petrol": FACTOR_PETROL_2026,
 }
 
 # A reading in the shape `extract_from_document` returns, trimmed as the toolkit trims it.
@@ -60,12 +119,70 @@ NORMALISED = {
 }
 
 
-def extract_payload(document_id: str = "doc_test", filename: str = "elec_001.pdf") -> dict:
+# The activity an electricity bill carries, in the shape `extract_from_document` returns.
+ELECTRICITY_ACTIVITY = {
+    "kind": "electricity",
+    "amount": "139600",
+    "unit": "kWh",
+    "source_field": "consumption",
+    "derivation": None,
+    "is_estimated": False,
+}
+
+# The two activities a mixed fuel-card statement carries. Litres, not money, and one
+# entry per product because they take different factors.
+FUEL_ACTIVITIES = [
+    {
+        "kind": "diesel",
+        "amount": "156.79",
+        "unit": "litres",
+        "source_field": "transactions.litres",
+        "derivation": "3 diesel transaction(s): 52.30 + 48.21 + 56.28 = 156.79 litres",
+        "is_estimated": False,
+    },
+    {
+        "kind": "petrol",
+        "amount": "116.79",
+        "unit": "litres",
+        "source_field": "transactions.litres",
+        "derivation": "3 petrol transaction(s): 38.11 + 41.02 + 37.66 = 116.79 litres",
+        "is_estimated": False,
+    },
+]
+
+# The LPG activity, which the page never prints: it comes from the cylinder arithmetic.
+LPG_ACTIVITY = {
+    "kind": "lpg",
+    "amount": "250",
+    "unit": "kg",
+    "source_field": "cylinder_deliveries",
+    "derivation": "5 cylinders x 50 kg = 250 kg",
+    "is_estimated": False,
+}
+
+
+def extract_payload(
+    document_id: str = "doc_test",
+    filename: str = "elec_001.pdf",
+    *,
+    document_kind: str = "electricity_bill",
+    normalised: dict | None = None,
+    activities: list[dict] | None = None,
+) -> dict:
     """What the real tool returns, before the toolkit trims it."""
     return {
         "document": filename,
+        "document_kind": document_kind,
+        "classification": {
+            "document_kind": document_kind,
+            "confidence": 0.98,
+            "why": "scripted fixture",
+        },
         "printed": {"consumption": "139,600", "consumption_unit": "kWh"},
-        "normalised": dict(NORMALISED),
+        "normalised": dict(NORMALISED if normalised is None else normalised),
+        "activities": (
+            [dict(ELECTRICITY_ACTIVITY)] if activities is None else [dict(a) for a in activities]
+        ),
         "field_problems": [],
         "consistency_flags": [],
         "request": {"model": "test-model", "dpi": 150, "image_detail": "high"},
@@ -106,10 +223,47 @@ def toolkit(session: Session) -> Toolkit:
         return ok(extract_payload(), f"Read {Path(path).name}.")
 
     def fake_lookup(category: str, unit: str, year: int) -> ToolResult:
-        factor = dict(FACTOR_2024, year_requested=year)
-        return ok({"factor": factor, "is_non_singapore": False}, "0.402 kg CO2 / kWh (EMA, 2024).")
+        factor = dict(FACTORS_BY_CATEGORY.get(category, FACTOR_2024), year_requested=year)
+        return ok(
+            {"factor": factor, "is_non_singapore": factor["jurisdiction"] != "SG"},
+            f"{factor['factor']} {factor['unit']} ({factor['publisher']}).",
+        )
 
     return Toolkit(session, extract=fake_extract, lookup=fake_lookup)
+
+
+@pytest.fixture
+def fuel_toolkit(session: Session) -> Toolkit:
+    """A toolkit whose document is a two-product fuel-card statement.
+
+    The case the pairs-based calculation exists for: two activities, two factors, one
+    total that no model computed.
+    """
+
+    def fake_extract(path, **_: Any) -> ToolResult:
+        return ok(
+            extract_payload(
+                filename="fuel_001.pdf",
+                document_kind="fuel_card_statement",
+                normalised={"period_start": "2026-02-01", "period_end": "2026-02-28"},
+                activities=FUEL_ACTIVITIES,
+            ),
+            "Read fuel_001.pdf as a fuel card statement.",
+        )
+
+    def fake_lookup(category: str, unit: str, year: int) -> ToolResult:
+        factor = dict(FACTORS_BY_CATEGORY[category], year_requested=year)
+        return ok(
+            {"factor": factor, "is_non_singapore": True},
+            f"{factor['factor']} {factor['unit']} (DESNZ {year}).",
+        )
+
+    return Toolkit(session, extract=fake_extract, lookup=fake_lookup)
+
+
+def pair(activity_ref: str, factor_ref: str) -> dict:
+    """One `calculate_emissions` pair, as the model would send it."""
+    return {"activity_ref": activity_ref, "factor_ref": factor_ref}
 
 
 # --- a fake provider client -------------------------------------------------------------

@@ -35,6 +35,16 @@ def test_schemas_are_strict():
         assert set(params["required"]) == set(params["properties"])
 
 
+def test_nested_definitions_are_strict_too():
+    """Strict mode applies at every level, and `pairs` introduced a second level."""
+    for schema in tool_schemas():
+        for definition in schema["parameters"].get("$defs", {}).values():
+            if definition.get("type") != "object":
+                continue
+            assert definition["additionalProperties"] is False
+            assert set(definition["required"]) == set(definition["properties"])
+
+
 def test_schemas_carry_no_keyword_strict_mode_rejects():
     serialised = json.dumps(tool_schemas())
     assert '"title"' not in serialised
@@ -49,9 +59,26 @@ def test_every_argument_is_described():
 
 def test_calculate_takes_handles_not_values():
     """The central rule: the model cannot put a quantity into a calculation."""
-    properties = schema_for(CalculateArgs)["properties"]
-    assert set(properties) == {"document_id", "factor_ref"}
-    assert not any("amount" in name or "factor_value" in name for name in properties)
+    schema = schema_for(CalculateArgs)
+    assert set(schema["properties"]) == {"pairs"}
+
+    # Each pair is two handles and nothing else. Asserted on the referenced definition
+    # rather than on the top level, because the quantity would now have to sneak in one
+    # level down - which is exactly where an incautious edit would put it.
+    pair = schema["$defs"]["CalculatePair"]
+    assert set(pair["properties"]) == {"activity_ref", "factor_ref"}
+    for properties in (schema["properties"], pair["properties"]):
+        assert not any(
+            token in name
+            for name in properties
+            for token in ("amount", "unit", "value", "litres", "kwh", "kg")
+        )
+
+
+def test_calculate_takes_a_list_so_the_total_is_pythons_to_compute():
+    """A fuel-card statement needs two factors and one total. The total is a sum."""
+    schema = schema_for(CalculateArgs)
+    assert schema["properties"]["pairs"]["type"] == "array"
 
 
 def test_argument_models_reject_unknown_fields():

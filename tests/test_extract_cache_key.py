@@ -9,18 +9,26 @@ The schema half matters as much as the instruction half, because `responses.pars
 the JSON schema with every call. Editing one field's `description` changes what the model
 is asked for.
 
+Since Tier 2 Block 1 the key carries a PIPELINE hash rather than one request's hash: the
+classifier runs before the kind is known, and all three extraction schemas are part of
+what could change a document's reading. A per-kind key would let a classifier edit replay
+a reply produced by the previous classifier.
+
 Offline: the key function is pure, so none of this calls a provider.
 """
 
 from pydantic import Field
 
+from carbon_r.models.doc_kind import DocumentClassification
 from carbon_r.models.extraction import ExtractedElectricityBill
 from carbon_r.tools.extract import (
+    CLASSIFY_INSTRUCTION,
     DEFAULT_DPI,
     EXTRACTION_INSTRUCTION,
     IMAGE_DETAIL,
     REQUEST_HASH,
     cache_key,
+    pipeline_hash,
     request_hash,
 )
 
@@ -41,7 +49,12 @@ class DescriptionEdited(ExtractedElectricityBill):
 
 def test_identical_inputs_give_an_identical_key():
     assert cache_key("elec_009", MODEL) == cache_key("elec_009", MODEL)
-    assert request_hash(EXTRACTION_INSTRUCTION, ExtractedElectricityBill) == REQUEST_HASH
+    assert pipeline_hash() == REQUEST_HASH
+
+
+def test_the_electricity_request_is_one_component_of_the_pipeline_hash():
+    """The per-request hash still exists; it is no longer the whole key on its own."""
+    assert request_hash(EXTRACTION_INSTRUCTION, ExtractedElectricityBill) != REQUEST_HASH
 
 
 def test_editing_the_instruction_changes_the_key():
@@ -53,17 +66,29 @@ def test_editing_the_instruction_changes_the_key():
     assert cache_key("elec_009", MODEL, request_fingerprint=edited) != cache_key("elec_009", MODEL)
 
 
+def test_editing_the_classifier_changes_the_key():
+    """A document's reading depends on the classifier, so the classifier is in the key."""
+    edited = request_hash(
+        CLASSIFY_INSTRUCTION + "\nWhen unsure, guess the most likely kind.",
+        DocumentClassification,
+    )
+    assert edited != request_hash(CLASSIFY_INSTRUCTION, DocumentClassification)
+    assert cache_key("lpg_001", MODEL, request_fingerprint=edited) != cache_key("lpg_001", MODEL)
+
+
 def test_editing_one_field_description_changes_the_key():
     """The schema travels with the request, so a description is part of the request."""
     edited = request_hash(EXTRACTION_INSTRUCTION, DescriptionEdited)
-    assert edited != REQUEST_HASH
+    assert edited != request_hash(EXTRACTION_INSTRUCTION, ExtractedElectricityBill)
 
 
 def test_adding_a_field_changes_the_key():
     class FieldAdded(ExtractedElectricityBill):
         late_payment_charge: str | None = Field(description="Late payment charge as printed")
 
-    assert request_hash(EXTRACTION_INSTRUCTION, FieldAdded) != REQUEST_HASH
+    assert request_hash(EXTRACTION_INSTRUCTION, FieldAdded) != request_hash(
+        EXTRACTION_INSTRUCTION, ExtractedElectricityBill
+    )
 
 
 def test_document_model_dpi_and_detail_each_change_the_key_independently():

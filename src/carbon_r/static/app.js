@@ -293,7 +293,50 @@ function notice(kind, title, detail) {
 }
 
 function figureCard(figure) {
-  const f = figure.factor;
+  // A result is a total plus one line per activity. An electricity bill has one line; a
+  // fuel-card statement with diesel and petrol has two, each with its own factor. The
+  // card renders the same shape either way rather than branching on the count, except
+  // that a single line does not need a per-line header repeating what the total says.
+  const lines = figure.lines || [];
+  const single = lines.length === 1;
+
+  const kinds = lines.map((line) => line.kind).join(' + ');
+  const scopes = (figure.scopes || []).map((n) => `Scope ${n}`).join(' + ');
+
+  // Per-scope breakdown, shown only when there is more than one: a combined number
+  // cannot be reported against a scope, and the server sends the split for that reason.
+  const byScope = Object.entries(figure.kg_co2e_by_scope || {});
+  const scopeSplit = byScope.length > 1
+    ? h('ul', { class: 'scope-split' }, byScope.map(([scope, kg]) =>
+        h('li', {}, [
+          h('span', { text: `Scope ${scope}` }),
+          h('strong', { text: `${group(kg)} kg CO2e` }),
+        ])))
+    : null;
+
+  return h('section', { class: 'card figure-card' }, [
+    h('p', { class: 'label', text: `${kinds} · ${scopes} · ${(figure.document_ids || []).join(', ')}` }),
+    h('p', { class: 'figure-value' }, [
+      document.createTextNode(group(figure.kg_co2e)),
+      h('span', { class: 'figure-unit', text: ' kg CO2e' }),
+    ]),
+    h('p', { class: 'figure-tonnes', text: `${group(figure.tonnes_co2e)} tonnes CO2e` }),
+    h('p', { class: 'derivation', text: figure.derivation }),
+    scopeSplit,
+    ...lines.map((line) => lineBlock(line, single)),
+    figure.required_disclosures?.length
+      ? h('ul', { class: 'disclosures' },
+          figure.required_disclosures.map((sentence) => h('li', { text: sentence })))
+      : null,
+    h('div', { class: 'audit-line' }, [
+      h('span', { text: 'Figure audit: every number in the reply was produced by a tool.' }),
+      h('span', { text: `${figure.calculation_ref} · ${lines.every((l) => l.factor.verified) ? 'factors verified from primary source' : 'a factor is not yet verified'}` }),
+    ]),
+  ]);
+}
+
+function lineBlock(line, single) {
+  const f = line.factor;
 
   const cite = [
     citeRow('Factor', `${group(f.factor)} ${f.unit}`),
@@ -305,7 +348,11 @@ function figureCard(figure) {
     // Always shown, never only when something else is missing: a factor from outside
     // Singapore has to be labelled as one wherever it appears.
     citeRow('Jurisdiction', f.jurisdiction, f.jurisdiction === 'SG' ? null : 'non-Singapore'),
-    citeRow('Method', `${figure.method}, ${figure.basis}`),
+    // Scope, method and basis come from the factor row. The page never composes them: a
+    // caption this file wrote would be a classification the server never sent.
+    citeRow('Classification',
+            [line.scope ? `Scope ${line.scope}` : null, line.method, line.gas_basis]
+              .filter(Boolean).join(', ')),
   ];
 
   const link = h('div', {}, [
@@ -313,26 +360,24 @@ function figureCard(figure) {
     h('dd', {}, [h('a', { href: f.source_url, target: '_blank', rel: 'noreferrer', text: f.source_url })]),
   ]);
 
-  return h('section', { class: 'card figure-card' }, [
-    h('p', {
-      class: 'label',
-      text: `${group(figure.activity_amount)} ${figure.activity_unit} · ${figure.document_id}`,
-    }),
-    h('p', { class: 'figure-value' }, [
-      document.createTextNode(group(figure.kg_co2e)),
-      h('span', { class: 'figure-unit', text: ' kg CO2e' }),
+  return h('div', { class: 'figure-line' }, [
+    // Suppressed for a single-line figure, where it would only repeat the total above.
+    single ? null : h('p', { class: 'figure-line-head' }, [
+      h('span', { text: `${group(line.activity_amount)} ${line.activity_unit} of ${line.kind}` }),
+      h('strong', { text: `${group(line.kg_co2e)} kg CO2e` }),
     ]),
-    h('p', { class: 'figure-tonnes', text: `${group(figure.tonnes_co2e)} tonnes CO2e` }),
-    h('p', { class: 'derivation', text: figure.derivation }),
-    h('dl', { class: 'cite' }, [...cite, link]),
-    figure.required_disclosures?.length
-      ? h('ul', { class: 'disclosures' },
-          figure.required_disclosures.map((sentence) => h('li', { text: sentence })))
+    single ? h('p', { class: 'label', text: `${group(line.activity_amount)} ${line.activity_unit} of ${line.kind}` }) : null,
+    // How the quantity was reached when the page did not print it - the cylinder
+    // arithmetic behind an LPG figure, the litre sum behind a fuel-card line.
+    line.activity_derivation
+      ? h('p', { class: 'sub-derivation', text: `Quantity: ${line.activity_derivation}` })
       : null,
-    h('div', { class: 'audit-line' }, [
-      h('span', { text: 'Figure audit: every number in the reply was produced by a tool.' }),
-      h('span', { text: `${figure.calculation_ref} · ${f.verified ? 'factor verified from primary source' : 'factor not yet verified'}` }),
-    ]),
+    // A conversion is a step in the arithmetic, so it is shown, with its authority.
+    line.conversion
+      ? h('p', { class: 'sub-derivation', text: `Conversion: ${line.conversion.statement} (${line.conversion.source})` })
+      : null,
+    single ? null : h('p', { class: 'derivation', text: line.derivation }),
+    h('dl', { class: 'cite' }, [...cite, link]),
   ]);
 }
 

@@ -3,8 +3,9 @@
 Upload a utility bill or fuel invoice, get a greenhouse-gas figure that carries its own
 receipts: the emission factor used, its unit, publisher, year, and the document it came from.
 
-**Status:** Tier 1, Block 4 complete — usable end to end over HTTP: upload a bill, ask a
-question, get a cited Scope 2 figure. No UI yet; that is Block 5.
+**Status:** Tier 2, Block 1 complete — usable end to end in the browser. Upload an
+electricity bill, an LPG invoice or a vehicle fuel-card statement and get a cited Scope 1
+or Scope 2 figure, with every line of the derivation shown.
 
 ## The one design rule worth stating up front
 
@@ -18,7 +19,9 @@ See [CLAUDE.md](CLAUDE.md) for the full set of rules this repo holds itself to,
 [SOURCES.md](SOURCES.md) for every dataset's provenance and verification status,
 [SYNTHGEN_V0.md](SYNTHGEN_V0.md) for how the synthetic test documents are generated,
 [TIER1_BLOCK3.md](TIER1_BLOCK3.md) for the extraction/calculation design and its measured
-results, and [TIER1_BLOCK4.md](TIER1_BLOCK4.md) for the agent loop and the API.
+results, [TIER1_BLOCK4.md](TIER1_BLOCK4.md) for the agent loop and the API, and
+[TIER2_BLOCK1.md](TIER2_BLOCK1.md) for Scope 1 — the two new document kinds, the DESNZ
+factors, and the four defects the first eval run found.
 
 ## What works today, and what it measures
 
@@ -26,35 +29,64 @@ Three tools, each returning `{status, data, message}`:
 
 | Tool | What it does |
 |---|---|
-| `extract_from_document` | Rasterises a page and has a vision model transcribe what is printed. It is never asked for a derived figure. |
-| `lookup_emission_factor` | Exact SQL (`category`, `unit`, `year`), never similarity search. Returns the factor with publisher, source document, page and retrieval date. |
-| `calculate_emissions` | Plain Python. Returns the figure together with every input used, the derivation written out, and structured disclosure flags. |
+| `extract_from_document` | Establishes what kind of document a page is, then has a vision model transcribe what is printed and returns the measurable activities it carries. It is never asked for a derived figure. A kind it cannot establish is refused, not guessed. |
+| `lookup_emission_factor` | Exact SQL (`category`, `unit`, `year`), never similarity search. Returns the factor with publisher, source document, page, scope, method, gas basis and retrieval date. |
+| `calculate_emissions` | Plain Python. Takes a list of (activity, factor) pairs and returns each line and the total, with every input used, the derivation written out, and structured disclosure flags. |
 
-Measured by `make eval` on the 18 synthetic bills in the `clean` tier, 24 scored fields
-per document:
+### Three document kinds, two scopes
 
-- Every field recovered correctly on **18 of 18** documents, in each of three fresh runs.
-- End-to-end kgCO₂e matching the answer key on **18 of 18**, in every run recorded.
-- **9 of 18** documents exercise the factor-year substitution: their activity periods fall
-  in 2025 and the newest published EMA factor is 2024, so the substitution is stated on the
-  result rather than applied silently.
+| Document | Activity | Factor | Scope |
+|---|---|---|---|
+| Electricity bill | kWh | EMA grid emission factor | 2, location-based |
+| LPG invoice | kg of gas, computed from the cylinder lines | DESNZ, per tonne | 1, combustion |
+| Fuel-card statement | litres **per product** | DESNZ, per litre, diesel and petrol separately | 1, combustion |
 
-What that figure does **not** cover is set out under [Limitations](#limitations) — it is
-one layout on crisp synthetic PDFs, and three runs is a small sample.
+Measured by `make eval` on **36 synthetic documents** in the `clean` tier — 18 bills, 12
+LPG invoices, 6 fuel-card statements — in two independent fresh runs with identical
+results:
+
+| | Count |
+|---|---|
+| Document kind identified correctly | **36 of 36** |
+| Activities recovered, in the right units | **36 of 36** |
+| Every scored field correct — electricity bills, 24 fields | **18 of 18** |
+| Every scored field correct — LPG invoices, 18 fields | **12 of 12** |
+| Every scored field correct — fuel-card statements, 17 fields | **6 of 6** |
+| End-to-end kgCO₂e matching the answer key | **36 of 36** |
+
+Two of those counts are worth reading twice. **9 of 36** documents exercise the
+factor-year substitution, which is stated on the result rather than applied silently. And
+**1 of 36** is an *expected refusal*: an LPG invoice whose supply period is 2024, for which
+no DESNZ factor is published at or before that year. Producing no figure is the correct
+outcome there, and the eval scores it as a pass — a harness that counted it as a miss would
+be rewarding a guess.
+
+What these figures do **not** cover is set out under [Limitations](#limitations) — one
+layout per kind, crisp synthetic PDFs, and a small sample.
 
 ### The agent that drives them
 
 An agent chooses which tool to call; it does not compute. Two properties make that
 structural rather than a matter of prompt wording:
 
-- **It passes handles, not values.** The calculation tool takes a `document_id` and a
-  `factor_ref` into the session's stored tool results — never an amount, never a factor.
-  A model that cannot write a digit into a calculation cannot mistype `0.402` as `0.42`.
+- **It passes handles, not values.** The calculation tool takes `activity_ref` and
+  `factor_ref` handles into the session's stored tool results — never an amount, never a
+  factor. A model that cannot write a digit into a calculation cannot mistype `0.402` as
+  `0.42`. That extends to totals: a fuel-card statement with diesel and petrol is one call
+  with two pairs, and the sum is Python's.
 - **Its answer is audited.** Every number in a reply is matched against the numbers the
   tools returned; anything untraceable comes back on the response as `unverified_figures`.
 
 The loop is bounded at 8 turns. On `no_results`, on an error, or when the turns run out,
-it reports what is missing and asks — it never assembles a figure to look finished.
+it reports what is missing and asks — it never assembles a figure to look finished. Three
+refusal paths are exercised live and recorded in
+[TIER2_BLOCK1.md](TIER2_BLOCK1.md): a document whose kind cannot be established, a file
+holding two kinds at once, and an activity year for which no factor is published.
+
+`calculate_emissions` is also all-or-nothing: if any line of a multi-line calculation
+cannot be computed, it returns no figure at all. A total over the lines that happened to
+work would look like an answer, be smaller than the truth, and carry nothing on its face to
+say a line was missing.
 
 The same property holds all the way to the screen: `/chat` returns the structured output of
 each `calculate_emissions` alongside the prose, and the page renders the figure from that.
@@ -125,25 +157,34 @@ docker compose up -d db
 Then load the emission factors (safe to re-run — it upserts):
 
 ```bash
-uv run python scripts/seed_factors.py        # or: make seed
+make seed          # EMA grid emission factors (Scope 2), 20 years
+make seed-desnz    # UK DESNZ fuel combustion factors (Scope 1)
 ```
+
+Both are idempotent: re-running changes nothing. `make verify-desnz` re-reads the DESNZ
+workbooks and diffs them against the values the loader carries, so the transcription is
+checkable rather than trusted once — it needs the git-ignored spreadsheets present.
 
 ### Generating documents and scoring them
 
 ```bash
-make docs         # 18 synthetic bills + answer keys into data/generated/ (git-ignored)
-make eval         # score extraction and the pipeline against those answer keys
+make docs         # 36 synthetic documents + answer keys into data/generated/ (git-ignored)
+make eval         # score routing, extraction and the pipeline against those answer keys
 make agent-smoke  # end-to-end flow check of /upload + /chat on 5 bills
 make flow-10      # the same flow on 10 bills spanning both factor years
-make check        # ruff + the full test suite (228 tests)
+make flow-scope1  # one document of each kind, including a refusal
+make check        # ruff + the full test suite (437 tests)
 ```
 
-`make flow-10` is a flow check, not a measurement: ten documents of one layout asked one
-question cannot measure accuracy, and the script says so on every line it prints. It checks
-that the loop finishes, that its figure equals the answer key's, that the factor is cited,
-that the disclosures are stated, and that no number appears which no tool produced. It is
-**10 of 10 on all five checks**, four turns per document, with the factor year substituted
-on 5 of the 10. `make eval` (18 of 18 on 24 fields) remains the measured number.
+The flow checks are flow checks, not measurements: documents of one layout asked one
+question cannot measure accuracy, and the script says so on every line it prints. They
+check that the loop finishes, that its figure equals the answer key's, that every factor is
+cited, that the disclosures are stated, that no number appears which no tool produced, and
+that a document with no published factor is refused rather than guessed.
+
+`make flow-scope1` is **4 of 4 on all six checks** across the three kinds, 15 turns, with
+one unit conversion, one two-line total and one honest refusal. `make eval` (36 of 36)
+remains the measured number.
 
 `make eval` caches each model reply, keyed on the document, model, DPI and a hash of the
 prompt *and* the response schema. A cache hit skips only the model call — every step after
@@ -156,31 +197,54 @@ No third-party source document is committed to this repo. Emission factors are t
 from primary sources with their citation recorded alongside, and every dataset used is
 listed in [SOURCES.md](SOURCES.md) with its publisher, URL and retrieval date.
 
+| Factor | Publisher | Licence | Scope | Basis |
+|---|---|---|---|---|
+| Singapore grid electricity, 2005–2024 | EMA, *Singapore Energy Statistics 2025*, Table 2.4 | — | 2 | CO₂ only |
+| LPG, diesel, petrol, 2025–2026 | DESNZ, *GHG Conversion Factors*, sheet `Fuels` | Open Government Licence v3.0 | 1 | CO₂e |
+
+The DESNZ factors are **published for the UK, not Singapore**, and every result that uses
+one says so. They are also CO₂e where EMA's is CO₂ only, so a figure combining the two
+carries a disclosure that the carbon-dioxide-only line excludes methane and nitrous oxide.
+The reasoning behind choosing the 100%-mineral diesel and petrol rows — and the fact that
+it rests on an **unverified assumption** about Singapore pump fuel — is recorded in
+[SOURCES.md](SOURCES.md) §9.
+
 ## Limitations
 
 Stated plainly, because they bound what any number here means:
 
-- All bills and invoices processed so far are **synthetic**. None are real customer documents.
+- All documents processed so far are **synthetic**. None are real customer documents.
 - Emission estimates produced here are **not assured** by any third party.
-- Figures are **location-based** (average grid intensity), not market-based.
-- The accuracy figures above describe **one layout, one vendor, crisp PDFs, no quirks** —
-  the `clean` tier. They say nothing yet about scans, phone photographs, MWh units or
-  billing periods that straddle a month. Tier 2 adds those tiers and reports per-quirk.
-- **Three runs is a small sample.** Both defects found during Block 3 appeared in exactly
-  one run of three, so a defect at that frequency is roughly as likely to be missed as
-  found. A clean three-run range is weak evidence of determinism, not proof of it.
-- **The agent has been exercised on one question over twenty-two live replies.** The
-  honesty paths — a missing factor, a failed read, an exhausted turn budget — are covered
-  by offline tests with a scripted provider, not yet by live misbehaviour.
+- Electricity figures are **location-based** (average grid intensity), not market-based.
+- **The fuel factors are not Singapore factors.** LPG, diesel and petrol use UK DESNZ
+  values, flagged as non-Singapore on every affected result. That they are the closest
+  available is a judgement, not a measurement.
+- **Diesel and petrol use the 100%-mineral rows on an unverified assumption** about the
+  biofuel content of Singapore pump fuel. NEA's own fuel specification has not been read.
+- The accuracy figures above describe **one layout per kind, crisp PDFs, no quirks** — the
+  `clean` tier. They say nothing yet about scans, phone photographs, MWh units or billing
+  periods that straddle a month. Block 2 adds those tiers and reports per-quirk.
+- **Two runs is a small sample.** Every defect found in this block appeared in the first
+  live run and none in a test, which is a reminder that a clean run is weak evidence of
+  correctness, not proof of it.
+- **The LPG documents carry less variation than their count suggests.** Gas is delivered in
+  whole cylinders, so an account with steady demand takes the same number every month. That
+  is realistic, and deliberately not tuned away, but 12 invoices do not carry 12 distinct
+  activity figures.
+- **The classifier's confidence threshold (0.7) was chosen by eye**, with no labelled set of
+  ambiguous documents behind it.
 - **The interface has no automated interaction coverage.** The page's figure panel and
   streamed steps are tested against the shape of the response; the drag behaviour of the
   audit sheet has been reviewed and used by hand, not instrumented.
 - **Sessions and uploads accumulate** with no eviction, and a restart loses every session.
-- **No holdout layout exists yet.** With a single layout there is no honest unseen-layout
-  number to quote; Tier 2 holds one layout out and reports it separately.
-- Where no factor is published for a bill's activity year, the latest factor at or before
-  it is used, up to two years back, and the substitution is stated on the result. Beyond
-  two years the tool returns `no_results` rather than a stale figure.
+- **No holdout layout exists yet.** With a single layout per kind there is no honest
+  unseen-layout number to quote; Block 2 holds one layout out and reports it separately.
+- Where no factor is published for a document's activity year, the latest factor at or
+  before it is used, up to two years back, and the substitution is stated on the result.
+  Beyond two years, or where nothing is published at or before that year at all, the tool
+  returns `no_results` rather than a stale figure. DESNZ publishes no back series, so an
+  activity year before 2025 reaches that path for the fuel factors — one document in the
+  set does so on purpose.
 
 ## Layout
 
@@ -190,7 +254,9 @@ src/carbon_r/
   db.py        connection helper
   main.py      FastAPI app: the page, /health, /upload, /chat, /chat/stream
   money.py     one definition of "round to cents", shared by generator and extraction
-  models/      Pydantic domain models: answer keys, extraction targets, factor citations
+  models/      Pydantic domain models: answer keys, extraction targets, activities,
+               factor citations, and the document-kind classification
+  xlsx.py      a read-only xlsx reader, for transcribing publishers' workbooks
   synthgen/    the synthetic-document generator (answer first, then the document)
   tools/       the tools the agent is allowed to call
   agent/       the tool-calling loop, the session workspace, the figure audit
@@ -198,8 +264,8 @@ src/carbon_r/
   static/      the page: one HTML file, its stylesheet, its script, and a spring
 db/migrations/ schema, applied in filename order
 scripts/       operational scripts: factor loading, document generation, the eval, the flow check
-tests/         228 tests, every one of them offline: no .env, no database, no API key
+tests/         437 tests, every one of them offline: no .env, no database, no API key
 data/uploads/  documents uploaded at runtime — git-ignored, never committed
-data/raw/      source documents — git-ignored, never committed
+data/raw/      source documents and publishers' workbooks — git-ignored, never committed
 data/generated/ synthetic documents, answer keys, eval runs — git-ignored
 ```

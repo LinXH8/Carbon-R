@@ -38,10 +38,15 @@ class Session:
     session_id: str
     documents: dict[str, StoredDocument] = field(default_factory=dict)
 
-    # Workspace. Keyed by handle for factors and calculations, by document_id for
-    # readings - a document has exactly one current reading, and re-reading it would
+    # Workspace. Keyed by handle for activities, factors and calculations, by document_id
+    # for readings - a document has exactly one current reading, and re-reading it would
     # cost another vision call for the same page.
     readings: dict[str, dict] = field(default_factory=dict)
+    # One entry per measurable quantity found on a document, `act_1`, `act_2`, ... A
+    # fuel-card statement contributes two (diesel and petrol); an electricity bill one.
+    # Keyed by handle rather than nested under the document so a calculation can name a
+    # single activity without the model having to describe which one it means.
+    activities: dict[str, dict] = field(default_factory=dict)
     factors: dict[str, dict] = field(default_factory=dict)
     calculations: dict[str, dict] = field(default_factory=dict)
 

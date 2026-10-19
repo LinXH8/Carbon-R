@@ -135,6 +135,13 @@ Every item below was a real mistake or near-miss. Each has a rule above or a che
 Verified v0 state (16 Oct 2026): 18 bills, all arithmetic and meter chains independently rechecked
 to the cent. Hand-check figures: doc_003 total S$1,215.38; doc_009 S$43,292.37; doc_017 S$2,183.52.
 
+> ⚠️ **Superseded.** Those three figures are from the *pre-conformance* v0 generator, when
+> documents were still named `doc_XXX`. Conforming v0 to this spec changed the profiles and
+> the fixed charges, so the current set reads `elec_003` S$1,411.32, `elec_009` S$42,108.23,
+> `elec_017` S$2,029.22 — the figures hand-checked in the build log's Block 2 entry and
+> re-verified unchanged in Tier 2 Block 1. The line above is kept rather than edited so the
+> history of the number is visible; cite the current figures, not these.
+
 ---
 
 ## Part 3: Shared architecture

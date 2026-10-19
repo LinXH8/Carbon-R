@@ -25,7 +25,7 @@ FULL_SEQUENCE = (
         unit="kg CO2 / kWh",
         year=2025,
     ),
-    call("calculate_emissions", document_id="doc_test", factor_ref="factor_1"),
+    call("calculate_emissions", pairs=[{"activity_ref": "act_1", "factor_ref": "factor_1"}]),
     ANSWER,
 )
 
@@ -135,7 +135,7 @@ def test_a_provider_failure_is_reported_not_raised(session, toolkit):
 def test_a_no_results_tool_result_reaches_the_model(session, toolkit):
     """The loop does not decide what a gap means; it hands it back and lets the agent speak."""
     client = fake_client(
-        call("calculate_emissions", document_id="doc_test", factor_ref="factor_1"),
+        call("calculate_emissions", pairs=[{"activity_ref": "act_1", "factor_ref": "factor_1"}]),
         "I could not calculate that: the document has not been read yet.",
     )
     run = run_agent(session, "question", client=client, model="m", toolkit=toolkit)

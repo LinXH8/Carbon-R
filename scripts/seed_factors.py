@@ -65,6 +65,15 @@ EMA_SOURCE = {
     "source_page": "Table 2.4",
     "jurisdiction": "SG",
     "verified": True,
+    # Set explicitly rather than left to migration 0002's backfill: a loader that relies on
+    # a backfill is a loader that writes null scopes the next time a row is added.
+    "scope": 2,
+    "method": "location-based",
+    # CO2 only, not CO2e - EMA's own unit string says so ('kg CO2 / kWh'), and the table's
+    # footnote defines the GEF as "average CO2 emissions emitted per unit of net electricity
+    # generation". A result that totals this with a CO2e factor is mixing bases and must
+    # disclose it.
+    "gas_basis": "CO2",
     "retrieved_at": date(2026, 10, 15),
     "notes": (
         "Grid Emission Factor (GEF): average CO2 emissions per unit of net electricity "
@@ -76,11 +85,11 @@ EMA_SOURCE = {
 UPSERT = """
 insert into emission_factors (
     category, factor, unit, year, publisher, source_document, source_url,
-    source_page, retrieved_at, jurisdiction, verified, notes
+    source_page, retrieved_at, jurisdiction, verified, notes, scope, method, gas_basis
 ) values (
     %(category)s, %(factor)s, %(unit)s, %(year)s, %(publisher)s, %(source_document)s,
     %(source_url)s, %(source_page)s, %(retrieved_at)s, %(jurisdiction)s, %(verified)s,
-    %(notes)s
+    %(notes)s, %(scope)s, %(method)s, %(gas_basis)s
 )
 on conflict (category, unit, year) do update set
     factor          = excluded.factor,
@@ -91,7 +100,10 @@ on conflict (category, unit, year) do update set
     retrieved_at    = excluded.retrieved_at,
     jurisdiction    = excluded.jurisdiction,
     verified        = excluded.verified,
-    notes           = excluded.notes
+    notes           = excluded.notes,
+    scope           = excluded.scope,
+    method          = excluded.method,
+    gas_basis       = excluded.gas_basis
 returning (xmax = 0) as inserted
 """
 
@@ -138,6 +150,10 @@ def main() -> int:
     print(f"\n{EMA_SOURCE['category']}: {inserted} inserted, {updated} unchanged/updated")
     print(f"  {total[0]} rows now present, {EMA_SOURCE['publisher']}, verified=True")
     print(f"  source: {EMA_SOURCE['source_document']}")
+    print(
+        f"  scope {EMA_SOURCE['scope']}, method {EMA_SOURCE['method']}, "
+        f"basis {EMA_SOURCE['gas_basis']}"
+    )
     print(f"  years:  {min(EMA_GRID_EMISSION_FACTOR)}-{max(EMA_GRID_EMISSION_FACTOR)}")
     return 0
 

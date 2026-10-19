@@ -17,6 +17,11 @@ established until then.
 | 6 | SG non-residential tariff *structure* (flat rate per tension category) | — | Shape of `synthgen` bills | — | **secondary only — VERIFY** |
 | 7 | Low-tension / high-tension supply threshold | — | `synthgen` plan assignment | — | **secondary only — VERIFY** |
 | 8 | Singapore postal sector ↔ area mapping (first two digits) | — | Constraining `synthgen` addresses | 2026-10-16 | **secondary only — VERIFY** |
+| 9 | [UK GHG Conversion Factors 2026](https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2026) | DESNZ | Scope 1 LPG, diesel, petrol factors | 2026-10-18 | **verified from primary** |
+| 10 | [UK GHG Conversion Factors 2025](https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2025) | DESNZ | Scope 1 factors, prior publication year | 2026-10-18 | **verified from primary** |
+| 11 | Whether Singapore pump fuel is blended with biofuel (NEA specification) | — | Mineral vs average-blend DESNZ rows | — | **assumption — VERIFY** |
+| 12 | GST treatment of Singapore pump prices and fuel-card statements | — | `synthgen` fuel-card money lines | — | **secondary only — VERIFY** |
+| 13 | Common Singapore LPG cylinder sizes and pricing basis | — | `synthgen` LPG invoice shape | — | **secondary only — VERIFY** |
 
 ---
 
@@ -173,7 +178,117 @@ verification is needed to know it is nobody's UEN.
 
 | Source | Needed for | Check on arrival |
 |---|---|---|
-| UK DESNZ conversion factors | Tier 2: LPG, diesel, petrol | Version, licence; load only used rows; flag `jurisdiction='UK'` |
 | US EPA supply-chain factors | Tier 3: spend-based Scope 3 | File version, licence; `jurisdiction='US'` |
 | SGX STI constituent list | Tier 3: peer disclosures | Changes over time — record the date |
 | IFRS S2 | Reporting-requirement context | Access terms: local use only, never committed |
+
+
+---
+
+## 9. UK DESNZ fuel combustion factors — verified from primary
+
+**Publication:** *UK Government GHG Conversion Factors for Company Reporting*, Department
+for Energy Security and Net Zero. Two publication years are loaded: **2026** (published
+11 June 2026, last updated 31 July 2026) and **2025**.
+
+**Licence:** **Open Government Licence v3.0**, per the gov.uk publication page.
+
+**Local copies** (git-ignored, never committed):
+
+```
+data/raw/desnz/ghg-conversion-factors-2026-full-set.xlsx
+data/raw/desnz/ghg-conversion-factors-2025-full-set.xlsx
+```
+
+**Sheet:** `Fuels`. The sheet states its own scope in cell `B6` — **`Scope 1`** — and its
+year in `F6`. Its guidance (`A8`), verbatim:
+
+> Fuels conversion factors should be used for primary fuel sources combusted at a site or
+> in an asset owned or controlled by the reporting organisation.
+
+**Column:** `D`, headed **`kg CO2e`** — the total of CO2, CH4 and N2O. Columns E, F and G
+break that total down, but each is *already expressed in CO2e* ("kg CO2e of CO2 per unit"),
+so there is no kg-CO2 column to choose instead. Every row loaded here is therefore `CO2e`,
+unlike EMA's grid factor, which is CO2 only.
+
+**Values loaded** (all `verified = true`, `jurisdiction = 'UK'`, `scope = 1`,
+`method = 'combustion'`, `gas_basis = 'CO2e'`):
+
+| Category | Fuel row (column B) | Unit | Row | 2025 | 2026 |
+|---|---|---|---|---|---|
+| `fuel_lpg` | LPG | tonnes | 35 | 2939.36095 | 2939.36095 |
+| `fuel_diesel` | Diesel (100% mineral diesel) | litres | 76 | 2.66155 | 2.66155 |
+| `fuel_petrol` | Petrol (100% mineral petrol) | litres | 100 | 2.33984 | **2.35372** |
+
+Only petrol per litre moved between the two publications, which is why both years are
+loaded separately rather than one being treated as current.
+
+**On precision.** The workbook stores IEEE-754 doubles, so cell `D35` reads
+`2939.3609499999998` where DESNZ publishes `2939.36095`. The loader carries the published
+5-decimal value and `make verify-desnz` re-reads the sheet and diffs against it; the
+residue is of order 1e-13 and the check fails if it ever exceeds 1e-9.
+
+**The unit string is composed, not quoted.** DESNZ splits across two cells what EMA put in
+one: column D's header (`kg CO2e`) over column C's unit (`tonnes`, `litres`). Both tokens
+are verbatim — including the plural denominators, which is why the stored units read
+`kg CO2e / tonnes` rather than `per tonne`. The agent matches the string exactly, so it
+reproduces the publisher rather than tidying it.
+
+### Decisions recorded, with their reasons
+
+**Gross vs net calorific value: not applicable to the rows loaded.** Each fuel is published
+in four units — `tonnes`, `litres`, `kWh (Net CV)`, `kWh (Gross CV)` — and only the two kWh
+rows carry a CV basis. The mass and volume rows have a single value each. No kWh row is
+loaded, so no CV basis has to be chosen.
+
+**`WTT- fuels` is not loaded.** Well-to-tank is upstream Scope 3. Loading it beside the
+combustion factor would let a lookup return the wrong one.
+
+**LPG is loaded per tonne only.** DESNZ publishes LPG in tonnes and litres and has **no
+per-kg row**, while an LPG invoice is written in kg. The conversion kg → tonnes is
+therefore an explicit, cited step inside `calculate_emissions`, shown in the derivation,
+rather than a factor quietly restated per kg. The per-litre LPG row is deliberately *not*
+loaded: nothing in this project measures LPG by volume, and an unused row is a row a
+lookup can land on by mistake.
+
+**100% mineral diesel and petrol, not the average biofuel blend. ⚠️ VERIFY.** DESNZ's own
+guidance (cell `A12`, and the worked example at `A17`) tells forecourt purchasers to use
+the average blend — but that is advice about *UK* forecourt fuel, which carries a mandated
+biofuel content.
+
+> No Singapore road-fuel biofuel blending mandate was found, and NEA has capped FAME
+> content in pump petrol and diesel since 1 July 2019, so the mineral rows are the closer
+> match for Singapore pump fuel.
+
+**This is a documented assumption, not a verified fact: NEA's own fuel specification has
+not been read.** It is row 11 in the table above and must not be presented as established.
+Choosing the blend would additionally pull in DESNZ's `Outside of scopes` requirement to
+report the biogenic portion separately — an obligation attached to a blend these documents
+do not claim to contain.
+
+**No back series.** A DESNZ publication is a standalone set for its own publication year,
+not a history. The table therefore holds 2025–2026 and nothing earlier, and an activity
+year of 2024 correctly returns `no_results` rather than a substituted figure. One synthetic
+LPG invoice (`lpg_001`) has a 2024 supply period precisely so that path is exercised.
+
+### Every DESNZ-sourced result is disclosed as non-Singapore
+
+`jurisdiction = 'UK'` drives `FactorCitation.is_non_singapore`, which raises the
+`non_singapore_factor` flag on every figure using one of these rows. The agent states it,
+and the page renders the jurisdiction unconditionally.
+
+---
+
+## 11, 12, 13. Open assumptions in the Scope 1 documents
+
+These shape the *synthetic documents*, not any emission factor, and none is presented as
+fact anywhere in the repo.
+
+| # | Assumption as used | Where | Cost if wrong |
+|---|---|---|---|
+| 11 | Singapore pump fuel is effectively unblended, so mineral DESNZ rows apply | `scripts/load_desnz_factors.py` | A real factor choice. Recorded as an assumption; see section 9 |
+| 12 | Pump prices on a fuel-card statement are GST-exclusive, with GST as its own line | `synthgen/profiles.py`, `models/fuel_card_statement.py` | Money decoys only — **litres are unaffected either way, so no emissions figure moves** |
+| 13 | 12.7 kg and 50 kg are plausible commercial cylinder sizes, priced per cylinder | `synthgen/profiles.py` | Realism of the invoice only; the cylinder arithmetic is tested regardless of the sizes |
+
+The GST convention (12) is enforced by `FuelCardStatement`'s validator, so the generated
+documents are at least internally consistent with the convention they state.

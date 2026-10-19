@@ -1,10 +1,10 @@
 """END-TO-END FLOW CHECK. Not an accuracy measurement, at any document count.
 
-Read that line again before quoting anything this prints. Documents from the single
-`clean` layout, asked one question, cannot measure accuracy however many of them there
-are; `scripts/eval_extraction.py` is the measured number (18 of 18 on 24 fields), and this
-script exists to answer a different, cruder question: does the whole thing work when a
-person uploads a bill and asks?
+Read that line again before quoting anything this prints. Documents from one `clean`
+layout per kind, asked one question, cannot measure accuracy however many of them there
+are; `scripts/eval_extraction.py` is the measured number, and this script exists to answer
+a different, cruder question: does the whole thing work when a person uploads a document
+and asks?
 
 The count is deliberately not in the filename. It was `agent_smoke_5bills.py` in Block 4,
 and the rename happened the moment the same script was run over ten - a filename that
@@ -26,7 +26,17 @@ Run it with a live OPENAI_API_KEY and DATABASE_URL:
 
     make agent-smoke          # the first five, as Block 4 ran it
     make flow-10              # ten documents spanning both factor years
-    uv run python scripts/agent_flow_check.py --docs elec_001,elec_002
+    make flow-scope1          # one document of each kind, including a refusal
+    uv run python scripts/agent_flow_check.py --docs elec_001,lpg_004,fuel_001
+
+Since Tier 2 Block 1 it handles all three document kinds. Two checks changed with them:
+
+- `figure_matches` compares the TOTAL, which for a two-product fuel-card statement is a
+  sum of two lines - the number the model is never allowed to compute;
+- a document for which no factor is published (`lpg_001`, whose supply period predates the
+  loaded DESNZ series) is expected to produce NO figure. `refused_honestly` scores that
+  case, and `figure_matches` is not applied to it. A script that counted an honest refusal
+  as a failure would be rewarding a guess.
 
 The API is exercised in-process through FastAPI's TestClient rather than over a socket.
 It is the same routing, validation and response model a curl would hit, with one fewer
@@ -45,43 +55,43 @@ from fastapi.testclient import TestClient
 from carbon_r.agent.session import get_session
 from carbon_r.config import PROJECT_ROOT, get_settings
 from carbon_r.main import app
-from carbon_r.models.electricity_bill import ElectricityBill
-from carbon_r.tools.calculate import calculate_emissions
-from carbon_r.tools.factors import lookup_emission_factor
+from eval_extraction import KINDS, documents_dir, emissions_for, kind_of
 
-GENERATED = PROJECT_ROOT / "data" / "generated" / "electricity_bill" / "clean"
-RUNS_DIR = PROJECT_ROOT / "data" / "generated" / "agent_smoke_SYNTHGEN_V0"
-
-FACTOR_CATEGORY = "electricity_grid_sg"
-FACTOR_UNIT = "kg CO2 / kWh"
+GENERATED = PROJECT_ROOT / "data" / "generated"
+RUNS_DIR = GENERATED / "flow_checks_TIER2_BLOCK1"
 
 QUESTION = (
-    "What are the Scope 2 emissions for this electricity bill? "
+    "What are the greenhouse-gas emissions from this document? "
     "Show the factor you used and where it comes from."
 )
 
-CHECKS = ("answered", "figure_matches", "cited", "disclosed", "no_stray_numbers")
+CHECKS = (
+    "answered",
+    "figure_matches",
+    "cited",
+    "disclosed",
+    "no_stray_numbers",
+    "refused_honestly",
+)
 
 
-def expected_kg(key: ElectricityBill) -> str | None:
-    """The answer key's own figure, by the same route the agent must take."""
-    if key.consumption_kwh is None or key.factor_year is None:
-        return None
-    factor = lookup_emission_factor(FACTOR_CATEGORY, FACTOR_UNIT, key.factor_year)
-    if factor.status != "ok":
-        return None
-    result = calculate_emissions(
-        activity_amount=Decimal(key.consumption_kwh),
-        activity_unit="kWh",
-        factor=factor.data["factor"],
-    )
-    return result.data["kg_co2e"] if result.status == "ok" else None
+def expected_figure(key) -> dict:
+    """The answer key's own figure, by the same route the agent must take.
+
+    Returns `{kg_co2e, refused}`. `refused` is True when no factor is published for the
+    activity year, which is a correct outcome rather than a missing one.
+    """
+    spec = KINDS[key.doc_kind]
+    outcome = emissions_for(spec.key_activities(key), key.factor_year)
+    return {"kg_co2e": outcome["kg_co2e"], "refused": outcome["refused"]}
 
 
 def check_document(client: TestClient, doc_id: str) -> dict:
-    """Upload one bill, ask the question, and score the five checks."""
-    pdf = GENERATED / f"{doc_id}.pdf"
-    key = ElectricityBill.model_validate_json((GENERATED / f"{doc_id}.json").read_text())
+    """Upload one document, ask the question, and score the checks."""
+    kind = kind_of(doc_id)
+    directory = documents_dir(kind)
+    pdf = directory / f"{doc_id}.pdf"
+    key = KINDS[kind].key_model.model_validate_json((directory / f"{doc_id}.json").read_text())
 
     with pdf.open("rb") as handle:
         uploaded = client.post(
@@ -96,41 +106,68 @@ def check_document(client: TestClient, doc_id: str) -> dict:
     session = get_session(uploaded["session_id"])
     calculations = list(session.calculations.values()) if session else []
     calculated = calculations[-1] if calculations else None
-    wanted = expected_kg(key)
+    expected = expected_figure(key)
+    wanted = expected["kg_co2e"]
     reply = answer["reply"]
     lowered = reply.lower()
 
-    factor = (calculated or {}).get("inputs", {}).get("factor", {})
-    substituted = bool(factor.get("substituted"))
+    lines = (calculated or {}).get("lines", [])
+    factors = [line["factor"] for line in lines]
+    substituted = any(f["substituted"] for f in factors)
+    non_singapore = any(f["jurisdiction"] != "SG" for f in factors)
+    converted = any(line["conversion"] for line in lines)
 
-    cited = bool(factor) and all(
+    # Cited: every line's factor value, publisher and year used appear in the reply. With
+    # two lines that means two factors and two publishers, which is the point - a reply
+    # that cited one factor for a two-product statement is not cited.
+    cited = bool(factors) and all(
         token.lower() in lowered
-        for token in (str(factor["factor"]), "ema", str(factor["year_used"]))
+        for factor in factors
+        for token in (str(factor["factor"]), factor["publisher"][:4], str(factor["year_used"]))
     )
-    disclosed = "not assured" in lowered and (
-        not substituted or str(factor["year_requested"]) in reply
+    disclosed = bool(factors) and (
+        "not assured" in lowered
+        and (not substituted or all(str(f["year_requested"]) in reply for f in factors))
+        # A UK factor must be labelled as not published for Singapore wherever it appears.
+        and (not non_singapore or "singapore" in lowered)
     )
 
     return {
         "doc_id": doc_id,
+        "document_kind": kind,
         "stopped_reason": answer["stopped_reason"],
         "turns_used": answer["turns_used"],
         "tool_calls": [f"{c['tool']}:{c['status']}" for c in answer["tool_calls"]],
         "expected_kg_co2e": wanted,
+        "expected_refusal": expected["refused"],
         "actual_kg_co2e": (calculated or {}).get("kg_co2e"),
+        "line_count": len(lines),
         "factor_substituted": substituted,
+        "non_singapore_factor": non_singapore,
+        "unit_converted": converted,
         "unverified_figures": answer["unverified_figures"],
         "reply": reply,
         "checks": {
             "answered": answer["stopped_reason"] == "completed" and bool(reply.strip()),
+            # Not applied to a document for which no factor is published: there is no
+            # figure to match, and `refused_honestly` scores that case instead.
             "figure_matches": (
-                wanted is not None
-                and calculated is not None
-                and Decimal(calculated["kg_co2e"]) == Decimal(wanted)
+                True
+                if expected["refused"]
+                else (
+                    wanted is not None
+                    and calculated is not None
+                    and Decimal(calculated["kg_co2e"]) == Decimal(wanted)
+                )
             ),
-            "cited": cited,
-            "disclosed": disclosed,
+            "cited": True if expected["refused"] else cited,
+            "disclosed": True if expected["refused"] else disclosed,
             "no_stray_numbers": answer["unverified_figures"] == [],
+            # The honesty check. When no factor is published the agent must produce no
+            # figure and say so; stating one would mean it had guessed.
+            "refused_honestly": (
+                (calculated is None and "no" in lowered) if expected["refused"] else True
+            ),
         },
     }
 
@@ -149,7 +186,15 @@ def report(run: dict) -> int:
 
     substituted = sum(row["factor_substituted"] for row in rows)
     turns = sum(row["turns_used"] for row in rows)
-    print(f"\n  factor-year substituted {substituted} of {total}")
+    by_kind: dict[str, int] = {}
+    for row in rows:
+        by_kind[row["document_kind"]] = by_kind.get(row["document_kind"], 0) + 1
+    print(f"\n  documents by kind       {by_kind}")
+    print(f"  factor-year substituted {substituted} of {total}")
+    print(f"  non-Singapore factor    {sum(r['non_singapore_factor'] for r in rows)} of {total}")
+    print(f"  unit converted          {sum(r['unit_converted'] for r in rows)} of {total}")
+    print(f"  multi-line figures      {sum(r['line_count'] > 1 for r in rows)} of {total}")
+    print(f"  expected refusals       {sum(r['expected_refusal'] for r in rows)} of {total}")
     print(f"  turns used              {turns} across {total} documents")
 
     for row in rows:
@@ -191,7 +236,8 @@ def main() -> int:
     if args.docs:
         doc_ids = [d.strip() for d in args.docs.split(",") if d.strip()]
     else:
-        doc_ids = sorted(p.stem for p in GENERATED.glob("elec_*.json"))[: args.count]
+        directory = documents_dir("electricity_bill")
+        doc_ids = sorted(p.stem for p in directory.glob("elec_*.json"))[: args.count]
     if not doc_ids:
         print("No documents selected.", file=sys.stderr)
         return 2
@@ -207,8 +253,8 @@ def main() -> int:
             "run_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "kind": "flow_check",
             "note": (
-                f"End-to-end flow check on {len(rows)} documents of one layout, one "
-                "question. Not an accuracy measurement."
+                f"End-to-end flow check on {len(rows)} documents, one layout per kind, "
+                "one question. Not an accuracy measurement."
             ),
             "model": settings.openai_model,
             "question": QUESTION,

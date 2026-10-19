@@ -1,4 +1,4 @@
-"""What a vision model read off a document, and the Python that makes sense of it.
+"""What a vision model read off an electricity bill, and the Python that makes sense of it.
 
 `ElectricityBill` is an ANSWER KEY: frozen, `extra="forbid"`, and guarded by a validator
 that re-derives every arithmetic relation. It is deliberately not reused as the extraction
@@ -18,40 +18,42 @@ types:
            |  normalise()      <- plain Python: separators, dates, MWh->kWh, Decimal
            v
     NormalisedBill  +  list[FieldProblem]
+           |
+           |  activities_for() <- what there is to apply a factor to
+           v
+    list[Activity]
 
 The model transcribes; Python converts. A field the model could only produce by
 multiplying is never asked for, so there is no prompt that invites it to do arithmetic.
 This also mirrors the spec's `printed` vs `truth` split (SYNTHGEN_SPEC.md 4.1, 6.1): a bad
 read and a bad interpretation fail separately and are reported separately.
 
-One unparseable field yields one `FieldProblem`, never an exception. One miss must cost
-one field, not the document.
+The parsing primitives live in `parsing.py`, shared with the LPG and fuel-card kinds.
+`normalise` keeps its two-value return - `(bill, problems)` - and the activity list is a
+separate step, because what was READ and what can be CALCULATED are different questions
+and a caller often wants only the first.
 """
 
 import re
-from datetime import date, datetime
-from decimal import Decimal, InvalidOperation
+from datetime import date
+from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from carbon_r.money import round2
-
-# Date formats the layouts use, in the order they are tried. Spec 6.1 lists
-# `04 Dec 2025`, `04/12/2025` and `2025-12-04` as the formats layouts vary between.
-#
-# `%d/%m/%Y` before `%m/%d/%Y`, and the American form is not tried at all: these are
-# Singapore documents, where 04/12/2025 is 4 December. For days 1-12 the two readings are
-# both syntactically valid and no amount of parsing can tell them apart, so the convention
-# is fixed here, documented, and recorded as an assumption rather than guessed per
-# document. A layout wanting unambiguous dates should use `%d %b %Y`.
-DATE_FORMATS = (
-    "%d %b %Y",  # 04 Dec 2025
-    "%d %B %Y",  # 04 December 2025
-    "%Y-%m-%d",  # 2025-12-04
-    "%d/%m/%Y",  # 04/12/2025  (day first: Singapore convention)
-    "%d-%m-%Y",  # 04-12-2025
-    "%d %b %y",  # 04 Dec 25
+from carbon_r.models.activity import Activity
+from carbon_r.models.parsing import (
+    DATE_FORMATS,
+    ConsistencyFlag,
+    FieldProblem,
+    comparer,
+    parse_date,
+    parse_decimal,
+    parse_int,
+    parse_reading_basis,
+    taker,
+    text_of,
 )
+from carbon_r.money import round2
 
 # Multipliers onto kWh. Extraction never converts; this is the conversion, in Python,
 # with the factor written down.
@@ -60,27 +62,6 @@ CONSUMPTION_UNITS = {
     "mwh": 1000,
     "gwh": 1_000_000,
 }
-
-_CURRENCY_NOISE = ("s$", "sgd", "$", "usd", "us$")
-
-# Unit tokens the layouts print INLINE with the figure - "139,600 kWh", "27.65 c/kWh".
-# Stripped from an allowlist rather than by grabbing the leading number with a regex: a
-# regex would also silently swallow "1,200 (estimated)" or "4,016 kWh credit", turning a
-# misread or a quirk into a clean-looking value. An unrecognised suffix still raises, and
-# so still surfaces as a FieldProblem.
-_UNIT_SUFFIXES = (
-    "cents/kwh",
-    "c/kwh",
-    "\u00a2/kwh",
-    "kwh",
-    "mwh",
-    "gwh",
-    "units",
-    "unit",
-    "sgd",
-    "kg",
-    "%",
-)
 
 
 class ExtractedElectricityBill(BaseModel):
@@ -178,83 +159,7 @@ class NormalisedBill(BaseModel):
         return self.period_start.year if self.period_start else None
 
 
-class FieldProblem(BaseModel):
-    """One field that could not be turned into a value. Not fatal; reported."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    field: str
-    printed: str | None
-    reason: str
-
-
-class ConsistencyFlag(BaseModel):
-    """A printed figure that does not agree with the other printed figures.
-
-    This says the PAGE disagrees with itself as read - which usually means a misread
-    field, occasionally a genuinely odd document. Never an error: the tool reports it and
-    the agent raises it with the user (rule 7).
-    """
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    relation: str
-    expected: Decimal
-    printed: Decimal
-    difference: Decimal
-
-
-# --- parsing helpers: the only place a printed string becomes a value -------------------
-
-
-def _clean(printed: str) -> str:
-    """Strip separators, a currency prefix and any inline unit, leaving the number."""
-    text = printed.strip().replace(",", "").replace("\u00a0", " ")
-
-    lowered = text.lower()
-    for token in _CURRENCY_NOISE:
-        if lowered.startswith(token):
-            text = text[len(token) :].strip()
-            lowered = text.lower()
-
-    # Longest suffix first, so "c/kwh" is not shortened to "kwh" and left with a "c".
-    for suffix in sorted(_UNIT_SUFFIXES, key=len, reverse=True):
-        if lowered.endswith(suffix):
-            text = text[: -len(suffix)].strip()
-            break
-
-    return text.strip()
-
-
-def _parse_int(printed: str) -> int:
-    value = Decimal(_clean(printed))  # via Decimal so "139600.00" is accepted
-    if value != value.to_integral_value():
-        raise ValueError(f"{printed!r} is not a whole number of units")
-    return int(value)
-
-
-def _parse_decimal(printed: str) -> Decimal:
-    return Decimal(_clean(printed))
-
-
-def _parse_date(printed: str) -> date:
-    text = printed.strip()
-    for fmt in DATE_FORMATS:
-        try:
-            return datetime.strptime(text, fmt).date()
-        except ValueError:
-            continue
-    raise ValueError(f"{printed!r} matches none of {len(DATE_FORMATS)} known date formats")
-
-
-def _parse_reading_basis(printed: str) -> bool:
-    text = printed.strip().lower()
-    if text.startswith("est"):
-        return True
-    if text.startswith("act"):
-        return False
-    raise ValueError(f"{printed!r} is neither 'Actual' nor 'Estimated'")
-
+# --- parsing specific to this kind ------------------------------------------------------
 
 # A tariff plan code as the layouts print them: upper-case alphanumerics in hyphenated
 # groups, e.g. SPR-HT-FIX-24. Deliberately narrow, so an ordinary parenthetical such as
@@ -276,7 +181,7 @@ _INLINE_LABELS = {
 # A label must be followed by one of these before it counts as a label. Hyphen is NOT
 # included: "UEN-123456" is more plausibly a value than a labelled one, and treating the
 # hyphen as a separator would silently truncate it.
-_LABEL_SEPARATORS = " :\u00b7\t\u2013\u2014"
+_LABEL_SEPARATORS = " :·\t–—"
 
 
 def _without_inline_label(printed: str, field: str) -> str:
@@ -353,20 +258,10 @@ def normalise(
 
     problems: list[FieldProblem] = []
     values: dict[str, object] = {}
-
-    def take(target: str, source: str, parser) -> None:
-        printed = getattr(extracted, source)
-        if printed is None or not str(printed).strip():
-            return
-        try:
-            values[target] = parser(printed)
-        except (ValueError, ArithmeticError, InvalidOperation) as exc:
-            problems.append(FieldProblem(field=target, printed=printed, reason=str(exc)))
-
-    text = lambda printed: str(printed).strip()  # noqa: E731 - a parser, like the others
+    take = taker(extracted, values, problems)
 
     for field in ("vendor_name", "customer_name", "customer_address", "tension", "currency"):
-        take(field, field, text)
+        take(field, field, text_of)
 
     # Identifier fields, where the layout may print the label in the same text run.
     for field in ("vendor_uen", "account_number", "meter_number", "tariff_plan_code"):
@@ -381,11 +276,11 @@ def normalise(
             values["tariff_plan_code"] = code_from_name
 
     for field in ("document_date", "period_start", "period_end"):
-        take(field, field, _parse_date)
+        take(field, field, parse_date)
 
-    take("previous_reading_kwh", "previous_reading", _parse_int)
-    take("current_reading_kwh", "current_reading", _parse_int)
-    take("is_estimated_reading", "reading_basis", _parse_reading_basis)
+    take("previous_reading_kwh", "previous_reading", parse_int)
+    take("current_reading_kwh", "current_reading", parse_int)
+    take("is_estimated_reading", "reading_basis", parse_reading_basis)
 
     for target, source in (
         ("tariff_cents_per_kwh", "tariff_cents_per_kwh"),
@@ -395,10 +290,10 @@ def normalise(
         ("gst_amount_sgd", "gst_amount"),
         ("total_sgd", "total"),
     ):
-        take(target, source, _parse_decimal)
+        take(target, source, parse_decimal)
 
     # GST is printed as a percentage and stored as a fraction, matching the answer key.
-    take("gst_rate", "gst_percent", lambda printed: _parse_decimal(printed) / Decimal(100))
+    take("gst_rate", "gst_percent", lambda printed: parse_decimal(printed) / Decimal(100))
 
     # Consumption last: it is the only field whose value depends on another field.
     _take_consumption(extracted, values, problems)
@@ -437,8 +332,8 @@ def _take_consumption(
         return
 
     try:
-        amount = _parse_decimal(printed)
-    except (ValueError, ArithmeticError, InvalidOperation) as exc:
+        amount = parse_decimal(printed)
+    except (ValueError, ArithmeticError) as exc:
         problems.append(FieldProblem(field="consumption_kwh", printed=printed, reason=str(exc)))
         return
 
@@ -455,30 +350,34 @@ def _take_consumption(
     values["consumption_kwh"] = int(kwh)
 
 
+def activities_for(bill: NormalisedBill) -> list[Activity]:
+    """The one activity an electricity bill carries, or none if it was not read.
+
+    Returns a list for the same reason every kind does: `calculate_emissions` takes lines,
+    and a single-activity document is one line rather than a separate shape. An empty list
+    is the honest answer when the consumption could not be read - the caller reports a gap
+    rather than calculating from a guess.
+    """
+    if bill.consumption_kwh is None:
+        return []
+    return [
+        Activity(
+            kind="electricity",
+            amount=Decimal(bill.consumption_kwh),
+            unit="kWh",
+            source_field="consumption",
+            is_estimated=bool(bill.is_estimated_reading),
+        )
+    ]
+
+
 def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
     """Re-derive the page's own arithmetic from the page's own figures.
-
-    Each relation is checked from PRINTED inputs rather than from previously derived ones,
-    so one misread field raises one flag instead of cascading through all four. A relation
-    whose inputs were not read is skipped - absence is reported as a `FieldProblem`, not
-    as a disagreement.
 
     Uses the shared `money.round2`; this module defines no rounding of its own (spec 1.2).
     """
     flags: list[ConsistencyFlag] = []
-
-    def compare(relation: str, expected: Decimal, printed: Decimal | None) -> None:
-        if printed is None:
-            return
-        if expected != printed:
-            flags.append(
-                ConsistencyFlag(
-                    relation=relation,
-                    expected=expected,
-                    printed=printed,
-                    difference=printed - expected,
-                )
-            )
+    compare = comparer(flags)
 
     if bill.consumption_kwh is not None and bill.tariff_cents_per_kwh is not None:
         compare(
@@ -516,3 +415,16 @@ def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
         )
 
     return flags
+
+
+__all__ = [
+    "CONSUMPTION_UNITS",
+    "DATE_FORMATS",
+    "ConsistencyFlag",
+    "ExtractedElectricityBill",
+    "FieldProblem",
+    "NormalisedBill",
+    "activities_for",
+    "check_consistency",
+    "normalise",
+]

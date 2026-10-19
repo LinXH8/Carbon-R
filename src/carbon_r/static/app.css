@@ -465,3 +465,40 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; 
   .bar, .sheet { backdrop-filter: none; -webkit-backdrop-filter: none; border: 1px solid var(--line-strong); }
   .card, .step, .call { border-width: 1px; border-color: var(--line-strong); }
 }
+
+/* --- a figure's lines -------------------------------------------------------------- */
+/* One block per activity. Separated by a rule rather than a card so the lines read as
+   parts of one figure rather than as several figures that happen to be adjacent. */
+.figure-line + .figure-line { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.figure-line-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.9375rem;
+}
+.figure-line-head strong { font-variant-numeric: tabular-nums; }
+
+/* The per-scope split. Present only when a total spans more than one scope, because a
+   combined number cannot honestly be reported against a single scope. */
+.scope-split {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface-sunken);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+.scope-split li { display: flex; justify-content: space-between; gap: 1rem; }
+.scope-split li + li { margin-top: 0.3rem; }
+.scope-split strong { font-variant-numeric: tabular-nums; }
+
+/* A derivation that explains an input rather than the figure: the cylinder arithmetic
+   behind an LPG quantity, or a unit conversion and the authority for it. */
+.sub-derivation {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}

@@ -6,33 +6,36 @@ arithmetic, the SQL and the vision call stay where they are. What this layer add
 1. **Address by id, never by path.** `extract_from_document` takes a `document_id` that
    must already be in the session. There is no tool argument that can name a file on
    disk, so a model (or a prompt injected into a document) cannot ask for /etc/passwd.
-2. **Handles instead of values.** A looked-up factor is stored and named `factor_1`; the
-   calculation reads it back from the session. See `toolspec.py`.
+2. **Handles instead of values.** A looked-up factor is stored and named `factor_1`; each
+   measurable quantity on a document is stored and named `act_1`, `act_2`; the calculation
+   reads both back from the session. See `toolspec.py`.
 3. **One failure shape.** An unknown tool, unparseable arguments, arguments that fail
    validation and a tool that genuinely found nothing all come back as a `ToolResult`.
    The loop never sees an exception, so a bad model turn costs a turn, not the request.
 
 The three implementations are injected rather than imported at call time, so the loop can
 be tested end to end with no API key, no database and no network.
+
+What changed in Tier 2 Block 1: there is no longer a single activity per document, and no
+`ACTIVITY_UNIT` constant. A document yields a list of activities, each with its own unit,
+and `calculate_emissions` takes a list of (activity, factor) pairs so the total is summed
+in Python rather than by the model.
 """
 
 from __future__ import annotations
 
 import json
 from collections.abc import Callable
-from decimal import Decimal, InvalidOperation
 
 from pydantic import ValidationError
 
 from carbon_r.agent.prompt import render_disclosures
 from carbon_r.agent.session import Session
 from carbon_r.agent.toolspec import ARG_MODELS, CalculateArgs, ExtractArgs, LookupFactorArgs
-from carbon_r.tools.base import ToolResult, error, no_results, ok
+from carbon_r.tools.base import ToolResult, error, ok
 from carbon_r.tools.calculate import calculate_emissions as _calculate_emissions
 from carbon_r.tools.extract import extract_from_document as _extract_from_document
 from carbon_r.tools.factors import lookup_emission_factor as _lookup_emission_factor
-
-ACTIVITY_UNIT = "kWh"  # Tier 1 reads electricity bills only
 
 
 class Toolkit:
@@ -108,20 +111,40 @@ class Toolkit:
         if result.status != "ok" or result.data is None:
             return result
 
+        # Store each activity under its own handle, so a calculation can name one line.
+        stored: list[dict] = []
+        for activity in result.data.get("activities", []):
+            handle = self.session.next_handle("act")
+            entry = activity | {"activity_ref": handle, "document_id": args.document_id}
+            self.session.activities[handle] = entry
+            stored.append(entry)
+
         trimmed = {
             "document_id": args.document_id,
             "filename": document.filename,
+            "document_kind": result.data.get("document_kind"),
             "normalised": result.data["normalised"],
+            "activities": stored,
             "field_problems": result.data["field_problems"],
             "consistency_flags": result.data["consistency_flags"],
         }
         self.session.readings[args.document_id] = trimmed
 
-        hint = ""
+        hints: list[str] = []
         period_start = trimmed["normalised"].get("period_start")
         if period_start:
-            hint = f" The activity year for the factor lookup is {period_start[:4]}."
-        return ok(trimmed, result.message + hint)
+            hints.append(f"The activity year for the factor lookup is {period_start[:4]}.")
+        if stored:
+            named = ", ".join(
+                f"{a['activity_ref']} = {a['amount']} {a['unit']} of {a['kind']}" for a in stored
+            )
+            hints.append(f"Activities: {named}.")
+        else:
+            hints.append(
+                "No measurable activity was read from this page, so there is nothing to "
+                "calculate. Report that and ask the user."
+            )
+        return ok(trimmed, " ".join([result.message, *hints]))
 
     def lookup_emission_factor(self, args: LookupFactorArgs) -> ToolResult:
         """Exact SQL, full citation, and a handle the calculation can refer to."""
@@ -137,55 +160,74 @@ class Toolkit:
         )
 
     def calculate_emissions(self, args: CalculateArgs) -> ToolResult:
-        """Figure from a stored reading and a stored factor. No value crosses the model."""
-        reading = self.session.readings.get(args.document_id)
-        if reading is None:
-            if self.session.known_document(args.document_id) is None:
-                known = ", ".join(self.session.documents) or "none"
-                return error(
-                    f"No document {args.document_id!r} in this session. Uploaded: {known}."
+        """Figures from stored activities and stored factors. No value crosses the model.
+
+        Unresolvable handles are reported together, before any calculation is attempted:
+        the model gets one message naming every bad reference rather than discovering them
+        one turn at a time. If any handle is bad, nothing is calculated - the same
+        all-or-nothing rule `tools/calculate.py` applies to the arithmetic itself, for the
+        same reason (a total over the lines that happened to resolve would be quietly
+        short).
+        """
+        if not args.pairs:
+            return error(
+                "No pairs were given. Pass one activity_ref and one factor_ref per "
+                "activity found on the document."
+            )
+
+        problems: list[str] = []
+        pairs: list[dict] = []
+        for index, pair in enumerate(args.pairs, start=1):
+            activity = self.session.activities.get(pair.activity_ref)
+            if activity is None:
+                known = ", ".join(self.session.activities) or "none"
+                problems.append(
+                    f"line {index}: no activity {pair.activity_ref!r} in this session "
+                    f"(known: {known}) - call extract_from_document first; the quantity "
+                    f"comes from the reading, not from you"
                 )
+            factor = self.session.factors.get(pair.factor_ref)
+            if factor is None:
+                known = ", ".join(self.session.factors) or "none"
+                problems.append(
+                    f"line {index}: no factor {pair.factor_ref!r} in this session "
+                    f"(known: {known}) - call lookup_emission_factor first"
+                )
+            if activity is None or factor is None:
+                continue
+            # Only the Activity's own fields; the handle and document_id are bookkeeping
+            # this layer added and `Activity` forbids extras.
+            pairs.append(
+                {
+                    "activity": {
+                        key: value
+                        for key, value in activity.items()
+                        if key not in ("activity_ref", "document_id")
+                    },
+                    "factor": factor,
+                }
+            )
+
+        if problems:
             return error(
-                f"{args.document_id} has not been read yet. Call extract_from_document on "
-                "it first; the consumption figure comes from the reading, not from you."
+                f"No figure was produced: {len(problems)} handle(s) could not be resolved. "
+                + " | ".join(problems)
+                + "."
             )
 
-        factor = self.session.factors.get(args.factor_ref)
-        if factor is None:
-            known = ", ".join(self.session.factors) or "none"
-            return error(
-                f"No factor {args.factor_ref!r} in this session. Looked-up factors: {known}. "
-                "Call lookup_emission_factor first."
-            )
-
-        consumption = reading["normalised"].get("consumption_kwh")
-        if consumption is None:
-            return no_results(
-                "The consumption was not read from this document, so there is nothing to "
-                "multiply. Report that the figure could not be read and ask the user to "
-                "confirm it.",
-                {"document_id": args.document_id, "field_problems": reading["field_problems"]},
-            )
-
-        try:
-            amount = Decimal(str(consumption))
-        except InvalidOperation:  # pragma: no cover - normalise guarantees a number
-            return error(f"Stored consumption for {args.document_id} is not a number.")
-
-        result = self._calculate(
-            activity_amount=amount,
-            activity_unit=ACTIVITY_UNIT,
-            factor=factor,
-            is_estimated_reading=bool(reading["normalised"].get("is_estimated_reading")),
-        )
+        result = self._calculate(pairs=pairs)
         if result.status != "ok" or result.data is None:
             return result
 
         handle = self.session.next_handle("calc")
+        document_ids = sorted(
+            {self.session.activities[pair.activity_ref]["document_id"] for pair in args.pairs}
+        )
         data = result.data | {
             "calculation_ref": handle,
-            "document_id": args.document_id,
-            "factor_ref": args.factor_ref,
+            "document_ids": document_ids,
+            "activity_refs": [pair.activity_ref for pair in args.pairs],
+            "factor_refs": [pair.factor_ref for pair in args.pairs],
             # The sentences this result must carry, rendered in one place so the wording
             # cannot drift between tools (CLAUDE.md rule 7).
             "required_disclosures": render_disclosures(result.data["disclosures"]),

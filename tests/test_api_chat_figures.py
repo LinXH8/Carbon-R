@@ -50,7 +50,7 @@ def figure_payload(toolkit):
     )
     result = toolkit.dispatch(
         "calculate_emissions",
-        json.dumps({"document_id": "doc_test", "factor_ref": "factor_1"}),
+        json.dumps({"pairs": [{"activity_ref": "act_1", "factor_ref": "factor_1"}]}),
     )
     assert result.status == "ok"
     return result.data
@@ -75,15 +75,22 @@ def test_figure_reaches_the_client_with_every_number_as_a_string(
     figure = body["figures"][0]
     assert figure["kg_co2e"] == figure_payload["kg_co2e"]
     assert figure["tonnes_co2e"] == figure_payload["tonnes_co2e"]
-    for key in ("kg_co2e", "tonnes_co2e", "activity_amount"):
+    for key in ("kg_co2e", "tonnes_co2e"):
         assert isinstance(figure[key], str)
-    assert isinstance(figure["factor"]["factor"], str)
+    # Per-scope totals too: a mixed-scope result sends a split, and every value in it is
+    # a number the client must not parse.
+    assert all(isinstance(value, str) for value in figure["kg_co2e_by_scope"].values())
+
+    line = figure["lines"][0]
+    for key in ("kg_co2e", "tonnes_co2e", "activity_amount"):
+        assert isinstance(line[key], str)
+    assert isinstance(line["factor"]["factor"], str)
 
 
 def test_figure_carries_the_full_citation(configured, monkeypatch, figure_payload):
     """Rule 2 at the HTTP boundary: factor, unit, publisher, year, document, page."""
     body = _chat(monkeypatch, AgentRun(session_id="sess_x", reply="x", figures=[figure_payload]))
-    factor = body["figures"][0]["factor"]
+    factor = body["figures"][0]["lines"][0]["factor"]
 
     for field in (
         "factor",
@@ -94,13 +101,18 @@ def test_figure_carries_the_full_citation(configured, monkeypatch, figure_payloa
         "source_document",
         "source_url",
         "source_page",
+        # Added in Tier 2 Block 1: what the factor classifies as travels with it, so the
+        # page never has to compose a scope or a method of its own.
+        "scope",
+        "method",
+        "gas_basis",
     ):
         assert factor[field], f"{field} is missing from the figure's citation"
 
 
 def test_both_years_travel_so_a_substitution_cannot_hide(configured, monkeypatch, figure_payload):
     body = _chat(monkeypatch, AgentRun(session_id="sess_x", reply="x", figures=[figure_payload]))
-    factor = body["figures"][0]["factor"]
+    factor = body["figures"][0]["lines"][0]["factor"]
 
     assert factor["substituted"] is True
     assert factor["year_requested"] == 2025
@@ -116,10 +128,55 @@ def test_figure_carries_the_derivation_and_the_disclosure_sentences(
     figure = body["figures"][0]
 
     assert "x 0.402 kg CO2 / kWh =" in figure["derivation"]
-    assert figure["method"] == "location-based"
-    assert figure["basis"] == "activity-based"
+    # Scope and method are per line, from the factor row, not a property of the result.
+    assert figure["lines"][0]["scope"] == 2
+    assert figure["lines"][0]["method"] == "location-based"
+    assert figure["scopes"] == [2]
     assert figure["required_disclosures"]
     assert any("not assured" in sentence.lower() for sentence in figure["required_disclosures"])
+
+
+def test_a_single_activity_document_still_sends_exactly_one_line(
+    configured, monkeypatch, figure_payload
+):
+    """The client renders one shape whatever the document, so this must not be empty."""
+    body = _chat(monkeypatch, AgentRun(session_id="sess_x", reply="x", figures=[figure_payload]))
+    figure = body["figures"][0]
+    assert len(figure["lines"]) == 1
+    # And the total agrees with the only line, rather than being computed differently.
+    assert figure["kg_co2e"] == figure["lines"][0]["kg_co2e"]
+
+
+def test_a_two_line_figure_sends_both_lines_and_their_total(configured, monkeypatch, fuel_toolkit):
+    """A total alone cannot be checked against the document, so the lines travel too."""
+    import json as _json
+
+    fuel_toolkit.dispatch("extract_from_document", _json.dumps({"document_id": "doc_test"}))
+    for category in ("fuel_diesel", "fuel_petrol"):
+        fuel_toolkit.dispatch(
+            "lookup_emission_factor",
+            _json.dumps({"category": category, "unit": "kg CO2e / litres", "year": 2026}),
+        )
+    result = fuel_toolkit.dispatch(
+        "calculate_emissions",
+        _json.dumps(
+            {
+                "pairs": [
+                    {"activity_ref": "act_1", "factor_ref": "factor_1"},
+                    {"activity_ref": "act_2", "factor_ref": "factor_2"},
+                ]
+            }
+        ),
+    )
+    assert result.status == "ok"
+
+    body = _chat(monkeypatch, AgentRun(session_id="sess_x", reply="x", figures=[result.data]))
+    figure = body["figures"][0]
+    assert [line["kind"] for line in figure["lines"]] == ["diesel", "petrol"]
+    assert figure["gas_bases"] == ["CO2e"]
+    # Every DESNZ factor is non-Singapore, and that has to reach the client.
+    assert all(line["factor"]["jurisdiction"] == "UK" for line in figure["lines"])
+    assert figure["disclosures"]["non_singapore_factor"] is True
 
 
 def test_a_factor_without_provenance_cannot_be_serialised():
@@ -159,7 +216,9 @@ def test_a_follow_up_turn_does_not_re_report_the_previous_turns_figure(session, 
                 unit="kg CO2 / kWh",
                 year=2025,
             ),
-            call("calculate_emissions", document_id="doc_test", factor_ref="factor_1"),
+            call(
+                "calculate_emissions", pairs=[{"activity_ref": "act_1", "factor_ref": "factor_1"}]
+            ),
             "56,119.2 kg CO2e (EMA 2024). Not assured.",
         ),
         model="test-model",

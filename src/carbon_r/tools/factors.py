@@ -40,7 +40,7 @@ MAX_FACTOR_YEAR_GAP = 2
 
 _COLUMNS = """
     category, factor, unit, year, publisher, source_document, source_url,
-    source_page, retrieved_at, jurisdiction, verified, notes
+    source_page, retrieved_at, jurisdiction, verified, notes, scope, method, gas_basis
 """
 
 # Exact identity: (category, unit, year) is the table's UNIQUE key.
@@ -92,6 +92,9 @@ def _citation(row: dict[str, Any], requested_year: int) -> FactorCitation:
         jurisdiction=row["jurisdiction"],
         verified=row["verified"],
         notes=row["notes"],
+        scope=row["scope"],
+        method=row["method"],
+        gas_basis=row["gas_basis"],
     )
 
 
@@ -153,7 +156,7 @@ def _resolve(
     else:
         message = (
             f"{citation.factor} {citation.unit} ({citation.publisher} {year_used}, "
-            f"{citation.source_document})."
+            f"{citation.source_document}). {citation.classification}."
         )
     return ok(data, message)
 

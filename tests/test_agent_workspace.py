@@ -11,7 +11,7 @@ from decimal import Decimal
 
 from carbon_r.agent.tools import Toolkit
 from carbon_r.tools.base import ToolResult, error, no_results, ok
-from conftest import FACTOR_2024, extract_payload
+from conftest import ELECTRICITY_ACTIVITY, FACTOR_2024, extract_payload
 
 
 def dispatch(toolkit: Toolkit, name: str, **arguments) -> ToolResult:
@@ -147,30 +147,125 @@ def _prepare(toolkit) -> None:
     )
 
 
+def calculate(toolkit, *pairs):
+    """Dispatch `calculate_emissions` with (activity_ref, factor_ref) pairs."""
+    return dispatch(
+        toolkit,
+        "calculate_emissions",
+        pairs=[{"activity_ref": a, "factor_ref": f} for a, f in pairs],
+    )
+
+
+def test_extraction_stores_each_activity_under_its_own_handle(toolkit, session):
+    """`act_1`, `act_2`, ... so a calculation can name one line without describing it."""
+    result = dispatch(toolkit, "extract_from_document", document_id="doc_test")
+    assert [a["activity_ref"] for a in result.data["activities"]] == ["act_1"]
+    assert session.activities["act_1"]["amount"] == "139600"
+    assert session.activities["act_1"]["unit"] == "kWh"
+    # The handles are named in the message, so the model can see what there is to do.
+    assert "act_1 = 139600 kWh of electricity" in result.message
+
+
+def test_a_two_product_document_stores_two_activities(fuel_toolkit, session):
+    """The case the pairs-based calculation exists for."""
+    result = dispatch(fuel_toolkit, "extract_from_document", document_id="doc_test")
+    assert [a["activity_ref"] for a in result.data["activities"]] == ["act_1", "act_2"]
+    assert {session.activities[h]["kind"] for h in ("act_1", "act_2")} == {"diesel", "petrol"}
+
+
 def test_calculate_uses_the_stored_reading_not_the_model(toolkit):
     """139600 kWh x 0.402 = 56119.2 kg. Neither number came through the model."""
     _prepare(toolkit)
-    result = dispatch(toolkit, "calculate_emissions", document_id="doc_test", factor_ref="factor_1")
+    result = calculate(toolkit, ("act_1", "factor_1"))
     assert result.status == "ok"
     assert Decimal(result.data["kg_co2e"]) == Decimal("56119.200")
-    assert result.data["inputs"]["activity_amount"] == "139600"
-    assert result.data["inputs"]["factor"]["factor"] == "0.402"
+    line = result.data["lines"][0]
+    assert line["activity"]["amount"] == "139600"
+    assert line["factor"]["factor"] == "0.402"
+
+
+def test_two_activities_in_one_call_produce_a_total_no_model_computed(fuel_toolkit):
+    """156.79 L diesel and 116.79 L petrol, each with its own DESNZ factor.
+
+    Computed by an independent integer route, so the expectation does not come from the
+    code under test:
+
+        156.79 x 2.66155 = 15679 x 266155 / 10^7 = 4,173,044,245 / 10^7 = 417.3044245
+        116.79 x 2.35372 = 11679 x 235372 / 10^7 = 2,748,909,588 / 10^7 = 274.8909588
+                                                         total = 692.1953833
+    """
+    dispatch(fuel_toolkit, "extract_from_document", document_id="doc_test")
+    dispatch(
+        fuel_toolkit,
+        "lookup_emission_factor",
+        category="fuel_diesel",
+        unit="kg CO2e / litres",
+        year=2026,
+    )
+    dispatch(
+        fuel_toolkit,
+        "lookup_emission_factor",
+        category="fuel_petrol",
+        unit="kg CO2e / litres",
+        year=2026,
+    )
+    result = calculate(fuel_toolkit, ("act_1", "factor_1"), ("act_2", "factor_2"))
+
+    assert result.status == "ok"
+    assert Decimal(result.data["kg_co2e_exact"]) == Decimal("692.1953833")
+    assert len(result.data["lines"]) == 2
+    assert result.data["disclosures"]["non_singapore_factor"] is True
 
 
 def test_calculate_returns_the_disclosure_sentences(toolkit):
     _prepare(toolkit)
-    result = dispatch(toolkit, "calculate_emissions", document_id="doc_test", factor_ref="factor_1")
+    result = calculate(toolkit, ("act_1", "factor_1"))
     sentences = " ".join(result.data["required_disclosures"])
     assert "not assured" in sentences
     assert "not from the activity year" in sentences  # FACTOR_2024 is a substitution
     assert "marked estimated" not in sentences  # this reading is actual
 
 
-def test_calculate_refuses_an_unknown_handle(toolkit):
+def test_calculate_refuses_an_unknown_factor_handle(toolkit):
     _prepare(toolkit)
-    result = dispatch(toolkit, "calculate_emissions", document_id="doc_test", factor_ref="factor_9")
+    result = calculate(toolkit, ("act_1", "factor_9"))
     assert result.status == "error"
+    assert result.data is None
     assert "lookup_emission_factor" in result.message
+
+
+def test_calculate_refuses_an_unknown_activity_handle(toolkit):
+    _prepare(toolkit)
+    result = calculate(toolkit, ("act_9", "factor_1"))
+    assert result.status == "error"
+    assert "extract_from_document" in result.message
+
+
+def test_one_unresolvable_handle_fails_the_whole_call(fuel_toolkit):
+    """No partial total: the lines that resolved are not calculated either.
+
+    A total over the resolvable lines would be short, and nothing on its face would say
+    so - the same reason `tools/calculate.py` is all-or-nothing about the arithmetic.
+    """
+    dispatch(fuel_toolkit, "extract_from_document", document_id="doc_test")
+    dispatch(
+        fuel_toolkit,
+        "lookup_emission_factor",
+        category="fuel_diesel",
+        unit="kg CO2e / litres",
+        year=2026,
+    )
+    result = calculate(fuel_toolkit, ("act_1", "factor_1"), ("act_2", "factor_7"))
+    assert result.status == "error"
+    assert result.data is None
+    assert "line 2" in result.message
+
+
+def test_every_unresolvable_handle_is_named_in_one_message(toolkit):
+    _prepare(toolkit)
+    result = calculate(toolkit, ("act_8", "factor_8"))
+    assert "act_8" in result.message
+    assert "factor_8" in result.message
 
 
 def test_calculate_refuses_a_document_that_was_never_read(toolkit):
@@ -181,27 +276,38 @@ def test_calculate_refuses_a_document_that_was_never_read(toolkit):
         unit="kg CO2 / kWh",
         year=2025,
     )
-    result = dispatch(toolkit, "calculate_emissions", document_id="doc_test", factor_ref="factor_1")
+    result = calculate(toolkit, ("act_1", "factor_1"))
     assert result.status == "error"
     assert "extract_from_document" in result.message
 
 
-def test_calculate_says_so_when_the_consumption_was_not_read(session):
-    payload = extract_payload()
+def test_no_pairs_is_refused(toolkit):
+    _prepare(toolkit)
+    result = dispatch(toolkit, "calculate_emissions", pairs=[])
+    assert result.status == "error"
+
+
+def test_extraction_says_so_when_no_activity_was_read(session):
+    """An empty activity list leaves nothing to calculate, and says that at extraction."""
+    payload = extract_payload(activities=[])
     payload["normalised"]["consumption_kwh"] = None
     toolkit = Toolkit(
         session,
         extract=lambda path, **_: ok(payload, "Read it, mostly."),
         lookup=lambda *_: ok({"factor": dict(FACTOR_2024), "is_non_singapore": False}, "0.402."),
     )
-    _prepare(toolkit)
-    result = dispatch(toolkit, "calculate_emissions", document_id="doc_test", factor_ref="factor_1")
-    assert result.status == "no_results"
+    result = dispatch(toolkit, "extract_from_document", document_id="doc_test")
+    assert result.status == "ok"
+    assert result.data["activities"] == []
+    assert "nothing to calculate" in result.message
     assert "ask the user" in result.message
+    assert session.activities == {}
 
 
 def test_an_estimated_reading_reaches_the_disclosures(session):
-    payload = extract_payload()
+    payload = extract_payload(
+        activities=[{**ELECTRICITY_ACTIVITY, "is_estimated": True}],
+    )
     payload["normalised"]["is_estimated_reading"] = True
     toolkit = Toolkit(
         session,
@@ -209,6 +315,6 @@ def test_an_estimated_reading_reaches_the_disclosures(session):
         lookup=lambda *_: ok({"factor": dict(FACTOR_2024), "is_non_singapore": False}, "0.402."),
     )
     _prepare(toolkit)
-    result = dispatch(toolkit, "calculate_emissions", document_id="doc_test", factor_ref="factor_1")
+    result = calculate(toolkit, ("act_1", "factor_1"))
     assert result.data["disclosures"]["estimated_reading"] is True
     assert any("marked estimated" in s for s in result.data["required_disclosures"])

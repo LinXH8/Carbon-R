@@ -9,11 +9,16 @@ The argument shapes are the load-bearing part of this module. Note what is NOT h
 
     calculate_emissions does not take an amount, and does not take a factor.
 
-It takes a `document_id` and a `factor_ref` - handles into the session workspace - and the
-values are read from what the earlier tools stored. The model selects the inputs; Python
-moves them. This is CLAUDE.md rule 1 again, one level up from `tools/calculate.py`: a
-model that cannot write a digit into a calculation cannot mistype 0.402 as 0.42, and no
-amount of prompt wording achieves that.
+It takes a list of `(activity_ref, factor_ref)` handles into the session workspace, and
+the values are read from what the earlier tools stored. The model selects the inputs;
+Python moves them. This is CLAUDE.md rule 1 again, one level up from
+`tools/calculate.py`: a model that cannot write a digit into a calculation cannot mistype
+0.402 as 0.42, and no amount of prompt wording achieves that.
+
+The argument is a LIST because a fuel-card statement carries diesel and petrol, which
+need two different factors and one total - and that total is a sum, which the model must
+not perform. Pairing them in one call means Python does the addition. It also means a
+partial result is impossible to request: the call either calculates every line or none.
 
 `lookup_emission_factor` keeps literal category/unit/year arguments, which is not an
 exception to the above. Those are SELECTORS against the table's UNIQUE key, not
@@ -54,6 +59,19 @@ class LookupFactorArgs(BaseModel):
     )
 
 
+class CalculatePair(BaseModel):
+    """One line of a calculation: which activity, and which factor to apply to it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    activity_ref: str = Field(
+        description="Handle of an activity returned by extract_from_document, e.g. 'act_1'."
+    )
+    factor_ref: str = Field(
+        description="Handle of a factor returned by lookup_emission_factor, e.g. 'factor_1'."
+    )
+
+
 class CalculateArgs(BaseModel):
     """Arguments for `calculate_emissions`.
 
@@ -63,34 +81,40 @@ class CalculateArgs(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    document_id: str = Field(
-        description="Document whose extracted consumption should be used as the activity "
-        "amount. It must already have been read with extract_from_document."
-    )
-    factor_ref: str = Field(
-        description="Handle of a factor returned by lookup_emission_factor, e.g. 'factor_1'."
+    pairs: list[CalculatePair] = Field(
+        description="One entry per activity to calculate. Pass EVERY activity from the "
+        "document in a single call, each with the factor that applies to it, and the "
+        "total is computed for you. If any pair is wrong, no figure is returned at all."
     )
 
 
 TOOL_DESCRIPTIONS: dict[str, str] = {
     "extract_from_document": (
-        "Read an uploaded document with a vision model and return what is printed on it, "
-        "together with the typed values, any field that could not be parsed, and any way "
-        "in which the page disagrees with itself. Transcription only: it returns no "
-        "derived or computed figure."
+        "Establish what kind of document an uploaded file is, then read it with a vision "
+        "model and return what is printed on it, together with the typed values, the "
+        "measurable activities it carries as act_N handles, any field that could not be "
+        "parsed, and any way in which the page disagrees with itself. Handles electricity "
+        "bills, LPG invoices and vehicle fuel-card statements; a file whose kind cannot be "
+        "established returns no_results rather than being read as a guess. Transcription "
+        "only: it returns no derived or computed emissions figure."
     ),
     "lookup_emission_factor": (
         "Fetch one emission factor by exact match on category, unit and year, with its "
-        "full provenance (publisher, source document, page, URL). If no factor is "
-        "published for the requested year, the latest published year at or before it is "
-        "used and the substitution is stated; past a 2-year gap this returns no_results "
-        "rather than a figure. Returns a factor_ref handle for calculate_emissions."
+        "full provenance (publisher, source document, page, URL, scope, method and "
+        "whether it is CO2 or CO2e). If no factor is published for the requested year, "
+        "the latest published year at or before it is used and the substitution is "
+        "stated; past a 2-year gap, or with nothing published at or before the year, this "
+        "returns no_results rather than a figure. Returns a factor_ref handle for "
+        "calculate_emissions. One call per activity: different fuels need different rows."
     ),
     "calculate_emissions": (
-        "Multiply the consumption read from a document by a looked-up emission factor, "
-        "in Python. This is the only tool that produces an emissions figure. It returns "
-        "the figure, the derivation written out, every input it used, and the "
-        "disclosures that must be stated with the result."
+        "Multiply each activity read from a document by the emission factor that applies "
+        "to it, in Python, and total the lines. This is the only tool that produces an "
+        "emissions figure. It returns the total, every line with its own derivation "
+        "written out, every input it used, and the disclosures that must be stated with "
+        "the result. Pass all of a document's activities in ONE call: that is what "
+        "produces the total. If any pair cannot be calculated, the whole call fails and "
+        "returns no figure, rather than a total that is quietly short."
     ),
 }
 
@@ -151,6 +175,7 @@ __all__ = [
     "TOOL_DESCRIPTIONS",
     "TOOL_NAMES",
     "CalculateArgs",
+    "CalculatePair",
     "ExtractArgs",
     "LookupFactorArgs",
     "schema_for",

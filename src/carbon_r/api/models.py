@@ -72,26 +72,110 @@ class FactorOut(BaseModel):
     verified: bool = Field(description="The value has been read from the publisher's own document")
     notes: str | None = None
 
+    # What the factor classifies as. Nullable to match the column, which could not be made
+    # NOT NULL on a populated table; a null here means the factor table needs reloading,
+    # and `calculate_emissions` refuses such a factor before it ever reaches this model.
+    scope: int | None = None
+    method: str | None = None
+    gas_basis: str | None = Field(
+        default=None, description="CO2 = carbon dioxide only; CO2e = all gases as equivalent"
+    )
 
-class FigureOut(BaseModel):
-    """One emissions figure with the inputs it was computed from.
 
-    The UI renders numbers from this and from nothing else. Scraping them out of `reply`
-    would put a model-authored figure on screen, which is the same defect as rule 1 with
-    the arithmetic moved into the presentation layer.
+class ConversionOut(BaseModel):
+    """A unit conversion applied before a factor, with the authority for it.
+
+    Present only when the activity's unit and the factor's unit differed - LPG in kg
+    against a factor published per tonne. A conversion that happened without appearing
+    here would be a step in the arithmetic the client cannot see.
     """
 
     model_config = ConfigDict(frozen=True)
 
+    from_unit: str
+    to_unit: str
+    from_amount: str
+    to_amount: str
+    statement: str = Field(description="The conversion in words, e.g. '1 tonne = 1000 kg'")
+    source: str
+
+
+class FigureLineOut(BaseModel):
+    """One line of a figure: one activity, one factor, one product.
+
+    A single-activity document produces exactly one of these, so the client renders one
+    shape whether it is reading an electricity bill or a two-product fuel-card statement.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    kind: str = Field(description="What was consumed: electricity, lpg, diesel, petrol")
     kg_co2e: str
     tonnes_co2e: str
-    derivation: str = Field(description="The arithmetic written out, checkable by hand")
-    method: str = Field(description="e.g. location-based")
-    basis: str = Field(description="e.g. activity-based")
+    derivation: str = Field(description="This line's arithmetic, written out")
+
+    # From the factor, not composed by the client: a page that captioned a figure itself
+    # would be asserting a classification it was never given.
+    scope: int | None = None
+    method: str | None = None
+    gas_basis: str | None = None
 
     activity_amount: str
     activity_unit: str
+    activity_derivation: str | None = Field(
+        default=None,
+        description="How the quantity was computed when the page did not print it, "
+        "e.g. the cylinder arithmetic behind an LPG figure",
+    )
+    conversion: ConversionOut | None = None
     factor: FactorOut
+
+    @classmethod
+    def from_line(cls, line: dict) -> "FigureLineOut":
+        activity = line["activity"]
+        return cls(
+            kind=line["kind"],
+            kg_co2e=line["kg_co2e"],
+            tonnes_co2e=line["tonnes_co2e"],
+            derivation=line["derivation"],
+            scope=line["scope"],
+            method=line["method"],
+            gas_basis=line["gas_basis"],
+            activity_amount=activity["amount"],
+            activity_unit=activity["unit"],
+            activity_derivation=activity.get("derivation"),
+            conversion=(
+                ConversionOut.model_validate(line["conversion"]) if line["conversion"] else None
+            ),
+            factor=FactorOut.model_validate(line["factor"]),
+        )
+
+
+class FigureOut(BaseModel):
+    """One emissions result: a total, and every line it was computed from.
+
+    The UI renders numbers from this and from nothing else. Scraping them out of `reply`
+    would put a model-authored figure on screen, which is the same defect as rule 1 with
+    the arithmetic moved into the presentation layer.
+
+    The total and the lines both cross the boundary because a total alone cannot be
+    checked against the document, and a mixed-scope total cannot honestly be reported as
+    belonging to any one scope - which is what `kg_co2e_by_scope` is for.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    kg_co2e: str = Field(description="The total across every line")
+    tonnes_co2e: str
+    derivation: str = Field(description="The arithmetic written out, checkable by hand")
+
+    lines: list[FigureLineOut]
+    scopes: list[int] = Field(description="Every GHG Protocol scope this total covers")
+    methods: list[str]
+    gas_bases: list[str]
+    kg_co2e_by_scope: dict[str, str] = Field(
+        description="Total per scope, so a mixed result is never only one number"
+    )
 
     disclosures: dict[str, bool] = Field(description="The flags; see required_disclosures")
     required_disclosures: list[str] = Field(
@@ -99,25 +183,24 @@ class FigureOut(BaseModel):
         "so the wording cannot drift between the API and the UI."
     )
 
-    document_id: str
+    document_ids: list[str]
     calculation_ref: str = Field(description="The session handle this figure is stored under")
 
     @classmethod
     def from_payload(cls, data: dict) -> "FigureOut":
-        """Reshape a `calculate_emissions` payload: inputs flattened, factor kept whole."""
-        inputs = data["inputs"]
+        """Reshape a `calculate_emissions` payload for the wire."""
         return cls(
             kg_co2e=data["kg_co2e"],
             tonnes_co2e=data["tonnes_co2e"],
             derivation=data["derivation"],
-            method=data["method"],
-            basis=data["basis"],
-            activity_amount=inputs["activity_amount"],
-            activity_unit=inputs["activity_unit"],
-            factor=FactorOut.model_validate(inputs["factor"]),
+            lines=[FigureLineOut.from_line(line) for line in data["lines"]],
+            scopes=data["scopes"],
+            methods=data["methods"],
+            gas_bases=data["gas_bases"],
+            kg_co2e_by_scope=data["kg_co2e_by_scope"],
             disclosures=data["disclosures"],
             required_disclosures=data["required_disclosures"],
-            document_id=data["document_id"],
+            document_ids=data["document_ids"],
             calculation_ref=data["calculation_ref"],
         )
 
