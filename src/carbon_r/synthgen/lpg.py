@@ -32,7 +32,6 @@ from carbon_r.models.lpg_invoice import CylinderLine, LPGInvoice
 from carbon_r.money import round2
 from carbon_r.synthgen.electricity import (
     AVG_DAYS_PER_MONTH,
-    add_months,
     days_in_month,
     seasonal_multiplier,
 )
@@ -43,8 +42,9 @@ from carbon_r.synthgen.profiles import (
     LPGCustomer,
     customer_by_key,
     incidental_details,
+    lpg_price_list,
 )
-from carbon_r.synthgen.rng import bill_rng, draw
+from carbon_r.synthgen.rng import bill_rng, doc_rng, draw
 
 DOC_KIND = "lpg_invoice"
 DOC_ID_PREFIX = "lpg"
@@ -55,7 +55,9 @@ IS_HOLDOUT_LAYOUT = False
 DIFFICULTY_TIER = "clean"
 
 DEFAULT_SEED = 20261016  # the same master seed as the electricity set
-GENERATOR_VERSION = "synthgen-lpg-1"
+# 2 since Tier 2 Block 2: price list by year, dated visits, top-ups, mixed sizes,
+# per-delivery billing, quirks.
+GENERATOR_VERSION = "synthgen-lpg-2"
 
 NOISE = 0.10  # +/-10% month-to-month wobble, as for electricity
 # A delivery invoice follows the supply period by a few days, drawn per document so the
@@ -113,14 +115,33 @@ def supply_period(
 ) -> tuple[date, date, date]:
     """(period_start, period_end, document_date) for one whole calendar month.
 
-    Whole months in this block; per-delivery invoicing and a period straddling two months
-    are Block 2 quirks. `monthrange` supplies the real day count, so February gets 28 or 29
-    and no date names a day its month does not have.
+    `monthrange` supplies the real day count, so February gets 28 or 29 and no date names
+    a day its month does not have.
     """
     period_start = date(year, month, 1)
     period_end = date(year, month, days_in_month(year, month))
     lag = lag_days if lag_days is not None else rng.randint(*INVOICE_LAG_DAYS_RANGE)
     return period_start, period_end, period_end + timedelta(days=lag)
+
+
+def _visits(
+    count: int, period_start: date, period_end: date, chance: float, rng: random.Random
+) -> list[tuple[date, int]]:
+    """The visits a month's cylinders arrived in: usually one, sometimes a top-up.
+
+    Drawn from the document's own "deliveries" stream. A top-up needs at least two
+    cylinders to split, and lands in the second half of the month.
+    """
+    last = period_end.day
+    first_day = rng.randint(2, min(12, last))
+    if count >= 2 and rng.random() < chance:
+        first_share = max(1, min(count - 1, round(count * rng.uniform(0.5, 0.7))))
+        second_day = rng.randint(16, last - 1)
+        return [
+            (period_start.replace(day=first_day), first_share),
+            (period_start.replace(day=second_day), count - first_share),
+        ]
+    return [(period_start.replace(day=first_day), count)]
 
 
 def build_invoice(
@@ -135,32 +156,85 @@ def build_invoice(
     noise: float | None = None,
     lag_days: int | None = None,
     returned_offset: int | None = None,
+    period: tuple[date, date] | None = None,
+    layout_id: str = LAYOUT_ID,
+    is_holdout_layout: bool = IS_HOLDOUT_LAYOUT,
+    difficulty_tier: str = DIFFICULTY_TIER,
+    prints_total_kg: bool = False,
 ) -> LPGInvoice:
-    """Assemble and validate one invoice.
+    """Assemble and validate one clean invoice. Quirks are applied afterwards (quirks.py).
 
-    Returns a validated LPGInvoice, so an arithmetic mistake in this module fails here -
-    before anything is written to disk and long before a PDF exists.
+    Monthly (`period` None): the month's gas, rounded up to whole cylinders, delivered in
+    one visit or - at the customer's `extra_delivery_chance` - two; plus a second cylinder
+    size where the customer takes one. Per delivery (`period` given): the gas used since
+    the previous visit, delivered on the period's last day.
+
+    The price list is the one for the period's year. Returns a validated LPGInvoice, so an
+    arithmetic mistake fails here - before anything is written to disk.
     """
     profile = customer_by_key(customer.key)
-    prices = customer.price_list
-    rng = bill_rng(seed, customer.account_number, year, month, DOC_KIND)
+    if period is None:
+        rng = bill_rng(seed, customer.account_number, year, month, DOC_KIND)
+        kg_wanted = monthly_lpg_kg(
+            customer.base_kg, year, month, customer.seasonal_amplitude, rng=rng, noise=noise
+        )
+        period_start, period_end, document_date = supply_period(year, month, rng, lag_days=lag_days)
+    else:
+        period_start, period_end = period
+        if period_start.year != period_end.year:
+            raise ValueError(
+                f"{doc_id}: an LPG period may not cross a year boundary ({period_start} to "
+                f"{period_end}); LPG is not pro-rated"
+            )
+        rng = doc_rng(seed, customer.account_number, period_end.isoformat(), DOC_KIND)
+        days = (period_end - period_start).days + 1
+        noise_value = draw(noise, rng, 1 - NOISE, 1 + NOISE)
+        wanted = customer.base_kg * noise_value * days / AVG_DAYS_PER_MONTH
+        kg_wanted = Decimal(str(round(wanted, 2)))
+        lag = lag_days if lag_days is not None else rng.randint(*INVOICE_LAG_DAYS_RANGE)
+        document_date = period_end + timedelta(days=lag)
 
-    kg_wanted = monthly_lpg_kg(
-        customer.base_kg, year, month, customer.seasonal_amplitude, rng=rng, noise=noise
-    )
+    prices = lpg_price_list(period_start.year)
+    deliveries = doc_rng(seed, doc_id, "deliveries")
     count = cylinders_for(kg_wanted, customer.cylinder_size_kg)
-    period_start, period_end, document_date = supply_period(year, month, rng, lag_days=lag_days)
+    size = customer.cylinder_size_kg
+    if period is None:
+        visits = _visits(
+            count, period_start, period_end, customer.extra_delivery_chance, deliveries
+        )
+    else:
+        visits = [(period_end, count)]
 
-    price = prices.price_per_cylinder_sgd[customer.cylinder_size_kg]
-    line = CylinderLine(
-        count=count, size_kg=customer.cylinder_size_kg, price_per_cylinder_sgd=price
-    )
+    lines = [
+        CylinderLine(
+            delivery_date=day,
+            count=n,
+            size_kg=size,
+            price_per_cylinder_sgd=prices.price_per_cylinder_sgd[size],
+        )
+        for day, n in visits
+    ]
+    if customer.second_size_kg is not None:
+        second_wanted = Decimal(
+            str(round(customer.second_base_kg * deliveries.uniform(1 - NOISE, 1 + NOISE), 2))
+        )
+        lines.append(
+            CylinderLine(
+                delivery_date=visits[0][0],
+                count=cylinders_for(second_wanted, customer.second_size_kg),
+                size_kg=customer.second_size_kg,
+                price_per_cylinder_sgd=prices.price_per_cylinder_sgd[customer.second_size_kg],
+            )
+        )
 
     # Money, in the exact order LPGInvoice's validator re-checks it.
     gst_rate = Decimal(str(get_settings().gst_rate))  # str(): never Decimal(float)
-    cylinder_charge = line.amount_sgd
-    rental_charge = round2(Decimal(count) * prices.rental_per_cylinder_sgd)
-    subtotal = cylinder_charge + prices.delivery_charge_sgd + rental_charge
+    cylinder_charge = sum((line.amount_sgd for line in lines), Decimal(0))
+    cylinder_count = sum(line.count for line in lines)
+    rental_charge = round2(Decimal(cylinder_count) * prices.rental_per_cylinder_sgd)
+    visit_count = len({line.delivery_date for line in lines})
+    delivery_charge = round2(Decimal(visit_count) * prices.delivery_charge_sgd)
+    subtotal = cylinder_charge + delivery_charge + rental_charge
     gst_amount = round2(subtotal * gst_rate)
 
     offset = returned_offset if returned_offset is not None else rng.randint(*RETURNED_OFFSET_RANGE)
@@ -170,69 +244,112 @@ def build_invoice(
         doc_id=doc_id,
         generator_seed=seed,
         generator_version=GENERATOR_VERSION,
-        layout_id=LAYOUT_ID,
-        is_holdout_layout=IS_HOLDOUT_LAYOUT,
-        difficulty_tier=DIFFICULTY_TIER,
+        layout_id=layout_id,
+        is_holdout_layout=is_holdout_layout,
+        difficulty_tier=difficulty_tier,
         degradation={},
         vendor_name=LPG_VENDOR_NAME,
         vendor_uen=LPG_VENDOR_UEN,
         customer_name=profile.name,
         customer_address=customer_address,
         account_number=customer.account_number,
-        invoice_number=f"IGS-{year}{month:02d}-{customer.account_number[-4:]}",
+        invoice_number=(
+            f"IGS-{period_end:%Y%m%d}-{customer.account_number[-4:]}"
+            if period is not None
+            else f"IGS-{year}{month:02d}-{customer.account_number[-4:]}"
+        ),
         document_date=document_date,
         period_start=period_start,
         period_end=period_end,
+        billing_basis="per_delivery" if period is not None else "monthly",
         price_list_code=prices.code,
-        cylinders=(line,),
-        lpg_kg=line.kg,
-        # The base layout does NOT print a kg total: the activity has to be computed from
-        # the cylinder line. That is the `lpg_cylinders` case, and it is the default here
-        # rather than an injected quirk because pricing per cylinder is how the invoice
-        # works.
-        prints_total_kg=False,
+        cylinders=tuple(lines),
+        lpg_kg=sum((line.kg for line in lines), Decimal(0)),
+        # A layout that prints no kg total is the `lpg_cylinders` case: the activity has to
+        # be computed from the cylinder lines. Structural, so recorded in every tier.
+        prints_total_kg=prints_total_kg,
         returned_cylinders=returned,
         cylinder_charge_sgd=cylinder_charge,
-        delivery_charge_sgd=prices.delivery_charge_sgd,
+        delivery_fee_sgd=prices.delivery_charge_sgd,
+        delivery_charge_sgd=delivery_charge,
         rental_per_cylinder_sgd=prices.rental_per_cylinder_sgd,
         rental_charge_sgd=rental_charge,
         subtotal_sgd=subtotal,
         gst_rate=gst_rate,
         gst_amount_sgd=gst_amount,
         total_sgd=subtotal + gst_amount,
-        quirks=[],  # this block ships no injected quirks; Block 2 fills this
+        quirks=[] if prints_total_kg else ["lpg_cylinders"],
     )
+
+
+# A per-delivery customer's visits fall this many days apart (inclusive).
+DELIVERY_INTERVAL_DAYS = (9, 16)
+
+
+def delivery_period(seed: int, doc_id: str, previous_end: date) -> tuple[date, date]:
+    """The days a per-delivery invoice covers: from the day after the last visit."""
+    interval = doc_rng(seed, doc_id, "interval").randint(*DELIVERY_INTERVAL_DAYS)
+    start = previous_end + timedelta(days=1)
+    return start, start + timedelta(days=interval - 1)
 
 
 def build_invoice_series(
     seed: int = DEFAULT_SEED, customers: tuple[LPGCustomer, ...] = LPG_CUSTOMERS
 ) -> list[LPGInvoice]:
-    """Every LPG invoice: four accounts, three consecutive months each.
+    """The Block 1 LPG invoices: four accounts, three documents each, on layout `a`.
 
     Document numbers come from each customer's `first_doc_number`, not from iteration
-    order, so adding a fifth customer cannot renumber the first four (spec 1.4). The
-    cylinder count carries forward within an account, which is what makes the returned-
-    empties count follow the previous delivery rather than being drawn from nowhere.
+    order, so adding a customer cannot renumber the others (spec 1.4).
     """
-    invoices: list[LPGInvoice] = []
+    from carbon_r.synthgen.plan import LPG, plan_kind
 
-    for customer in customers:
-        profile = customer_by_key(customer.key)
-        address, _ = incidental_details(profile, seed)
-        previous_cylinders = 0
+    plans = [p for p in plan_kind(LPG, seed, series=(), accounts=customers)]
+    return build_v1(seed, plans, customers=customers)
 
-        for offset in range(MONTHS_PER_ACCOUNT):
-            year, month = add_months(customer.start_year, customer.start_month, offset)
-            invoice = build_invoice(
-                customer,
-                year,
-                month,
-                f"{DOC_ID_PREFIX}_{customer.first_doc_number + offset:03d}",
-                seed,
-                customer_address=address,
-                previous_cylinders=previous_cylinders,
+
+def build_v1(seed: int = DEFAULT_SEED, plans=None, *, customers=LPG_CUSTOMERS) -> list[LPGInvoice]:
+    """Every synthgen v1 invoice, from the plan, clean and then dressed.
+
+    Each account's documents are built in number order (which is date order), carrying the
+    cylinder count forward for the returned-empties line and, for a per-delivery customer,
+    the date of the last visit.
+    """
+    from carbon_r.synthgen.layouts import layout
+    from carbon_r.synthgen.plan import LPG, plan_kind
+    from carbon_r.synthgen.quirks import dress
+
+    plans = plans if plans is not None else plan_kind(LPG, seed)
+    by_key = {customer.key: customer for customer in customers}
+    previous_cylinders: dict[str, int] = {}
+    last_visit: dict[str, date] = {}
+    built = {}
+
+    for plan in sorted(plans, key=lambda p: (p.account, p.number)):
+        customer = by_key[plan.account]
+        address, _ = incidental_details(customer_by_key(customer.key), seed)
+        period = None
+        if customer.billing_basis == "per_delivery":
+            previous_end = last_visit.get(
+                plan.account, date(plan.year, plan.month, 1) - timedelta(days=1)
             )
-            previous_cylinders = invoice.cylinder_count
-            invoices.append(invoice)
+            period = delivery_period(seed, plan.doc_id, previous_end)
+        shape = layout(plan.layout_id)
+        invoice = build_invoice(
+            customer,
+            plan.year,
+            plan.month,
+            plan.doc_id,
+            seed,
+            customer_address=address,
+            previous_cylinders=previous_cylinders.get(plan.account, 0),
+            period=period,
+            layout_id=plan.layout_id,
+            is_holdout_layout=shape.is_holdout,
+            difficulty_tier=plan.tier,
+            prints_total_kg=shape.prints_total_kg,
+        )
+        previous_cylinders[plan.account] = invoice.cylinder_count
+        last_visit[plan.account] = invoice.period_end
+        built[plan.number] = dress(invoice, plan, seed)
 
-    return invoices
+    return [built[n] for n in sorted(built)]

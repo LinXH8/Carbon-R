@@ -131,14 +131,21 @@ class Toolkit:
         self.session.readings[args.document_id] = trimmed
 
         hints: list[str] = []
-        period_start = trimmed["normalised"].get("period_start")
-        if period_start:
-            hints.append(f"The activity year for the factor lookup is {period_start[:4]}.")
         if stored:
+            # Each activity names its own year: a bill split across 31 December carries two,
+            # and a single document-level year would send both halves to one factor.
             named = ", ".join(
-                f"{a['activity_ref']} = {a['amount']} {a['unit']} of {a['kind']}" for a in stored
+                f"{a['activity_ref']} = {a['amount']} {a['unit']} of {a['kind']}"
+                + (f" in {a['factor_year']}" if a.get("factor_year") else " (year not read)")
+                for a in stored
             )
             hints.append(f"Activities: {named}.")
+            years = sorted({a["factor_year"] for a in stored if a.get("factor_year")})
+            if len(years) > 1:
+                hints.append(
+                    "The period crosses a year boundary, so the activity was split by days: "
+                    f"look up one factor per year ({', '.join(map(str, years))})."
+                )
         else:
             hints.append(
                 "No measurable activity was read from this page, so there is nothing to "

@@ -22,6 +22,7 @@ established until then.
 | 11 | Whether Singapore pump fuel is blended with biofuel (NEA specification) | — | Mineral vs average-blend DESNZ rows | — | **assumption — VERIFY** |
 | 12 | GST treatment of Singapore pump prices and fuel-card statements | — | `synthgen` fuel-card money lines | — | **secondary only — VERIFY** |
 | 13 | Common Singapore LPG cylinder sizes and pricing basis | — | `synthgen` LPG invoice shape | — | **secondary only — VERIFY** |
+| 14 | How Singapore bills show credits, balances brought forward and GST-inclusive headlines; LPG per-delivery billing | — | `synthgen` v1 quirk shapes | — | **not claimed — fictional** |
 
 ---
 
@@ -292,3 +293,13 @@ fact anywhere in the repo.
 
 The GST convention (12) is enforced by `FuelCardStatement`'s validator, so the generated
 documents are at least internally consistent with the convention they state.
+
+## 14. synthgen v1 quirk shapes — fictional, nothing claimed
+
+Tier 2 Block 2 added credits for a prior period, account summaries with a balance brought
+forward, GST-inclusive headlines, per-delivery LPG invoices, top-up deliveries, and price
+lists and tariff plans that change by year. **None of these shapes was read from a real
+Singapore document, and no claim is made that real bills look like this.** They exist to
+put a specific reading trap on the page. Every price, rate, rebate and plan in
+`synthgen/profiles.py` is fictional. Nothing here can move an emission factor; the
+activities the traps guard are what the eval scores.

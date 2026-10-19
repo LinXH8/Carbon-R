@@ -26,7 +26,8 @@ Run it with a live OPENAI_API_KEY and DATABASE_URL:
 
     make agent-smoke          # the first five, as Block 4 ran it
     make flow-10              # ten documents spanning both factor years
-    make flow-scope1          # one document of each kind, including a refusal
+    make flow-scope1          # one document of each kind, including a refusal (Block 1 set)
+    make flow-block2          # cross-year, MWh, balance forward, a hard-tier photo (v1)
     uv run python scripts/agent_flow_check.py --docs elec_001,lpg_004,fuel_001
 
 Since Tier 2 Block 1 it handles all three document kinds. Two checks changed with them:
@@ -37,6 +38,12 @@ Since Tier 2 Block 1 it handles all three document kinds. Two checks changed wit
   loaded DESNZ series) is expected to produce NO figure. `refused_honestly` scores that
   case, and `figure_matches` is not applied to it. A script that counted an honest refusal
   as a failure would be rewarding a guess.
+
+Since Tier 2 Block 2 the default document set is synthgen v1, found through the
+manifests; `--root data/generated` reads the Block 1 set. A held-out (layout `d`) document
+is REFUSED by name: a flow check is a look at the agent's answers, and looking is how a
+holdout leaks into tuning. Each row records the factor years its figure used, so a
+cross-year bill shows whether both years reached the total.
 
 The API is exercised in-process through FastAPI's TestClient rather than over a socket.
 It is the same routing, validation and response model a curl would hit, with one fewer
@@ -49,16 +56,21 @@ import json
 import sys
 from datetime import UTC, datetime
 from decimal import Decimal
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from carbon_r.agent.session import get_session
 from carbon_r.config import PROJECT_ROOT, get_settings
 from carbon_r.main import app
-from eval_extraction import KINDS, documents_dir, emissions_for, kind_of
+from eval_extraction import KINDS, V1_ROOT, discover, emissions_for, kind_of
 
 GENERATED = PROJECT_ROOT / "data" / "generated"
-RUNS_DIR = GENERATED / "flow_checks_TIER2_BLOCK1"
+RUNS_DIRS = {
+    V1_ROOT: GENERATED / "flow_checks_TIER2_BLOCK2",
+    GENERATED: GENERATED / "flow_checks_TIER2_BLOCK1",
+}
+CONTENT_TYPES = {".pdf": "application/pdf", ".png": "image/png"}
 
 QUESTION = (
     "What are the greenhouse-gas emissions from this document? "
@@ -82,20 +94,20 @@ def expected_figure(key) -> dict:
     activity year, which is a correct outcome rather than a missing one.
     """
     spec = KINDS[key.doc_kind]
-    outcome = emissions_for(spec.key_activities(key), key.factor_year)
+    outcome = emissions_for(spec.key_activities(key))
     return {"kg_co2e": outcome["kg_co2e"], "refused": outcome["refused"]}
 
 
-def check_document(client: TestClient, doc_id: str) -> dict:
+def check_document(client: TestClient, ref) -> dict:
     """Upload one document, ask the question, and score the checks."""
+    doc_id = ref.doc_id
     kind = kind_of(doc_id)
-    directory = documents_dir(kind)
-    pdf = directory / f"{doc_id}.pdf"
-    key = KINDS[kind].key_model.model_validate_json((directory / f"{doc_id}.json").read_text())
+    page = ref.page
+    key = KINDS[kind].key_model.model_validate_json(ref.key.read_text())
 
-    with pdf.open("rb") as handle:
+    with page.open("rb") as handle:
         uploaded = client.post(
-            "/upload", files={"file": (pdf.name, handle, "application/pdf")}
+            "/upload", files={"file": (page.name, handle, CONTENT_TYPES[page.suffix])}
         ).json()
 
     answer = client.post(
@@ -135,6 +147,11 @@ def check_document(client: TestClient, doc_id: str) -> dict:
     return {
         "doc_id": doc_id,
         "document_kind": kind,
+        "file": page.name,
+        "layout_id": key.layout_id,
+        "difficulty_tier": key.difficulty_tier,
+        "quirks": list(key.quirks),
+        "factor_years_used": sorted({f["year_used"] for f in factors}),
         "stopped_reason": answer["stopped_reason"],
         "turns_used": answer["turns_used"],
         "tool_calls": [f"{c['tool']}:{c['status']}" for c in answer["tool_calls"]],
@@ -196,6 +213,12 @@ def report(run: dict) -> int:
     print(f"  multi-line figures      {sum(r['line_count'] > 1 for r in rows)} of {total}")
     print(f"  expected refusals       {sum(r['expected_refusal'] for r in rows)} of {total}")
     print(f"  turns used              {turns} across {total} documents")
+    for row in rows:
+        years = row.get("factor_years_used") or []
+        print(
+            f"  {row['doc_id']:9} {row.get('layout_id', '')} {row.get('difficulty_tier', '')}"
+            f"  factor years {years}  {row['actual_kg_co2e']} kg"
+        )
 
     for row in rows:
         failed = [name for name, passed in row["checks"].items() if not passed]
@@ -207,9 +230,10 @@ def report(run: dict) -> int:
                 print(f"    numbers no tool produced: {row['unverified_figures']}")
             print(f"    reply: {row['reply'][:400]}")
 
-    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    runs_dir = RUNS_DIRS.get(PROJECT_ROOT / run["document_set"], GENERATED / "flow_checks_other")
+    runs_dir.mkdir(parents=True, exist_ok=True)
     stamp = run["run_at"].replace(":", "").replace("-", "")
-    path = RUNS_DIR / f"{stamp}-flow-{len(rows)}.json"
+    path = runs_dir / f"{stamp}-flow-{len(rows)}.json"
     path.write_text(json.dumps(run, indent=2) + "\n", encoding="utf-8")
     print(f"\nRun written to {path.relative_to(PROJECT_ROOT)}")
 
@@ -220,7 +244,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--docs", help="comma-separated doc ids; default the first --count")
     parser.add_argument("--count", type=int, default=5, help="how many documents (default 5)")
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=V1_ROOT,
+        help="document set (default synthgen v1; data/generated for Block 1)",
+    )
     args = parser.parse_args()
+    root = args.root if args.root.is_absolute() else PROJECT_ROOT / args.root
 
     settings = get_settings()
     if not settings.llm_configured or not settings.openai_model:
@@ -229,15 +260,27 @@ def main() -> int:
     if not settings.database_configured:
         print("DATABASE_URL must be set: the factor lookup is real SQL.", file=sys.stderr)
         return 2
-    if not GENERATED.exists():
-        print(f"No generated documents at {GENERATED}. Run `make docs` first.", file=sys.stderr)
+    refs = {ref.doc_id: ref for kind in KINDS for ref in discover(root, kind)}
+    if not refs:
+        print(f"No generated documents under {root}. Run `make docs` first.", file=sys.stderr)
         return 2
 
     if args.docs:
         doc_ids = [d.strip() for d in args.docs.split(",") if d.strip()]
     else:
-        directory = documents_dir("electricity_bill")
-        doc_ids = sorted(p.stem for p in directory.glob("elec_*.json"))[: args.count]
+        doc_ids = sorted(d for d in refs if d.startswith("elec_"))[: args.count]
+    unknown = [d for d in doc_ids if d not in refs]
+    held_out = [d for d in doc_ids if d in refs and refs[d].is_holdout]
+    if unknown or held_out:
+        if unknown:
+            print(f"Not in {root}: {', '.join(unknown)}", file=sys.stderr)
+        if held_out:
+            print(
+                f"Refused: {', '.join(held_out)} on the held-out layout. A flow check "
+                "is never run on the holdout.",
+                file=sys.stderr,
+            )
+        return 2
     if not doc_ids:
         print("No documents selected.", file=sys.stderr)
         return 2
@@ -246,15 +289,16 @@ def main() -> int:
     rows = []
     for doc_id in doc_ids:
         print(f"  {doc_id} ...", flush=True)
-        rows.append(check_document(client, doc_id))
+        rows.append(check_document(client, refs[doc_id]))
 
     return report(
         {
             "run_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "kind": "flow_check",
+            "document_set": str(root.relative_to(PROJECT_ROOT)),
             "note": (
-                f"End-to-end flow check on {len(rows)} documents, one layout per kind, "
-                "one question. Not an accuracy measurement."
+                f"End-to-end flow check on {len(rows)} documents, one question. "
+                "Not an accuracy measurement."
             ),
             "model": settings.openai_model,
             "question": QUESTION,

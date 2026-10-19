@@ -37,14 +37,21 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from carbon_r.models.quirks import QuirkFields, check_quirk_fields, require_quirk
 from carbon_r.money import round2
 
 
 class CylinderLine(BaseModel):
-    """One delivery line: `count` cylinders of `size_kg` each, at `price_per_cylinder`."""
+    """One delivery line: `count` cylinders of `size_kg` each, at `price_per_cylinder`.
+
+    `delivery_date` says which visit the line belongs to. Two lines on one date are two
+    cylinder sizes from one visit; two dates are two visits (an extra delivery in the
+    month), each paying the delivery fee.
+    """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    delivery_date: date | None = None
     count: int = Field(gt=0)
     size_kg: Decimal = Field(gt=0)
     price_per_cylinder_sgd: Decimal = Field(gt=0)
@@ -58,13 +65,14 @@ class CylinderLine(BaseModel):
         return round2(Decimal(self.count) * self.price_per_cylinder_sgd)
 
 
-class LPGInvoice(BaseModel):
+class LPGInvoice(QuirkFields):
     """One LPG delivery invoice, with its own derivation attached."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # --- identity (spec 3.3: common to every document kind) -------------------------
-    schema_version: Literal["1"] = "1"
+    # "2" since Tier 2 Block 2: quirk fields, dated delivery lines, billing basis.
+    schema_version: Literal["2"] = "2"
     doc_id: str = Field(pattern=r"^lpg_\d{3}$")
     doc_kind: Literal["lpg_invoice"] = "lpg_invoice"
     generator_seed: int
@@ -91,6 +99,9 @@ class LPGInvoice(BaseModel):
     period_end: date
 
     # --- the gas ------------------------------------------------------------------
+    # `monthly`: one invoice per calendar month, possibly with an extra visit.
+    # `per_delivery`: one invoice per visit; the period is the days since the last one.
+    billing_basis: Literal["monthly", "per_delivery"] = "monthly"
     price_list_code: str = Field(min_length=1)
     cylinders: tuple[CylinderLine, ...] = Field(min_length=1)
     # Derived = sum(count x size_kg). The activity, and the thing the page never prints.
@@ -104,6 +115,9 @@ class LPGInvoice(BaseModel):
     # --- money --------------------------------------------------------------------
     currency: Literal["SGD"] = "SGD"
     cylinder_charge_sgd: Decimal = Field(ge=0)
+    # Per visit, from the price list. None only on a hand-built key, where the delivery
+    # charge is then taken as printed.
+    delivery_fee_sgd: Decimal | None = Field(default=None, ge=0)
     delivery_charge_sgd: Decimal = Field(ge=0)
     # Charged per cylinder delivered, and not a purchase of gas.
     rental_per_cylinder_sgd: Decimal = Field(ge=0)
@@ -113,8 +127,7 @@ class LPGInvoice(BaseModel):
     gst_amount_sgd: Decimal = Field(ge=0)
     total_sgd: Decimal = Field(ge=0)
 
-    # --- quirks -------------------------------------------------------------------
-    quirks: list[str] = Field(default_factory=list)
+    # `quirks` and the shared credit / balance / GST-display fields come from QuirkFields.
 
     @property
     def days_in_period(self) -> int:
@@ -128,6 +141,12 @@ class LPGInvoice(BaseModel):
     @property
     def cylinder_count(self) -> int:
         return sum(line.count for line in self.cylinders)
+
+    @property
+    def deliveries(self) -> int:
+        """Visits on this invoice: distinct delivery dates, or one when lines are undated."""
+        dates = {line.delivery_date for line in self.cylinders if line.delivery_date}
+        return max(1, len(dates))
 
     @model_validator(mode="after")
     def _arithmetic_closes(self) -> "LPGInvoice":
@@ -164,12 +183,35 @@ class LPGInvoice(BaseModel):
                 f"round2({self.cylinder_count} x {self.rental_per_cylinder_sgd}) = {rental}"
             )
 
-        subtotal = self.cylinder_charge_sgd + self.delivery_charge_sgd + self.rental_charge_sgd
+        if self.delivery_fee_sgd is not None:
+            delivery = round2(Decimal(self.deliveries) * self.delivery_fee_sgd)
+            if delivery != self.delivery_charge_sgd:
+                raise ValueError(
+                    f"delivery_charge_sgd {self.delivery_charge_sgd} != round2("
+                    f"{self.deliveries} visit(s) x {self.delivery_fee_sgd}) = {delivery}"
+                )
+
+        outside = [
+            line.delivery_date
+            for line in self.cylinders
+            if line.delivery_date
+            and not (self.period_start <= line.delivery_date <= self.period_end)
+        ]
+        if outside:
+            raise ValueError(f"delivery date(s) {outside} fall outside the supply period")
+
+        # A credit for a prior delivery reduces the money, never this invoice's kg.
+        subtotal = (
+            self.cylinder_charge_sgd
+            + self.delivery_charge_sgd
+            + self.rental_charge_sgd
+            - self.credit_amount_sgd
+        )
         if subtotal != self.subtotal_sgd:
             raise ValueError(
                 f"subtotal_sgd {self.subtotal_sgd} != cylinder {self.cylinder_charge_sgd} + "
                 f"delivery {self.delivery_charge_sgd} + rental {self.rental_charge_sgd} "
-                f"= {subtotal}"
+                f"- credit {self.credit_amount_sgd} = {subtotal}"
             )
 
         gst = round2(self.subtotal_sgd * self.gst_rate)
@@ -186,6 +228,10 @@ class LPGInvoice(BaseModel):
                 f"{self.subtotal_sgd} + {self.gst_amount_sgd} = {total}"
             )
 
+        check_quirk_fields(self, self.doc_kind, self.total_sgd)
+        require_quirk(
+            self.quirks, "lpg_cylinders", not self.prints_total_kg, "the kg total being unprinted"
+        )
         return self
 
 

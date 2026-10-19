@@ -131,6 +131,12 @@ class ExtractedFuelCardStatement(BaseModel):
     discount_amount: str | None = Field(
         description="Total discount or rebate as printed, positive or with its minus sign"
     )
+    credit_adjustment: str | None = Field(
+        description=(
+            "A credit or adjustment line for an earlier period, as printed (its money "
+            "amount only), or null if the page has none"
+        )
+    )
     subtotal: str | None = Field(description="Amount after discount and before GST, as printed")
     gst_percent: str | None = Field(description="GST percentage as printed, e.g. '9'")
     gst_amount: str | None = Field(description="GST amount as printed")
@@ -197,6 +203,8 @@ class NormalisedFuelCardStatement(BaseModel):
     currency: str | None = None
     gross_amount_sgd: Decimal | None = None
     discount_amount_sgd: Decimal | None = None
+    # A credit for an earlier statement, stored as a magnitude like the discount.
+    credit_adjustment_sgd: Decimal | None = None
     subtotal_sgd: Decimal | None = None
     gst_rate: Decimal | None = None
     gst_amount_sgd: Decimal | None = None
@@ -341,6 +349,7 @@ def normalise_fuel(
     # printed sign still has to PARSE - losing it was a defect the first eval run found -
     # it just does not survive into the stored value.
     take("discount_amount_sgd", "discount_amount", lambda printed: abs(parse_decimal(printed)))
+    take("credit_adjustment_sgd", "credit_adjustment", lambda printed: abs(parse_decimal(printed)))
     take("gst_rate", "gst_percent", lambda printed: parse_decimal(printed) / Decimal(100))
 
     _take_transactions(extracted, values, problems)
@@ -371,6 +380,9 @@ def activities_for_fuel(statement: NormalisedFuelCardStatement) -> list[Activity
                 unit="litres",
                 source_field="transactions.litres",
                 derivation=derivation,
+                factor_year=statement.factor_year,
+                period_start=statement.period_start,
+                period_end=statement.period_end,
             )
         )
     return activities
@@ -421,8 +433,10 @@ def check_consistency_fuel(
         # `discount_amount_sgd` is a magnitude however the page printed it, so the
         # relation is a plain subtraction. See `normalise_fuel`.
         compare(
-            "subtotal = gross_amount - discount",
-            statement.gross_amount_sgd - statement.discount_amount_sgd,
+            "subtotal = gross_amount - discount - credit_adjustment",
+            statement.gross_amount_sgd
+            - statement.discount_amount_sgd
+            - (statement.credit_adjustment_sgd or Decimal(0)),
             statement.subtotal_sgd,
         )
 

@@ -131,6 +131,11 @@ Every item below was a real mistake or near-miss. Each has a rule above or a che
 | 13 | Faker gave a car workshop a 7th-floor unit, a Serangoon address a far-west postal code, and a real-looking UEN. | Faker output must be constrained by profile: ground-floor units for F&B/workshops/cold stores; postal-code prefix matching the address area (⚠️ VERIFY the prefix mapping); impossible identifiers. |
 | 14 | Random wobble made April > May for the laundry despite May being peak. | Not a bug. Noise larger than a seasonal swing is realistic. Don't "fix" realistic variation to make examples tidy. |
 | 15 | `iras.gov.sg` and `ema.gov.sg` HTML pages return nothing to a fetcher. | Use the publisher's PDF or Excel download as the primary source. Cite edition and page. |
+| 16 | (Tier 2 Block 1 spot check) A dental clinic on an upper floor bought LPG. | A gas customer must be a business that burns gas, on the ground floor. Tested. |
+| 17 | `IGS-COM-26` printed on a December 2024 invoice; the tariff plans had the same flaw. | A price list or plan code that carries a year must match the PERIOD's year. Lists are per year. |
+| 18 | One cylinder count every month per account. | Quantisation is real but needs delivery-level variety: per-delivery invoices, top-ups, mixed sizes. |
+| 19 | (Tier 2 Block 2) A 2-3 degree tilt put values a whole row from their labels on wide layouts. | Look at degraded images on the WIDEST layout; tune the range, never the key. |
+| 20 | Adding a date to a description cell squeezed "12" and "50 kg" into "1250 kg". | A layout change can print a false quantity. Look at the rendered page after every template change. |
 
 Verified v0 state (16 Oct 2026): 18 bills, all arithmetic and meter chains independently rechecked
 to the cent. Hand-check figures: doc_003 total S$1,215.38; doc_009 S$43,292.37; doc_017 S$2,183.52.
@@ -170,6 +175,12 @@ tests/
 ```
 
 ### 3.2 Output layout
+
+> **Tier 2 Block 2:** the set is written under a versioned root,
+> `data/generated/synthgen_v1/<doc_kind>/<tier>/`, so the Block 1 set at
+> `data/generated/<doc_kind>/clean/` stays on disk and its recorded eval stays
+> reproducible. A degraded document is `doc_XXX.png` beside `doc_XXX.clean.pdf`; the
+> manifest's `file` names the page to read.
 
 ```
 data/generated/
@@ -351,6 +362,20 @@ Each quirk is **controlled** (injected at a chosen rate) and **recorded** (named
 Start with `estimated_reading`, `cross_month_period`, `unit_mwh`, `lpg_cylinders`. Add the rest
 once the eval harness reports per-quirk accuracy.
 
+> **Tier 2 Block 2 deviations from this table** (reasons in TIER2_BLOCK2.md):
+> - **Structural vs injected.** `lpg_cylinders` and `mixed_fuel` describe what a document
+>   is, so they are recorded in every tier, including clean. Only injected quirks set the
+>   tier (clean 0, moderate 1-2, hard 3+). For LPG and fuel every injected quirk is a money
+>   decoy, so their hard tier is harder to read, not to interpret.
+> - **`credit_adjustment` and `balance_forward` also apply to fuel-card statements**;
+>   without them, fuel could not reach the hard tier. A credit names a prior period and
+>   may print a decoy quantity (kWh, kg, litres); this period's activity is unchanged, and
+>   restating the prior period is not modelled.
+> - **Implemented:** `estimated_reading`, `cross_month_period`, `cross_year_period`,
+>   `unit_mwh`, `lpg_cylinders`, `mixed_fuel`, `credit_adjustment`, `balance_forward`,
+>   `gst_confusion`. **Deferred:** `missing_month` (Block 3 scenarios), `usd_invoice`
+>   (needs FX, Tier 3), `multiple_premises` (needs a two-meter schema), `ct_multiplier`.
+
 ### 5.2 Printed vs true values
 
 When a quirk makes the page differ from the truth, the key holds both:
@@ -366,6 +391,8 @@ When a quirk makes the page differ from the truth, the key holds both:
 }
 ```
 
+- **Tier 2 Block 2 deviation:** the split is by YEAR (`split_kwh_by_year`), not by month.
+  Factors are annual, so a monthly split adds lines and changes no figure.
 - The split is computed by **days** (17 March days, 14 April days → 31 days total), rounded so
   the parts sum exactly to the whole (assign the rounding remainder to the last month). The
   numbers above are illustrative; real ones come from the script (Rule 1.6).
@@ -393,6 +420,10 @@ When a quirk makes the page differ from the truth, the key holds both:
   tuning prompts. Its accuracy is reported separately. This is the honest number.
 
 ### 6.2 Degradation (moderate and hard tiers)
+
+> **Tier 2 Block 2:** Pillow only (no Augraphy/OpenCV): rotation, blur, uneven light,
+> keystone, downscale, JPEG. Rotation was narrowed to 0.3-1.0 degrees (photo) and 0.2-0.8
+> (scan) after wider tilts made wide layouts unreadable.
 - Pipeline: render PDF → rasterise (`pdf2image`) → Augraphy (ink bleed, paper texture, shadows)
   and/or OpenCV/Pillow (rotate 1–3°, blur, downscale, JPEG compression, uneven lighting).
 - Seed every effect from the document label; record effect names and parameters in

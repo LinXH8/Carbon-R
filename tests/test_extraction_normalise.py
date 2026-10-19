@@ -5,6 +5,7 @@ round-trip test builds its printed strings from the generator's own renderer con
 it proves `normalise` inverts what the layout prints rather than what I assumed it prints.
 """
 
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -12,6 +13,8 @@ import pytest
 from carbon_r.models.extraction import (
     DATE_FORMATS,
     ExtractedElectricityBill,
+    NormalisedBill,
+    activities_for,
     check_consistency,
     normalise,
 )
@@ -55,7 +58,13 @@ def perfect_reading(doc_id: str, **overrides) -> ExtractedElectricityBill:
     context = bill_context(BILLS[doc_id])
     fields = {field: context[key] for key, field in CONTEXT_TO_FIELD.items()}
     return ExtractedElectricityBill(
-        **{**fields, "consumption_unit": "kWh", "notes": None, **overrides}
+        **{
+            **fields,
+            "consumption_unit": "kWh",
+            "credit_adjustment": None,
+            "notes": None,
+            **overrides,
+        }
     )
 
 
@@ -346,3 +355,45 @@ def test_a_label_with_nothing_after_it_is_left_alone():
 def test_a_value_merely_beginning_with_label_letters_is_untouched():
     normalised, _ = normalise(perfect_reading("elec_009", vendor_uen="UENITED-1234"))
     assert normalised.vendor_uen == "UENITED-1234"
+
+
+# --- activities, and the year boundary (Tier 2 Block 2) ---------------------------------
+#
+# Split literals from the independent scratch route in test_prorate.py:
+# 9000 kWh over 16 Dec 2023 - 15 Jan 2024 is {2023: 4645, 2024: 4355}.
+
+
+def test_a_single_year_bill_is_one_activity_carrying_its_year():
+    bill = NormalisedBill(
+        consumption_kwh=4296,
+        period_start=date(2025, 11, 1),
+        period_end=date(2025, 11, 30),
+        document_date=date(2025, 12, 4),
+    )
+    (only,) = activities_for(bill)
+    assert only.amount == Decimal(4296)
+    assert only.factor_year == 2025
+    assert only.derivation is None
+
+
+def test_a_bill_across_31_december_is_split_by_days_into_two_years():
+    bill = NormalisedBill(
+        consumption_kwh=9000,
+        period_start=date(2023, 12, 16),
+        period_end=date(2024, 1, 15),
+        is_estimated_reading=True,
+    )
+    first, second = activities_for(bill)
+    assert (first.factor_year, first.amount) == (2023, Decimal(4645))
+    assert (second.factor_year, second.amount) == (2024, Decimal(4355))
+    assert (first.period_start, first.period_end) == (date(2023, 12, 16), date(2023, 12, 31))
+    assert (second.period_start, second.period_end) == (date(2024, 1, 1), date(2024, 1, 15))
+    assert "16 of 31 days in 2023" in first.derivation
+    assert "remainder" in second.derivation
+    # The estimate flag belongs to the reading, so both parts carry it.
+    assert first.is_estimated and second.is_estimated
+
+
+def test_without_a_readable_period_there_is_no_year_to_split_by():
+    (only,) = activities_for(NormalisedBill(consumption_kwh=500))
+    assert only.factor_year is None

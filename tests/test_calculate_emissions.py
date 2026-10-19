@@ -472,3 +472,78 @@ def test_a_flag_on_any_line_raises_it_for_the_whole_result():
         ]
     )
     assert result.data["disclosures"]["non_singapore_factor"] is True
+
+
+# --- the factor year (Tier 2 Block 2) ----------------------------------------------------
+#
+# An activity carries the year it belongs to, and a factor looked up for another year is
+# refused. Expected figures by the integer route: 4645 x 412 = 1,913,740 and
+# 4355 x 402 = 1,750,710 thousandths of a kg; total 3,664,450 -> 3664.450 kg.
+
+
+def split_activity(amount: str, year: int) -> Activity:
+    return Activity(
+        kind="electricity",
+        amount=Decimal(amount),
+        unit="kWh",
+        source_field="consumption",
+        factor_year=year,
+    )
+
+
+def test_a_factor_for_the_wrong_year_is_refused():
+    result = calculate_emissions(
+        pairs=[{"activity": split_activity("4645", 2023), "factor": factor_2024()}]
+    )
+    assert result.status == "error"
+    assert result.data is None
+    assert "belongs to 2023" in result.message
+    assert "looked up for 2024" in result.message
+
+
+def test_a_substituted_factor_is_still_the_right_year():
+    """Asking for 2025 and being given 2024 is a disclosed substitution, not a mismatch."""
+    result = calculate_emissions(
+        pairs=[
+            {
+                "activity": split_activity("100", 2025),
+                "factor": factor_2024(year_requested=2025, substituted=True),
+            }
+        ]
+    )
+    assert result.status == "ok"
+    assert result.data["disclosures"]["factor_year_substituted"] is True
+
+
+def test_one_years_factor_on_both_halves_is_refused_whole():
+    result = calculate_emissions(
+        pairs=[
+            {"activity": split_activity("4645", 2023), "factor": factor_2024()},
+            {"activity": split_activity("4355", 2024), "factor": factor_2024()},
+        ]
+    )
+    assert result.status == "error"
+    assert "1 of 2 line(s)" in result.message
+
+
+def test_a_bill_split_across_a_year_boundary_uses_both_years():
+    result = calculate_emissions(
+        pairs=[
+            {
+                "activity": split_activity("4645", 2023),
+                "factor": factor_2024(factor=Decimal("0.412"), year_requested=2023, year_used=2023),
+            },
+            {"activity": split_activity("4355", 2024), "factor": factor_2024()},
+        ]
+    )
+    assert result.status == "ok"
+    assert [line["kg_co2e"] for line in result.data["lines"]] == ["1913.740", "1750.710"]
+    assert result.data["kg_co2e"] == "3664.450"
+    assert [line["factor"]["year_used"] for line in result.data["lines"]] == [2023, 2024]
+
+
+def test_an_activity_without_a_year_is_not_year_checked():
+    """A hand-built activity with no year keeps the Tier 1 behaviour."""
+    activity = Activity(kind="electricity", amount=Decimal("10"), unit="kWh", source_field="x")
+    result = calculate_emissions(pairs=[{"activity": activity, "factor": factor_2024()}])
+    assert result.status == "ok"

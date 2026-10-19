@@ -1,0 +1,51 @@
+{# Fuel-card layout C - monospaced, upper case, slashed dates, totals at the end.
+   No arithmetic, no literal dates. #}
+<!-- {{ doc_id }} / layout {{ layout_id }} / {{ generator_version }} / seed {{ generator_seed }} -->
+{% from "_quirks.html.j2" import gst_headline, account_summary, credit_row %}
+<style>
+  @page { size: A4; margin: 13mm; }
+  body { font-family: "Courier New", Courier, monospace; font-size: 8.2pt; color: #111; line-height: 1.3; }
+  .notice { border: 1pt dashed #8a6d00; background: #fffbe8; color: #6b5500; padding: 4pt 6pt; font-size: 7.2pt; margin-bottom: 9pt; }
+  .head { border-top: 2pt solid #111; border-bottom: 2pt solid #111; padding: 5pt 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 7pt; }
+  td, th { padding: 1.4pt 2pt; text-align: left; }
+  th { border-bottom: 1pt solid #111; }
+  .num { text-align: right; }
+  footer { margin-top: 12pt; font-size: 7pt; border-top: 1pt solid #111; padding-top: 4pt; }
+</style>
+
+<div class="notice">{{ notice }}</div>
+<div class="head"><b>{{ vendor_name }}</b> UEN {{ vendor_uen }}<br>{{ vendor_address }} / {{ vendor_support }}<br>
+FUEL CARD STATEMENT {{ statement_number }}</div>
+<table>
+  <tr><td>STATEMENT DATE</td><td>{{ document_date }}</td><td>ACCOUNT</td><td>{{ account_number }}</td></tr>
+  <tr><td>CARDHOLDER</td><td colspan="3">{{ customer_name }}, {{ customer_address }}</td></tr>
+  <tr><td>CARD</td><td>{{ card_number }}</td><td>PERIOD</td><td>{{ period_start }} - {{ period_end }}</td></tr>
+  <tr><td>PRICE LIST</td><td colspan="3">{{ price_list_code }}</td></tr>
+</table>
+
+{{ gst_headline(gst_inclusive_display, total, currency, "CURRENT CHARGES INCL GST") }}
+
+<table>
+  <tr><th>DATE</th><th>TIME</th><th>VEHICLE</th><th>STATION</th><th>PRODUCT</th><th class="num">LITRES</th><th class="num">PRICE</th><th class="num">{{ currency }}</th></tr>
+  {% for row in transactions %}
+  <tr><td>{{ row.date }}</td><td>{{ row.time }}</td><td>{{ row.vehicle }}</td><td>{{ row.station }}</td><td>{{ row.product }}</td><td class="num">{{ row.litres }}</td><td class="num">{{ row.unit_price }}</td><td class="num">{{ row.amount }}</td></tr>
+  {% endfor %}
+</table>
+
+<table>
+  <tr><th>PRODUCT TOTAL</th><th class="num">LITRES</th><th class="num">{{ currency }}</th></tr>
+  {% for row in product_totals %}
+  <tr><td>{{ row.product }}</td><td class="num">{{ row.litres }}</td><td class="num">{{ row.amount }}</td></tr>
+  {% endfor %}
+  <tr><td>GROSS</td><td></td><td class="num">{{ gross_amount }}</td></tr>
+  <tr><td>REBATE {{ discount_per_litre }}/L</td><td></td><td class="num">-{{ discount_amount }}</td></tr>
+  {{ credit_row(credit, 1) }}
+  <tr><td>{{ "CURRENT CHARGES" if gst_inclusive_display else "NET BEFORE GST" }}</td><td></td><td class="num">{{ subtotal }}</td></tr>
+  <tr><td>GST {{ gst_percent }}%</td><td></td><td class="num">{{ gst_amount }}</td></tr>
+  <tr><td><b>TOTAL PAYABLE</b></td><td></td><td class="num"><b>{{ total }}</b></td></tr>
+</table>
+
+{{ account_summary(summary, currency, "ACCOUNT SUMMARY") }}
+
+<footer>{{ notice }}<br>{{ generator_version }} / SEED {{ generator_seed }}</footer>

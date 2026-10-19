@@ -109,6 +109,14 @@ class ExtractedLPGInvoice(BaseModel):
         )
     )
 
+    credit_adjustment: str | None = Field(
+        description=(
+            "A credit or adjustment line for an earlier delivery, as printed (its money "
+            "amount only), or null if the page has none. A credit row is a charge row too: "
+            "keep it in `lines` with its minus sign"
+        )
+    )
+
     currency: str | None = Field(description="Currency code or symbol as printed")
     subtotal: str | None = Field(description="Subtotal before GST as printed")
     gst_percent: str | None = Field(description="GST percentage as printed, e.g. '9'")
@@ -189,6 +197,9 @@ class NormalisedLPGInvoice(BaseModel):
     # whichever row happened to be in the right place.
     delivery_charge_sgd: Decimal | None = None
     rental_charge_sgd: Decimal | None = None
+    # A credit for an earlier delivery, as a magnitude. The row itself stays in `lines`
+    # with its sign, so `subtotal = sum(line amounts)` still holds.
+    credit_adjustment_sgd: Decimal | None = None
 
     currency: str | None = None
     subtotal_sgd: Decimal | None = None
@@ -346,6 +357,7 @@ def normalise_lpg(
 
     take("total_kg_printed", "total_kg_printed", parse_decimal)
     take("returned_cylinders", "returned_cylinders", parse_int)
+    take("credit_adjustment_sgd", "credit_adjustment", lambda printed: abs(parse_decimal(printed)))
 
     for target, source in (
         ("subtotal_sgd", "subtotal"),
@@ -385,6 +397,9 @@ def activities_for_lpg(invoice: NormalisedLPGInvoice) -> list[Activity]:
             unit="kg",
             source_field="cylinder_deliveries",
             derivation=derivation,
+            factor_year=invoice.factor_year,
+            period_start=invoice.period_start,
+            period_end=invoice.period_end,
         )
     ]
 

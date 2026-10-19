@@ -1,5 +1,5 @@
-{# Layout A - the only layout in synthgen v0. Tier 2 Block 2 adds more, and holds one back
-   as a never-tuned-on evaluation layout.
+{# Layout A - the synthgen v0 layout, and the layout every Block 1 bill is on. Tier 2
+   Block 2 added b, c and d (d held out) and the quirk blocks from _quirks.html.j2.
 
    No arithmetic and no literal dates in here: every value is a pre-formatted string from
    render.bill_context(), built from an ElectricityBill that already passed its validator. #}
@@ -38,6 +38,7 @@
            font-size: 7.2pt; color: #7a848e; }
 </style>
 
+{% from "_quirks.html.j2" import gst_headline, account_summary, credit_row %}
 <div class="notice">{{ notice }}</div>
 
 <header>
@@ -76,6 +77,9 @@
   </div>
 </div>
 
+{{ gst_headline(gst_inclusive_display, total, currency) }}
+{{ account_summary(summary, currency) }}
+
 <table class="meter">
   <thead>
     <tr>
@@ -90,9 +94,9 @@
     <tr>
       <td>{{ meter_number }}</td>
       <td>{{ reading_basis }}</td>
-      <td class="num">{{ previous_reading }} kWh</td>
-      <td class="num">{{ current_reading }} kWh</td>
-      <td class="num">{{ consumption }} kWh</td>
+      <td class="num">{{ previous_reading }} {{ consumption_unit }}</td>
+      <td class="num">{{ current_reading }} {{ consumption_unit }}</td>
+      <td class="num">{{ consumption }} {{ consumption_unit }}</td>
     </tr>
   </tbody>
 </table>
@@ -109,7 +113,7 @@
   <tbody>
     <tr>
       <td>Electricity consumption</td>
-      <td class="num">{{ consumption }} kWh</td>
+      <td class="num">{{ consumption }} {{ consumption_unit }}</td>
       <td class="num">{{ tariff_cents_per_kwh }} c/kWh</td>
       <td class="num">{{ energy_charge }}</td>
     </tr>
@@ -119,8 +123,9 @@
       <td class="num">&mdash;</td>
       <td class="num">{{ fixed_charge }}</td>
     </tr>
+    {{ credit_row(credit, 2) }}
     <tr class="sum">
-      <td colspan="3" class="label">Subtotal before GST</td>
+      <td colspan="3" class="label">{{ "Current charges" if gst_inclusive_display else "Subtotal before GST" }}</td>
       <td class="num">{{ subtotal }}</td>
     </tr>
     <tr class="sum">

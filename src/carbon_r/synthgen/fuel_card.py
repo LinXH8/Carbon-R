@@ -35,15 +35,15 @@ from decimal import Decimal
 from carbon_r.config import get_settings
 from carbon_r.models.fuel_card_statement import FuelCardStatement, FuelTransaction
 from carbon_r.money import round2
-from carbon_r.synthgen.electricity import add_months, days_in_month
+from carbon_r.synthgen.electricity import days_in_month
 from carbon_r.synthgen.profiles import (
     FUEL_CUSTOMERS,
-    FUEL_DISCOUNT_PER_LITRE_SGD,
     FUEL_VENDOR_NAME,
     FUEL_VENDOR_UEN,
     FuelCustomer,
     Vehicle,
     customer_by_key,
+    fuel_price_list,
     incidental_details,
 )
 from carbon_r.synthgen.rng import bill_rng
@@ -55,7 +55,8 @@ IS_HOLDOUT_LAYOUT = False
 DIFFICULTY_TIER = "clean"
 
 DEFAULT_SEED = 20261016  # the same master seed as the other kinds
-GENERATOR_VERSION = "synthgen-fuel-card-1"
+# 2 since Tier 2 Block 2: price list by year, rebate per contract, quirks.
+GENERATOR_VERSION = "synthgen-fuel-card-2"
 
 # A statement follows the period it covers by a few days, drawn per document.
 STATEMENT_LAG_DAYS_RANGE = (2, 7)
@@ -121,14 +122,17 @@ def build_statement(
     *,
     customer_address: str,
     lag_days: int | None = None,
+    layout_id: str = LAYOUT_ID,
+    is_holdout_layout: bool = IS_HOLDOUT_LAYOUT,
+    difficulty_tier: str = DIFFICULTY_TIER,
 ) -> FuelCardStatement:
-    """Assemble and validate one statement.
+    """Assemble and validate one clean statement. Quirks are applied afterwards.
 
     Returns a validated FuelCardStatement, so an arithmetic mistake in this module fails
     here - before anything is written to disk and long before a PDF exists.
     """
     profile = customer_by_key(customer.key)
-    prices = customer.price_list
+    prices = fuel_price_list(year)
     rng = bill_rng(seed, customer.account_number, year, month, DOC_KIND)
 
     month_prices = prices.prices.get((year, month))
@@ -178,7 +182,7 @@ def build_statement(
     gst_rate = Decimal(str(get_settings().gst_rate))  # str(): never Decimal(float)
     gross = sum((t.amount_sgd for t in transactions), Decimal(0))
     total_litres = sum(litres_by_product.values(), Decimal(0))
-    discount = round2(total_litres * FUEL_DISCOUNT_PER_LITRE_SGD)
+    discount = round2(total_litres * customer.discount_per_litre_sgd)
     subtotal = gross - discount
     gst_amount = round2(subtotal * gst_rate)
 
@@ -186,9 +190,9 @@ def build_statement(
         doc_id=doc_id,
         generator_seed=seed,
         generator_version=GENERATOR_VERSION,
-        layout_id=LAYOUT_ID,
-        is_holdout_layout=IS_HOLDOUT_LAYOUT,
-        difficulty_tier=DIFFICULTY_TIER,
+        layout_id=layout_id,
+        is_holdout_layout=is_holdout_layout,
+        difficulty_tier=difficulty_tier,
         degradation={},
         vendor_name=FUEL_VENDOR_NAME,
         vendor_uen=FUEL_VENDOR_UEN,
@@ -205,41 +209,54 @@ def build_statement(
         litres_by_product=litres_by_product,
         prints_product_totals=True,
         gross_amount_sgd=gross,
-        discount_per_litre_sgd=FUEL_DISCOUNT_PER_LITRE_SGD,
+        discount_per_litre_sgd=customer.discount_per_litre_sgd,
         discount_amount_sgd=discount,
         subtotal_sgd=subtotal,
         gst_rate=gst_rate,
         gst_amount_sgd=gst_amount,
         total_sgd=subtotal + gst_amount,
-        quirks=[],  # this block ships no injected quirks; Block 2 fills this
+        # Structural: a statement for a fleet burning two fuels is what it is, in every tier.
+        quirks=["mixed_fuel"] if len(litres_by_product) > 1 else [],
     )
 
 
 def build_statement_series(
     seed: int = DEFAULT_SEED, customers: tuple[FuelCustomer, ...] = FUEL_CUSTOMERS
 ) -> list[FuelCardStatement]:
-    """Every fuel-card statement: two accounts, three consecutive months each.
+    """The Block 1 statements: the original two accounts, three consecutive months each.
 
     Document numbers come from each customer's `first_doc_number`, not from iteration
-    order, so adding a third customer cannot renumber the first two (spec 1.4).
+    order; a customer with 0 has no Block 1 run (spec 1.4).
     """
-    statements: list[FuelCardStatement] = []
+    from carbon_r.synthgen.plan import FUEL, plan_kind
 
-    for customer in customers:
-        profile = customer_by_key(customer.key)
-        address, _ = incidental_details(profile, seed)
+    return build_v1(seed, plan_kind(FUEL, seed, series=(), accounts=customers), customers)
 
-        for offset in range(MONTHS_PER_ACCOUNT):
-            year, month = add_months(customer.start_year, customer.start_month, offset)
-            statements.append(
-                build_statement(
-                    customer,
-                    year,
-                    month,
-                    f"{DOC_ID_PREFIX}_{customer.first_doc_number + offset:03d}",
-                    seed,
-                    customer_address=address,
-                )
-            )
 
-    return statements
+def build_v1(
+    seed: int = DEFAULT_SEED, plans=None, customers: tuple[FuelCustomer, ...] = FUEL_CUSTOMERS
+) -> list[FuelCardStatement]:
+    """Every synthgen v1 statement, from the plan, clean and then dressed."""
+    from carbon_r.synthgen.layouts import layout
+    from carbon_r.synthgen.plan import FUEL, plan_kind
+    from carbon_r.synthgen.quirks import dress
+
+    plans = plans if plans is not None else plan_kind(FUEL, seed)
+    by_key = {customer.key: customer for customer in customers}
+    built = {}
+    for plan in plans:
+        customer = by_key[plan.account]
+        address, _ = incidental_details(customer_by_key(customer.key), seed)
+        statement = build_statement(
+            customer,
+            plan.year,
+            plan.month,
+            plan.doc_id,
+            seed,
+            customer_address=address,
+            layout_id=plan.layout_id,
+            is_holdout_layout=layout(plan.layout_id).is_holdout,
+            difficulty_tier=plan.tier,
+        )
+        built[plan.number] = dress(statement, plan, seed)
+    return [built[n] for n in sorted(built)]

@@ -127,6 +127,9 @@ ELECTRICITY_ACTIVITY = {
     "source_field": "consumption",
     "derivation": None,
     "is_estimated": False,
+    "factor_year": 2025,
+    "period_start": "2025-11-01",
+    "period_end": "2025-11-30",
 }
 
 # The two activities a mixed fuel-card statement carries. Litres, not money, and one
@@ -139,6 +142,9 @@ FUEL_ACTIVITIES = [
         "source_field": "transactions.litres",
         "derivation": "3 diesel transaction(s): 52.30 + 48.21 + 56.28 = 156.79 litres",
         "is_estimated": False,
+        "factor_year": 2026,
+        "period_start": "2026-02-01",
+        "period_end": "2026-02-28",
     },
     {
         "kind": "petrol",
@@ -147,6 +153,9 @@ FUEL_ACTIVITIES = [
         "source_field": "transactions.litres",
         "derivation": "3 petrol transaction(s): 38.11 + 41.02 + 37.66 = 116.79 litres",
         "is_estimated": False,
+        "factor_year": 2026,
+        "period_start": "2026-02-01",
+        "period_end": "2026-02-28",
     },
 ]
 

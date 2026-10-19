@@ -41,11 +41,30 @@ detail, and a hash of the classifier AND all three extraction instructions and s
 for every document, even without `--no-cache`. `--no-cache` forces fresh calls with an
 UNCHANGED request; its purpose is to measure run-to-run variation.
 
+Document sets (Tier 2 Block 2)
+------------------------------
+The default set is synthgen v1 at `data/generated/synthgen_v1/`: three tiers, four layouts
+per kind, quirks. Documents are found through each kind's `manifest.json`, whose `file`
+names the page to read - a PNG for a scanned or photographed document. `--root
+data/generated` reads the Block 1 set instead; its runs stay in their own directory.
+
+**The holdout layout is excluded by default.** Layout `d` of each kind is never looked at
+while tuning, and is scored separately in Block 3 with `--include-holdout`.
+
+Activities are compared by (kind, factor year), not by kind alone: a bill across 31
+December is two activities, and getting the split wrong is a different failure from
+reading the wrong kWh.
+
+Every run records the git commit (and whether the tree was dirty), the seed and generator
+versions from the manifests, the model and the request hash - so a figure can be traced
+to exactly the code and documents that produced it.
+
 Counts, never bare percentages (CLAUDE.md): "17 of 18" is a claim that can be checked.
 """
 
 import argparse
 import json
+import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -74,13 +93,21 @@ from carbon_r.tools.extract import (
 from carbon_r.tools.factors import lookup_emission_factor
 
 GENERATED = PROJECT_ROOT / "data" / "generated"
-REPLY_CACHE = GENERATED / ".eval-cache"
-# Run records are kept per DOCUMENT SET, not in one pooled directory. These results
-# describe the Tier 2 Block 1 set: three kinds, one layout each, the clean tier, no quirks.
-# When Block 2 adds layouts, quirks and degraded tiers, its runs belong in their own
-# directory - an accuracy figure is only meaningful against the set it was measured on,
-# and pooling the two would silently mix them.
-RUNS_DIR = GENERATED / "eval_runs_TIER2_BLOCK1"
+V1_ROOT = GENERATED / "synthgen_v1"
+# Run records are kept per DOCUMENT SET, not in one pooled directory - an accuracy figure
+# is only meaningful against the set it was measured on, and pooling two sets would
+# silently mix them. The Block 1 set (one layout, clean) keeps its own directory.
+RUNS_DIRS = {
+    V1_ROOT: GENERATED / "eval_runs_TIER2_BLOCK2",
+    GENERATED: GENERATED / "eval_runs_TIER2_BLOCK1",
+}
+
+
+def reply_cache(root: Path) -> Path:
+    """Cached model replies, per document set: v1 reuses Block 1's document ids for
+    different documents, so one shared cache could replay a Block 1 reply against a v1 key."""
+    return root / ".eval-cache"
+
 
 # Activity kind -> the (category, unit) selectors its factor is looked up by. The unit
 # strings are the publishers' own, verbatim.
@@ -98,7 +125,6 @@ class KindSpec:
 
     key_model: type
     normalised_model: type
-    doc_glob: str
     # Fields that are BOTH printed on the page and present in the answer key. Fields the
     # generator knows but the page does not show (seed, layout, degradation) are not
     # extractable and are not scored.
@@ -106,27 +132,32 @@ class KindSpec:
     # Compared on whitespace and case only - never on content. Declared rather than
     # inferred, so the strictness of the score is visible: money and dates are exact.
     text_fields: frozenset[str]
-    # How to read the truth's activities, as {kind: amount}, for the activity score.
+    # How to read the truth's activities, as {(kind, factor year): amount}.
     key_activities: Any
 
 
-def _electricity_activities(key: ElectricityBill) -> dict[str, Decimal]:
-    return {"electricity": Decimal(key.consumption_kwh)}
+ActivityKey = tuple[str, int]
 
 
-def _lpg_activities(key: LPGInvoice) -> dict[str, Decimal]:
-    return {"lpg": key.lpg_kg}
+def _electricity_activities(key: ElectricityBill) -> dict[ActivityKey, Decimal]:
+    """One entry per calendar year: a bill across 31 December is two activities."""
+    split = key.split_kwh_by_year or {key.factor_year: key.consumption_kwh}
+    return {("electricity", year): Decimal(kwh) for year, kwh in split.items()}
 
 
-def _fuel_activities(key: FuelCardStatement) -> dict[str, Decimal]:
+def _lpg_activities(key: LPGInvoice) -> dict[ActivityKey, Decimal]:
+    return {("lpg", key.factor_year): key.lpg_kg}
+
+
+def _fuel_activities(key: FuelCardStatement) -> dict[ActivityKey, Decimal]:
     """Litres per ACTIVITY KIND, so two octane grades collapse as the pipeline collapses
     them. Keyed by kind rather than by printed product name for exactly that reason."""
     from carbon_r.models.extraction_fuel import kind_for_product
 
-    totals: dict[str, Decimal] = {}
+    totals: dict[ActivityKey, Decimal] = {}
     for product, litres in key.litres_by_product.items():
-        kind = kind_for_product(product)
-        totals[kind] = totals.get(kind, Decimal(0)) + litres
+        slot = (kind_for_product(product), key.factor_year)
+        totals[slot] = totals.get(slot, Decimal(0)) + litres
     return totals
 
 
@@ -134,7 +165,6 @@ KINDS: dict[str, KindSpec] = {
     "electricity_bill": KindSpec(
         key_model=ElectricityBill,
         normalised_model=NormalisedBill,
-        doc_glob="elec_*.json",
         scored_fields=(
             "vendor_name",
             "vendor_uen",
@@ -156,6 +186,7 @@ KINDS: dict[str, KindSpec] = {
             "tariff_cents_per_kwh",
             "energy_charge_sgd",
             "fixed_charge_sgd",
+            "credit_adjustment_sgd",
             "subtotal_sgd",
             "gst_rate",
             "gst_amount_sgd",
@@ -180,7 +211,6 @@ KINDS: dict[str, KindSpec] = {
     "lpg_invoice": KindSpec(
         key_model=LPGInvoice,
         normalised_model=NormalisedLPGInvoice,
-        doc_glob="lpg_*.json",
         scored_fields=(
             "vendor_name",
             "vendor_uen",
@@ -197,6 +227,7 @@ KINDS: dict[str, KindSpec] = {
             "currency",
             "delivery_charge_sgd",
             "rental_charge_sgd",
+            "credit_adjustment_sgd",
             "subtotal_sgd",
             "gst_rate",
             "gst_amount_sgd",
@@ -218,7 +249,6 @@ KINDS: dict[str, KindSpec] = {
     "fuel_card_statement": KindSpec(
         key_model=FuelCardStatement,
         normalised_model=NormalisedFuelCardStatement,
-        doc_glob="fuel_*.json",
         scored_fields=(
             "vendor_name",
             "vendor_uen",
@@ -233,6 +263,7 @@ KINDS: dict[str, KindSpec] = {
             "currency",
             "gross_amount_sgd",
             "discount_amount_sgd",
+            "credit_adjustment_sgd",
             "subtotal_sgd",
             "gst_rate",
             "gst_amount_sgd",
@@ -265,11 +296,72 @@ def kind_of(doc_id: str) -> str:
     return PREFIXES[prefix]
 
 
-def documents_dir(kind: str) -> Path:
-    return GENERATED / kind / "clean"
+@dataclass(frozen=True)
+class DocRef:
+    """One document to score: where its page and its key are, and whether it is held out."""
+
+    doc_id: str
+    page: Path
+    key: Path
+    is_holdout: bool = False
+
+
+def discover(root: Path, kind: str) -> list[DocRef]:
+    """Every document of one kind in a set, through its manifest's `file` entries.
+
+    The Block 1 manifest predates `file`; its documents are clean PDFs beside their keys.
+    """
+    manifest_path = root / kind / "manifest.json"
+    if not manifest_path.exists():
+        return []
+    refs = []
+    for entry in json.loads(manifest_path.read_text())["documents"]:
+        page = root / kind / entry.get("file", f"clean/{entry['doc_id']}.pdf")
+        refs.append(
+            DocRef(
+                doc_id=entry["doc_id"],
+                page=page,
+                key=page.parent / f"{entry['doc_id']}.json",
+                is_holdout=entry.get("is_holdout_layout", False),
+            )
+        )
+    return refs
+
+
+def set_provenance(root: Path) -> dict:
+    """Seed and generator version per kind, from the manifests - for the run record."""
+    out = {}
+    for kind in KINDS:
+        path = root / kind / "manifest.json"
+        if path.exists():
+            manifest = json.loads(path.read_text())
+            out[kind] = {
+                "seed": manifest["seed"],
+                "generator_version": manifest["generator_version"],
+                "document_count": manifest["document_count"],
+            }
+    return out
+
+
+def git_state() -> dict:
+    """The commit the run measured, and whether uncommitted changes could have touched it."""
+
+    def run(*args: str) -> str:
+        return subprocess.run(
+            ["git", *args], cwd=PROJECT_ROOT, capture_output=True, text=True, check=False
+        ).stdout.strip()
+
+    return {"commit": run("rev-parse", "HEAD"), "dirty": bool(run("status", "--porcelain"))}
+
+
+# A field that is absent on a document where the key holds zero: a page with no credit
+# prints no credit line, and a reading that returns null for it has read the page right.
+ZERO_WHEN_ABSENT = frozenset({"credit_adjustment_sgd"})
 
 
 def _comparable(value, field: str, spec: KindSpec):
+    if field in ZERO_WHEN_ABSENT and (value is None or value == 0):
+        return Decimal(0)
     if value is None:
         return None
     if field in spec.text_fields:
@@ -293,33 +385,48 @@ def compare_fields(key, reading, spec: KindSpec) -> dict[str, dict]:
     return verdicts
 
 
-def compare_activities(expected: dict[str, Decimal], found: list[dict]) -> dict:
-    """Did the reading recover the same quantities, in the same units, as the key?
+def read_activities(found: list[dict]) -> dict[ActivityKey, Decimal]:
+    """The reading's activities as {(kind, factor year): amount}. Two lines of one kind in
+    one year (two octane grades) are summed, as for the key."""
+    got: dict[ActivityKey, Decimal] = {}
+    for activity in found:
+        slot = (activity["kind"], activity.get("factor_year"))
+        got[slot] = got.get(slot, Decimal(0)) + Decimal(activity["amount"])
+    return got
 
-    Compared as a mapping of kind to amount rather than positionally: the order activities
-    come back in is not a property worth scoring, but the set of them is.
+
+def _label(slot: ActivityKey) -> str:
+    return f"{slot[0]} {slot[1]}"
+
+
+def compare_activities(expected: dict[ActivityKey, Decimal], found: list[dict]) -> dict:
+    """Did the reading recover the same quantities, in the same units and years, as the key?
+
+    Compared as a mapping of (kind, year) to amount rather than positionally: the order
+    activities come back in is not a property worth scoring, but the set of them is - and
+    since Tier 2 Block 2 the year is part of it, because a cross-year bill split wrongly
+    is a wrong activity even when its kWh total is right.
     """
-    got = {a["kind"]: Decimal(a["amount"]) for a in found}
-    units = {a["kind"]: a["unit"] for a in found}
+    got = read_activities(found)
     from carbon_r.models.activity import KIND_UNITS
 
-    units_right = all(units.get(kind) == KIND_UNITS.get(kind) for kind in got)
+    units_right = all(a["unit"] == KIND_UNITS.get(a["kind"]) for a in found)
     return {
         "correct": got == expected and units_right,
-        "expected": {k: str(v) for k, v in sorted(expected.items())},
-        "got": {k: str(v) for k, v in sorted(got.items())},
+        "expected": {_label(k): str(v) for k, v in sorted(expected.items(), key=str)},
+        "got": {_label(k): str(v) for k, v in sorted(got.items(), key=str)},
         "units_right": units_right,
     }
 
 
-def emissions_for(activities: dict[str, Decimal], factor_year: int | None) -> dict:
+def emissions_for(activities: dict[ActivityKey, Decimal]) -> dict:
     """kgCO2e for a set of activities, or None with the reason. Same path for key and read.
 
     Returns `{kg_co2e, substituted, note, refused}`. `refused` marks an honest refusal -
     a factor that is not published - as distinct from a failure, so the report can score
     an expected refusal as expected.
     """
-    if not activities or factor_year is None:
+    if not activities or any(year is None for _, year in activities):
         return {
             "kg_co2e": None,
             "substituted": None,
@@ -329,7 +436,7 @@ def emissions_for(activities: dict[str, Decimal], factor_year: int | None) -> di
 
     pairs = []
     substituted = False
-    for kind, amount in sorted(activities.items()):
+    for (kind, factor_year), amount in sorted(activities.items()):
         category, unit = FACTOR_SELECTORS[kind]
         factor = lookup_emission_factor(category, unit, factor_year)
         if factor.status != "ok":
@@ -351,6 +458,7 @@ def emissions_for(activities: dict[str, Decimal], factor_year: int | None) -> di
                     "amount": amount,
                     "unit": KIND_UNITS[kind],
                     "source_field": "eval",
+                    "factor_year": factor_year,
                 },
                 "factor": factor.data["factor"],
             }
@@ -372,14 +480,16 @@ def emissions_for(activities: dict[str, Decimal], factor_year: int | None) -> di
     }
 
 
-def load_reading(pdf: Path, doc_id: str, *, model: str, dpi: int, use_cache: bool) -> tuple:
+def load_reading(
+    pdf: Path, doc_id: str, *, model: str, dpi: int, use_cache: bool, cache_dir: Path
+) -> tuple:
     """The model's raw classification and reading, from cache when unchanged.
 
     Both calls are cached together: a cached entry that held only the transcription would
     have to re-classify to know which schema to parse it with, which is the expensive half
     of what the cache exists to avoid.
     """
-    path = REPLY_CACHE / cache_key(doc_id, model, dpi)
+    path = cache_dir / cache_key(doc_id, model, dpi)
     if use_cache and path.exists():
         stored = json.loads(path.read_text())
         kind = stored["document_kind"]
@@ -391,7 +501,7 @@ def load_reading(pdf: Path, doc_id: str, *, model: str, dpi: int, use_cache: boo
     if kind not in EXTRACTORS:
         # A refusal is cached too: re-paying for a page the classifier declined would make
         # a re-run of the eval cost money for no new information.
-        REPLY_CACHE.mkdir(parents=True, exist_ok=True)
+        cache_dir.mkdir(parents=True, exist_ok=True)
         path.write_text(
             json.dumps(
                 {
@@ -407,7 +517,7 @@ def load_reading(pdf: Path, doc_id: str, *, model: str, dpi: int, use_cache: boo
         return classification.model_dump(), kind, None, False
 
     extracted = read_page(pdf, kind=kind, dpi=dpi, model=model)
-    REPLY_CACHE.mkdir(parents=True, exist_ok=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(
             {
@@ -423,21 +533,30 @@ def load_reading(pdf: Path, doc_id: str, *, model: str, dpi: int, use_cache: boo
     return classification.model_dump(), kind, extracted, False
 
 
-def evaluate(doc_ids: list[str], *, model: str, dpi: int, use_cache: bool) -> dict:
+def evaluate(
+    refs: list[DocRef], *, model: str, dpi: int, use_cache: bool, root: Path = V1_ROOT
+) -> dict:
     rows = []
-    for doc_id in doc_ids:
+    for ref in refs:
+        doc_id = ref.doc_id
         true_kind = kind_of(doc_id)
         spec = KINDS[true_kind]
-        directory = documents_dir(true_kind)
-        pdf = directory / f"{doc_id}.pdf"
-        key = spec.key_model.model_validate_json((directory / f"{doc_id}.json").read_text())
+        pdf = ref.page
+        key = spec.key_model.model_validate_json(ref.key.read_text())
 
         classification, read_kind, extracted, cached = load_reading(
-            pdf, doc_id, model=model, dpi=dpi, use_cache=use_cache
+            pdf, doc_id, model=model, dpi=dpi, use_cache=use_cache, cache_dir=reply_cache(root)
         )
 
         expected_activities = spec.key_activities(key)
-        from_key = emissions_for(expected_activities, key.factor_year)
+        from_key = emissions_for(expected_activities)
+        dress = {
+            "file": str(pdf.relative_to(root)) if pdf.is_relative_to(root) else str(pdf),
+            "layout_id": key.layout_id,
+            "is_holdout_layout": key.is_holdout_layout,
+            "difficulty_tier": key.difficulty_tier,
+            "quirks": list(key.quirks),
+        }
 
         if extracted is None:
             # The classifier refused. Nothing was read, so there is nothing to score but
@@ -445,6 +564,7 @@ def evaluate(doc_ids: list[str], *, model: str, dpi: int, use_cache: bool) -> di
             rows.append(
                 {
                     "doc_id": doc_id,
+                    **dress,
                     "cached": cached,
                     "status": "no_results",
                     "true_kind": true_kind,
@@ -484,14 +604,14 @@ def evaluate(doc_ids: list[str], *, model: str, dpi: int, use_cache: bool) -> di
         found = result.data.get("activities", []) if result.data else []
         activity = compare_activities(expected_activities, found)
 
-        read_activities = {a["kind"]: Decimal(a["amount"]) for a in found}
-        from_reading = emissions_for(read_activities, reading.factor_year if reading else None)
+        from_reading = emissions_for(read_activities(found))
         expected_kg = from_key["kg_co2e"]
         actual_kg = from_reading["kg_co2e"]
 
         rows.append(
             {
                 "doc_id": doc_id,
+                **dress,
                 "cached": cached,
                 "status": result.status,
                 "true_kind": true_kind,
@@ -529,6 +649,10 @@ def evaluate(doc_ids: list[str], *, model: str, dpi: int, use_cache: bool) -> di
         )
     return {
         "run_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "document_set": str(root.relative_to(PROJECT_ROOT)),
+        "set_provenance": set_provenance(root),
+        "git": git_state(),
+        "holdout_included": any(ref.is_holdout for ref in refs),
         "request": {
             "model": model,
             "dpi": dpi,
@@ -547,7 +671,14 @@ def report(run: dict) -> int:
     cached = sum(r["cached"] for r in rows)
     fresh = total - cached
 
-    print(f"\nCarbon R extraction eval - {total} documents")
+    print(f"\nCarbon R extraction eval - {total} documents from {run['document_set']}")
+    git = run["git"]
+    dirty = " (DIRTY TREE - not a clean measurement)" if git["dirty"] else ""
+    print(
+        f"  commit {git['commit'][:7]}{dirty}"
+        f"  seed {sorted({p['seed'] for p in run['set_provenance'].values()})}"
+        f"  holdout {'INCLUDED' if run['holdout_included'] else 'excluded'}"
+    )
     print(
         f"  model {run['request']['model']}  dpi {run['request']['dpi']}  "
         f"detail {run['request']['image_detail']}  request {run['request']['request_hash']}"
@@ -639,9 +770,10 @@ def report(run: dict) -> int:
     if worst:
         print(f"\nWeakest fields: {', '.join(worst)}")
 
-    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    runs_dir = RUNS_DIRS.get(PROJECT_ROOT / run["document_set"], GENERATED / "eval_runs_other")
+    runs_dir.mkdir(parents=True, exist_ok=True)
     stamp = run["run_at"].replace(":", "").replace("-", "")
-    path = RUNS_DIR / f"{stamp}-{run['request']['request_hash']}.json"
+    path = runs_dir / f"{stamp}-{run['request']['request_hash']}.json"
     path.write_text(json.dumps(run, indent=2) + "\n", encoding="utf-8")
     print(f"\nRun written to {path.relative_to(PROJECT_ROOT)}")
 
@@ -658,6 +790,17 @@ def main() -> int:
     parser.add_argument("--dpi", type=int, default=DEFAULT_DPI)
     parser.add_argument("--model", default=None)
     parser.add_argument(
+        "--root",
+        type=Path,
+        default=V1_ROOT,
+        help="document set to score (default synthgen v1; data/generated for Block 1)",
+    )
+    parser.add_argument(
+        "--include-holdout",
+        action="store_true",
+        help="also score the held-out layout (Block 3; never while tuning)",
+    )
+    parser.add_argument(
         "--no-cache",
         action="store_true",
         help="call the model again for every document, to measure run-to-run variation",
@@ -670,25 +813,35 @@ def main() -> int:
         print("OPENAI_API_KEY and OPENAI_MODEL must be set; see .env.example", file=sys.stderr)
         return 2
 
-    if args.docs:
-        doc_ids = [d.strip() for d in args.docs.split(",") if d.strip()]
-    else:
-        kinds = sorted(KINDS) if args.kind == "all" else [args.kind]
-        doc_ids = []
-        for kind in kinds:
-            directory = documents_dir(kind)
-            if not directory.exists():
-                print(f"No generated documents at {directory}. Run `make docs`.", file=sys.stderr)
-                return 2
-            doc_ids += sorted(p.stem for p in directory.glob(KINDS[kind].doc_glob))
+    root = args.root if args.root.is_absolute() else PROJECT_ROOT / args.root
+    kinds = sorted(KINDS) if args.kind == "all" else [args.kind]
+    refs = [ref for kind in kinds for ref in discover(root, kind)]
+    if not refs:
+        print(f"No generated documents under {root}. Run `make docs`.", file=sys.stderr)
+        return 2
+    refs = select(refs, docs=args.docs, include_holdout=args.include_holdout)
     if args.limit:
-        doc_ids = doc_ids[: args.limit]
-    if not doc_ids:
+        refs = refs[: args.limit]
+    if not refs:
         print("No documents selected.", file=sys.stderr)
         return 2
 
-    run = evaluate(doc_ids, model=model, dpi=args.dpi, use_cache=not args.no_cache)
+    run = evaluate(refs, model=model, dpi=args.dpi, use_cache=not args.no_cache, root=root)
     return report(run)
+
+
+def select(refs: list[DocRef], *, docs: str | None, include_holdout: bool) -> list[DocRef]:
+    """Narrow to named documents, and drop the holdout layout unless asked for.
+
+    A named holdout document is still dropped without `--include-holdout`: naming it is
+    exactly how a holdout leaks into tuning.
+    """
+    if docs:
+        wanted = {d.strip() for d in docs.split(",") if d.strip()}
+        refs = [ref for ref in refs if ref.doc_id in wanted]
+    if not include_holdout:
+        refs = [ref for ref in refs if not ref.is_holdout]
+    return refs
 
 
 if __name__ == "__main__":

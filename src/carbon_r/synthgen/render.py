@@ -10,6 +10,12 @@ Two rules hold here, for every document kind:
    can never name a day their month does not have. A literal date in a layout is an
    unvalidated number on a document whose whole job is to be trustworthy.
 
+Since Tier 2 Block 2 each layout's date format comes from the layout registry
+(`synthgen/layouts.py`), and every builder adds the shared quirk blocks - a credit line, an
+account summary, a GST-inclusive headline - only when the key carries them. Templates
+print those blocks through the macros in `_quirks.html.j2`, so the three kinds cannot
+disagree on what a credit looks like.
+
 One context builder per kind, dispatched by `context_for`. They are separate functions
 rather than one with branches because the three kinds share almost no fields, and a single
 builder would be a long sequence of `if doc_kind ==` with every kind's quirks visible to
@@ -29,6 +35,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 from carbon_r.models.electricity_bill import ElectricityBill
 from carbon_r.models.fuel_card_statement import FuelCardStatement
 from carbon_r.models.lpg_invoice import LPGInvoice
+from carbon_r.synthgen.layouts import layout
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 DEFAULT_TEMPLATE = "electricity_bill_a.html.j2"
@@ -53,19 +60,68 @@ def environment() -> Environment:
     )
 
 
-def _date(value) -> str:
-    return value.strftime("%d %b %Y")
+def _date(value, fmt: str = "%d %b %Y") -> str:
+    return value.strftime(fmt)
 
 
 def _money(value) -> str:
     return f"{value:,.2f}"
 
 
+def _dates(document) -> dict:
+    """The document's three dates in its layout's format."""
+    fmt = layout(document.layout_id).date_format
+    return {
+        "document_date": _date(document.document_date, fmt),
+        "period_start": _date(document.period_start, fmt),
+        "period_end": _date(document.period_end, fmt),
+    }
+
+
+def _quirk_blocks(document) -> dict:
+    """The shared quirk blocks, as printed strings, or None where the key has none."""
+    credit = None
+    if document.credit_amount_sgd > 0:
+        credit = {
+            "reference": document.credit_reference,
+            "amount": _money(document.credit_amount_sgd),
+            "quantity": (
+                f"{_quantity(document.credit_quantity)} {document.credit_quantity_unit}"
+                if document.credit_quantity is not None
+                else None
+            ),
+        }
+    summary = None
+    if document.amount_due_sgd is not None:
+        summary = {
+            "balance": _money(document.balance_forward_sgd),
+            "payment": _money(document.payment_received_sgd),
+            "charges": _money(document.total_sgd),
+            "amount_due": _money(document.amount_due_sgd),
+        }
+    return {
+        "credit": credit,
+        "summary": summary,
+        "gst_inclusive_display": document.gst_inclusive_display,
+    }
+
+
+def _energy(kwh: int, unit: str) -> str:
+    """A kWh figure in the unit the page prints: MWh at 3 dp is exact for whole kWh."""
+    if unit == "MWh":
+        return f"{Decimal(kwh) / Decimal(1000):,.3f}"
+    return f"{kwh:,}"
+
+
 def bill_context(bill: ElectricityBill) -> dict:
     """Pre-format every value the layout prints. All strings; no numbers to manipulate."""
     from carbon_r.synthgen.profiles import VENDOR_ADDRESS, VENDOR_SUPPORT
 
+    unit = bill.consumption_unit_printed
     return {
+        **_dates(bill),
+        **_quirk_blocks(bill),
+        "consumption_unit": unit,
         "notice": SYNTHETIC_NOTICE,
         "doc_id": bill.doc_id,
         "layout_id": bill.layout_id,
@@ -76,14 +132,11 @@ def bill_context(bill: ElectricityBill) -> dict:
         "customer_name": bill.customer_name,
         "customer_address": bill.customer_address,
         "account_number": bill.account_number,
-        "document_date": _date(bill.document_date),
-        "period_start": _date(bill.period_start),
-        "period_end": _date(bill.period_end),
         "days_in_period": f"{bill.days_in_period}",
         "meter_number": bill.meter_number,
-        "previous_reading": f"{bill.previous_reading_kwh:,}",
-        "current_reading": f"{bill.current_reading_kwh:,}",
-        "consumption": f"{bill.consumption_kwh:,}",
+        "previous_reading": _energy(bill.previous_reading_kwh, unit),
+        "current_reading": _energy(bill.current_reading_kwh, unit),
+        "consumption": _energy(bill.consumption_kwh, unit),
         "reading_basis": "Estimated" if bill.is_estimated_reading else "Actual",
         "tariff_plan_code": bill.tariff_plan_code,
         "tariff_plan_name": bill.tariff_plan_name,
@@ -117,13 +170,21 @@ def _quantity(value) -> str:
 def lpg_context(invoice: LPGInvoice) -> dict:
     """Pre-format every value the LPG layout prints. All strings; no numbers to manipulate.
 
-    Note what is NOT in here: a total weight of gas. The layout cannot print one because
-    this context does not carry one - which is the `lpg_cylinders` case enforced
-    structurally rather than by remembering to leave a field out of the template.
+    The total weight of gas is in here only when the key says the layout prints it
+    (`prints_total_kg`). Otherwise the context does not carry one and the layout cannot
+    print it - the `lpg_cylinders` case enforced structurally rather than by remembering
+    to leave a field out of a template.
     """
     from carbon_r.synthgen.profiles import LPG_VENDOR_ADDRESS, LPG_VENDOR_SUPPORT
 
+    fmt = layout(invoice.layout_id).date_format
     return {
+        **_dates(invoice),
+        **_quirk_blocks(invoice),
+        "total_kg": _quantity(invoice.lpg_kg) if invoice.prints_total_kg else None,
+        "per_delivery": invoice.billing_basis == "per_delivery",
+        "visits": f"{invoice.deliveries}",
+        "delivery_fee": _money(invoice.delivery_fee_sgd or invoice.delivery_charge_sgd),
         "notice": SYNTHETIC_NOTICE,
         "doc_id": invoice.doc_id,
         "layout_id": invoice.layout_id,
@@ -135,13 +196,11 @@ def lpg_context(invoice: LPGInvoice) -> dict:
         "customer_address": invoice.customer_address,
         "account_number": invoice.account_number,
         "invoice_number": invoice.invoice_number,
-        "document_date": _date(invoice.document_date),
-        "period_start": _date(invoice.period_start),
-        "period_end": _date(invoice.period_end),
         "days_in_period": f"{invoice.days_in_period}",
         "price_list_code": invoice.price_list_code,
         "cylinder_lines": [
             {
+                "delivery_date": _date(line.delivery_date, fmt) if line.delivery_date else "",
                 "count": f"{line.count}",
                 "size_kg": _quantity(line.size_kg),
                 "price_per_cylinder": _money(line.price_per_cylinder_sgd),
@@ -179,7 +238,10 @@ def fuel_context(statement: FuelCardStatement) -> dict:
             amount_by_product.get(transaction.product, Decimal(0)) + transaction.amount_sgd
         )
 
+    fmt = layout(statement.layout_id).date_format
     return {
+        **_dates(statement),
+        **_quirk_blocks(statement),
         "notice": SYNTHETIC_NOTICE,
         "doc_id": statement.doc_id,
         "layout_id": statement.layout_id,
@@ -192,13 +254,10 @@ def fuel_context(statement: FuelCardStatement) -> dict:
         "account_number": statement.account_number,
         "card_number": statement.card_number,
         "statement_number": statement.statement_number,
-        "document_date": _date(statement.document_date),
-        "period_start": _date(statement.period_start),
-        "period_end": _date(statement.period_end),
         "price_list_code": statement.price_list_code,
         "transactions": [
             {
-                "date": _date(t.date),
+                "date": _date(t.date, fmt),
                 "time": t.time,
                 "vehicle": t.vehicle,
                 "station": t.station,

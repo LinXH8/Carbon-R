@@ -23,8 +23,11 @@ from carbon_r.money import round2
 from carbon_r.synthgen import fuel_card, lpg
 from carbon_r.synthgen.profiles import (
     FUEL_CUSTOMERS,
+    FUEL_PRICE_LISTS,
     LPG_CUSTOMERS,
     customer_by_key,
+    fuel_price_list,
+    lpg_price_list,
 )
 from carbon_r.synthgen.render import render_html, template_for
 
@@ -51,11 +54,15 @@ def test_a_different_seed_gives_different_documents():
 
 
 def test_adding_a_customer_does_not_change_any_existing_document():
-    """Document numbers come from `first_doc_number`, not from iteration order (spec 1.4)."""
+    """Document numbers come from `first_doc_number`, not from iteration order (spec 1.4).
+
+    Since Tier 2 Block 2 a customer carries no price list of its own - the list is chosen
+    by the supply period's year - so the newcomer is built without one, and the existing
+    invoices must still be untouched.
+    """
     extra = LPG_CUSTOMERS[0].__class__(
         key="jurong_auto",
         account_number="GAS-9999-99",
-        price_list_code="IGS-COM-26",
         base_kg=100,
         seasonal_amplitude=0.05,
         cylinder_size_kg=Decimal("50"),
@@ -65,6 +72,7 @@ def test_adding_a_customer_does_not_change_any_existing_document():
     )
     extended = lpg.build_invoice_series(customers=(*LPG_CUSTOMERS, extra))
     before = {i.doc_id: i.model_dump() for i in LPG_SET}
+    assert len(extended) == len(LPG_SET) + 3
     for invoice in extended:
         if invoice.doc_id in before:
             assert invoice.model_dump() == before[invoice.doc_id]
@@ -188,12 +196,26 @@ def test_the_base_lpg_layout_never_prints_a_kg_total():
 
 
 def test_the_rendered_lpg_page_shows_the_cylinders_but_not_the_kg_total():
-    invoice = next(i for i in LPG_SET if i.cylinders[0].size_kg == Decimal("12.7"))
+    """The catering kitchen's invoice: 50 kg and 12.7 kg lines, and no kg total printed.
+
+    Block 1 asserted this on the dental clinic's single 12.7 kg line. The clinic was
+    replaced (a clinic does not cook); the kitchen keeps the fractional size on a second
+    line, which is the harder reading - two products of count x size to add.
+    """
+    invoice = next(i for i in LPG_SET if i.doc_id == "lpg_007")
+    assert invoice.customer_name == "Tampines Catering Kitchen Pte Ltd"
+    assert [line.size_kg for line in invoice.cylinders] == [Decimal("50"), Decimal("12.7")]
     html = render_html(invoice)
-    assert f"{invoice.cylinders[0].count}" in html
-    assert "12.7 kg" in html
-    assert str(invoice.lpg_kg) not in html  # 50.8 appears nowhere
+    for line in invoice.cylinders:
+        assert f"LPG cylinder, {_size(line.size_kg)} kg" in html
+        assert f'<td class="num">{line.count}</td>' in html
+    assert str(invoice.lpg_kg) not in html  # the 188.1 kg activity appears nowhere
+    assert invoice.quirks == ["lpg_cylinders"]
     assert template_for(invoice) == "lpg_invoice_a.html.j2"
+
+
+def _size(value: Decimal) -> str:
+    return "50" if value == Decimal("50") else str(value)
 
 
 def test_the_lpg_page_labels_rental_as_not_a_supply_of_gas():
@@ -300,15 +322,39 @@ def test_at_least_one_statement_carries_two_products():
 
 
 def test_prices_belong_to_the_vendor_so_two_customers_pay_the_same():
-    """A price list is the vendor's, like a tariff plan (spec Part 2, lesson 4)."""
-    prices = FUEL_CUSTOMERS[0].price_list
-    assert FUEL_CUSTOMERS[1].price_list is prices
-    for (year, month), by_product in prices.prices.items():
-        assert by_product["Petrol 95"] > by_product["Diesel"], f"{year}-{month}"
+    """A price list is the vendor's, like a tariff plan (spec Part 2, lesson 4).
+
+    Since Tier 2 Block 2 there is one list per year, chosen by the statement period's year,
+    so every customer's statement in a year names the same list and pays its prices.
+    """
+    for statement in fuel_card.build_v1():
+        year = statement.period_start.year
+        prices = fuel_price_list(year)
+        assert statement.price_list_code == prices.code == f"SFC-PUMP-{year % 100:02d}"
+        month = prices.prices[(year, statement.period_start.month)]
+        for transaction in statement.transactions:
+            assert transaction.unit_price_sgd == month[transaction.product]
+    for code, prices in FUEL_PRICE_LISTS.items():
+        for (year, month), by_product in prices.prices.items():
+            assert code.endswith(f"{year % 100:02d}")
+            assert by_product["Petrol 95"] > by_product["Diesel"], f"{year}-{month}"
+
+
+def test_each_lpg_invoice_uses_its_supply_years_price_list():
+    """Block 1 printed IGS-COM-26 on a December 2024 invoice; the code must match the year."""
+    for invoice in lpg.build_v1():
+        prices = lpg_price_list(invoice.period_start.year)
+        assert invoice.price_list_code == prices.code
+        for line in invoice.cylinders:
+            assert line.price_per_cylinder_sgd == prices.price_per_cylinder_sgd[line.size_kg]
+        assert invoice.delivery_fee_sgd == prices.delivery_charge_sgd
+        assert invoice.rental_per_cylinder_sgd == prices.rental_per_cylinder_sgd
 
 
 def test_a_month_with_no_published_price_is_refused_rather_than_substituted():
-    """Falling back to another month's price would be a figure from nowhere."""
+    """Falling back to another month's - or another year's - price would be a figure from
+    nowhere. Since Tier 2 Block 2 the year's list is looked up first, so a year with no
+    list is refused by name."""
     customer = FUEL_CUSTOMERS[0]
     with pytest.raises(ValueError) as caught:
         fuel_card.build_statement(
@@ -319,7 +365,15 @@ def test_a_month_with_no_published_price_is_refused_rather_than_substituted():
             fuel_card.DEFAULT_SEED,
             customer_address="somewhere",
         )
-    assert "no prices for 2099-01" in str(caught.value)
+    assert "No fuel price list SFC-PUMP-99" in str(caught.value)
+
+
+def test_a_month_missing_from_an_existing_years_list_is_also_refused():
+    customer = FUEL_CUSTOMERS[0]
+    with pytest.raises(ValueError, match="no prices for 2024-01"):
+        fuel_card.build_statement(
+            customer, 2024, 1, "fuel_099", fuel_card.DEFAULT_SEED, customer_address="somewhere"
+        )
 
 
 def test_transactions_are_chronological_and_totally_ordered():
@@ -365,19 +419,29 @@ def test_one_lpg_invoice_predates_the_loaded_desnz_series():
 
 
 def test_identities_are_shared_with_the_electricity_profiles():
-    """One business has one legal name, whichever document it appears on."""
+    """One business has one legal name, whichever document it appears on.
+
+    Checked over the whole v1 set: the three fleets added in Block 2 have no Block 1
+    statements, so the Block 1 set alone would leave them untested.
+    """
+    v1 = (*lpg.build_v1(), *fuel_card.build_v1())
     for customer in (*LPG_CUSTOMERS, *FUEL_CUSTOMERS):
         profile = customer_by_key(customer.key)
-        documents = [
-            d for d in (*LPG_SET, *FUEL_SET) if d.account_number == customer.account_number
-        ]
-        assert documents
+        documents = [d for d in v1 if d.account_number == customer.account_number]
+        assert documents, customer.key
         assert all(d.customer_name == profile.name for d in documents)
 
 
-def test_no_document_carries_a_quirk_in_this_block():
-    """Quirks arrive in Tier 2 Block 2; recording them early would overstate the set."""
-    assert all(not d.quirks for d in (*LPG_SET, *FUEL_SET))
+def test_block1_documents_carry_only_their_structural_quirks():
+    """The Block 1 documents stay clean: no INJECTED quirk. What they do carry is what
+    they structurally are (Tier 2 Block 2): every layout-`a` LPG invoice prints no kg
+    total, so it is `lpg_cylinders`; a statement with two products is `mixed_fuel`."""
+    assert all(i.quirks == ["lpg_cylinders"] and not i.prints_total_kg for i in LPG_SET)
+    for statement in FUEL_SET:
+        expected = ["mixed_fuel"] if len(statement.litres_by_product) > 1 else []
+        assert statement.quirks == expected
+    assert any(s.quirks == ["mixed_fuel"] for s in FUEL_SET)
+    assert all(d.difficulty_tier == "clean" for d in (*LPG_SET, *FUEL_SET))
 
 
 def test_no_layout_is_held_out_while_there_is_only_one():

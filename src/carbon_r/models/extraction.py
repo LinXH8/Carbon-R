@@ -54,6 +54,7 @@ from carbon_r.models.parsing import (
     text_of,
 )
 from carbon_r.money import round2
+from carbon_r.prorate import days_by_year, split_by_year
 
 # Multipliers onto kWh. Extraction never converts; this is the conversion, in Python,
 # with the factor written down.
@@ -99,6 +100,12 @@ class ExtractedElectricityBill(BaseModel):
     tariff_cents_per_kwh: str | None = Field(description="Energy rate as printed, no conversion")
     energy_charge: str | None = Field(description="Energy charge line amount as printed")
     fixed_charge: str | None = Field(description="Fixed/service charge line amount as printed")
+    credit_adjustment: str | None = Field(
+        description=(
+            "A credit or adjustment line for an earlier period, as printed (its money "
+            "amount only), or null if the page has none"
+        )
+    )
     subtotal: str | None = Field(description="Subtotal before GST as printed")
     gst_percent: str | None = Field(description="GST percentage as printed, e.g. '9'")
     gst_amount: str | None = Field(description="GST amount as printed")
@@ -148,6 +155,8 @@ class NormalisedBill(BaseModel):
     tariff_cents_per_kwh: Decimal | None = None
     energy_charge_sgd: Decimal | None = None
     fixed_charge_sgd: Decimal | None = None
+    # A credit for an earlier period, stored as a magnitude (the page prints a deduction).
+    credit_adjustment_sgd: Decimal | None = None
     subtotal_sgd: Decimal | None = None
     gst_rate: Decimal | None = None
     gst_amount_sgd: Decimal | None = None
@@ -292,6 +301,10 @@ def normalise(
     ):
         take(target, source, parse_decimal)
 
+    # A credit is printed as a deduction; the key holds its magnitude, and the direction
+    # lives in `subtotal = energy + fixed - credit` (the convention normalise_fuel set).
+    take("credit_adjustment_sgd", "credit_adjustment", lambda printed: abs(parse_decimal(printed)))
+
     # GST is printed as a percentage and stored as a fraction, matching the answer key.
     take("gst_rate", "gst_percent", lambda printed: parse_decimal(printed) / Decimal(100))
 
@@ -351,24 +364,66 @@ def _take_consumption(
 
 
 def activities_for(bill: NormalisedBill) -> list[Activity]:
-    """The one activity an electricity bill carries, or none if it was not read.
+    """The electricity on a bill: one activity per calendar year its period touches.
 
     Returns a list for the same reason every kind does: `calculate_emissions` takes lines,
     and a single-activity document is one line rather than a separate shape. An empty list
     is the honest answer when the consumption could not be read - the caller reports a gap
     rather than calculating from a guess.
+
+    A period straddling 31 December (`cross_year_period`) is split by days with
+    `prorate.split_by_year`, because the two years take different grid factors. Each part
+    carries its own year and its own slice of the period, and the division is written into
+    `derivation` - the page never prints the split, so the step has to be checkable here.
+    Without a readable period there is nothing to split by, so the bill stays one activity
+    with no year, and the factor lookup has to say so.
     """
     if bill.consumption_kwh is None:
         return []
-    return [
-        Activity(
-            kind="electricity",
-            amount=Decimal(bill.consumption_kwh),
-            unit="kWh",
-            source_field="consumption",
-            is_estimated=bool(bill.is_estimated_reading),
+
+    basis = {
+        "kind": "electricity",
+        "unit": "kWh",
+        "source_field": "consumption",
+        "is_estimated": bool(bill.is_estimated_reading),
+    }
+    start, end = bill.period_start, bill.period_end
+    if start is None or end is None or start > end or start.year == end.year:
+        return [
+            Activity(
+                amount=Decimal(bill.consumption_kwh),
+                factor_year=bill.factor_year,
+                period_start=start,
+                period_end=end,
+                **basis,
+            )
+        ]
+
+    days = days_by_year(start, end)
+    total_days = sum(days.values())
+    shares = split_by_year(bill.consumption_kwh, start, end)
+    last_year = max(shares)
+    activities = []
+    for year, share in sorted(shares.items()):
+        rounding = (
+            "the remainder, so the parts sum to the whole"
+            if year == last_year
+            else "rounded half up to a whole kWh"
         )
-    ]
+        activities.append(
+            Activity(
+                amount=Decimal(share),
+                factor_year=year,
+                period_start=max(start, date(year, 1, 1)),
+                period_end=min(end, date(year, 12, 31)),
+                derivation=(
+                    f"{bill.consumption_kwh:,} kWh x {days[year]} of {total_days} days "
+                    f"in {year} = {share:,} kWh ({rounding})"
+                ),
+                **basis,
+            )
+        )
+    return activities
 
 
 def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
@@ -387,9 +442,10 @@ def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
         )
 
     if bill.energy_charge_sgd is not None and bill.fixed_charge_sgd is not None:
+        credit = bill.credit_adjustment_sgd or Decimal(0)
         compare(
-            "subtotal = energy_charge + fixed_charge",
-            bill.energy_charge_sgd + bill.fixed_charge_sgd,
+            "subtotal = energy_charge + fixed_charge - credit_adjustment",
+            bill.energy_charge_sgd + bill.fixed_charge_sgd - credit,
             bill.subtotal_sgd,
         )
 

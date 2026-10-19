@@ -243,13 +243,20 @@ def rasterise(path: Path, dpi: int = DEFAULT_DPI, *, cache_dir: Path | None = No
 
     Uses poppler's `pdftoppm`, which is already a project dependency in practice (the
     build log records it as present and `pdftotext` is used elsewhere).
+
+    The cache is keyed by the file's CONTENT as well as its name. Until Tier 2 Block 2 it
+    was keyed by name alone, so a regenerated `lpg_007.pdf` - a different document under
+    the same name - would have been read from the old page image. Found by reading this
+    code before the Block 2 baseline, not by a failure; no recorded run was affected,
+    because no Block 1 document was regenerated with a change after its pages were cached.
     """
     if path.suffix.lower() in (".png", ".jpg", ".jpeg"):
         return [path]
 
     cache_dir = cache_dir or PAGE_CACHE
     cache_dir.mkdir(parents=True, exist_ok=True)
-    prefix = cache_dir / f"{path.stem}-{dpi}dpi"
+    content = hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+    prefix = cache_dir / f"{path.stem}-{content}-{dpi}dpi"
 
     existing = sorted(cache_dir.glob(f"{prefix.name}-*.png"))
     if existing:

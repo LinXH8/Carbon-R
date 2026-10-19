@@ -1,0 +1,46 @@
+{# Shared quirk blocks, printed the same way on every kind and layout (Tier 2 Block 2).
+
+   Each block renders only when the answer key carries it - the context builder passes
+   None (or False) otherwise - so a clean document cannot acquire a credit, a balance or
+   a GST-inclusive headline by template accident. Styles are inline so a layout's own CSS
+   needs nothing extra. No arithmetic here: every figure is a pre-formatted string. #}
+
+{# gst_confusion: the GST-INCLUSIVE figure is the first and largest number on the page.
+   The page is not wrong - it says "incl. GST" - but the figure a reader meets first is
+   not the pre-GST subtotal. #}
+{% macro gst_headline(show, total, currency, label="Current charges (incl. GST)") %}
+{% if show %}
+<div style="margin: 10pt 0 0; padding: 7pt 9pt; border: 1pt solid #b9b2a6; background: #f6f3ee;">
+  <span style="font-size: 8pt; color: #5a5348;">{{ label }}</span>
+  <span style="float: right; font-size: 15pt; font-weight: 700;">{{ currency }} {{ total }}</span>
+</div>
+{% endif %}
+{% endmacro %}
+
+{# balance_forward: an account summary in which "amount due" is NOT this period's total. #}
+{% macro account_summary(summary, currency, title="Account summary") %}
+{% if summary %}
+<table style="width: 100%; border-collapse: collapse; margin-top: 10pt; font-size: 8.4pt;">
+  <tr><td colspan="2" style="font-size: 7.4pt; text-transform: uppercase; letter-spacing: .08em; color: #5a5348; border-bottom: .8pt solid #c9c3b8; padding-bottom: 2pt;">{{ title }}</td></tr>
+  <tr><td style="padding: 2pt 0;">Previous balance</td><td style="text-align: right;">{{ summary.balance }}</td></tr>
+  <tr><td style="padding: 2pt 0;">Payment received, thank you</td><td style="text-align: right;">&minus;{{ summary.payment }}</td></tr>
+  <tr><td style="padding: 2pt 0;">Charges this period</td><td style="text-align: right;">{{ summary.charges }}</td></tr>
+  <tr><td style="padding: 3pt 0; font-weight: 700; border-top: .8pt solid #c9c3b8;">Amount due ({{ currency }})</td><td style="text-align: right; font-weight: 700; border-top: .8pt solid #c9c3b8;">{{ summary.amount_due }}</td></tr>
+</table>
+{% endif %}
+{% endmacro %}
+
+{# credit_adjustment: one charges-table row. `between` is the number of cells between the
+   description and the amount; the decoy quantity, when the credit names one, goes in the
+   first of them. #}
+{% macro credit_row(credit, between) %}
+{% if credit %}
+<tr>
+  <td>Credit: {{ credit.reference }}</td>
+  {% for i in range(between) %}
+  <td class="num">{% if i == 0 and credit.quantity %}{{ credit.quantity }}{% endif %}</td>
+  {% endfor %}
+  <td class="num">&minus;{{ credit.amount }}</td>
+</tr>
+{% endif %}
+{% endmacro %}

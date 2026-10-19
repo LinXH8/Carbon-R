@@ -1,4 +1,5 @@
-{# Layout A for fuel-card statements - the only layout in Tier 2 Block 1.
+{# Layout A for fuel-card statements - the Block 1 layout. Tier 2 Block 2 added b, c and d
+   (d held out) and the quirk blocks from _quirks.html.j2.
 
    No arithmetic and no literal dates in here: every value is a pre-formatted string from
    render.fuel_context(), built from a FuelCardStatement that already passed its validator.
@@ -45,6 +46,7 @@
            font-size: 7.2pt; color: #7e8b86; }
 </style>
 
+{% from "_quirks.html.j2" import gst_headline, account_summary, credit_row %}
 <div class="notice">{{ notice }}</div>
 
 <header>
@@ -82,6 +84,9 @@
     </dl>
   </div>
 </div>
+
+{{ gst_headline(gst_inclusive_display, total, currency) }}
+{{ account_summary(summary, currency) }}
 
 <h3>Transactions</h3>
 <table>
@@ -138,8 +143,9 @@
       <td class="label" colspan="2">Fleet rebate, {{ discount_per_litre }} per litre</td>
       <td class="num">&minus;{{ discount_amount }}</td>
     </tr>
+    {{ credit_row(credit, 1) }}
     <tr class="sum">
-      <td class="label" colspan="2">Amount before GST</td>
+      <td class="label" colspan="2">{{ "Current charges" if gst_inclusive_display else "Amount before GST" }}</td>
       <td class="num">{{ subtotal }}</td>
     </tr>
     <tr class="sum">

@@ -1,5 +1,5 @@
-{# Layout A for LPG invoices - the only layout in Tier 2 Block 1. Block 2 adds more and
-   holds one back as a never-tuned-on evaluation layout.
+{# Layout A for LPG invoices - the Block 1 layout. Tier 2 Block 2 added b, c and d (d held
+   out), dated delivery lines, and the quirk blocks from _quirks.html.j2.
 
    No arithmetic and no literal dates in here: every value is a pre-formatted string from
    render.lpg_context(), built from an LPGInvoice that already passed its validator.
@@ -32,7 +32,9 @@
   table { width: 100%; border-collapse: collapse; margin-top: 13pt; }
   th { font-size: 7.4pt; text-transform: uppercase; letter-spacing: .08em; color: #6b6158;
        text-align: left; border-bottom: .8pt solid #d8cfc5; padding: 0 0 3pt; font-weight: 600; }
-  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; padding-left: 10pt;
+                   white-space: nowrap; }
+  .when { font-size: 7.6pt; color: #6b6158; }
   td { padding: 4.5pt 0; border-bottom: .4pt solid #efe9e2; }
   tr.sum td { border-bottom: none; padding: 2.5pt 0; }
   tr.sum td.label { text-align: right; color: #6b6158; }
@@ -44,6 +46,7 @@
            font-size: 7.2pt; color: #8a8178; }
 </style>
 
+{% from "_quirks.html.j2" import gst_headline, account_summary, credit_row %}
 <div class="notice">{{ notice }}</div>
 
 <header>
@@ -82,6 +85,9 @@
   </div>
 </div>
 
+{{ gst_headline(gst_inclusive_display, total, currency) }}
+{{ account_summary(summary, currency) }}
+
 <div class="delivery">
   <table>
     <thead>
@@ -96,7 +102,7 @@
     <tbody>
       {% for line in cylinder_lines %}
       <tr>
-        <td>LPG cylinder, {{ line.size_kg }} kg</td>
+        <td>LPG cylinder, {{ line.size_kg }} kg{% if line.delivery_date %}<br><span class="when">delivered {{ line.delivery_date }}</span>{% endif %}</td>
         <td class="num">{{ line.count }}</td>
         <td class="num">{{ line.size_kg }} kg</td>
         <td class="num">{{ line.price_per_cylinder }}</td>
@@ -105,9 +111,9 @@
       {% endfor %}
       <tr>
         <td>Delivery charge</td>
+        <td class="num">{{ visits }} visit{{ "s" if visits != "1" else "" }}</td>
         <td class="num"></td>
-        <td class="num"></td>
-        <td class="num"></td>
+        <td class="num">{{ delivery_fee }}</td>
         <td class="num">{{ delivery_charge }}</td>
       </tr>
       <tr>
@@ -124,8 +130,9 @@
         <td class="num"></td>
         <td class="num">&mdash;</td>
       </tr>
+      {{ credit_row(credit, 3) }}
       <tr class="sum">
-        <td class="label" colspan="4">Subtotal</td>
+        <td class="label" colspan="4">{{ "Current charges" if gst_inclusive_display else "Subtotal" }}</td>
         <td class="num">{{ subtotal }}</td>
       </tr>
       <tr class="sum">

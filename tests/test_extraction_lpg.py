@@ -59,6 +59,7 @@ def reading(**overrides) -> ExtractedLPGInvoice:
         "gst_percent": "9",
         "gst_amount": "62.10",
         "total": "752.10",
+        "credit_adjustment": None,
         "notes": None,
     }
     return ExtractedLPGInvoice(**{**defaults, **overrides})

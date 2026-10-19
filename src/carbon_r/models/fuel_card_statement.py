@@ -39,6 +39,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from carbon_r.models.quirks import QuirkFields, check_quirk_fields, require_quirk
 from carbon_r.money import round2
 
 
@@ -72,13 +73,14 @@ class FuelTransaction(BaseModel):
         return self
 
 
-class FuelCardStatement(BaseModel):
+class FuelCardStatement(QuirkFields):
     """One monthly fuel-card statement, with its own derivation attached."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # --- identity (spec 3.3: common to every document kind) -------------------------
-    schema_version: Literal["1"] = "1"
+    # "2" since Tier 2 Block 2: quirk fields.
+    schema_version: Literal["2"] = "2"
     doc_id: str = Field(pattern=r"^fuel_\d{3}$")
     doc_kind: Literal["fuel_card_statement"] = "fuel_card_statement"
     generator_seed: int
@@ -129,8 +131,7 @@ class FuelCardStatement(BaseModel):
     gst_amount_sgd: Decimal = Field(ge=0)
     total_sgd: Decimal = Field(ge=0)
 
-    # --- quirks -------------------------------------------------------------------
-    quirks: list[str] = Field(default_factory=list)
+    # `quirks` and the shared credit / balance / GST-display fields come from QuirkFields.
 
     @property
     def days_in_period(self) -> int:
@@ -205,11 +206,13 @@ class FuelCardStatement(BaseModel):
                 f"{self.discount_per_litre_sgd}) = {discount}"
             )
 
-        subtotal = self.gross_amount_sgd - self.discount_amount_sgd
+        # A reversed prior-statement transaction is a credit: money only, and never this
+        # statement's litres.
+        subtotal = self.gross_amount_sgd - self.discount_amount_sgd - self.credit_amount_sgd
         if subtotal != self.subtotal_sgd:
             raise ValueError(
-                f"subtotal_sgd {self.subtotal_sgd} != "
-                f"{self.gross_amount_sgd} - {self.discount_amount_sgd} = {subtotal}"
+                f"subtotal_sgd {self.subtotal_sgd} != {self.gross_amount_sgd} - "
+                f"{self.discount_amount_sgd} - credit {self.credit_amount_sgd} = {subtotal}"
             )
 
         gst = round2(self.subtotal_sgd * self.gst_rate)
@@ -226,6 +229,10 @@ class FuelCardStatement(BaseModel):
                 f"{self.subtotal_sgd} + {self.gst_amount_sgd} = {total}"
             )
 
+        check_quirk_fields(self, self.doc_kind, self.total_sgd)
+        require_quirk(
+            self.quirks, "mixed_fuel", len(self.litres_by_product) > 1, "more than one product"
+        )
         return self
 
 

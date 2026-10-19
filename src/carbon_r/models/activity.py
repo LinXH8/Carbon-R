@@ -20,6 +20,7 @@ itself does not show. A figure whose activity was computed and whose computation
 recorded would be a bare number one level up from the one rule 2 forbids.
 """
 
+from datetime import date
 from decimal import Decimal
 from typing import Literal
 
@@ -61,6 +62,19 @@ class Activity(BaseModel):
     # read. Travels with the activity rather than the document because a document can
     # carry several activities and they need not share a basis.
     is_estimated: bool = False
+
+    # The calendar year this quantity belongs to, and so the year its factor must be
+    # looked up for. Set from the activity period, never from the document date. A bill
+    # whose period straddles 31 December yields one activity per year (`prorate.py`), and
+    # `calculate_emissions` refuses a factor looked up for any other year - so "the right
+    # year's factor" is enforced by the code rather than by the model following a hint.
+    # None only for an activity built by hand in a test that does not care.
+    factor_year: int | None = None
+
+    # The days this quantity covers. On a split, each part carries its own share of the
+    # original period, so the year boundary is visible on the line itself.
+    period_start: date | None = None
+    period_end: date | None = None
 
     @property
     def label(self) -> str:

@@ -1,0 +1,54 @@
+{# Fuel-card layout D - the HOLDOUT layout (spec 6.1): never looked at while tuning, scored
+   separately. Banded header, transactions grouped visually by vehicle column, two-digit
+   years. No arithmetic, no literal dates: every value comes from render.fuel_context(). #}
+<!-- {{ doc_id }} / layout {{ layout_id }} / {{ generator_version }} / seed {{ generator_seed }} -->
+{% from "_quirks.html.j2" import gst_headline, account_summary, credit_row %}
+<style>
+  @page { size: A4; margin: 12mm; }
+  body { font-family: Verdana, sans-serif; font-size: 8pt; color: #1d1d1d; line-height: 1.4; }
+  .notice { border: 1.2pt dashed #8a6d00; background: #fffbe8; color: #6b5500; padding: 4pt 6pt; font-size: 7.2pt; }
+  .band { background: #2f3e46; color: white; padding: 8pt 10pt; margin-top: 8pt; }
+  .band .name { font-size: 13pt; font-weight: 700; }
+  .facts { display: flex; gap: 14pt; margin-top: 8pt; }
+  .facts div { flex: 1; background: #eef1f2; padding: 6pt 8pt; }
+  .facts b { display: block; font-size: 7pt; color: #2f3e46; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; margin-top: 9pt; }
+  td, th { padding: 2.6pt 2pt; border-bottom: .5pt solid #ddd; text-align: left; }
+  th { color: #2f3e46; font-size: 7.2pt; }
+  .num { text-align: right; }
+  .pay { margin-top: 8pt; font-size: 11pt; font-weight: 700; color: #2f3e46; text-align: right; }
+  footer { margin-top: 12pt; font-size: 7pt; color: #777; }
+</style>
+
+<div class="notice">{{ notice }}</div>
+<div class="band"><div class="name">{{ vendor_name }}</div>{{ vendor_address }} &middot; Registration {{ vendor_uen }} &middot; {{ vendor_support }}</div>
+<div class="facts">
+  <div><b>Cardholder</b>{{ customer_name }}<br>{{ customer_address }}</div>
+  <div><b>Account &middot; card</b>{{ account_number }}<br>{{ card_number }}<br><b>Statement</b>{{ statement_number }}</div>
+  <div><b>Statement date</b>{{ document_date }}<br><b>Covers</b>{{ period_start }} to {{ period_end }}<br><b>Prices</b>{{ price_list_code }}</div>
+</div>
+
+{{ gst_headline(gst_inclusive_display, total, currency) }}
+
+<table>
+  <tr><th>Vehicle</th><th>Date</th><th>Time</th><th>Location</th><th>Grade</th><th class="num">Qty (L)</th><th class="num">Unit price</th><th class="num">{{ currency }}</th></tr>
+  {% for row in transactions %}
+  <tr><td>{{ row.vehicle }}</td><td>{{ row.date }}</td><td>{{ row.time }}</td><td>{{ row.station }}</td><td>{{ row.product }}</td><td class="num">{{ row.litres }}</td><td class="num">{{ row.unit_price }}</td><td class="num">{{ row.amount }}</td></tr>
+  {% endfor %}
+</table>
+
+<table>
+  <tr><th>Grade</th><th class="num">Qty (L)</th><th class="num">{{ currency }}</th></tr>
+  {% for row in product_totals %}
+  <tr><td>{{ row.product }}</td><td class="num">{{ row.litres }}</td><td class="num">{{ row.amount }}</td></tr>
+  {% endfor %}
+  <tr><td>Total purchases</td><td></td><td class="num">{{ gross_amount }}</td></tr>
+  <tr><td>Volume rebate ({{ discount_per_litre }} per litre)</td><td></td><td class="num">&minus;{{ discount_amount }}</td></tr>
+  {{ credit_row(credit, 1) }}
+  <tr><td>{{ "Current charges" if gst_inclusive_display else "Charges excluding GST" }}</td><td></td><td class="num">{{ subtotal }}</td></tr>
+  <tr><td>Goods and Services Tax ({{ gst_percent }}%)</td><td></td><td class="num">{{ gst_amount }}</td></tr>
+</table>
+<div class="pay">Statement amount: {{ currency }} {{ total }}</div>
+{{ account_summary(summary, currency) }}
+
+<footer>{{ notice }} {{ generator_version }}, seed {{ generator_seed }}.</footer>

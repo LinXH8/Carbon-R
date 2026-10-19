@@ -4,7 +4,7 @@ This module is CLAUDE.md rule 1 made concrete. It imports no model provider and 
 database: it is plain Python over `Decimal`, it can be read in one sitting, and every
 number it returns can be re-derived by hand from the inputs it hands back alongside.
 
-Four properties are load-bearing:
+Five properties are load-bearing:
 
 1. **It returns its inputs.** Rule 2: there is no code path here that returns a bare
    float. Every line carries its activity amount, its factor with full provenance, and its
@@ -18,6 +18,10 @@ Four properties are load-bearing:
    it cannot drift between tools, and it leaves this function testable by equality rather
    than by string matching.
 4. **It is all-or-nothing.** See `Why a bad line fails the whole call`.
+5. **It refuses a factor for the wrong year.** An activity carries the year it belongs
+   to; a factor looked up for any other year is an error. A bill split across 31
+   December is two activities in two years, and this is what stops one year's factor
+   being applied to both halves (Tier 2 Block 2).
 
 Many lines, one call
 --------------------
@@ -154,6 +158,24 @@ def _as_factor(
     return factor, None
 
 
+def _year_problem(activity: Activity, factor: FactorCitation, index: int) -> str | None:
+    """A factor looked up for a different year than the activity's is refused.
+
+    `year_requested` is what the lookup was asked for; a substitution (asking for 2025 and
+    being given 2024) is legitimate and is disclosed separately. What is refused here is
+    asking for the wrong year in the first place - most importantly, applying one year's
+    factor to both halves of a bill split across 31 December. Without this check that
+    mistake would produce a plausible, cited, wrong figure.
+    """
+    if activity.factor_year is None or factor.year_requested == activity.factor_year:
+        return None
+    return (
+        f"line {index}: the activity ({activity.label}) belongs to {activity.factor_year}, "
+        f"but the factor was looked up for {factor.year_requested}. Look the factor up for "
+        f"{activity.factor_year}"
+    )
+
+
 def _reconcile(
     activity: Activity, factor: FactorCitation, index: int
 ) -> tuple[dict | None, str | None]:
@@ -269,6 +291,11 @@ def calculate_emissions(
         if factor_problem:
             problems.append(factor_problem)
         if activity is None or factor is None:
+            continue
+
+        year_problem = _year_problem(activity, factor, index)
+        if year_problem:
+            problems.append(year_problem)
             continue
 
         reconciled, unit_problem = _reconcile(activity, factor, index)

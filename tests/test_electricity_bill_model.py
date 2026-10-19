@@ -118,4 +118,4 @@ def test_common_spec_fields_default_sensibly_for_a_clean_document():
 
 def test_unknown_fields_are_rejected():
     with pytest.raises(ValidationError):
-        ElectricityBill(**{**GOOD, "amount_due_sgd": Decimal("1.00")})
+        ElectricityBill(**{**GOOD, "monthly_split_kwh": {"2024-05": 9859}})

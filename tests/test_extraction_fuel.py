@@ -71,6 +71,7 @@ def reading(**overrides) -> ExtractedFuelCardStatement:
         "gst_percent": "9",
         "gst_amount": "27.96",
         "total": "338.58",
+        "credit_adjustment": None,
         "notes": None,
     }
     return ExtractedFuelCardStatement(**{**defaults, **overrides})
@@ -308,9 +309,19 @@ def test_the_gross_total_is_not_checked_when_a_row_amount_was_not_read():
 
 
 def test_the_discount_relation_is_checked():
+    """Since Tier 2 Block 2 the relation also subtracts a credit for an earlier statement."""
     normalised, _ = normalise_fuel(reading(subtotal="300.00"))
     relations = [f.relation for f in check_consistency_fuel(normalised)]
-    assert "subtotal = gross_amount - discount" in relations
+    assert "subtotal = gross_amount - discount - credit_adjustment" in relations
+
+
+def test_a_printed_credit_closes_the_subtotal_and_is_stored_as_a_magnitude():
+    """310.62 - 12.40 = 298.22: the credit is a deduction on the page, a magnitude in the key."""
+    normalised, problems = normalise_fuel(reading(credit_adjustment="−12.40", subtotal="298.22"))
+    assert not problems
+    assert normalised.credit_adjustment_sgd == Decimal("12.40")
+    relations = [f.relation for f in check_consistency_fuel(normalised)]
+    assert "subtotal = gross_amount - discount - credit_adjustment" not in relations
 
 
 # --- minus signs ------------------------------------------------------------------------

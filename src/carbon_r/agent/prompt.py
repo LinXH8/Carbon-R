@@ -78,8 +78,10 @@ You have three tools. The normal sequence is:
      what is printed on the page, and returns the measurable activities it found, each
      under a handle like act_1
   2. lookup_emission_factor(category, unit, year) - ONE CALL PER ACTIVITY, because
-     different fuels have different factors. The year is the ACTIVITY year, which is the
-     year the document's period starts in, never the document date
+     different fuels have different factors. The year is the ACTIVITY's own year, given
+     beside each handle ("act_1 = ... in 2023"), never the document date. A bill whose
+     period crosses 31 December comes back as one activity per year: look a factor up for
+     each year, and pair each activity with its own year's factor
   3. calculate_emissions(pairs) - pair every activity with its factor, in a SINGLE call,
      and the figure and the total come back
 

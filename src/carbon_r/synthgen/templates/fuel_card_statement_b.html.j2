@@ -1,0 +1,58 @@
+{# Fuel-card layout B - the per-product summary FIRST, then the transactions; ISO dates and
+   different wording ("Volume", "Fleet discount"). No arithmetic, no literal dates. #}
+<!-- {{ doc_id }} / layout {{ layout_id }} / {{ generator_version }} / seed {{ generator_seed }} -->
+{% from "_quirks.html.j2" import gst_headline, account_summary, credit_row %}
+<style>
+  @page { size: A4; margin: 15mm 14mm; }
+  body { font-family: Georgia, serif; font-size: 8.8pt; color: #222; line-height: 1.45; }
+  .notice { border: 1.2pt dashed #8a6d00; background: #fffbe8; color: #6b5500; padding: 5pt 7pt;
+            font-family: Arial, sans-serif; font-size: 7.6pt; margin-bottom: 11pt; }
+  .brand { font-size: 15pt; color: #8a4b08; font-weight: 700; }
+  .meta { font-size: 7.6pt; color: #666; }
+  h2 { font-size: 9pt; color: #8a4b08; margin: 12pt 0 3pt; border-bottom: 1pt solid #8a4b08; }
+  .row { display: flex; justify-content: space-between; border-bottom: .4pt dotted #bbb; padding: 1.5pt 0; }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { padding: 2.4pt 2pt; border-bottom: .4pt dotted #bbb; text-align: left; font-size: 8.2pt; }
+  .num { text-align: right; }
+  footer { margin-top: 15pt; font-size: 7.2pt; color: #777; border-top: .4pt solid #ccc; padding-top: 5pt; }
+</style>
+
+<div class="notice">{{ notice }}</div>
+<div class="brand">{{ vendor_name }}</div>
+<div class="meta">UEN {{ vendor_uen }} &middot; {{ vendor_address }} &middot; {{ vendor_support }}</div>
+
+<h2>Fleet card statement {{ statement_number }}</h2>
+<div class="row"><span>Cardholder</span><span>{{ customer_name }}</span></div>
+<div class="row"><span>Address</span><span>{{ customer_address }}</span></div>
+<div class="row"><span>Account / card</span><span>{{ account_number }} / {{ card_number }}</span></div>
+<div class="row"><span>Issued</span><span>{{ document_date }}</span></div>
+<div class="row"><span>Statement period</span><span>{{ period_start }} to {{ period_end }}</span></div>
+<div class="row"><span>Pump price list</span><span>{{ price_list_code }}</span></div>
+
+{{ gst_headline(gst_inclusive_display, total, currency) }}
+
+<h2>Summary ({{ currency }})</h2>
+<table>
+  <tr><th>Fuel</th><th class="num">Volume (L)</th><th class="num">Value</th></tr>
+  {% for row in product_totals %}
+  <tr><td>{{ row.product }}</td><td class="num">{{ row.litres }}</td><td class="num">{{ row.amount }}</td></tr>
+  {% endfor %}
+  <tr><td>Purchases</td><td></td><td class="num">{{ gross_amount }}</td></tr>
+  <tr><td>Fleet discount at {{ discount_per_litre }}/L</td><td></td><td class="num">&minus;{{ discount_amount }}</td></tr>
+  {{ credit_row(credit, 1) }}
+  <tr><td>{{ "Current charges" if gst_inclusive_display else "Net of discount, before GST" }}</td><td></td><td class="num">{{ subtotal }}</td></tr>
+  <tr><td>GST {{ gst_percent }}%</td><td></td><td class="num">{{ gst_amount }}</td></tr>
+  <tr><td><strong>Statement total</strong></td><td></td><td class="num"><strong>{{ total }}</strong></td></tr>
+</table>
+
+{{ account_summary(summary, currency) }}
+
+<h2>Transactions</h2>
+<table>
+  <tr><th>Date</th><th>Time</th><th>Vehicle</th><th>Site</th><th>Fuel</th><th class="num">L</th><th class="num">$/L</th><th class="num">Value</th></tr>
+  {% for row in transactions %}
+  <tr><td>{{ row.date }}</td><td>{{ row.time }}</td><td>{{ row.vehicle }}</td><td>{{ row.station }}</td><td>{{ row.product }}</td><td class="num">{{ row.litres }}</td><td class="num">{{ row.unit_price }}</td><td class="num">{{ row.amount }}</td></tr>
+  {% endfor %}
+</table>
+
+<footer>Discount reduces the amount payable, not the volume drawn. {{ notice }} {{ generator_version }}, seed {{ generator_seed }}.</footer>

@@ -1,4 +1,4 @@
-"""The fictional cast: three vendors, their price lists, and six customers.
+"""The fictional cast: three vendors, their price lists, and seven customers.
 
 Everything here is invented. No real company name, UEN, logo, address or published rate
 appears, and the rendered pages say so. What is borrowed is only the *shape* of the
@@ -53,28 +53,39 @@ class TariffPlan:
 # shape of a voltage category: a large consumer takes supply at higher voltage, pays less
 # per unit and more as a fixed charge. It also means "cheaper per kWh" and "cheaper bill"
 # are not the same thing anywhere in this test set.
+def _plan(family: str, year: int, cents: str, fixed: str) -> TariffPlan:
+    industrial = "-HT-" in family
+    return TariffPlan(
+        code=f"{family}-{year % 100:02d}",
+        name=f"{'Industrial' if industrial else 'Business'} Fixed {year % 100:02d}",
+        tension="High Tension" if industrial else "Low Tension",
+        cents_per_kwh=Decimal(cents),
+        fixed_charge_sgd=Decimal(fixed),
+    )
+
+
+# One plan per family per year, because the plan code carries its year: a 2022 bill on
+# "Business Fixed 24" would be a page contradicting itself (found in the Tier 2 Block 1
+# spot check, on the LPG price list; the same flaw existed here). A bill takes its
+# family's plan for its PERIOD year - see CustomerProfile.plan_for.
+#
+# The three 2024/2025 rows are the Block 1 values, unchanged, so the Block 1 bills are
+# bit-identical. The others are fictional, chosen to drift plausibly; no real retailer's
+# rates are reproduced (SOURCES.md rows 6-7).
 TARIFF_PLANS: dict[str, TariffPlan] = {
-    "SPR-LT-FIX-24": TariffPlan(
-        code="SPR-LT-FIX-24",
-        name="Business Fixed 24",
-        tension="Low Tension",
-        cents_per_kwh=Decimal("29.86"),
-        fixed_charge_sgd=Decimal("12.00"),
-    ),
-    "SPR-HT-FIX-24": TariffPlan(
-        code="SPR-HT-FIX-24",
-        name="Industrial Fixed 24",
-        tension="High Tension",
-        cents_per_kwh=Decimal("27.65"),
-        fixed_charge_sgd=Decimal("32.00"),
-    ),
-    "SPR-LT-FIX-25": TariffPlan(
-        code="SPR-LT-FIX-25",
-        name="Business Fixed 25",
-        tension="Low Tension",
-        cents_per_kwh=Decimal("30.12"),
-        fixed_charge_sgd=Decimal("12.00"),
-    ),
+    plan.code: plan
+    for plan in (
+        _plan("SPR-LT-FIX", 2022, "31.42", "11.00"),
+        _plan("SPR-LT-FIX", 2023, "32.07", "11.50"),
+        _plan("SPR-LT-FIX", 2024, "29.86", "12.00"),
+        _plan("SPR-LT-FIX", 2025, "30.12", "12.00"),
+        _plan("SPR-LT-FIX", 2026, "29.48", "12.50"),
+        _plan("SPR-HT-FIX", 2022, "29.15", "30.00"),
+        _plan("SPR-HT-FIX", 2023, "29.71", "30.00"),
+        _plan("SPR-HT-FIX", 2024, "27.65", "32.00"),
+        _plan("SPR-HT-FIX", 2025, "27.94", "32.00"),
+        _plan("SPR-HT-FIX", 2026, "27.38", "33.00"),
+    )
 }
 
 
@@ -104,8 +115,10 @@ class CustomerProfile:
     seasonal_amplitude: float
     start_year: int
     start_month: int
-    # First document number for this account's run. Explicit rather than derived from
-    # position, so adding a profile cannot renumber anybody else's documents (spec 1.4).
+    # First document number for this account's Block 1 run, or 0 for an account added
+    # later with no Block 1 run. Explicit rather than derived from position, so adding a
+    # profile cannot renumber anybody else's documents (spec 1.4). Block 2 numbers are
+    # declared in synthgen/plan.py.
     first_doc_number: int
     street: str
     # Postal sector (first two digits) for the street's area. See POSTAL_SECTORS.
@@ -116,7 +129,20 @@ class CustomerProfile:
 
     @property
     def plan(self) -> TariffPlan:
+        """The plan this account's Block 1 bills were on."""
         return TARIFF_PLANS[self.plan_code]
+
+    @property
+    def plan_family(self) -> str:
+        return self.plan_code.rsplit("-", 1)[0]
+
+    def plan_for(self, year: int) -> TariffPlan:
+        """The account's plan for a period in `year`: same family, that year's rates."""
+        code = f"{self.plan_family}-{year % 100:02d}"
+        plan = TARIFF_PLANS.get(code)
+        if plan is None:
+            raise ValueError(f"No tariff plan {code} for {self.key}; declare it in TARIFF_PLANS")
+        return plan
 
 
 # Nine bills in 2024, nine in 2025: half the set finds an exact-year EMA factor, half must
@@ -205,6 +231,25 @@ CUSTOMER_PROFILES: tuple[CustomerProfile, ...] = (
         first_doc_number=16,
         street="Jalan Pesawat Lama",
         postal_sector="61",  # workshop: ground floor, Jurong
+        ground_floor_only=True,
+    ),
+    # Added in Tier 2 Block 2 to replace the dental clinic as an LPG customer: a clinic
+    # does not cook, and sits upstairs. A catering kitchen burns gas, on the ground floor.
+    # Appended LAST, so no existing document is renumbered or reassigned.
+    CustomerProfile(
+        key="tampines_catering",
+        name="Tampines Catering Kitchen Pte Ltd",
+        account_number="8820-6604-11",
+        plan_code="SPR-LT-FIX-25",
+        base_kwh=4_600,
+        seasonal_amplitude=0.07,  # cooking load dominates; cooling is secondary
+        start_year=2025,
+        start_month=10,
+        # 0 = no Block 1 bills; the Block 1 series skips it, so adding it renumbers nothing.
+        # Its Block 2 numbers come from synthgen/plan.py.
+        first_doc_number=0,
+        street="Tampines Industrial Walk 7",
+        postal_sector="52",  # central kitchen: ground floor; an existing sector (unverified map)
         ground_floor_only=True,
     ),
 )
@@ -303,7 +348,31 @@ class LPGPriceList:
     rental_per_cylinder_sgd: Decimal
 
 
+# One price list per year, selected by the supply period's year. The Block 1 set printed
+# "IGS-COM-26" on a December 2024 invoice at 2026 prices - a code and a date that disagree
+# on the same page (the Tier 2 Block 1 spot check). The 2026 list is the Block 1 list,
+# unchanged; 2024 and 2025 are fictional, and lower, as prices drift.
 LPG_PRICE_LISTS: dict[str, LPGPriceList] = {
+    "IGS-COM-24": LPGPriceList(
+        code="IGS-COM-24",
+        name="Commercial Cylinder 2024",
+        price_per_cylinder_sgd={
+            Decimal("12.7"): Decimal("44.90"),
+            Decimal("50"): Decimal("152.00"),
+        },
+        delivery_charge_sgd=Decimal("8.00"),
+        rental_per_cylinder_sgd=Decimal("4.50"),
+    ),
+    "IGS-COM-25": LPGPriceList(
+        code="IGS-COM-25",
+        name="Commercial Cylinder 2025",
+        price_per_cylinder_sgd={
+            Decimal("12.7"): Decimal("46.80"),
+            Decimal("50"): Decimal("158.50"),
+        },
+        delivery_charge_sgd=Decimal("9.00"),
+        rental_per_cylinder_sgd=Decimal("5.00"),
+    ),
     "IGS-COM-26": LPGPriceList(
         code="IGS-COM-26",
         name="Commercial Cylinder 2026",
@@ -315,6 +384,14 @@ LPG_PRICE_LISTS: dict[str, LPGPriceList] = {
         rental_per_cylinder_sgd=Decimal("5.00"),
     ),
 }
+
+
+def lpg_price_list(year: int) -> LPGPriceList:
+    """The LPG vendor's list for a supply period in `year`. No fallback to another year."""
+    code = f"IGS-COM-{year % 100:02d}"
+    if code not in LPG_PRICE_LISTS:
+        raise ValueError(f"No LPG price list {code}; declare it rather than borrowing a year")
+    return LPG_PRICE_LISTS[code]
 
 
 # --- fuel cards -------------------------------------------------------------------------
@@ -415,26 +492,66 @@ def _fuel_prices() -> dict[tuple[int, int], dict[str, Decimal]]:
     }
 
 
-FUEL_PRICE_LISTS: dict[str, FuelPriceList] = {
-    "SFC-PUMP-26": FuelPriceList(
-        code="SFC-PUMP-26",
-        name="Fleet Pump Price 2026",
-        prices=_fuel_prices(),
-    ),
-}
+def _fuel_lists() -> dict[str, FuelPriceList]:
+    """The monthly pump-price table, split into one list per calendar year.
 
-# Per-litre discount the card gives back. Money only: it reduces the amount payable and
-# leaves the litres - and therefore the emissions - untouched. That is the trap.
+    Block 1 printed "SFC-PUMP-26" on 2025 statements. The monthly prices are unchanged;
+    only the code and name now match the period, so every litre and amount on the Block 1
+    statements is the same.
+    """
+    by_year: dict[int, dict[tuple[int, int], dict[str, Decimal]]] = {}
+    for (year, month), prices in _fuel_prices().items():
+        by_year.setdefault(year, {})[(year, month)] = prices
+    return {
+        f"SFC-PUMP-{year % 100:02d}": FuelPriceList(
+            code=f"SFC-PUMP-{year % 100:02d}",
+            name=f"Fleet Pump Price {year}",
+            prices=prices,
+        )
+        for year, prices in sorted(by_year.items())
+    }
+
+
+FUEL_PRICE_LISTS: dict[str, FuelPriceList] = _fuel_lists()
+
+
+def fuel_price_list(year: int) -> FuelPriceList:
+    """The card issuer's pump prices for a statement in `year`."""
+    code = f"SFC-PUMP-{year % 100:02d}"
+    if code not in FUEL_PRICE_LISTS:
+        raise ValueError(f"No fuel price list {code}; extend _fuel_prices rather than borrow")
+    return FUEL_PRICE_LISTS[code]
+
+
+# Per-litre rebate on the original two cards. Money only: it reduces the amount payable and
+# leaves the litres - and therefore the emissions - untouched. That is the trap. Since
+# Tier 2 Block 2 the rebate is per contract (FuelCustomer.discount_per_litre_sgd); the two
+# Block 1 fleets are pinned to this value so fuel_001..006 are unchanged.
 FUEL_DISCOUNT_PER_LITRE_SGD = Decimal("0.06")
 
 
 @dataclass(frozen=True)
 class LPGCustomer:
-    """A customer's gas use. Mirrors CustomerProfile's shape for electricity."""
+    """A customer's gas use. Mirrors CustomerProfile's shape for electricity.
+
+    Since Tier 2 Block 2 the price list is chosen by the supply period's year rather than
+    fixed per customer (`lpg_price_list`), and three things vary that Block 1 held fixed,
+    because one cylinder count every month was the most visible tell in the Block 1 set:
+
+    billing_basis
+        `monthly` - one invoice per calendar month. `per_delivery` - one invoice per visit,
+        covering the days since the previous one, so the cylinder count follows the
+        interval rather than the calendar.
+    extra_delivery_chance
+        On a monthly invoice, the chance the month's gas arrived in two visits (a top-up),
+        each paying the delivery fee.
+    second_size_kg / second_base_kg
+        A second cylinder size taken alongside the main one - a kitchen with a main range
+        on 50 kg cylinders and a side station on 12.7 kg.
+    """
 
     key: str  # matches a CustomerProfile key, so one business has both documents
     account_number: str
-    price_list_code: str
     # kg of LPG in a month of average length, before seasonality and noise. Cooking and
     # process heat, so the seasonal swing is small: a kitchen's gas use tracks covers
     # served, not the weather.
@@ -444,92 +561,84 @@ class LPGCustomer:
     start_year: int
     start_month: int
     first_doc_number: int
-
-    @property
-    def price_list(self) -> LPGPriceList:
-        return LPG_PRICE_LISTS[self.price_list_code]
+    billing_basis: str = "monthly"
+    extra_delivery_chance: float = 0.0
+    second_size_kg: Decimal | None = None
+    second_base_kg: int = 0
 
 
 @dataclass(frozen=True)
 class FuelCustomer:
-    """A customer's fleet and card."""
+    """A customer's fleet and card. The rebate is the card contract's, per customer."""
 
     key: str
     account_number: str
-    price_list_code: str
     fleet: Fleet
     start_year: int
     start_month: int
     first_doc_number: int
-
-    @property
-    def price_list(self) -> FuelPriceList:
-        return FUEL_PRICE_LISTS[self.price_list_code]
+    discount_per_litre_sgd: Decimal = FUEL_DISCOUNT_PER_LITRE_SGD
 
 
-# Gas goes to the two businesses that would burn it: a coffee shop kitchen and a laundry
-# with gas dryers.
+# Gas goes to the businesses that burn it, all on the ground floor: a coffee-shop kitchen,
+# a laundry with gas dryers, a catering kitchen and a print works with gas-fired dryers.
+# Block 1 had a dental clinic here; a clinic does not cook and its unit is upstairs, so it
+# was replaced by the catering kitchen (spot-check finding; spec lesson 13).
 #
 # `kopi_corner` starts in Dec 2024 ON PURPOSE. DESNZ publishes a standalone set per year
 # and only 2025 and 2026 are loaded, so a 2024 supply period has no factor at or before it
 # and `lookup_emission_factor` returns no_results. That is the one honesty path Tier 1
-# never exercised live (every synthetic bill fell inside the substitution cap), and it is
-# worth having a document that reaches it.
-#
-# Starting in December rather than October gives exactly ONE such document out of the
-# account's three: enough to exercise the refusal, while the other two still produce
-# figures. Three un-calculable documents would have made a quarter of the set untestable
-# for everything downstream of the factor lookup.
+# never exercised live, and `lpg_001` is the document that reaches it. Every LPG document
+# added in Block 2 has its period inside 2025-2026.
 LPG_CUSTOMERS: tuple[LPGCustomer, ...] = (
     LPGCustomer(
         key="kopi_corner",
         account_number="GAS-4401-07",
-        price_list_code="IGS-COM-26",
         # Sized so that noise and seasonality carry the monthly requirement across
-        # cylinder boundaries. A base that always rounded to the same number of cylinders
-        # would make every invoice for this account identical but for its dates, and a
-        # constant guess would score on it.
+        # cylinder boundaries.
         base_kg=230,
         seasonal_amplitude=0.06,
         cylinder_size_kg=Decimal("50"),
         start_year=2024,
         start_month=12,
         first_doc_number=1,
+        extra_delivery_chance=0.25,
     ),
     LPGCustomer(
         key="lion_city_laundry",
         account_number="GAS-7718-02",
-        price_list_code="IGS-COM-26",
         base_kg=565,
         seasonal_amplitude=0.05,
         cylinder_size_kg=Decimal("50"),
         start_year=2025,
         start_month=3,
         first_doc_number=4,
+        extra_delivery_chance=0.35,
     ),
     LPGCustomer(
-        key="serangoon_dental",
-        account_number="GAS-9163-05",
-        price_list_code="IGS-COM-26",
-        base_kg=41,
+        key="tampines_catering",
+        account_number="GAS-6604-05",
+        base_kg=150,
         seasonal_amplitude=0.04,
-        # The small cylinder, so one document in the set has a fractional kg total and an
-        # extraction that rounded the cylinder arithmetic is caught.
-        cylinder_size_kg=Decimal("12.7"),
+        cylinder_size_kg=Decimal("50"),
         start_year=2025,
         start_month=11,
         first_doc_number=7,
+        # The small cylinder on a side station, so the set keeps a fractional kg total and
+        # an extraction that rounded the cylinder arithmetic is caught.
+        second_size_kg=Decimal("12.7"),
+        second_base_kg=36,  # 32.4-39.6 kg wanted: 3 or 4 cylinders of 12.7
     ),
     LPGCustomer(
         key="tampines_print_works",
         account_number="GAS-5520-09",
-        price_list_code="IGS-COM-26",
         base_kg=138,
         seasonal_amplitude=0.05,
         cylinder_size_kg=Decimal("50"),
         start_year=2026,
         start_month=1,
         first_doc_number=10,
+        billing_basis="per_delivery",
     ),
 )
 
@@ -540,13 +649,15 @@ LPG_CUSTOMERS: tuple[LPGCustomer, ...] = (
 #
 # It starts in November so that its three months span a year boundary: the December
 # statement is dated in January, which is the case spec Part 8 item 11 asks every kind to
-# contain - a document whose period year differs from its document-date year, so an eval
-# can catch a model that took the factor year from the wrong date.
+# contain.
+#
+# Three fleets were added in Tier 2 Block 2, appended last, two of them mixed, so that
+# `mixed_fuel` and the per-litre rebate have enough documents behind them to support a
+# per-kind claim. Their rebates differ from the Block 1 fleets' pinned 0.06.
 FUEL_CUSTOMERS: tuple[FuelCustomer, ...] = (
     FuelCustomer(
         key="jurong_auto",
         account_number="FLT-4487-01",
-        price_list_code="SFC-PUMP-26",
         fleet=Fleet(
             card_number="6677-****-****-2201",
             vehicles=(
@@ -562,7 +673,6 @@ FUEL_CUSTOMERS: tuple[FuelCustomer, ...] = (
     FuelCustomer(
         key="lion_city_laundry",
         account_number="FLT-7741-03",
-        price_list_code="SFC-PUMP-26",
         fleet=Fleet(
             card_number="6677-****-****-7742",
             vehicles=(
@@ -574,6 +684,52 @@ FUEL_CUSTOMERS: tuple[FuelCustomer, ...] = (
         start_year=2026,
         start_month=2,
         first_doc_number=4,
+    ),
+    FuelCustomer(
+        key="kopi_corner",
+        account_number="FLT-1134-05",
+        fleet=Fleet(
+            card_number="6677-****-****-1135",
+            vehicles=(
+                Vehicle(plate="SYN 7720 M", product="Diesel", tank_litres=65),
+                Vehicle(plate="SYN 7721 M", product="Petrol 95", tank_litres=45),
+            ),
+            fills_per_vehicle_per_month=2,
+        ),
+        start_year=2025,
+        start_month=1,
+        first_doc_number=0,  # no Block 1 statements; numbers from synthgen/plan.py
+        discount_per_litre_sgd=Decimal("0.05"),
+    ),
+    FuelCustomer(
+        key="kranji_cold_store",
+        account_number="FLT-3309-02",
+        fleet=Fleet(
+            card_number="6677-****-****-3310",
+            vehicles=(
+                Vehicle(plate="SYN 4410 R", product="Diesel", tank_litres=120),
+                Vehicle(plate="SYN 4411 R", product="Diesel", tank_litres=120),
+                Vehicle(plate="SYN 4415 R", product="Petrol 95", tank_litres=55),
+            ),
+            fills_per_vehicle_per_month=4,
+        ),
+        start_year=2025,
+        start_month=1,
+        first_doc_number=0,
+        discount_per_litre_sgd=Decimal("0.08"),
+    ),
+    FuelCustomer(
+        key="tampines_catering",
+        account_number="FLT-6604-06",
+        fleet=Fleet(
+            card_number="6677-****-****-6607",
+            vehicles=(Vehicle(plate="SYN 6630 T", product="Petrol 95", tank_litres=60),),
+            fills_per_vehicle_per_month=4,
+        ),
+        start_year=2025,
+        start_month=10,
+        first_doc_number=0,
+        discount_per_litre_sgd=Decimal("0.04"),
     ),
 )
 

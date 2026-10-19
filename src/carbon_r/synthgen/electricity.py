@@ -24,6 +24,7 @@ from decimal import Decimal
 from carbon_r.config import get_settings
 from carbon_r.models.electricity_bill import ElectricityBill
 from carbon_r.money import round2
+from carbon_r.prorate import split_by_year
 from carbon_r.synthgen.profiles import (
     CUSTOMER_PROFILES,
     VENDOR_NAME,
@@ -43,7 +44,8 @@ IS_HOLDOUT_LAYOUT = False
 DIFFICULTY_TIER = "clean"
 
 DEFAULT_SEED = 20261016
-GENERATOR_VERSION = "synthgen-electricity-2"
+# 3 since Tier 2 Block 2: plan by period year, by-year split, standalone periods, quirks.
+GENERATOR_VERSION = "synthgen-electricity-3"
 
 PEAK_MONTH = 5  # May: hottest month in Singapore, peak cooling load. Global - weather is.
 NOISE = 0.10  # +/-10% month-to-month wobble, as the checklist asks
@@ -97,6 +99,41 @@ def monthly_consumption_kwh(
     return round(base_kwh * seasonal * noise * days / AVG_DAYS_PER_MONTH)
 
 
+def period_consumption_kwh(
+    base_kwh: int,
+    start: date,
+    end: date,
+    amplitude: float,
+    rng: random.Random | None = None,
+    *,
+    noise: float | None = None,
+) -> int:
+    """Units used over a period that is not a calendar month (a meter-read cycle).
+
+    The same model as `monthly_consumption_kwh`, with the period's own day count and the
+    seasonal multiplier of the month the period mostly falls in (its midpoint).
+    """
+    if noise is None and rng is None:
+        raise ValueError("period_consumption_kwh needs either rng or noise")
+    noise = draw(noise, rng, 1 - NOISE, 1 + NOISE)
+    days = (end - start).days + 1
+    midpoint = start + timedelta(days=days // 2)
+    seasonal = seasonal_multiplier(midpoint.month, amplitude)
+    return round(base_kwh * seasonal * noise * days / AVG_DAYS_PER_MONTH)
+
+
+def standalone_opening_reading_kwh(profile: CustomerProfile, seed: int, start: date) -> int:
+    """A meter read for a bill that is not part of the account's monthly run.
+
+    Wound back from the account's opening read by its base use per month, so a 2022 bill
+    reads lower than the 2024 run on the same meter. Readings are NOT continuous between
+    an account's separate windows - recorded as a known limit in TIER2_BLOCK2.md.
+    """
+    opening = opening_reading_kwh(profile, seed)
+    months_before = (profile.start_year - start.year) * 12 + (profile.start_month - start.month)
+    return max(profile.base_kwh * 6, opening - profile.base_kwh * months_before)
+
+
 def opening_reading_kwh(profile: CustomerProfile, seed: int) -> int:
     """A plausible lifetime meter read, sized to the business.
 
@@ -148,23 +185,49 @@ def build_bill(
     meter_number: str,
     noise: float | None = None,
     lag_days: int | None = None,
+    period: tuple[date, date] | None = None,
+    layout_id: str = LAYOUT_ID,
+    is_holdout_layout: bool = IS_HOLDOUT_LAYOUT,
+    difficulty_tier: str = DIFFICULTY_TIER,
 ) -> ElectricityBill:
-    """Assemble and validate one bill.
+    """Assemble and validate one clean bill. Quirks are applied afterwards (quirks.py).
+
+    `period` replaces the calendar month with a meter-read cycle - the standalone
+    `cross_month_period` and `cross_year_period` bills. Without it the bill is exactly the
+    Block 1 bill: same random draws in the same order, so Block 1 is bit-identical.
 
     Returns a validated ElectricityBill, so an arithmetic mistake in this module fails
     here - before anything is written to disk and long before a PDF exists.
     """
-    plan = profile.plan
     rng = bill_rng(seed, profile.account_number, year, month, DOC_KIND)
-    consumption = monthly_consumption_kwh(
-        profile.base_kwh,
-        year,
-        month,
-        profile.seasonal_amplitude,
-        rng=rng,
-        noise=noise,
-    )
-    period_start, period_end, document_date = billing_period(year, month, rng, lag_days=lag_days)
+    if period is None:
+        consumption = monthly_consumption_kwh(
+            profile.base_kwh,
+            year,
+            month,
+            profile.seasonal_amplitude,
+            rng=rng,
+            noise=noise,
+        )
+        period_start, period_end, document_date = billing_period(
+            year, month, rng, lag_days=lag_days
+        )
+    else:
+        period_start, period_end = period
+        consumption = period_consumption_kwh(
+            profile.base_kwh,
+            period_start,
+            period_end,
+            profile.seasonal_amplitude,
+            rng=rng,
+            noise=noise,
+        )
+        lag = lag_days if lag_days is not None else rng.randint(*BILL_LAG_DAYS_RANGE)
+        document_date = period_end + timedelta(days=lag)
+
+    # The plan for the PERIOD's year: a plan code carries its year, and a page whose plan
+    # year disagrees with its period contradicts itself.
+    plan = profile.plan_for(period_start.year)
 
     # Money, in the exact order ElectricityBill's validator re-checks it.
     gst_rate = Decimal(str(get_settings().gst_rate))  # str(): never Decimal(float)
@@ -172,13 +235,19 @@ def build_bill(
     subtotal = energy_charge + plan.fixed_charge_sgd
     gst_amount = round2(subtotal * gst_rate)
 
+    quirks = []
+    if period_start.year != period_end.year:
+        quirks.append("cross_year_period")
+    elif period is not None:
+        quirks.append("cross_month_period")
+
     return ElectricityBill(
         doc_id=doc_id,
         generator_seed=seed,
         generator_version=GENERATOR_VERSION,
-        layout_id=LAYOUT_ID,
-        is_holdout_layout=IS_HOLDOUT_LAYOUT,
-        difficulty_tier=DIFFICULTY_TIER,
+        layout_id=layout_id,
+        is_holdout_layout=is_holdout_layout,
+        difficulty_tier=difficulty_tier,
         degradation={},
         vendor_name=VENDOR_NAME,
         vendor_uen=VENDOR_UEN,
@@ -193,6 +262,7 @@ def build_bill(
         current_reading_kwh=previous_reading_kwh + consumption,
         consumption_kwh=consumption,
         is_estimated_reading=False,
+        split_kwh_by_year=split_by_year(consumption, period_start, period_end),
         tariff_plan_code=plan.code,
         tariff_plan_name=plan.name,
         tension=plan.tension,
@@ -203,7 +273,7 @@ def build_bill(
         gst_rate=gst_rate,
         gst_amount_sgd=gst_amount,
         total_sgd=subtotal + gst_amount,
-        quirks=[],  # v0 ships no quirks; Tier 2 Block 2 fills this
+        quirks=quirks,
     )
 
 
@@ -220,6 +290,8 @@ def build_bill_series(
     bills: list[ElectricityBill] = []
 
     for profile in profiles:
+        if profile.first_doc_number <= 0:
+            continue  # added after Block 1: it has no Block 1 run
         address, meter_number = incidental_details(profile, seed)
         reading = opening_reading_kwh(profile, seed)
 
@@ -239,3 +311,52 @@ def build_bill_series(
             bills.append(bill)
 
     return bills
+
+
+def build_v1(seed: int = DEFAULT_SEED, plans=None) -> list[ElectricityBill]:
+    """Every synthgen v1 bill, from the plan (synthgen/plan.py), clean and then dressed.
+
+    Each account's monthly documents are built in date order so the meter reading carries
+    from one bill to the next, Block 1 straight into its Block 2 series. Standalone bills
+    (the two period quirks) take a reading wound back from the account's opening read.
+    """
+    from carbon_r.synthgen.layouts import layout
+    from carbon_r.synthgen.plan import ELEC, plan_kind
+    from carbon_r.synthgen.profiles import customer_by_key
+    from carbon_r.synthgen.quirks import dress
+
+    plans = plans if plans is not None else plan_kind(ELEC, seed)
+    by_number = {}
+    readings: dict[str, int] = {}
+
+    def key(plan):
+        return (plan.account, plan.group not in ("block1", "series"), plan.year, plan.month)
+
+    for plan in sorted(plans, key=key):
+        profile = customer_by_key(plan.account)
+        address, meter_number = incidental_details(profile, seed)
+        if plan.period is None:
+            reading = readings.get(plan.account)
+            if reading is None:
+                reading = opening_reading_kwh(profile, seed)
+        else:
+            reading = standalone_opening_reading_kwh(profile, seed, plan.period[0])
+        bill = build_bill(
+            profile,
+            plan.year,
+            plan.month,
+            reading,
+            plan.doc_id,
+            seed,
+            customer_address=address,
+            meter_number=meter_number,
+            period=plan.period,
+            layout_id=plan.layout_id,
+            is_holdout_layout=layout(plan.layout_id).is_holdout,
+            difficulty_tier=plan.tier,
+        )
+        if plan.period is None:
+            readings[plan.account] = bill.current_reading_kwh
+        by_number[plan.number] = dress(bill, plan, seed)
+
+    return [by_number[n] for n in sorted(by_number)]

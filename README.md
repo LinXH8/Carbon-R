@@ -168,13 +168,37 @@ checkable rather than trusted once — it needs the git-ignored spreadsheets pre
 ### Generating documents and scoring them
 
 ```bash
-make docs         # 36 synthetic documents + answer keys into data/generated/ (git-ignored)
-make eval         # score routing, extraction and the pipeline against those answer keys
-make agent-smoke  # end-to-end flow check of /upload + /chat on 5 bills
-make flow-10      # the same flow on 10 bills spanning both factor years
-make flow-scope1  # one document of each kind, including a refusal
-make check        # ruff + the full test suite (437 tests)
+make docs-plan    # print the synthgen v1 quirk x tier table and pre-render checks; writes nothing
+make docs         # the synthgen v1 set: 198 documents + answer keys (git-ignored)
+make eval         # score routing, extraction and the pipeline on v1 (holdout excluded)
+make eval-block1  # the Block 1 set (36 clean documents), as Block 1 measured it
+make agent-smoke  # end-to-end flow check of /upload + /chat on 5 Block 1 bills
+make flow-10      # the same flow on 10 Block 1 bills spanning both factor years
+make flow-scope1  # one Block 1 document of each kind, including a refusal
+make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forward, a photo
+make check        # ruff + the full test suite (521 tests)
 ```
+
+### Reproducing the test set
+
+The documents are not committed; the generator and its seed are, so the set can be rebuilt
+bit-for-bit at the answer-key level:
+
+- **seed** `20261016`, recorded in each kind's `manifest.json`;
+- **generators** `synthgen-electricity-3`, `synthgen-lpg-2`, `synthgen-fuel-card-2`;
+- **output** `data/generated/synthgen_v1/<kind>/<clean|moderate|hard>/`, each document a
+  page (`.pdf`, or `.png` for a scanned or photographed one) beside its JSON answer key.
+
+synthgen v1 holds **198 documents**: 93 electricity bills, 51 LPG invoices and 54 fuel-card
+statements, over four layouts per kind and three difficulty tiers. Layout `d` of each kind
+is **held out**: never looked at while tuning, and excluded from `make eval` by default.
+Every injected quirk appears on at least 15 non-holdout documents per kind; `make
+docs-plan` prints the table. Arithmetic closes to the cent on all 198. Determinism is
+asserted on the JSON keys and the HTML; PDF bytes carry a WeasyPrint timestamp and are not
+compared.
+
+**No accuracy figure on synthgen v1 is stated yet.** The baseline run belongs to Block 2's
+follow-up commit; until then the only measured numbers are Block 1's, on its own set.
 
 The flow checks are flow checks, not measurements: documents of one layout asked one
 question cannot measure accuracy, and the script says so on every line it prints. They
@@ -222,23 +246,26 @@ Stated plainly, because they bound what any number here means:
 - **Diesel and petrol use the 100%-mineral rows on an unverified assumption** about the
   biofuel content of Singapore pump fuel. NEA's own fuel specification has not been read.
 - The accuracy figures above describe **one layout per kind, crisp PDFs, no quirks** — the
-  `clean` tier. They say nothing yet about scans, phone photographs, MWh units or billing
-  periods that straddle a month. Block 2 adds those tiers and reports per-quirk.
+  Block 1 `clean` set. They say nothing about scans, phone photographs, MWh units or billing
+  periods that straddle a month. synthgen v1 adds those documents; its baseline is not yet
+  stated, and per-tier and per-quirk reporting arrives with Block 3.
+- **In synthgen v1, a hard LPG or fuel document is harder to read, not harder to
+  interpret**: their injected quirks are all money decoys, and every hard one carries the
+  same three, so per-quirk results on them are confounded. See TIER2_BLOCK2.md.
 - **Two runs is a small sample.** Every defect found in this block appeared in the first
   live run and none in a test, which is a reminder that a clean run is weak evidence of
   correctness, not proof of it.
 - **The LPG documents carry less variation than their count suggests.** Gas is delivered in
-  whole cylinders, so an account with steady demand takes the same number every month. That
-  is realistic, and deliberately not tuned away, but 12 invoices do not carry 12 distinct
-  activity figures.
+  whole cylinders. synthgen v1 adds per-delivery invoices, top-up visits and mixed sizes,
+  but a steady account's monthly invoices still often share a kg figure.
 - **The classifier's confidence threshold (0.7) was chosen by eye**, with no labelled set of
   ambiguous documents behind it.
 - **The interface has no automated interaction coverage.** The page's figure panel and
   streamed steps are tested against the shape of the response; the drag behaviour of the
   audit sheet has been reviewed and used by hand, not instrumented.
 - **Sessions and uploads accumulate** with no eviction, and a restart loses every session.
-- **No holdout layout exists yet.** With a single layout per kind there is no honest
-  unseen-layout number to quote; Block 2 holds one layout out and reports it separately.
+- **The holdout layout has not been scored yet.** synthgen v1 holds layout `d` out of every
+  default run; Block 3 reports it once, separately.
 - Where no factor is published for a document's activity year, the latest factor at or
   before it is used, up to two years back, and the substitution is stated on the result.
   Beyond two years, or where nothing is published at or before that year at all, the tool

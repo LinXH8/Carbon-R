@@ -318,3 +318,20 @@ def test_an_estimated_reading_reaches_the_disclosures(session):
     result = calculate(toolkit, ("act_1", "factor_1"))
     assert result.data["disclosures"]["estimated_reading"] is True
     assert any("marked estimated" in s for s in result.data["required_disclosures"])
+
+
+def test_a_split_bill_names_each_activitys_year(session):
+    """A bill across 31 December reads as two activities, each with its own year."""
+    halves = [
+        {**ELECTRICITY_ACTIVITY, "amount": "4645", "factor_year": 2023},
+        {**ELECTRICITY_ACTIVITY, "amount": "4355", "factor_year": 2024},
+    ]
+
+    def fake_extract(path, **_):
+        return ok(extract_payload(activities=halves), "Read elec_101.pdf.")
+
+    kit = Toolkit(session, extract=fake_extract)
+    result = dispatch(kit, "extract_from_document", document_id="doc_test")
+    assert "act_1 = 4645 kWh of electricity in 2023" in result.message
+    assert "act_2 = 4355 kWh of electricity in 2024" in result.message
+    assert "one factor per year (2023, 2024)" in result.message

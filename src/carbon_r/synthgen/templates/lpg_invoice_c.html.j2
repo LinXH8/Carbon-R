@@ -1,0 +1,46 @@
+{# LPG layout C - monospaced, upper case, dashed day-first dates, no kg total printed (the
+   `lpg_cylinders` case). No arithmetic, no literal dates. #}
+<!-- {{ doc_id }} / layout {{ layout_id }} / {{ generator_version }} / seed {{ generator_seed }} -->
+{% from "_quirks.html.j2" import gst_headline, account_summary, credit_row %}
+<style>
+  @page { size: A4; margin: 14mm; }
+  body { font-family: "Courier New", Courier, monospace; font-size: 8.8pt; color: #111; line-height: 1.35; }
+  .notice { border: 1pt dashed #8a6d00; background: #fffbe8; color: #6b5500; padding: 4pt 6pt; font-size: 7.4pt; margin-bottom: 10pt; }
+  .head { border-top: 2pt solid #111; border-bottom: 2pt solid #111; padding: 5pt 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8pt; }
+  td, th { padding: 1.6pt 3pt; text-align: left; }
+  th { border-bottom: 1pt solid #111; }
+  td.num, th.num { text-align: right; }
+  footer { margin-top: 14pt; font-size: 7pt; border-top: 1pt solid #111; padding-top: 4pt; }
+</style>
+
+<div class="notice">{{ notice }}</div>
+<div class="head">
+  <b>{{ vendor_name }}</b> UEN {{ vendor_uen }}<br>{{ vendor_address }} / {{ vendor_support }}<br>
+  LPG TAX INVOICE NO {{ invoice_number }}
+</div>
+<table>
+  <tr><td>DATE</td><td>{{ document_date }}</td><td>ACCOUNT</td><td>{{ account_number }}</td></tr>
+  <tr><td>SOLD TO</td><td colspan="3">{{ customer_name }}, {{ customer_address }}</td></tr>
+  <tr><td>SUPPLY</td><td colspan="3">{{ period_start }} TO {{ period_end }} ({{ days_in_period }} DAYS) &middot; PRICE LIST {{ price_list_code }}</td></tr>
+</table>
+
+{{ gst_headline(gst_inclusive_display, total, currency, "CURRENT CHARGES INCL GST") }}
+
+<table>
+  <tr><th>ITEM</th><th class="num">QTY</th><th class="num">UNIT {{ currency }}</th><th class="num">{{ currency }}</th></tr>
+  {% for line in cylinder_lines %}
+  <tr><td>LPG {{ line.size_kg }}KG CYL DELIVERED {{ line.delivery_date }}</td><td class="num">{{ line.count }}</td><td class="num">{{ line.price_per_cylinder }}</td><td class="num">{{ line.amount }}</td></tr>
+  {% endfor %}
+  <tr><td>DELIVERY</td><td class="num">{{ visits }}</td><td class="num">{{ delivery_fee }}</td><td class="num">{{ delivery_charge }}</td></tr>
+  <tr><td>CYL RENTAL</td><td class="num">{{ cylinder_count }}</td><td class="num">{{ rental_per_cylinder }}</td><td class="num">{{ rental_charge }}</td></tr>
+  <tr><td>EMPTIES RETURNED</td><td class="num">{{ returned_cylinders }}</td><td></td><td class="num">-</td></tr>
+  {{ credit_row(credit, 2) }}
+  <tr><td>{{ "CURRENT CHARGES" if gst_inclusive_display else "SUBTOTAL" }}</td><td></td><td></td><td class="num">{{ subtotal }}</td></tr>
+  <tr><td>GST {{ gst_percent }}%</td><td></td><td></td><td class="num">{{ gst_amount }}</td></tr>
+  <tr><td><b>TOTAL</b></td><td></td><td></td><td class="num"><b>{{ total }}</b></td></tr>
+</table>
+
+{{ account_summary(summary, currency, "ACCOUNT SUMMARY") }}
+
+<footer>{{ notice }}<br>{{ generator_version }} / SEED {{ generator_seed }}</footer>

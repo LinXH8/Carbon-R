@@ -1,0 +1,53 @@
+{# LPG layout D - the HOLDOUT layout (spec 6.1): never looked at while tuning, scored
+   separately. Sidebar layout, long month names, and a printed kg total.
+   No arithmetic, no literal dates: every value comes from render.lpg_context(). #}
+<!-- {{ doc_id }} / layout {{ layout_id }} / {{ generator_version }} / seed {{ generator_seed }} -->
+{% from "_quirks.html.j2" import gst_headline, account_summary, credit_row %}
+<style>
+  @page { size: A4; margin: 12mm; }
+  body { font-family: Verdana, sans-serif; font-size: 8.4pt; color: #1d1d1d; line-height: 1.45; }
+  .notice { border: 1.2pt dashed #8a6d00; background: #fffbe8; color: #6b5500; padding: 4pt 6pt; font-size: 7.2pt; }
+  .band { background: #0f5c6e; color: white; padding: 8pt 10pt; margin-top: 8pt; }
+  .band .name { font-size: 13pt; font-weight: 700; }
+  .wrap { display: flex; }
+  .side { width: 36%; background: #eaf4f6; padding: 9pt 10pt; }
+  .side h4 { margin: 8pt 0 2pt; font-size: 7.2pt; color: #0f5c6e; text-transform: uppercase; }
+  .main { flex: 1; padding: 9pt 0 0 12pt; }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { padding: 3pt 2pt; border-bottom: .5pt solid #ddd; text-align: left; }
+  th { color: #0f5c6e; font-size: 7.4pt; }
+  .num { text-align: right; }
+  .pay { margin-top: 8pt; font-size: 11pt; font-weight: 700; color: #0f5c6e; text-align: right; }
+  footer { margin-top: 14pt; font-size: 7pt; color: #777; }
+</style>
+
+<div class="notice">{{ notice }}</div>
+<div class="band"><div class="name">{{ vendor_name }}</div>{{ vendor_address }} &middot; Registration {{ vendor_uen }} &middot; {{ vendor_support }}</div>
+<div class="wrap">
+  <div class="side">
+    <h4>Customer</h4>{{ customer_name }}<br>{{ customer_address }}
+    <h4>Account</h4>{{ account_number }}
+    <h4>Invoice</h4>{{ invoice_number }}<br>issued {{ document_date }}
+    <h4>Supply covered</h4>{{ period_start }} to {{ period_end }}<br>{{ days_in_period }} days
+    <h4>Price schedule</h4>{{ price_list_code }}
+  </div>
+  <div class="main">
+    {{ gst_headline(gst_inclusive_display, total, currency) }}
+    <table>
+      <tr><th>Gas supplied</th><th class="num">Cylinders</th><th class="num">Each</th><th class="num">{{ currency }}</th></tr>
+      {% for line in cylinder_lines %}
+      <tr><td>{{ line.size_kg }} kg cylinders, {{ line.delivery_date }}</td><td class="num">{{ line.count }}</td><td class="num">{{ line.price_per_cylinder }}</td><td class="num">{{ line.amount }}</td></tr>
+      {% endfor %}
+      {% if total_kg %}<tr><td colspan="4"><b>Net LPG supplied: {{ total_kg }} kg</b></td></tr>{% endif %}
+      <tr><td>Delivery ({{ visits }} drop(s))</td><td></td><td class="num">{{ delivery_fee }}</td><td class="num">{{ delivery_charge }}</td></tr>
+      <tr><td>Cylinder rental (not gas)</td><td class="num">{{ cylinder_count }}</td><td class="num">{{ rental_per_cylinder }}</td><td class="num">{{ rental_charge }}</td></tr>
+      <tr><td>Empties collected</td><td class="num">{{ returned_cylinders }}</td><td></td><td class="num">&mdash;</td></tr>
+      {{ credit_row(credit, 2) }}
+      <tr><td>{{ "Current charges" if gst_inclusive_display else "Charges excluding GST" }}</td><td></td><td></td><td class="num">{{ subtotal }}</td></tr>
+      <tr><td>Goods and Services Tax ({{ gst_percent }}%)</td><td></td><td></td><td class="num">{{ gst_amount }}</td></tr>
+    </table>
+    <div class="pay">Amount of this invoice: {{ currency }} {{ total }}</div>
+    {{ account_summary(summary, currency) }}
+  </div>
+</div>
+<footer>{{ notice }} {{ generator_version }}, seed {{ generator_seed }}.</footer>

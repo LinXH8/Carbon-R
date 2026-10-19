@@ -17,6 +17,8 @@ a reply produced by the previous classifier.
 Offline: the key function is pure, so none of this calls a provider.
 """
 
+from pathlib import Path
+
 from pydantic import Field
 
 from carbon_r.models.doc_kind import DocumentClassification
@@ -123,3 +125,33 @@ def test_the_hash_is_stable_across_processes():
         for seed in ("0", "1", "12345")
     }
     assert runs == {REQUEST_HASH}
+
+
+def test_the_page_cache_is_keyed_by_content_not_only_by_name(tmp_path, monkeypatch):
+    """A regenerated document under the same name must not be read from the old page.
+
+    Tier 2 Block 2 regenerates lpg_007 as a different customer's invoice; a name-keyed
+    cache would have handed the model Block 1's page. pdftoppm is replaced by a fake that
+    records each call, so the test needs no poppler.
+    """
+    from carbon_r.tools import extract
+
+    calls = []
+
+    def fake_run(command, **_):
+        calls.append(command)
+        Path(command[-1] + "-1.png").write_bytes(b"page")
+
+    monkeypatch.setattr(extract.subprocess, "run", fake_run)
+    pdf = tmp_path / "lpg_007.pdf"
+    cache = tmp_path / "pages"
+
+    pdf.write_bytes(b"%PDF block 1 dental clinic")
+    first = extract.rasterise(pdf, cache_dir=cache)
+    assert extract.rasterise(pdf, cache_dir=cache) == first
+    assert len(calls) == 1  # unchanged content: served from the cache
+
+    pdf.write_bytes(b"%PDF v1 catering kitchen")
+    second = extract.rasterise(pdf, cache_dir=cache)
+    assert len(calls) == 2  # changed content: rasterised again
+    assert second != first

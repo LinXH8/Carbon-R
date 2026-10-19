@@ -7,7 +7,7 @@ export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 # the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
 export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
 
-.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs models db-up db-down check eval agent-smoke flow-10 flow-scope1
+.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
@@ -40,8 +40,11 @@ seed-desnz:  ## Load UK DESNZ fuel factors into DATABASE_URL (idempotent)
 verify-desnz:  ## Re-read the DESNZ workbooks and diff them against the loader's literals
 	uv run python scripts/load_desnz_factors.py --verify
 
-docs:     ## Generate synthetic documents + answer keys into data/generated/
+docs:     ## Generate the synthgen v1 set + answer keys into data/generated/synthgen_v1/
 	uv run python scripts/generate_docs.py
+
+docs-plan:  ## Print the v1 quirk x tier table and pre-render checks; writes nothing
+	uv run python scripts/generate_docs.py --plan
 
 models:   ## List model ids available to OPENAI_API_KEY
 	uv run python scripts/list_models.py
@@ -52,20 +55,31 @@ db-up:    ## Start local Postgres (only if not using a hosted database)
 db-down:  ## Stop local Postgres
 	docker compose down
 
-eval:     ## Score extraction and the pipeline against the answer keys
+eval:     ## Score extraction and the pipeline on synthgen v1 (holdout excluded)
 	uv run python scripts/eval_extraction.py
 
+eval-block1:  ## Score the Block 1 set (data/generated/<kind>/clean), as Block 1 measured it
+	uv run python scripts/eval_extraction.py --root data/generated
+
 agent-smoke:  ## End-to-end flow check of /upload + /chat on 5 bills (NOT an accuracy measurement)
-	uv run python scripts/agent_flow_check.py
+	uv run python scripts/agent_flow_check.py --root data/generated
 
 # Ten documents chosen to span both factor years, so the factor-year substitution
 # disclosure is actually exercised. The first five bills all fall in 2024 and never hit it.
 flow-10:  ## Flow check on 10 bills across both factor years (NOT an accuracy measurement)
-	uv run python scripts/agent_flow_check.py --docs \
+	uv run python scripts/agent_flow_check.py --root data/generated --docs \
 	  elec_001,elec_002,elec_003,elec_004,elec_005,elec_010,elec_013,elec_016,elec_017,elec_018
 
 # One document per kind, chosen to exercise what Block 1 added: the kg->tonnes conversion
 # (lpg_004), a two-product total the model must not compute (fuel_001), and a supply period
 # with no published factor, where the honest answer is no figure at all (lpg_001).
 flow-scope1:  ## Flow check across all three kinds incl. a refusal (NOT an accuracy measurement)
-	uv run python scripts/agent_flow_check.py --docs elec_001,lpg_004,lpg_001,fuel_001
+	uv run python scripts/agent_flow_check.py --root data/generated --docs elec_001,lpg_004,lpg_001,fuel_001
+
+# Four synthgen v1 documents, none on the held-out layout: elec_068 crosses 31 Dec 2023, so
+# its two lines take two DIFFERENT published EMA factors (2023 0.412, 2024 0.402) - a
+# 2025/26 bill would fall back to 2024 on both halves and show one factor twice; elec_056
+# prints MWh; lpg_029 carries a balance forward and a 50 kg credit that must not reduce the
+# 600 kg delivered; fuel_012 is a hard-tier phone photo.
+flow-block2:  ## Flow check on v1: cross-year, MWh, balance forward, hard photo (NOT accuracy)
+	uv run python scripts/agent_flow_check.py --docs elec_068,elec_056,lpg_029,fuel_012
