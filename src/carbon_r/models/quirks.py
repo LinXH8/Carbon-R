@@ -19,6 +19,9 @@ worth stating plainly: for LPG and fuel, every injected quirk is a money decoy (
 a balance brought forward, GST shown inclusive), while the traps that change the activity
 are structural. A *hard* LPG or fuel document is harder to READ, not harder to INTERPRET.
 
+What each quirk looks like on a rendered page, per layout and per synthgen version, is in
+QUIRKS.md at the repo root. Change a quirk here, change its entry there.
+
 The fields live in `QuirkFields`, a base every answer-key model inherits, so the three
 kinds cannot drift apart on what a credit or a balance forward is. Each model's own
 validator calls `check_quirk_fields` and folds `credit_amount_sgd` into its subtotal.

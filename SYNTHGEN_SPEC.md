@@ -341,6 +341,10 @@ plus a `scenario.json` with revenue, contract share and the truth activity total
 
 ### 5.1 Catalogue
 
+> What each implemented quirk actually looks like on a generated page, per layout and per
+> synthgen version, with example documents: [QUIRKS.md](QUIRKS.md). The table below is the
+> original design.
+
 Each quirk is **controlled** (injected at a chosen rate) and **recorded** (named in `quirks`).
 
 | Quirk | Applies to | What changes on the page | What the key records | Tests |

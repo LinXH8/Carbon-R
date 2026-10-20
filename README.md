@@ -197,6 +197,9 @@ docs-plan` prints the table. Arithmetic closes to the cent on all 198. Determini
 asserted on the JSON keys and the HTML; PDF bytes carry a WeasyPrint timestamp and are not
 compared.
 
+What each quirk looks like on the page, and what it tests, is described per version in
+[QUIRKS.md](QUIRKS.md).
+
 **No accuracy figure on synthgen v1 is stated yet.** The baseline run belongs to Block 2's
 follow-up commit; until then the only measured numbers are Block 1's, on its own set.
 
