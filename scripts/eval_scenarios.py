@@ -31,6 +31,16 @@ approximate factors and are illustrative only (SYNTHGEN_SPEC 4.5).
 
     uv run python scripts/eval_scenarios.py              (or: make eval-scenarios)
     uv run python scripts/eval_scenarios.py --scenario makan_mates_2025
+
+End to end (`--end-to-end`, or: make eval-scenarios-e2e)
+--------------------------------------------------------
+Three scenarios - the base year, the missing month and the estimated readings - are also
+run through EXTRACTION: each rendered page is classified and read by the model (cached per
+scenario), and the year is then rolled up from what was READ, not from the key. That is
+where the honesty checks meet model behaviour: a gap is only flagged if the periods were
+read right, and an estimate only if "Estimated" was read. Reported separately from the
+calculation-level result, which it is compared against: the same figures, the same gaps,
+the same estimates. Needs `make scenarios` first and an OPENAI_API_KEY.
 """
 
 from __future__ import annotations
@@ -64,6 +74,8 @@ from carbon_r.tools.company_year import (
 from eval_extraction import KINDS, LOOKUP_RETRIES, _factor, git_state
 
 RUNS_DIR = PROJECT_ROOT / "data" / "generated" / "eval_runs_TIER2_BLOCK3_SCENARIOS"
+E2E_RUNS_DIR = PROJECT_ROOT / "data" / "generated" / "eval_runs_TIER2_BLOCK3_SCENARIOS_E2E"
+SCENARIOS_ROOT = PROJECT_ROOT / "data" / "generated" / "scenarios"
 
 FACTOR_SELECTORS: dict[str, tuple[str, str]] = {
     "electricity": ("electricity_grid_sg", "kg CO2 / kWh"),
@@ -362,12 +374,233 @@ def run_all(scenarios=SCENARIOS) -> dict:
     }
 
 
+# --- end to end -----------------------------------------------------------------------------
+
+E2E_CHECKS = (
+    "scope_1_matches",
+    "scope_2_matches",
+    "allocation_matches",
+    "gaps_match",
+    "estimated_match",
+    "excluded_match",
+)
+
+
+def _read_currency(printed: str | None) -> str:
+    """The reading's currency as a code. Only the scenario set's two currencies exist."""
+    return "USD" if printed and "US" in printed.upper() else "SGD"
+
+
+def read_figure(row: dict) -> DocumentFigure:
+    """One document's figure computed from what extraction READ - the same path as the
+    calculation level, fed the reading instead of the key."""
+    read = row.get("read") or {}
+    common = {
+        "document_id": row["doc_id"],
+        "document_kind": row["read_kind"],
+        "is_estimated": bool(read.get("is_estimated")),
+        "currency": _read_currency(read.get("currency")),
+    }
+    if not read.get("period_start") or not read.get("period_end"):
+        return DocumentFigure(
+            **common,
+            period_start=date(1900, 1, 1),
+            period_end=date(1900, 1, 1),
+            status="error",
+            message="the period was not read, so the document cannot be placed in the year",
+        )
+    common |= {
+        "period_start": date.fromisoformat(read["period_start"]),
+        "period_end": date.fromisoformat(read["period_end"]),
+    }
+    pairs, refusal = [], None
+    for activity in read["activities"]:
+        category, unit = FACTOR_SELECTORS[activity["kind"]]
+        result = _factor(category, unit, activity["factor_year"])
+        if result.status != "ok":
+            refusal = refusal or result.message
+            continue
+        pairs.append({"activity": activity, "factor": result.data["factor"]})
+    if refusal is not None:
+        return DocumentFigure(**common, status="no_results", message=refusal)
+    if not pairs:
+        return DocumentFigure(**common, status="error", message="no activity was read")
+    result = calculate_emissions(pairs=pairs)
+    if result.status != "ok":
+        return DocumentFigure(**common, status="error", message=result.message)
+    return DocumentFigure(**common, status="ok", lines=result.data["lines"])
+
+
+def evaluate_end_to_end(scenario: Scenario, *, model: str, use_cache: bool) -> dict:
+    from carbon_r.tools.extract import DEFAULT_DPI
+    from eval_extraction import discover, evaluate, summarise
+
+    root = SCENARIOS_ROOT / scenario.scenario_id
+    refs = [ref for kind in KINDS for ref in discover(root, kind)]
+    if not refs:
+        raise SystemExit(f"No documents under {root}; run `make scenarios` first.")
+    extraction = evaluate(refs, model=model, dpi=DEFAULT_DPI, use_cache=use_cache, root=root)
+    rows = extraction["documents"]
+    figures = [read_figure(row) for row in rows]
+    roll = roll_up(
+        figures, reporting_year=scenario.reporting_year, active_period=scenario.active_period
+    )
+    data = roll.data or {}
+    alloc = (
+        allocate(
+            data,
+            contract_revenue_sgd=scenario.contract_revenue,
+            total_revenue_sgd=scenario.business.revenue_sgd,
+            share_source=f"scenario {scenario.scenario_id} (fictional figures)",
+        )
+        if roll.status == "ok"
+        else None
+    )
+    truth = evaluate_scenario(scenario)
+
+    def scope(block: dict, n: str):
+        return ((block.get("scopes") or {}).get(n) or {}).get("kg_co2e")
+
+    truth_roll = truth["roll_up"]["data"] or {}
+    checks = {
+        "scope_1_matches": scope(data, "1") == scope(truth_roll, "1"),
+        "scope_2_matches": scope(data, "2") == scope(truth_roll, "2"),
+        "allocation_matches": (alloc.data["allocated_kg_co2e"] if alloc else None)
+        == truth["got"]["allocated_kg"],
+        "gaps_match": data.get("gaps", {}) == truth["expected"]["gaps"],
+        "estimated_match": data.get("estimated_documents", []) == truth["expected"]["estimated"],
+        "excluded_match": sorted(e["document_id"] for e in data.get("excluded", []))
+        == truth["expected"]["excluded"],
+    }
+    summary = summarise(rows)
+    return {
+        "scenario_id": scenario.scenario_id,
+        "documents": len(rows),
+        "extraction": {
+            "kind_correct": sum(r["kind_correct"] for r in rows),
+            "activity_correct": sum(r["activity"]["correct"] for r in rows),
+            "pipeline_exact": sum(r["pipeline_exact"] for r in rows),
+            "every_field": sum(
+                r["fields_scored"] > 0 and r["fields_correct"] == r["fields_scored"] for r in rows
+            ),
+            "cached": sum(r["cached"] for r in rows),
+            "retry": summary["retry"],
+            "tokens_this_run": summary["tokens_this_run"],
+            "misses": [
+                {
+                    "doc_id": r["doc_id"],
+                    "activity": r["activity"],
+                    "pipeline_note": r["pipeline_note"],
+                    "fields": {f: v for f, v in r["fields"].items() if not v["correct"]},
+                }
+                for r in rows
+                if not (r["activity"]["correct"] and r["pipeline_exact"])
+                or r["fields_correct"] != r["fields_scored"]
+            ],
+        },
+        "checks": checks,
+        "passed": all(checks.values()),
+        "read": {
+            "scope_1_kg": scope(data, "1"),
+            "scope_2_kg": scope(data, "2"),
+            "allocated_kg": alloc.data["allocated_kg_co2e"] if alloc else None,
+            "gaps": data.get("gaps", {}),
+            "estimated": data.get("estimated_documents", []),
+            "excluded": [e["document_id"] for e in data.get("excluded", [])],
+        },
+        "truth": {
+            "scope_1_kg": scope(truth_roll, "1"),
+            "scope_2_kg": scope(truth_roll, "2"),
+            "allocated_kg": truth["got"]["allocated_kg"],
+            "gaps": truth["expected"]["gaps"],
+            "estimated": truth["expected"]["estimated"],
+        },
+        "request": extraction["request"],
+        "roll_up": roll.model_dump(mode="json"),
+    }
+
+
+def report_end_to_end(run: dict) -> int:
+    rows = run["scenarios"]
+    git = run["git"]
+    dirty = " (DIRTY TREE - not a clean measurement)" if git["dirty"] else ""
+    print(f"\nCarbon R scenario eval - END TO END, {len(rows)} scenarios, through extraction")
+    print(f"  commit {git['commit'][:7]}{dirty}  model {run['model']}")
+    for r in rows:
+        x = r["extraction"]
+        n = r["documents"]
+        print(f"\n  {r['scenario_id']}  ({n} documents, {x['cached']} cached)")
+        print(
+            f"    extraction: kind {x['kind_correct']} of {n} · activity {x['activity_correct']} "
+            f"of {n} · pipeline {x['pipeline_exact']} of {n} · "
+            f"every field {x['every_field']} of {n}"
+        )
+        rt = x["retry"]
+        print(
+            f"    retry: {rt['triggered']} triggered, {rt['adopted']} adopted, fields "
+            f"correct->wrong {rt['field_buckets']['correct_to_wrong']}, "
+            f"wrong->correct {rt['field_buckets']['wrong_to_correct']}"
+        )
+        for name in E2E_CHECKS:
+            print(f"    {name:20} {'yes' if r['checks'][name] else 'NO  <-'}")
+        print(
+            f"    read:  S1 {r['read']['scope_1_kg']}  S2 {r['read']['scope_2_kg']}  "
+            f"allocated {r['read']['allocated_kg']}  gaps {r['read']['gaps']}  "
+            f"estimated {r['read']['estimated']}"
+        )
+        print(
+            f"    truth: S1 {r['truth']['scope_1_kg']}  S2 {r['truth']['scope_2_kg']}  "
+            f"allocated {r['truth']['allocated_kg']}  gaps {r['truth']['gaps']}  "
+            f"estimated {r['truth']['estimated']}"
+        )
+        for miss in x["misses"]:
+            print(f"    miss {miss['doc_id']}: {json.dumps(miss, default=str)[:300]}")
+    for name in E2E_CHECKS:
+        print(f"  {name:20} {sum(r['checks'][name] for r in rows)} of {len(rows)}")
+    tokens = [r["extraction"]["tokens_this_run"] for r in rows]
+    print(
+        f"  tokens this run: {sum(t['calls'] for t in tokens)} calls, "
+        f"{sum(t['input_tokens'] for t in tokens)} in, "
+        f"{sum(t['output_tokens'] for t in tokens)} out"
+    )
+    E2E_RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = run["run_at"].replace(":", "").replace("-", "")
+    path = E2E_RUNS_DIR / f"{stamp}.json"
+    path.write_text(json.dumps(run, indent=2, default=str) + "\n", encoding="utf-8")
+    print(f"\nRun written to {path.relative_to(PROJECT_ROOT)}")
+    return 0 if all(r["passed"] for r in rows) else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scenario", help="one scenario id; default every scenario")
+    parser.add_argument(
+        "--end-to-end", action="store_true", help="the three e2e scenarios, through extraction"
+    )
+    parser.add_argument("--no-cache", action="store_true", help="fresh model calls")
     args = parser.parse_args()
     scenarios = [scenario_by_id(args.scenario)] if args.scenario else list(SCENARIOS)
-    return report(run_all(scenarios))
+    if not args.end_to_end:
+        return report(run_all(scenarios))
+
+    from carbon_r.config import get_settings
+
+    settings = get_settings()
+    if not settings.llm_configured or not settings.openai_model:
+        print("OPENAI_API_KEY and OPENAI_MODEL must be set; see .env.example", file=sys.stderr)
+        return 2
+    chosen = [s for s in scenarios if s.end_to_end]
+    run = {
+        "run_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "git": git_state(),
+        "model": settings.openai_model,
+        "scenarios": [
+            evaluate_end_to_end(s, model=settings.openai_model, use_cache=not args.no_cache)
+            for s in chosen
+        ],
+        "factor_lookup_retries": list(LOOKUP_RETRIES),
+    }
+    return report_end_to_end(run)
 
 
 if __name__ == "__main__":

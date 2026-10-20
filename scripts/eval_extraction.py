@@ -630,6 +630,7 @@ def _score(result, *, key, spec, read_kind, kind_correct, expected_activities, f
         ),
         "note": from_reading["note"],
         "substituted": from_reading["substituted"],
+        "found": found,
     }
 
 
@@ -837,6 +838,17 @@ def evaluate(
                     "pipeline_exact": before["pipeline_exact"],
                 },
                 "retry": retry,
+                # What was READ, for a caller that computes from the reading rather than
+                # scoring it - the company-year end-to-end run (eval_scenarios.py).
+                "read": {
+                    "activities": after["found"],
+                    "period_start": (result.data or {}).get("normalised", {}).get("period_start"),
+                    "period_end": (result.data or {}).get("normalised", {}).get("period_end"),
+                    "is_estimated": bool(
+                        (result.data or {}).get("normalised", {}).get("is_estimated_reading")
+                    ),
+                    "currency": (result.data or {}).get("normalised", {}).get("currency"),
+                },
             }
         )
     return {
