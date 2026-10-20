@@ -200,8 +200,43 @@ compared.
 What each quirk looks like on the page, and what it tests, is described per version in
 [QUIRKS.md](QUIRKS.md).
 
-**No accuracy figure on synthgen v1 is stated yet.** The baseline run belongs to Block 2's
-follow-up commit; until then the only measured numbers are Block 1's, on its own set.
+#### The synthgen v1 baseline
+
+One fresh run on the 166 non-holdout documents, at commit `719b840` (clean tree), model
+`gpt-5.4-mini-2026-03-17`, request `1788ce3e`, 20 Oct 2026:
+
+| Measure | Result |
+|---|---|
+| Document kind correct | 166 of 166 |
+| Activity recovered (kind, amount, unit **and year**) | 166 of 166 |
+| **Pipeline kgCO2e exact** | **166 of 166**: clean 69 of 69 · moderate 48 of 48 · hard 49 of 49 |
+| Every field correct, electricity | 57 of 82 (29 of 29 clean · 20 of 26 moderate · 8 of 27 hard) |
+| Every field correct, fuel card | 27 of 42 (14 of 18 · 11 of 12 · 2 of 12) |
+| Every field correct, LPG | 0 of 42 (two normaliser defects; see below) |
+
+Every emissions figure was right on every tier and every quirk, including 15 bills split
+across 31 December, 24 printed in MWh, and every credit, balance forward and GST-inclusive
+headline. **The field-level numbers are lower, and mostly not because of the model.**
+Of the 125 failing fields:
+- 96 trace to Python normalisation: MWh meter readings not converted; an LPG charge row
+  dropped when its quantity is a word; the rental row's label not recognised; an inline
+  "UEN" label not stripped;
+- 8 trace to two layouts that print two fields under one label;
+- 3 are the model "correcting" an odd-looking identifier;
+- 18 are genuine misreads, 15 of them on phone-photo pages.
+
+The credit column needs a caveat. The eval itself had a defect: it compared against a field
+name the answer key does not use. The figures above re-score that column from the same
+recorded replies against the right field (165 of 166), with no new model calls; the run as
+printed, defect included, is kept in [TIER2_BLOCK2.md](TIER2_BLOCK2.md).
+
+**What this does not measure.**
+- It is one run, so run-to-run variation is unmeasured.
+- The held-out layout has not been scored.
+- The documents are synthetic.
+
+`make flow-block2` passed 4 of 4 on all six checks. That includes a bill across 31 Dec 2023
+that the agent split into two lines with two EMA factors (0.412 and 0.402), each cited.
 
 The flow checks are flow checks, not measurements: documents of one layout asked one
 question cannot measure accuracy, and the script says so on every line it prints. They
@@ -248,10 +283,13 @@ Stated plainly, because they bound what any number here means:
   available is a judgement, not a measurement.
 - **Diesel and petrol use the 100%-mineral rows on an unverified assumption** about the
   biofuel content of Singapore pump fuel. NEA's own fuel specification has not been read.
-- The accuracy figures above describe **one layout per kind, crisp PDFs, no quirks** — the
-  Block 1 `clean` set. They say nothing about scans, phone photographs, MWh units or billing
-  periods that straddle a month. synthgen v1 adds those documents; its baseline is not yet
-  stated, and per-tier and per-quirk reporting arrives with Block 3.
+- The Block 1 figures (36 of 36) describe **one layout per kind, crisp PDFs, no quirks**. The
+  synthgen v1 baseline covers scans, photos and quirks, but it is **one run**, on synthetic
+  documents, with the holdout layout not yet scored. Per-quirk reporting in the eval itself
+  arrives with Block 3.
+- **A CO2-only electricity figure is labelled "kg CO2e".** `calculate_emissions` names its
+  unit "kg CO2e" whatever the factor's gas basis. Mixing CO2 and CO2e lines is disclosed;
+  a figure that is CO2 only is not labelled as such.
 - **In synthgen v1, a hard LPG or fuel document is harder to read, not harder to
   interpret**: their injected quirks are all money decoys, and every hard one carries the
   same three, so per-quirk results on them are confounded. See TIER2_BLOCK2.md.

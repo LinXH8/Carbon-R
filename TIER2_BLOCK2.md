@@ -4,10 +4,9 @@ Written for someone who was not there: the design decisions and their reasons, t
 found and what caught them, and the evidence behind every number. Environment details and
 career notes live in the local build log, not here.
 
-**Status at this commit:** the set is generated and checked, and the pipeline and eval are
-ready for it. The **baseline eval has not been run yet**. Its results will be added in a
-follow-up commit that cites this commit's SHA, because a measurement is only meaningful
-against the exact code that produced it.
+**Status:** built at `a77f601`; documented at `719b840` (`QUIRKS.md`); **baseline measured
+at `719b840`**, a clean tree, on 20 Oct 2026. The baseline is recorded below exactly as run,
+with nothing fixed in between, together with one defect the run exposed in the eval itself.
 
 ## What this block had to change
 
@@ -295,6 +294,159 @@ pytest -q              521 passed, 1 skipped   (437 at the end of Block 1)
 ```
 
 The skip is the database-backed factor-years test, which passes with `DATABASE_URL` set.
+
+## The baseline
+
+One fresh run, holdout excluded, nothing changed before or after it.
+
+```
+$ make eval
+Carbon R extraction eval - 166 documents from data/generated/synthgen_v1
+  commit 719b840  seed [20261016]  holdout excluded            (git tree clean)
+  model gpt-5.4-mini-2026-03-17  dpi 150  detail high  request 1788ce3e
+  0 cached, 166 fresh
+
+  document kind correct   166 of 166
+  activity recovered      166 of 166
+  pipeline kgCO2e exact   166 of 166
+  factor-year substituted  40 of 166
+  expected refusals         1 of 166   (lpg_001: no LPG factor for 2024, correctly no figure)
+
+  every field correct, as printed:  electricity 47 of 82 · LPG 0 of 42 · fuel 18 of 42
+  field failures, as printed:       182
+Run: data/generated/eval_runs_TIER2_BLOCK2/20261020T082120+0000-1788ce3e.json
+```
+
+### The headline: every emissions figure is right, on every tier and every quirk
+
+**166 of 166 documents produced the answer key's kgCO2e to the last gram**: clean 69 of 69,
+moderate 48 of 48, hard 49 of 49 (49 phone photos and 28 scans among them). That holds
+on every quirk:
+
+- all 15 cross-year bills were split into the right two years by days;
+- all 24 MWh bills were converted to the right kWh;
+- no credit's decoy quantity was ever subtracted from an activity;
+- no "amount due" was taken for a period total;
+- no GST-inclusive headline reached a calculation.
+
+**What it means.** The traps that change an emissions figure — reading the activity, its
+unit, its year, and which lines count — were all read and interpreted correctly on this set.
+
+**What it does not mean.**
+- It does not mean every *field* was read right; the next section is about the fields.
+- It is one run: run-to-run variation is not measured.
+- The documents are synthetic.
+- The holdout layout has not been scored.
+
+### A defect in the eval, found by the run: the credit column scored nothing
+
+The `credit_adjustment_sgd` column (electricity 58 of 82, LPG 26 of 42, fuel 24 of 42 as
+printed) is **invalid**. The eval looked the field up on the answer key as
+`credit_adjustment_sgd`; the key calls it `credit_amount_sgd`. "Expected" was therefore
+always empty, so every document that carried a credit failed and every one without a credit
+passed, whatever was read.
+
+The rule that scores an absent credit as zero is what kept this quiet: it turned the
+missing key field into 0 rather than raising an error. It was introduced in this block, with
+the eval plumbing, and no test compared the eval's field names against the key's.
+
+**Re-scored without new model calls.** The run file holds every reading. Comparing each
+recorded reading against the key's `credit_amount_sgd` gives **credit read correctly on 165
+of 166**. The one miss is `fuel_039`, whose whole money summary was misread; see the
+misreads below.
+
+The harness is **not** fixed in this commit. Fixing it is Block 3's first change, and it is
+re-scorable from the reply cache at no API cost.
+
+With the credit column re-scored, **125 field failures remain**:
+
+| Kind | clean | moderate | hard |
+|---|---|---|---|
+| Electricity, every field correct | 29 of 29 | 20 of 26 | 8 of 27 |
+| LPG, every field correct | 0 of 22 | 0 of 10 | 0 of 10 |
+| Fuel card, every field correct | 14 of 18 | 11 of 12 | 2 of 12 |
+
+### Where the 125 failures come from
+
+Each failure was traced to the recorded reply. **96 of the 125 are in Python normalisation,
+not in what the model read.**
+
+| Cause | Field failures | Documents | Evidence |
+|---|---|---|---|
+| **Meter readings on MWh bills are not converted.** The model transcribes "285.727 MWh"; `normalise` converts the *consumption* by its unit but parses the *readings* as whole kWh, fails, and reports them unparsed | 48 | 24 MWh bills: readings **0 of 24**, against 58 of 58 on kWh bills; consumption on the same bills 24 of 24 | `unparsed elec_064: previous_reading_kwh <- '285.727 MWh'` |
+| **A charge line is dropped when its quantity is a word.** LPG layout `a` now prints "1 visit" / "2 visits" in the count column; the model transcribes it exactly, the quantity fails to parse, and the whole row is discarded, taking the delivery charge with it | 25 | all **22 of 22** layout-`a` LPG invoices, plus 3 layout-`b` ("1 trip(s)") | `lpg_001 lines[3]: quantity '2 visits', amount '16.00'` dropped; subtotal check short by exactly 16.00 |
+| **The rental row's label is not recognised** — the prediction made before the run | 20 | **all 20** layout-`b` ("Cylinder hire") and layout-`c` ("CYL RENTAL") invoices, and no others | **Prediction confirmed exactly** |
+| The inline label "UEN" is stripped from electricity readings but not from LPG or fuel | 3 | `fuel_009`, `fuel_051`, `lpg_039` | got `'UEN SYN-0000-0003'` |
+| **Two fields under one label**, by layout design: `fuel_b` prints "Account / card" on one row, `fuel_c` "CARDHOLDER name, address" | 8 | `fuel_028`, `fuel_032`, `fuel_048` (account and card); `fuel_033` (name and address) | the reading holds both values in one field |
+| **The model "corrected" an odd identifier**: `SFC-202607-7-01` read as `SFC-202607-01` | 3 | `fuel_012`, `fuel_021`, `fuel_040` | the cosmetic identifier oddity logged in Block 2 is now a measured cost |
+| **Genuine misreads** | 18 | 12 documents: 9 hard, 1 moderate, 2 clean | below |
+
+**The genuine misreads, by tier:**
+- **hard, 15 fields in 9 documents:**
+  - two addresses (`Tempua` → `Tempeua`; `523169` → `52369`);
+  - three card numbers (`6677` → `667?`, a dropped `*`);
+  - a UEN (`SYN-0000-0002` → `SYN-000-0002`);
+  - three fuel money summaries: `fuel_024` gross unread, `fuel_036` gross 2,047.49 for 1,937.60, and `fuel_039` read wrong throughout its summary, with total 4,787.19 for 3,023.14.
+- **moderate, 1:** `lpg_035`'s address truncated.
+- **clean, 2:** `fuel_025` `Tempua` → `Tempa`; `fuel_052` `523169` → `52369`.
+
+The postal code `523169` was misread three times across three kinds and tiers.
+
+**Per tier:** genuine misreads touch 9 of 49 hard documents, 1 of 48 moderate, and 2 of 69
+clean. They concentrate on fuel statements, the densest pages: 6 of the 9 hard
+documents with a misread are fuel cards. Every scored misread is in a money or identity
+field.
+
+**None touched a quantity an activity is computed from**, which is why the pipeline figure
+survived them. One unscored printed figure was a quantity: `fuel_048`'s per-product petrol
+total, which the consistency check flagged ("litres[petrol] = sum(transaction litres) off by
+21459.24"). The activity is summed from the transaction rows, which were read correctly, so
+that check did its job by catching the disagreement.
+
+### End to end
+
+```
+$ make flow-block2          # elec_068, elec_056, lpg_029, fuel_012 - none on the holdout
+  answered / figure_matches / cited / disclosed / no_stray_numbers / refused_honestly   4 of 4 each
+  16 turns · 1 substitution · 2 non-Singapore · 1 unit conversion · 2 multi-line figures
+  elec_068  elec_b moderate  factor years [2023, 2024]  3553.628 kg
+  elec_056  elec_b moderate  factor years [2024]        2839.728 kg
+  lpg_029   lpg_a  moderate  factor years [2025]        1763.617 kg
+  fuel_012  fuel_b hard      factor years [2026]         422.122 kg
+```
+
+Each figure was re-derived by an independent integer route and matches to the last gram:
+
+```
+elec_068  5060 x 0.412 + 3654 x 0.402         = 2084.720 + 1468.908 = 3553.628
+elec_056  7064 x 0.402  (2026 -> 2024, disclosed)                   = 2839.728
+lpg_029   600 kg = 0.6 t x 2939.36095                               = 1763.61657
+fuel_012  101.10 x 2.66155 + 65.02 x 2.35372  = 269.0827 + 153.0389 = 422.1215794
+```
+
+`elec_068` is the demonstration this block was built for. The agent made two factor
+lookups, and its reply reads: "5,060 kWh × 0.412 … 3,654 kWh × 0.402 … The period crosses a
+year boundary, so the document was split into 2023 and 2024 activities". It cited both EMA
+years. `lpg_029` carried a 50 kg credit and a balance forward, and its figure is on the
+600 kg delivered.
+
+**One labelling flaw seen in the replies, present since Tier 1:** a figure computed only
+from EMA's CO2-only factor is still labelled "kg CO2e", because `calculate_emissions` names
+its unit "kg CO2e" whatever the gas basis. The mixed-basis disclosure exists; a single-basis
+CO2 label does not. It is recorded, not fixed.
+
+### What the baseline says Block 3 should do first
+
+Fix the measurement before anything it measures, then one normaliser change at a time, each
+re-scored from the reply cache so that each change's effect is isolated:
+
+1. the eval's credit field name (a measurement fix, so no pipeline change);
+2. MWh meter readings, the largest single cause at 48 failures;
+3. a charge line kept when its quantity is a word;
+4. the rental label;
+5. the inline "UEN" label on LPG and fuel.
+
+The holdout is scored once, separately, only after these.
 
 ## Known limits of this set
 

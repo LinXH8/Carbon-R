@@ -441,8 +441,10 @@ listed in `quirks`.
 ## Oddities you may notice that are not traps
 
 - **Statement and invoice numbers like `SFC-202607-7-01` or `IGS-202505-1-07`.** They are
-  built from the account number's last four characters, hyphen included. It is cosmetic,
-  and it is left as is so the v0 fuel statements stay unchanged in v1.
+  built from the account number's last four characters, hyphen included. They were left as
+  is so the v0 fuel statements stay unchanged in v1. Not a deliberate trap, but **not
+  harmless either**: in the v1 baseline the model "corrected" `SFC-…-7-01` to `SFC-…-01`
+  on 3 of 42 fuel statements, so an odd-looking identifier costs field accuracy.
 - **Readings that don't follow on.** A standalone `cross_month_period` or
   `cross_year_period` bill's readings do not continue from any other bill on the same
   meter.
