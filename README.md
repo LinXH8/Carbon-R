@@ -170,13 +170,18 @@ checkable rather than trusted once — it needs the git-ignored spreadsheets pre
 ```bash
 make docs-plan    # print the synthgen v1 quirk x tier table and pre-render checks; writes nothing
 make docs         # the synthgen v1 set: 198 documents + answer keys (git-ignored)
-make eval         # score routing, extraction and the pipeline on v1 (holdout excluded)
+make eval         # score routing, extraction and the pipeline on v1 (holdout excluded),
+                  # per tier and per quirk, with and without the one retry
+make eval-holdout # the held-out layout only - scored once, at the end of Block 3
+make eval-scenarios      # 21 company-year scenarios at calculation level (0 model calls)
+make scenarios           # render those scenarios' 676 documents (git-ignored)
+make eval-scenarios-e2e  # three of them end to end, through extraction (model calls)
 make eval-block1  # the Block 1 set (36 clean documents), as Block 1 measured it
 make agent-smoke  # end-to-end flow check of /upload + /chat on 5 Block 1 bills
 make flow-10      # the same flow on 10 Block 1 bills spanning both factor years
 make flow-scope1  # one Block 1 document of each kind, including a refusal
 make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forward, a photo
-make check        # ruff + the full test suite (521 tests)
+make check        # ruff + the full test suite (585 tests)
 ```
 
 ### Reproducing the test set
@@ -235,6 +240,84 @@ printed, defect included, is kept in [TIER2_BLOCK2.md](TIER2_BLOCK2.md).
 - The held-out layout has not been scored.
 - The documents are synthetic.
 
+#### After Tier 2 Block 3: the eval fixed, the normaliser fixed, the holdout scored
+
+Details, commits and evidence: [TIER2_BLOCK3.md](TIER2_BLOCK3.md). Every figure below is a
+count from a recorded run.
+
+**The same 166 replies, re-scored after each fix** (0 model calls; commit `eb4b86a`):
+
+| Measure | Baseline | Now |
+|---|---|---|
+| Pipeline kgCO2e exact | 166 of 166 | 166 of 166 |
+| Every field correct, electricity | 57 of 82 | **80 of 82** |
+| Every field correct, LPG | 0 of 42 | **40 of 42** |
+| Every field correct, fuel card | 27 of 42 | **28 of 42** |
+| Field failures | 125 | **29** |
+
+The eval's credit-column defect was fixed first. Then four normaliser changes, one per
+commit, removed exactly the number of failures each was predicted to: 48, 25, 20 and 3.
+The 29 that remain:
+- 18 genuine misreads, 15 of them on phone photos;
+- 8 where a layout prints two fields under one label;
+- 3 where the model "corrects" an odd identifier.
+
+**One retry, with the error and never the answer.** When a field will not parse or the
+page's arithmetic does not close, the page is read once more. The model is told which
+check failed, never which value is expected.
+
+The first version took the whole second reading, and overwrote **3 correct fields while
+fixing 0**. It now takes only the fields the failed check reads: **0 correct → wrong**.
+Counts so far:
+- on the tuned set, 2 unscored values corrected, both checked against the key by hand;
+- on the holdout, 1 scored field corrected (wrong → correct).
+
+That is five triggers in all: a small sample.
+
+**The held-out layout, scored once, last** (32 documents, fresh):
+- document kind, activity and **pipeline kgCO2e: 32 of 32**;
+- every field: electricity 0 of 11, LPG 7 of 9, fuel 5 of 12.
+
+24 of the 26 field failures come from two labels that layout `d` prints and the normaliser,
+tuned on layouts a–c, did not know: "Registration" for the UEN, and "Low Tension supply".
+That is overfitting, which is what a holdout is there to show. It is recorded, not fixed.
+
+**Company-year scenarios.** 21 scenarios run at calculation level:
+- one fictional business's year, Makan Mates, with 15 variations;
+- five other businesses.
+
+Each scenario's truth activities go through factor lookup, calculation, a year roll-up and
+a revenue-share allocation. The results are checked against an independent exact-rational
+route and against the honesty facts each scenario defines. **21 of 21 pass all ten
+checks:**
+- Scope 1, Scope 2 and the allocation are exact;
+- gaps are listed exactly;
+- estimated readings are listed;
+- documents with no published factor are named;
+- factor-year substitutions are disclosed;
+- days outside the year are listed, not counted;
+- USD invoices are listed and not converted;
+- a scope with no document has no figure rather than 0.
+
+Tests show this check fails a roll-up that hides gaps, drops exclusions or counts a
+neighbouring year.
+
+| Makan Mates 2025 | kg CO2e |
+|---|---|
+| Scope 1 (LPG 7.7 t, diesel 3,775.19 L; DESNZ 2025, non-Singapore) | 32,680.936 |
+| Scope 2 (99,740 kWh; EMA 2024 factor, substituted and disclosed; location-based) | 40,095.480 |
+| Allocated to one buyer (Scope 1 + 2 × 720,000 / 2,400,000 revenue; an assumption) | 21,832.925 |
+
+These are computed from the activities and the verified factors in the database. They are
+not the 30.1 / 39.4 / 21 t of the project's illustrative context.
+
+**End to end, three scenarios through extraction** (107 documents):
+- activity and pipeline: 107 of 107;
+- the year's figures equal the calculation level in all three;
+- the March gap and the two estimated readings were flagged **from what was read**.
+
+The scenarios are synthetic, and each was run once.
+
 `make flow-block2` passed 4 of 4 on all six checks. That includes a bill across 31 Dec 2023
 that the agent split into two lines with two EMA factors (0.412 and 0.402), each cited.
 
@@ -284,9 +367,8 @@ Stated plainly, because they bound what any number here means:
 - **Diesel and petrol use the 100%-mineral rows on an unverified assumption** about the
   biofuel content of Singapore pump fuel. NEA's own fuel specification has not been read.
 - The Block 1 figures (36 of 36) describe **one layout per kind, crisp PDFs, no quirks**. The
-  synthgen v1 baseline covers scans, photos and quirks, but it is **one run**, on synthetic
-  documents, with the holdout layout not yet scored. Per-quirk reporting in the eval itself
-  arrives with Block 3.
+  synthgen v1 figures cover scans, photos and quirks, but each is **one run**, on synthetic
+  documents.
 - **A CO2-only electricity figure is labelled "kg CO2e".** `calculate_emissions` names its
   unit "kg CO2e" whatever the factor's gas basis. Mixing CO2 and CO2e lines is disclosed;
   a figure that is CO2 only is not labelled as such.
@@ -305,8 +387,14 @@ Stated plainly, because they bound what any number here means:
   streamed steps are tested against the shape of the response; the drag behaviour of the
   audit sheet has been reviewed and used by hand, not instrumented.
 - **Sessions and uploads accumulate** with no eviction, and a restart loses every session.
-- **The holdout layout has not been scored yet.** synthgen v1 holds layout `d` out of every
-  default run; Block 3 reports it once, separately.
+- **The holdout showed the normaliser overfits its layouts.** On layout `d`, every emissions
+  figure was right, but 24 field failures came from two printed labels that layouts a–c do
+  not use. They are recorded and not fixed, and the holdout can no longer measure a fix
+  for them.
+- **Company-year figures are Python functions, not yet agent tools.** The roll-up and the
+  allocation are measured by the scenario eval; asking the chat for a year's total or an
+  allocated figure arrives in Tier 3. Allocation by revenue share is an assumption, and
+  is labelled as one.
 - Where no factor is published for a document's activity year, the latest factor at or
   before it is used, up to two years back, and the substitution is stated on the result.
   Beyond two years, or where nothing is published at or before that year at all, the tool
