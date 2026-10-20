@@ -48,7 +48,6 @@ from carbon_r.models.parsing import (
     comparer,
     parse_date,
     parse_decimal,
-    parse_int,
     parse_reading_basis,
     taker,
     text_of,
@@ -287,8 +286,15 @@ def normalise(
     for field in ("document_date", "period_start", "period_end"):
         take(field, field, parse_date)
 
-    take("previous_reading_kwh", "previous_reading", parse_int)
-    take("current_reading_kwh", "current_reading", parse_int)
+    # Readings are in the bill's unit: an MWh bill prints "285.727 MWh" on its register
+    # lines too. They go through the same conversion as consumption (Block 3, B3: before
+    # this, readings 0 of 24 on MWh bills against 58 of 58 on kWh bills).
+    bill_unit = extracted.consumption_unit
+    for target, source in (
+        ("previous_reading_kwh", "previous_reading"),
+        ("current_reading_kwh", "current_reading"),
+    ):
+        take(target, source, lambda printed: energy_kwh(printed, bill_unit))
     take("is_estimated_reading", "reading_basis", parse_reading_basis)
 
     for target, source in (
@@ -328,39 +334,49 @@ def _take_consumption(
     printed = extracted.consumption
     if printed is None or not str(printed).strip():
         return
+    try:
+        values["consumption_kwh"] = energy_kwh(printed, extracted.consumption_unit)
+    except (ValueError, ArithmeticError) as exc:
+        shown = (
+            printed if not extracted.consumption_unit else f"{printed} {extracted.consumption_unit}"
+        )
+        problems.append(FieldProblem(field="consumption_kwh", printed=shown, reason=str(exc)))
 
-    unit = (extracted.consumption_unit or "kWh").strip().lower()
+
+# An energy unit printed at the END of the figure itself. `clean` strips these silently, so
+# the unit is read here first: "285 MWh" must never reach a parser that sees only "285".
+_INLINE_ENERGY_UNIT = re.compile(r"(kwh|mwh|gwh)\s*$", re.IGNORECASE)
+
+
+def energy_kwh(printed: str, unit_printed: str | None) -> int:
+    """Whole kWh from a printed energy figure. The conversion lives here, and only here.
+
+    The unit is the one printed WITH the figure if there is one, else the bill's printed
+    unit, else kWh. Two printed units that disagree are a problem, not a choice: picking
+    either would be a guess about a factor of 1000.
+
+    An unrecognised unit is a problem rather than an assumption: silently treating "MWh"
+    as kWh would understate emissions by a factor of 1000 and the figure would still look
+    plausible. That was possible before Block 3 - `clean` strips "MWh" as noise, so a
+    whole-number "285 MWh" with no separate unit read parsed as 285 kWh.
+    """
+    inline = _INLINE_ENERGY_UNIT.search(printed.strip())
+    stated = (unit_printed or "").strip().lower() or None
+    if inline and stated and inline.group(1).lower() != stated:
+        raise ValueError(
+            f"{printed!r} is printed in {inline.group(1)}, but the bill's unit is {unit_printed!r}"
+        )
+    unit = inline.group(1).lower() if inline else (stated or "kwh")
     multiplier = CONSUMPTION_UNITS.get(unit)
     if multiplier is None:
-        problems.append(
-            FieldProblem(
-                field="consumption_kwh",
-                printed=f"{printed} {extracted.consumption_unit}",
-                reason=(
-                    f"Unrecognised consumption unit {extracted.consumption_unit!r}; "
-                    f"known units: {', '.join(sorted(CONSUMPTION_UNITS))}"
-                ),
-            )
+        raise ValueError(
+            f"Unrecognised energy unit {unit_printed!r}; known units: "
+            f"{', '.join(sorted(CONSUMPTION_UNITS))}"
         )
-        return
-
-    try:
-        amount = parse_decimal(printed)
-    except (ValueError, ArithmeticError) as exc:
-        problems.append(FieldProblem(field="consumption_kwh", printed=printed, reason=str(exc)))
-        return
-
-    kwh = amount * multiplier
+    kwh = parse_decimal(printed) * multiplier
     if kwh != kwh.to_integral_value():
-        problems.append(
-            FieldProblem(
-                field="consumption_kwh",
-                printed=f"{printed} {unit}",
-                reason=f"{kwh} kWh is not a whole number of units",
-            )
-        )
-        return
-    values["consumption_kwh"] = int(kwh)
+        raise ValueError(f"{printed!r} is {kwh} kWh, not a whole number of units")
+    return int(kwh)
 
 
 def activities_for(bill: NormalisedBill) -> list[Activity]:

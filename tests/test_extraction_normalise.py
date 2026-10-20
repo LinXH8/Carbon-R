@@ -167,9 +167,56 @@ def test_an_unrecognised_consumption_unit_is_a_problem_not_an_assumption():
         perfect_reading("elec_001", consumption="8.24", consumption_unit="therms")
     )
     assert normalised.consumption_kwh is None
-    assert len(problems) == 1
-    assert problems[0].field == "consumption_kwh"
-    assert "therms" in problems[0].reason
+    # Readings are in the bill's unit too, so they are not assumed to be kWh either.
+    assert {p.field for p in problems} == {
+        "consumption_kwh",
+        "previous_reading_kwh",
+        "current_reading_kwh",
+    }
+    assert all("therms" in p.reason for p in problems)
+
+
+@pytest.mark.parametrize(
+    ("previous", "current", "unit", "expected"),
+    [
+        # Block 3, B3: the register lines of an MWh bill are in MWh as well.
+        ("285.727 MWh", "292.791 MWh", "MWh", (285727, 292791)),
+        ("285.727", "292.791", "MWh", (285727, 292791)),  # unit only in the unit column
+        ("285,727 kWh", "292,791 kWh", "kWh", (285727, 292791)),
+        ("285,727", "292,791", None, (285727, 292791)),
+    ],
+)
+def test_meter_readings_convert_in_the_bills_unit(previous, current, unit, expected):
+    normalised, problems = normalise(
+        perfect_reading(
+            "elec_001",
+            previous_reading=previous,
+            current_reading=current,
+            consumption="7.064" if unit == "MWh" else "7,064",
+            consumption_unit=unit,
+        )
+    )
+    assert [p for p in problems if "reading" in p.field] == []
+    assert (normalised.previous_reading_kwh, normalised.current_reading_kwh) == expected
+
+
+def test_a_whole_number_in_mwh_is_never_read_as_kwh():
+    """Before B3, `clean` stripped "MWh" as noise: "285 MWh" with no unit column became
+    285 kWh - 1000x low, with no problem raised."""
+    normalised, problems = normalise(
+        perfect_reading("elec_001", consumption="285 MWh", consumption_unit=None)
+    )
+    assert problems == []
+    assert normalised.consumption_kwh == 285_000
+
+
+def test_an_inline_unit_that_contradicts_the_unit_column_is_a_problem():
+    normalised, problems = normalise(
+        perfect_reading("elec_001", consumption="7,064 kWh", consumption_unit="MWh")
+    )
+    assert normalised.consumption_kwh is None
+    assert [p.field for p in problems] == ["consumption_kwh"]
+    assert "MWh" in problems[0].reason
 
 
 def test_gst_is_stored_as_a_fraction_matching_the_answer_key():
