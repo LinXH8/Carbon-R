@@ -63,6 +63,7 @@ Counts, never bare percentages (CLAUDE.md): "17 of 18" is a claim that can be ch
 """
 
 import argparse
+import dataclasses
 import json
 import subprocess
 import sys
@@ -79,6 +80,7 @@ from carbon_r.models.extraction_fuel import NormalisedFuelCardStatement
 from carbon_r.models.extraction_lpg import NormalisedLPGInvoice
 from carbon_r.models.fuel_card_statement import FuelCardStatement
 from carbon_r.models.lpg_invoice import LPGInvoice
+from carbon_r.synthgen.plan import TIERS
 from carbon_r.tools.calculate import calculate_emissions
 from carbon_r.tools.extract import (
     DEFAULT_DPI,
@@ -134,6 +136,13 @@ class KindSpec:
     text_fields: frozenset[str]
     # How to read the truth's activities, as {(kind, factor year): amount}.
     key_activities: Any
+    # Reading field -> answer-key field, where the two models name one printed value
+    # differently. Without this the key side was looked up by the READING's name, found
+    # nothing, and - through ZERO_WHEN_ABSENT - scored as 0 (the Block 2 credit defect).
+    key_fields: dict[str, str] = dataclasses.field(default_factory=dict)
+
+    def key_field(self, name: str) -> str:
+        return self.key_fields.get(name, name)
 
 
 ActivityKey = tuple[str, int]
@@ -207,6 +216,7 @@ KINDS: dict[str, KindSpec] = {
             }
         ),
         key_activities=_electricity_activities,
+        key_fields={"credit_adjustment_sgd": "credit_amount_sgd"},
     ),
     "lpg_invoice": KindSpec(
         key_model=LPGInvoice,
@@ -245,6 +255,7 @@ KINDS: dict[str, KindSpec] = {
             }
         ),
         key_activities=_lpg_activities,
+        key_fields={"credit_adjustment_sgd": "credit_amount_sgd"},
     ),
     "fuel_card_statement": KindSpec(
         key_model=FuelCardStatement,
@@ -282,6 +293,7 @@ KINDS: dict[str, KindSpec] = {
             }
         ),
         key_activities=_fuel_activities,
+        key_fields={"credit_adjustment_sgd": "credit_amount_sgd"},
     ),
 }
 
@@ -354,13 +366,14 @@ def git_state() -> dict:
     return {"commit": run("rev-parse", "HEAD"), "dirty": bool(run("status", "--porcelain"))}
 
 
-# A field that is absent on a document where the key holds zero: a page with no credit
-# prints no credit line, and a reading that returns null for it has read the page right.
+# A READ field that may be absent where the key holds zero: a page with no credit prints
+# no credit line, and a reading that returns null for it has read the page right. Applied
+# to the reading only - an absent EXPECTED value raises instead (see `compare_fields`).
 ZERO_WHEN_ABSENT = frozenset({"credit_adjustment_sgd"})
 
 
-def _comparable(value, field: str, spec: KindSpec):
-    if field in ZERO_WHEN_ABSENT and (value is None or value == 0):
+def _comparable(value, field: str, spec: KindSpec, *, read_side: bool = False):
+    if read_side and field in ZERO_WHEN_ABSENT and value is None:
         return Decimal(0)
     if value is None:
         return None
@@ -372,13 +385,22 @@ def _comparable(value, field: str, spec: KindSpec):
 
 
 def compare_fields(key, reading, spec: KindSpec) -> dict[str, dict]:
-    """Field-by-field verdict. Pure: no API, no database - unit-testable on its own."""
+    """Field-by-field verdict. Pure: no API, no database - unit-testable on its own.
+
+    The expected side must exist on the key. A comparison that defaults a missing expected
+    value can never fail loudly, and that is how the credit column scored nothing in
+    Block 2.
+    """
     verdicts: dict[str, dict] = {}
     for field in spec.scored_fields:
-        expected = getattr(key, field, None)
+        key_name = spec.key_field(field)
+        if key_name not in type(key).model_fields:
+            raise KeyError(f"{type(key).__name__} has no field {key_name!r} (scored as {field!r})")
+        expected = getattr(key, key_name)
         got = getattr(reading, field, None) if reading is not None else None
         verdicts[field] = {
-            "correct": _comparable(expected, field, spec) == _comparable(got, field, spec),
+            "correct": _comparable(expected, field, spec)
+            == _comparable(got, field, spec, read_side=True),
             "expected": str(expected),
             "got": None if got is None else str(got),
         }
@@ -419,6 +441,41 @@ def compare_activities(expected: dict[ActivityKey, Decimal], found: list[dict]) 
     }
 
 
+_FACTORS: dict[tuple[str, str, int], Any] = {}
+# Lookup attempts that came back `error` and were retried, for the run record.
+LOOKUP_RETRIES: list[str] = []
+LOOKUP_ATTEMPTS = 3
+
+
+class LookupFailed(RuntimeError):
+    """The database failed, repeatedly. The run stops: it would not be a measurement."""
+
+
+def _factor(category: str, unit: str, year: int):
+    """One exact-SQL lookup per (category, unit, year) per run. Each lookup opens its own
+    connection to the database, and a 166-document re-score made several hundred of them
+    for a handful of distinct keys. The factor table does not change during a run, so an
+    answer - `ok` or `no_results` - cannot either.
+
+    An `error` is never memoised and never scored. It is a fact about the connection, not
+    about the factor: caching one replayed a single dropped connection onto ten bills, and
+    scoring one turned a key-side failure into a "figures differ" pipeline miss (both in
+    Block 3, A2). It is retried, recorded, and after LOOKUP_ATTEMPTS the run aborts.
+    """
+    key = (category, unit, year)
+    if key in _FACTORS:
+        return _FACTORS[key]
+    for _attempt in range(LOOKUP_ATTEMPTS):
+        result = lookup_emission_factor(category, unit, year)
+        if result.status != "error":
+            _FACTORS[key] = result
+            return result
+        LOOKUP_RETRIES.append(f"{category} {unit} {year}: {result.message[:120]}")
+    raise LookupFailed(
+        f"factor lookup for {key} failed {LOOKUP_ATTEMPTS} times; last: {result.message}"
+    )
+
+
 def emissions_for(activities: dict[ActivityKey, Decimal]) -> dict:
     """kgCO2e for a set of activities, or None with the reason. Same path for key and read.
 
@@ -438,7 +495,7 @@ def emissions_for(activities: dict[ActivityKey, Decimal]) -> dict:
     substituted = False
     for (kind, factor_year), amount in sorted(activities.items()):
         category, unit = FACTOR_SELECTORS[kind]
-        factor = lookup_emission_factor(category, unit, factor_year)
+        factor = _factor(category, unit, factor_year)
         if factor.status != "ok":
             return {
                 "kg_co2e": None,
@@ -494,9 +551,12 @@ def load_reading(
         stored = json.loads(path.read_text())
         kind = stored["document_kind"]
         extracted = EXTRACTORS[kind]["schema"].model_validate(stored["printed"])
-        return stored["classification"], kind, extracted, True
+        # A hit costs nothing now; the usage it cost when fresh is kept with the entry
+        # (absent on entries written before Block 3).
+        return stored["classification"], kind, extracted, True, stored.get("usage")
 
-    classification = classify_page(pdf, dpi=dpi, model=model)
+    usage: list[dict] = []
+    classification = classify_page(pdf, dpi=dpi, model=model, usage=usage)
     kind, _ = classification.resolved()
     if kind not in EXTRACTORS:
         # A refusal is cached too: re-paying for a page the classifier declined would make
@@ -508,15 +568,16 @@ def load_reading(
                     "classification": classification.model_dump(),
                     "document_kind": kind,
                     "printed": None,
+                    "usage": usage,
                 },
                 indent=2,
             )
             + "\n",
             encoding="utf-8",
         )
-        return classification.model_dump(), kind, None, False
+        return classification.model_dump(), kind, None, False, usage
 
-    extracted = read_page(pdf, kind=kind, dpi=dpi, model=model)
+    extracted = read_page(pdf, kind=kind, dpi=dpi, model=model, usage=usage)
     cache_dir.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(
@@ -524,13 +585,14 @@ def load_reading(
                 "classification": classification.model_dump(),
                 "document_kind": kind,
                 "printed": extracted.model_dump(),
+                "usage": usage,
             },
             indent=2,
         )
         + "\n",
         encoding="utf-8",
     )
-    return classification.model_dump(), kind, extracted, False
+    return classification.model_dump(), kind, extracted, False, usage
 
 
 def evaluate(
@@ -544,7 +606,7 @@ def evaluate(
         pdf = ref.page
         key = spec.key_model.model_validate_json(ref.key.read_text())
 
-        classification, read_kind, extracted, cached = load_reading(
+        classification, read_kind, extracted, cached, usage = load_reading(
             pdf, doc_id, model=model, dpi=dpi, use_cache=use_cache, cache_dir=reply_cache(root)
         )
 
@@ -566,6 +628,7 @@ def evaluate(
                     "doc_id": doc_id,
                     **dress,
                     "cached": cached,
+                    "usage": usage,
                     "status": "no_results",
                     "true_kind": true_kind,
                     "read_kind": read_kind,
@@ -613,6 +676,7 @@ def evaluate(
                 "doc_id": doc_id,
                 **dress,
                 "cached": cached,
+                "usage": usage,
                 "status": result.status,
                 "true_kind": true_kind,
                 "read_kind": read_kind,
@@ -662,7 +726,86 @@ def evaluate(
         },
         "document_count": len(rows),
         "documents": rows,
+        "summary": summarise(rows),
+        # Database errors retried during the run. Non-empty means the connection dropped
+        # and was retried successfully; it never means a row was scored on an error.
+        "factor_lookup_retries": list(LOOKUP_RETRIES),
     }
+
+
+# Below this many documents a cell is reported, but marked: the quirk x kind cells of v1
+# sit at or near the floor of 15 (TIER2_BLOCK2.md, "Known limits"), and several moderate
+# cells hold 4 to 7. A count that small is a description of those documents, not a rate.
+SMALL_N = 15
+
+MEASURES = ("every_field", "activity", "pipeline")
+
+
+def _cell(rows: list[dict]) -> dict:
+    return {
+        "documents": len(rows),
+        "every_field": sum(
+            r["fields_scored"] > 0 and r["fields_correct"] == r["fields_scored"] for r in rows
+        ),
+        "activity": sum(r["activity"]["correct"] for r in rows),
+        "pipeline": sum(r["pipeline_exact"] for r in rows),
+        "small_n": len(rows) < SMALL_N,
+    }
+
+
+def summarise(rows: list[dict]) -> dict:
+    """Counts per (tier, kind) and per (quirk, kind). Pure, so it is unit-testable.
+
+    A document with three quirks counts once in each of its three quirk rows, so the quirk
+    table's rows do not sum to the document count - and are not meant to.
+    """
+    by_tier: dict[str, dict[str, dict]] = {}
+    by_quirk: dict[str, dict[str, dict]] = {}
+    for kind in KINDS:
+        in_kind = [r for r in rows if r["true_kind"] == kind]
+        present = {r["difficulty_tier"] for r in in_kind}
+        for tier in [t for t in TIERS if t in present] + sorted(present - set(TIERS)):
+            by_tier.setdefault(tier, {})[kind] = _cell(
+                [r for r in in_kind if r["difficulty_tier"] == tier]
+            )
+        for quirk in sorted({q for r in in_kind for q in r["quirks"]}):
+            by_quirk.setdefault(quirk, {})[kind] = _cell(
+                [r for r in in_kind if quirk in r["quirks"]]
+            )
+    return {
+        "small_n_below": SMALL_N,
+        "by_tier": by_tier,
+        "by_quirk": by_quirk,
+        "tokens_this_run": tokens(r for r in rows if not r["cached"]),
+    }
+
+
+def tokens(rows) -> dict:
+    """Token totals over the given rows' recorded calls. Run on the FRESH rows only, it is
+    what this run cost; cached rows cost nothing now."""
+    calls = [u for r in rows for u in (r.get("usage") or [])]
+    return {
+        "calls": len(calls),
+        "input_tokens": sum(u.get("input_tokens", 0) for u in calls),
+        "output_tokens": sum(u.get("output_tokens", 0) for u in calls),
+    }
+
+
+def _print_table(title: str, table: dict[str, dict[str, dict]]) -> None:
+    print(f"\n{title}  (every field / activity / pipeline, as counts; * = fewer than {SMALL_N})")
+    kinds = [k for k in KINDS if any(k in row for row in table.values())]
+    print(f"  {'':22}" + "".join(f"{k:>30}" for k in kinds))
+    for name, cells in table.items():
+        line = f"  {name:22}"
+        for kind in kinds:
+            cell = cells.get(kind)
+            if cell is None:
+                line += f"{'-':>30}"
+                continue
+            n = cell["documents"]
+            text = " / ".join(f"{cell[m]}" for m in MEASURES) + f" of {n}"
+            line += f"{text + ('*' if cell['small_n'] else ' '):>30}"
+        print(line)
 
 
 def report(run: dict) -> int:
@@ -766,6 +909,19 @@ def report(run: dict) -> int:
             print(f"  consistency {row['doc_id']}: {flag['relation']} off by {flag['difference']}")
         for problem in row["field_problems"]:
             print(f"  unparsed {row['doc_id']}: {problem['field']} <- {problem['printed']!r}")
+
+    summary = run.get("summary") or summarise(rows)
+    _print_table("Per tier", summary["by_tier"])
+    _print_table("Per quirk", summary["by_quirk"])
+    if run.get("factor_lookup_retries"):
+        print(
+            f"\nFactor lookups retried after a database error: {len(run['factor_lookup_retries'])}"
+        )
+    spent = summary["tokens_this_run"]
+    print(
+        f"\nTokens this run: {spent['calls']} calls, {spent['input_tokens']} in, "
+        f"{spent['output_tokens']} out (cached documents cost nothing)"
+    )
 
     if worst:
         print(f"\nWeakest fields: {', '.join(worst)}")

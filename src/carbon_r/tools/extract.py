@@ -289,8 +289,13 @@ def _parse(
     instruction: str,
     schema: type[BaseModel],
     detail: str,
+    usage: list[dict] | None = None,
 ) -> BaseModel:
-    """One model call returning a validated instance of `schema`."""
+    """One model call returning a validated instance of `schema`.
+
+    `usage`, when given, receives the provider's token counts for this call - the eval
+    records them so a run's cost is measured rather than estimated.
+    """
     response = client.responses.parse(
         model=model,
         input=[
@@ -304,6 +309,8 @@ def _parse(
         ],
         text_format=schema,
     )
+    if usage is not None and getattr(response, "usage", None) is not None:
+        usage.append(response.usage.model_dump())
     parsed = response.output_parsed
     if parsed is None:
         raise RuntimeError(f"Model returned no parsed output (status {response.status!r})")
@@ -311,7 +318,11 @@ def _parse(
 
 
 def classify_page(
-    path: Path, *, dpi: int = DEFAULT_DPI, model: str | None = None
+    path: Path,
+    *,
+    dpi: int = DEFAULT_DPI,
+    model: str | None = None,
+    usage: list[dict] | None = None,
 ) -> DocumentClassification:
     """One small model call: what kind of document is this? Raises on provider failure."""
     settings = get_settings()
@@ -324,12 +335,18 @@ def classify_page(
         CLASSIFY_INSTRUCTION,
         DocumentClassification,
         CLASSIFY_DETAIL,
+        usage,
     )
     return result  # type: ignore[return-value]
 
 
 def read_page(
-    path: Path, *, kind: str, dpi: int = DEFAULT_DPI, model: str | None = None
+    path: Path,
+    *,
+    kind: str,
+    dpi: int = DEFAULT_DPI,
+    model: str | None = None,
+    usage: list[dict] | None = None,
 ) -> BaseModel:
     """One model call transcribing a page with the schema for `kind`.
 
@@ -349,6 +366,7 @@ def read_page(
         spec["instruction"],
         spec["schema"],
         IMAGE_DETAIL,
+        usage,
     )
 
 
