@@ -262,7 +262,8 @@ def _take_cylinders(
 # label this does not know leaves the field None, which an eval reports.
 _CHARGE_LABELS = {
     "delivery_charge_sgd": ("delivery charge", "delivery"),
-    "rental_charge_sgd": ("cylinder rental", "rental"),
+    # "cylinder hire" is layout b's wording, "cyl rental" layout c's (Block 3, B5).
+    "rental_charge_sgd": ("cylinder rental", "cylinder hire", "cyl rental", "rental"),
 }
 
 # Rows that are summary lines rather than charges. They have their own fields, and

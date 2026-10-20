@@ -391,3 +391,27 @@ def test_an_unreadable_quantity_is_a_problem_but_the_charge_is_kept():
     assert [p.field for p in problems] == ["lines[2].quantity"]
     assert invoice.delivery_charge_sgd == Decimal("10.00")
     assert check_consistency_lpg(invoice) == []
+
+
+@pytest.mark.parametrize(
+    "label", ["Cylinder rental", "Cylinder hire, 5 x S$4.00", "CYL RENTAL", "Rental"]
+)
+def test_every_layouts_rental_label_is_recognised(label):
+    lines = [
+        line("LPG cylinder 50 kg", "660.00", quantity="4", unit_price="165.00"),
+        line("Delivery charge", "10.00"),
+        line(label, "20.00", quantity="4", unit_price="5.00"),
+    ]
+    invoice, _ = normalise_lpg(reading(lines=lines))
+    assert invoice.rental_charge_sgd == Decimal("20.00")
+
+
+def test_a_credit_for_a_charge_is_not_taken_as_the_charge():
+    lines = [
+        line("LPG cylinder 50 kg", "660.00", quantity="4", unit_price="165.00"),
+        line("Credit: delivery charge, prior invoice", "-10.00"),
+        line("Delivery charge", "10.00"),
+        line("Cylinder rental", "20.00", quantity="4", unit_price="5.00"),
+    ]
+    invoice, _ = normalise_lpg(reading(lines=lines))
+    assert invoice.delivery_charge_sgd == Decimal("10.00")
