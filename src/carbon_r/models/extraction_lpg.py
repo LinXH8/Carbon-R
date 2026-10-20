@@ -276,6 +276,18 @@ def _is_summary(description: str) -> bool:
     return any(lowered.startswith(label) for label in _SUMMARY_LABELS)
 
 
+def _optional_decimal(
+    printed: str | None, field: str, problems: list[FieldProblem]
+) -> Decimal | None:
+    if printed is None or not printed.strip():
+        return None
+    try:
+        return parse_decimal(printed)
+    except (ValueError, ArithmeticError) as exc:
+        problems.append(FieldProblem(field=field, printed=printed, reason=str(exc)))
+        return None
+
+
 def _take_lines(
     extracted: ExtractedLPGInvoice,
     values: dict[str, object],
@@ -306,18 +318,25 @@ def _take_lines(
             )
             continue
         try:
-            lines.append(
-                InvoiceLine(
-                    description=(printed.description or "").strip(),
-                    quantity=parse_decimal(printed.quantity) if printed.quantity else None,
-                    unit_price=parse_decimal(printed.unit_price) if printed.unit_price else None,
-                    amount=parse_decimal(printed.amount),
-                )
-            )
+            amount = parse_decimal(printed.amount)
         except (ValueError, ArithmeticError) as exc:
             problems.append(
                 FieldProblem(field=f"lines[{index}]", printed=printed.amount, reason=str(exc))
             )
+            continue
+        # The amount is the figure; quantity and unit price only describe it. A quantity
+        # that will not parse is a problem against THAT cell, never a reason to drop the
+        # charge - before Block 3 B4 a "2 visits" cell discarded its row's S$16.00.
+        lines.append(
+            InvoiceLine(
+                description=description,
+                quantity=_optional_decimal(printed.quantity, f"lines[{index}].quantity", problems),
+                unit_price=_optional_decimal(
+                    printed.unit_price, f"lines[{index}].unit_price", problems
+                ),
+                amount=amount,
+            )
+        )
     values["lines"] = lines
 
     for field, labels in _CHARGE_LABELS.items():

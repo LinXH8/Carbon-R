@@ -364,3 +364,30 @@ def test_a_label_with_a_parenthetical_still_matches():
         )
     )
     assert normalised.rental_charge_sgd == Decimal("20.00")
+
+
+# --- charge lines whose quantity is a count word (Block 3, B4) ---------------------------
+
+
+@pytest.mark.parametrize("quantity", ["1 visit", "2 visits", "1 trip(s)", "3 trips"])
+def test_a_delivery_counted_in_words_keeps_its_charge(quantity):
+    lines = [
+        line("LPG cylinder 50 kg", "660.00", quantity="4", unit_price="165.00"),
+        line("Delivery charge", "10.00", quantity=quantity, unit_price="10.00"),
+        line("Cylinder rental", "20.00", quantity="4", unit_price="5.00"),
+    ]
+    invoice, problems = normalise_lpg(reading(lines=lines))
+    assert problems == []
+    assert invoice.delivery_charge_sgd == Decimal("10.00")
+
+
+def test_an_unreadable_quantity_is_a_problem_but_the_charge_is_kept():
+    lines = [
+        line("LPG cylinder 50 kg", "660.00", quantity="4", unit_price="165.00"),
+        line("Delivery charge", "10.00", quantity="two-ish", unit_price="10.00"),
+        line("Cylinder rental", "20.00", quantity="4", unit_price="5.00"),
+    ]
+    invoice, problems = normalise_lpg(reading(lines=lines))
+    assert [p.field for p in problems] == ["lines[2].quantity"]
+    assert invoice.delivery_charge_sgd == Decimal("10.00")
+    assert check_consistency_lpg(invoice) == []

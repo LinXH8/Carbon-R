@@ -74,6 +74,13 @@ _UNIT_SUFFIXES = (
     "tonne",
     "kg",
     "%",
+    # Counts of deliveries on an LPG invoice's charge lines: "1 visit", "2 trip(s)".
+    # Block 2's layouts print them; Block 3 B4 found every such row dropped.
+    "trip(s)",
+    "trips",
+    "trip",
+    "visits",
+    "visit",
 )
 
 
