@@ -7,7 +7,7 @@ export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 # the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
 export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
 
-.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e
+.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
@@ -57,6 +57,10 @@ db-down:  ## Stop local Postgres
 
 eval:     ## Score extraction and the pipeline on synthgen v1 (holdout excluded)
 	uv run python scripts/eval_extraction.py
+
+# The held-out layout d: scored ONCE, as the block's last measurement, and never tuned on.
+eval-holdout:  ## Score only the held-out layout (Block 3, once; never while tuning)
+	uv run python scripts/eval_extraction.py --holdout-only
 
 eval-block1:  ## Score the Block 1 set (data/generated/<kind>/clean), as Block 1 measured it
 	uv run python scripts/eval_extraction.py --root data/generated

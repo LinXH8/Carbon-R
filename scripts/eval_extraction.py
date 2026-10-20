@@ -108,6 +108,8 @@ V1_ROOT = GENERATED / "synthgen_v1"
 # silently mix them. The Block 1 set (one layout, clean) keeps its own directory.
 RUNS_DIRS = {
     V1_ROOT: GENERATED / "eval_runs_TIER2_BLOCK2",
+    # The held-out layout, scored once at the end of Block 3 and never tuned on.
+    (V1_ROOT, "holdout"): GENERATED / "eval_runs_TIER2_BLOCK3_HOLDOUT",
     GENERATED: GENERATED / "eval_runs_TIER2_BLOCK1",
 }
 
@@ -1162,7 +1164,11 @@ def report(run: dict) -> int:
     if worst:
         print(f"\nWeakest fields: {', '.join(worst)}")
 
-    runs_dir = RUNS_DIRS.get(PROJECT_ROOT / run["document_set"], GENERATED / "eval_runs_other")
+    set_root = PROJECT_ROOT / run["document_set"]
+    if run.get("holdout_only"):
+        runs_dir = RUNS_DIRS.get((set_root, "holdout"), GENERATED / "eval_runs_other")
+    else:
+        runs_dir = RUNS_DIRS.get(set_root, GENERATED / "eval_runs_other")
     runs_dir.mkdir(parents=True, exist_ok=True)
     stamp = run["run_at"].replace(":", "").replace("-", "")
     path = runs_dir / f"{stamp}-{run['request']['request_hash']}.json"
@@ -1193,6 +1199,11 @@ def main() -> int:
         help="also score the held-out layout (Block 3; never while tuning)",
     )
     parser.add_argument(
+        "--holdout-only",
+        action="store_true",
+        help="score ONLY the held-out layout, into its own runs directory (once, last)",
+    )
+    parser.add_argument(
         "--no-cache",
         action="store_true",
         help="call the model again for every document, to measure run-to-run variation",
@@ -1216,7 +1227,9 @@ def main() -> int:
     if not refs:
         print(f"No generated documents under {root}. Run `make docs`.", file=sys.stderr)
         return 2
-    refs = select(refs, docs=args.docs, include_holdout=args.include_holdout)
+    refs = select(refs, docs=args.docs, include_holdout=args.include_holdout or args.holdout_only)
+    if args.holdout_only:
+        refs = [ref for ref in refs if ref.is_holdout]
     if args.limit:
         refs = refs[: args.limit]
     if not refs:
@@ -1231,6 +1244,7 @@ def main() -> int:
         root=root,
         retry_enabled=not args.no_retry,
     )
+    run["holdout_only"] = args.holdout_only
     return report(run)
 
 

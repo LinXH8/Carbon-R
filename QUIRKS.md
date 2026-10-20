@@ -457,12 +457,66 @@ listed in `quirks`.
 
 ---
 
+# Company-year scenarios (`synthgen-scenario-1`, Tier 2 Block 3)
+
+A scenario is one fictional business's documents for one reporting year, for the
+calculation eval: `data/generated/scenarios/<scenario_id>/`, with v1's per-kind folders
+plus a `scenario.json` that names the company, its revenue and contract revenue (both
+fictional, for allocation), the reporting year, the active period, and what was withheld.
+21 scenarios, 676 documents, seed `20261020` (not v1's, so an account that also has v1
+bills does not repeat v1's draws). Built from the v1 builders, templates and injectors, so
+every page looks like a v1 page on layouts `a`, `b` or `c`. **Layout `d` is never used.**
+
+Two things are new, and one v1 quirk is used in a new way:
+
+### Withheld documents (a property of the set, not a quirk)
+
+`missing_month` is not a page quirk: no page shows it. A scenario withholds documents
+(`intended.withheld` in `scenario.json`), and the gap is in the SET. The meter keeps
+running underneath it, so the bill after a withheld month starts from a reading the set
+never shows. **The correct reading:** for electricity and fuel cards, every uncovered day
+of the active period is a gap and its months are listed. For LPG, a month with no invoice
+is ordinary - a kitchen runs on cylinders already on site - and only a run longer than
+45 days (`LPG_MAX_GAP_DAYS`) is a gap. **Open:** `makan_mates_missing_month` (March
+electricity), `makan_mates_lpg_quiet_month` (August LPG: not a gap),
+`makan_mates_lpg_long_gap` (April-June LPG: a gap).
+
+### `usd_invoice` — LPG (structural, scenarios only)
+
+**What you will see.** "Amount (USD)" in the column heading, "USD 1,747.71" as the total,
+price list `IGS-USD-25`. Everything else is a normal LPG invoice: the cylinders, sizes and
+so the kg are unaffected.
+
+**What the key records.** `currency: "USD"`, and `usd_invoice` in `quirks`. The money
+fields keep their `_sgd` names and hold USD - the names predate a second currency.
+
+**The correct reading.** The kg, and therefore the emissions figure, do not depend on the
+currency. Nothing is converted: there is no FX in Tier 2, and the USD prices are their own
+fictional list, not a conversion of the SGD list at any rate. The roll-up lists the
+document as non-SGD.
+
+**Not modelled:** the page charges GST at 9% in USD. Whether a Singapore tax invoice in a
+foreign currency must also show the GST amount in SGD is a VERIFY item that has not been
+checked against IRAS's own guidance; the synthetic page makes no claim either way.
+
+**Open:** `makan_mates_usd_lpg`, `lpg_004` to `lpg_006`.
+
+### A meter cycle across the whole year
+
+`makan_mates_meter_cycle` bills electricity from the 15th to the 14th, so the year has
+thirteen bills: the first runs 15 Dec 2024 to 14 Jan 2025 and the last 15 Dec 2025 to
+14 Jan 2026 (`cross_year_period` on both, `cross_month_period` on the rest). **The correct
+reading:** only the 2025 days of each count toward 2025; the others are listed as outside
+the reporting year, not dropped and not counted.
+
+---
+
 ## Planned, and not in any version yet
 
 | Quirk | What it would test | Why it is not here yet |
 |---|---|---|
-| `missing_month` | noticing a gap in a year of an account's documents | It is a property of a *set*, not of one page; it belongs with Block 3's company-year scenarios |
-| `usd_invoice` | a non-SGD currency that needs converting at the invoice date | Needs `convert_currency`, which is Tier 3 |
+| `missing_month` | noticing a gap in a year of an account's documents | **Done differently in Block 3:** a property of a scenario's set (above), not a page quirk |
+| `usd_invoice` with conversion | a non-SGD amount converted at the invoice date | The USD page exists (above); converting it needs `convert_currency`, which is Tier 3 |
 | `multiple_premises` | two meters on one bill, so not taking only the first | Needs a two-meter extraction schema |
 | `ct_multiplier` | a high-tension register reading × a CT multiplier | Not started; the high-tension plan is flat-rate and that structure is unverified |
 
