@@ -77,6 +77,13 @@ QUIRKS: dict[str, QuirkSpec] = {
         False,
         "previous balance and payment printed, so 'amount due' differs from this period",
     ),
+    # Structural, so v1's planner (which plans INJECTED quirks only) can never pick it:
+    # it exists for the Block 3 company-year scenarios, and v1 stays byte-identical.
+    "usd_invoice": QuirkSpec(
+        frozenset({LPG}),
+        True,
+        "the invoice is priced in USD; the kg delivered, and so the activity, are unaffected",
+    ),
     "gst_confusion": QuirkSpec(
         frozenset({ELEC, LPG, FUEL}),
         False,

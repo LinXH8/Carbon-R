@@ -61,6 +61,11 @@ eval:     ## Score extraction and the pipeline on synthgen v1 (holdout excluded)
 eval-block1:  ## Score the Block 1 set (data/generated/<kind>/clean), as Block 1 measured it
 	uv run python scripts/eval_extraction.py --root data/generated
 
+# Company-year scenarios (Tier 2 Block 3). Calculation level: no model call, no generated
+# files needed - the documents are built in memory from the generator.
+eval-scenarios:  ## Score Makan Mates + 20 variations at calculation level (0 model calls)
+	uv run python scripts/eval_scenarios.py
+
 agent-smoke:  ## End-to-end flow check of /upload + /chat on 5 bills (NOT an accuracy measurement)
 	uv run python scripts/agent_flow_check.py --root data/generated
 

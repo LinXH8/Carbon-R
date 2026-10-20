@@ -142,9 +142,10 @@ def _credit_terms(document, rng) -> dict:
 
 
 def _vehicle(statement, plate: str):
-    from carbon_r.synthgen.profiles import FUEL_CUSTOMERS
+    from carbon_r.synthgen.profiles import FUEL_CUSTOMERS, SCENARIO_FUEL_CUSTOMERS
 
-    for customer in FUEL_CUSTOMERS:
+    # v1's cards first, so a v1 plate resolves exactly as it always did.
+    for customer in FUEL_CUSTOMERS + SCENARIO_FUEL_CUSTOMERS:
         for vehicle in customer.fleet.vehicles:
             if vehicle.plate == plate:
                 return vehicle

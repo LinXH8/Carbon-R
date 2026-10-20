@@ -386,9 +386,23 @@ LPG_PRICE_LISTS: dict[str, LPGPriceList] = {
 }
 
 
-def lpg_price_list(year: int) -> LPGPriceList:
-    """The LPG vendor's list for a supply period in `year`. No fallback to another year."""
-    code = f"IGS-COM-{year % 100:02d}"
+# A USD list for the Block 3 `usd_invoice` scenario. Fictional prices, set on their own -
+# NOT a conversion of the SGD list at any exchange rate: an FX rate is a VERIFY item, and
+# no rate is claimed or implied. Only 2025, the scenarios' reporting year.
+LPG_PRICE_LISTS["IGS-USD-25"] = LPGPriceList(
+    code="IGS-USD-25",
+    name="Commercial Cylinder 2025 (USD)",
+    price_per_cylinder_sgd={Decimal("12.7"): Decimal("35.40"), Decimal("50"): Decimal("119.00")},
+    delivery_charge_sgd=Decimal("7.00"),
+    rental_per_cylinder_sgd=Decimal("3.80"),
+)
+
+
+def lpg_price_list(year: int, currency: str = "SGD") -> LPGPriceList:
+    """The LPG vendor's list for a supply period in `year`. No fallback to another year.
+
+    `price_per_cylinder_sgd` and the other `_sgd` names hold the list's own currency."""
+    code = f"IGS-{'COM' if currency == 'SGD' else currency}-{year % 100:02d}"
     if code not in LPG_PRICE_LISTS:
         raise ValueError(f"No LPG price list {code}; declare it rather than borrowing a year")
     return LPG_PRICE_LISTS[code]
@@ -734,6 +748,84 @@ FUEL_CUSTOMERS: tuple[FuelCustomer, ...] = (
 )
 
 
+# =======================================================================================
+# Company-year scenarios, added in Tier 2 Block 3
+# =======================================================================================
+#
+# Kept OUT of CUSTOMER_PROFILES, LPG_CUSTOMERS and FUEL_CUSTOMERS: the v1 planner walks
+# those, and a new account there would add documents to v1. `customer_by_key` searches
+# both, so a scenario document carries one identity per business like every other.
+#
+# Makan Mates is the project's worked example: a restaurant kitchen with a cold room
+# (electricity), gas ranges on 50 kg cylinders (LPG) and one diesel delivery van. Sized to
+# land near the illustrative 30 / 39 t of the project context, but its expected figures
+# are computed by the eval from these activities x the DB's verified factors - never
+# copied from that context (SYNTHGEN_SPEC 4.5).
+SCENARIO_PROFILES: tuple[CustomerProfile, ...] = (
+    CustomerProfile(
+        key="makan_mates",
+        name="Makan Mates Pte Ltd",
+        account_number="8820-5520-11",
+        plan_code="SPR-LT-FIX-25",
+        base_kwh=8_100,
+        seasonal_amplitude=0.12,  # a cold room tracks ambient temperature
+        start_year=2025,
+        start_month=1,
+        first_doc_number=0,
+        street="Jalan Pemimpin",
+        postal_sector="55",
+        ground_floor_only=True,
+    ),
+)
+
+SCENARIO_LPG_CUSTOMERS: tuple[LPGCustomer, ...] = (
+    LPGCustomer(
+        key="makan_mates",
+        account_number="GAS-5520-11",
+        base_kg=640,
+        seasonal_amplitude=0.05,
+        cylinder_size_kg=Decimal("50"),
+        start_year=2025,
+        start_month=1,
+        first_doc_number=0,
+        extra_delivery_chance=0.3,
+    ),
+)
+
+SCENARIO_FUEL_CUSTOMERS: tuple[FuelCustomer, ...] = (
+    FuelCustomer(
+        key="makan_mates",
+        account_number="FLT-5520-11",
+        fleet=Fleet(
+            card_number="6677-****-****-5521",
+            vehicles=(Vehicle(plate="SYN 5520 M", product="Diesel", tank_litres=70),),
+            fills_per_vehicle_per_month=6,
+        ),
+        start_year=2025,
+        start_month=1,
+        first_doc_number=0,
+        discount_per_litre_sgd=Decimal("0.05"),
+    ),
+    # The mixed-fuel variation: the same kitchen with a petrol runabout as well.
+    FuelCustomer(
+        key="makan_mates",
+        account_number="FLT-5520-12",
+        fleet=Fleet(
+            card_number="6677-****-****-5522",
+            vehicles=(
+                Vehicle(plate="SYN 5520 M", product="Diesel", tank_litres=70),
+                Vehicle(plate="SYN 5523 M", product="Petrol 95", tank_litres=45),
+            ),
+            fills_per_vehicle_per_month=5,
+        ),
+        start_year=2025,
+        start_month=1,
+        first_doc_number=0,
+        discount_per_litre_sgd=Decimal("0.05"),
+    ),
+)
+
+
 def customer_by_key(key: str) -> CustomerProfile:
     """The electricity profile for a key, so one business keeps one name and address.
 
@@ -742,7 +834,8 @@ def customer_by_key(key: str) -> CustomerProfile:
     and looking it up here means there is one definition of each business rather than
     three that can drift apart.
     """
-    for profile in CUSTOMER_PROFILES:
+    profiles = CUSTOMER_PROFILES + SCENARIO_PROFILES
+    for profile in profiles:
         if profile.key == key:
             return profile
-    raise KeyError(f"No customer profile {key!r}; have {[p.key for p in CUSTOMER_PROFILES]}")
+    raise KeyError(f"No customer profile {key!r}; have {[p.key for p in profiles]}")

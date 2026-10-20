@@ -113,7 +113,11 @@ class LPGInvoice(QuirkFields):
     returned_cylinders: int = Field(ge=0)
 
     # --- money --------------------------------------------------------------------
-    currency: Literal["SGD"] = "SGD"
+    # USD only with the `usd_invoice` quirk (Block 3 scenarios). The money fields keep
+    # their `_sgd` names and then hold USD: the field names predate a second currency,
+    # and renaming them would change every v1 answer key. Nothing converts the amounts -
+    # they never reach an activity-based figure (CLAUDE.md: no FX in Tier 2).
+    currency: Literal["SGD", "USD"] = "SGD"
     cylinder_charge_sgd: Decimal = Field(ge=0)
     # Per visit, from the price list. None only on a hand-built key, where the delivery
     # charge is then taken as printed.
@@ -229,6 +233,11 @@ class LPGInvoice(QuirkFields):
             )
 
         check_quirk_fields(self, self.doc_kind, self.total_sgd)
+        if (self.currency == "USD") != ("usd_invoice" in self.quirks):
+            raise ValueError(
+                f"currency {self.currency} disagrees with quirks {self.quirks}: an invoice "
+                "is in USD exactly when usd_invoice is named"
+            )
         require_quirk(
             self.quirks, "lpg_cylinders", not self.prints_total_kg, "the kg total being unprinted"
         )

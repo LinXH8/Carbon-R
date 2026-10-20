@@ -161,6 +161,7 @@ def build_invoice(
     is_holdout_layout: bool = IS_HOLDOUT_LAYOUT,
     difficulty_tier: str = DIFFICULTY_TIER,
     prints_total_kg: bool = False,
+    currency: str = "SGD",
 ) -> LPGInvoice:
     """Assemble and validate one clean invoice. Quirks are applied afterwards (quirks.py).
 
@@ -194,7 +195,7 @@ def build_invoice(
         lag = lag_days if lag_days is not None else rng.randint(*INVOICE_LAG_DAYS_RANGE)
         document_date = period_end + timedelta(days=lag)
 
-    prices = lpg_price_list(period_start.year)
+    prices = lpg_price_list(period_start.year, currency)
     deliveries = doc_rng(seed, doc_id, "deliveries")
     count = cylinders_for(kg_wanted, customer.cylinder_size_kg)
     size = customer.cylinder_size_kg
@@ -278,7 +279,9 @@ def build_invoice(
         gst_rate=gst_rate,
         gst_amount_sgd=gst_amount,
         total_sgd=subtotal + gst_amount,
-        quirks=[] if prints_total_kg else ["lpg_cylinders"],
+        currency=currency,
+        quirks=([] if prints_total_kg else ["lpg_cylinders"])
+        + (["usd_invoice"] if currency == "USD" else []),
     )
 
 
