@@ -316,7 +316,11 @@ def _take_consumption(
         shown = (
             printed if not extracted.consumption_unit else f"{printed} {extracted.consumption_unit}"
         )
-        problems.append(FieldProblem(field="consumption_kwh", printed=shown, reason=str(exc)))
+        problems.append(
+            FieldProblem(
+                field="consumption_kwh", printed=shown, reason=str(exc), source="consumption"
+            )
+        )
 
 
 # An energy unit printed at the END of the figure itself. `clean` strips these silently, so
@@ -431,6 +435,7 @@ def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
             "energy_charge = round2(consumption_kwh x tariff_cents_per_kwh / 100)",
             round2(Decimal(bill.consumption_kwh) * bill.tariff_cents_per_kwh / Decimal(100)),
             bill.energy_charge_sgd,
+            ("consumption", "consumption_unit", "tariff_cents_per_kwh", "energy_charge"),
         )
 
     if bill.energy_charge_sgd is not None and bill.fixed_charge_sgd is not None:
@@ -439,6 +444,7 @@ def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
             "subtotal = energy_charge + fixed_charge - credit_adjustment",
             bill.energy_charge_sgd + bill.fixed_charge_sgd - credit,
             bill.subtotal_sgd,
+            ("energy_charge", "fixed_charge", "credit_adjustment", "subtotal"),
         )
 
     if bill.subtotal_sgd is not None and bill.gst_rate is not None:
@@ -446,6 +452,7 @@ def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
             "gst_amount = round2(subtotal x gst_rate)",
             round2(bill.subtotal_sgd * bill.gst_rate),
             bill.gst_amount_sgd,
+            ("subtotal", "gst_percent", "gst_amount"),
         )
 
     if bill.subtotal_sgd is not None and bill.gst_amount_sgd is not None:
@@ -453,6 +460,7 @@ def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
             "total = subtotal + gst_amount",
             bill.subtotal_sgd + bill.gst_amount_sgd,
             bill.total_sgd,
+            ("subtotal", "gst_amount", "total"),
         )
 
     if bill.previous_reading_kwh is not None and bill.current_reading_kwh is not None:
@@ -460,6 +468,7 @@ def check_consistency(bill: NormalisedBill) -> list[ConsistencyFlag]:
             "consumption_kwh = current_reading - previous_reading",
             Decimal(bill.current_reading_kwh - bill.previous_reading_kwh),
             Decimal(bill.consumption_kwh) if bill.consumption_kwh is not None else None,
+            ("previous_reading", "current_reading", "consumption", "consumption_unit"),
         )
 
     return flags

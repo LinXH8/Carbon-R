@@ -438,6 +438,7 @@ def check_consistency_lpg(invoice: NormalisedLPGInvoice) -> list[ConsistencyFlag
             "total_kg = sum(cylinder count x cylinder size)",
             invoice.lpg_kg,
             invoice.total_kg_printed,
+            ("cylinder_deliveries", "total_kg_printed"),
         )
 
     for index, line in enumerate(invoice.lines, start=1):
@@ -446,6 +447,7 @@ def check_consistency_lpg(invoice: NormalisedLPGInvoice) -> list[ConsistencyFlag
                 f"lines[{index}] amount = round2(quantity x unit_price)",
                 round2(line.quantity * line.unit_price),
                 line.amount,
+                ("lines",),
             )
 
     if invoice.lines:
@@ -453,6 +455,7 @@ def check_consistency_lpg(invoice: NormalisedLPGInvoice) -> list[ConsistencyFlag
             "subtotal = sum(line amounts)",
             sum((line.amount for line in invoice.lines), Decimal(0)),
             invoice.subtotal_sgd,
+            ("lines", "subtotal"),
         )
 
     if invoice.subtotal_sgd is not None and invoice.gst_rate is not None:
@@ -460,6 +463,7 @@ def check_consistency_lpg(invoice: NormalisedLPGInvoice) -> list[ConsistencyFlag
             "gst_amount = round2(subtotal x gst_rate)",
             round2(invoice.subtotal_sgd * invoice.gst_rate),
             invoice.gst_amount_sgd,
+            ("subtotal", "gst_percent", "gst_amount"),
         )
 
     if invoice.subtotal_sgd is not None and invoice.gst_amount_sgd is not None:
@@ -467,6 +471,7 @@ def check_consistency_lpg(invoice: NormalisedLPGInvoice) -> list[ConsistencyFlag
             "total = subtotal + gst_amount",
             invoice.subtotal_sgd + invoice.gst_amount_sgd,
             invoice.total_sgd,
+            ("subtotal", "gst_amount", "total"),
         )
 
     return flags

@@ -86,6 +86,19 @@ def test_a_better_second_reading_is_adopted_and_its_changes_named():
     assert final.data["retry"]["first_normalised"]["gross_amount_sgd"] == "426.72"
 
 
+def test_a_field_no_failed_check_reads_is_never_taken_from_the_retry():
+    """C7b. Re-reading a hard photo re-rolled fields nobody asked about: the first live run
+    of the retry changed three correct values (account, card, address) to wrong ones."""
+    first = _result(reading(**MISREAD))
+    second = reading(customer_address="41 Jalan Pesawat Lam, #01-07, Singapore 610234")
+    final = with_retry(first, second, PAGE, kind=KIND, dpi=150, model="test-model")
+    assert final.data["retry"]["adopted"]
+    assert "customer_address" not in final.data["retry"]["scope"]
+    assert "customer_address" not in final.data["changed_on_retry"]
+    assert final.data["normalised"]["customer_address"] == reading().customer_address
+    assert final.data["normalised"]["gross_amount_sgd"] == reading().gross_amount
+
+
 def test_a_second_reading_that_is_no_better_is_not_adopted():
     first = _result(reading(**MISREAD))
     final = with_retry(first, reading(**MISREAD), PAGE, kind=KIND, dpi=150, model="test-model")

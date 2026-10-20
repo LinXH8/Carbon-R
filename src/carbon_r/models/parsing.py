@@ -92,6 +92,9 @@ class FieldProblem(BaseModel):
     field: str
     printed: str | None
     reason: str
+    # The PRINTED field it was read from, where that differs from `field`. A retry is
+    # scoped to printed fields (Block 3, C7b), so a problem must say which one it is.
+    source: str | None = None
 
 
 class ConsistencyFlag(BaseModel):
@@ -108,6 +111,10 @@ class ConsistencyFlag(BaseModel):
     expected: Decimal
     printed: Decimal
     difference: Decimal
+    # The PRINTED fields the relation reads. A retry re-takes only these from a second
+    # reading (Block 3, C7b): re-reading the whole page also re-rolled fields nobody asked
+    # about, and on hard photos it got some of them wrong.
+    fields: tuple[str, ...] = ()
 
 
 def is_blank_dash(printed: str | None) -> bool:
@@ -241,7 +248,9 @@ def taker(source: object, values: dict, problems: list[FieldProblem]):
         try:
             values[target] = parser(printed)
         except (ValueError, ArithmeticError, InvalidOperation) as exc:
-            problems.append(FieldProblem(field=target, printed=str(printed), reason=str(exc)))
+            problems.append(
+                FieldProblem(field=target, printed=str(printed), reason=str(exc), source=field)
+            )
 
     return take
 
@@ -254,7 +263,9 @@ def comparer(flags: list[ConsistencyFlag]):
     not read is skipped - absence is reported as a `FieldProblem`, not as a disagreement.
     """
 
-    def compare(relation: str, expected: Decimal, printed: Decimal | None) -> None:
+    def compare(
+        relation: str, expected: Decimal, printed: Decimal | None, fields: tuple[str, ...] = ()
+    ) -> None:
         if printed is None:
             return
         if expected != printed:
@@ -264,6 +275,7 @@ def comparer(flags: list[ConsistencyFlag]):
                     expected=expected,
                     printed=printed,
                     difference=printed - expected,
+                    fields=fields,
                 )
             )
 

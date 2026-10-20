@@ -571,6 +571,22 @@ def reread_page(
     )
 
 
+# A problem's field root that is not itself the printed field's name.
+_PRINTED_ROOT = {"cylinders": "cylinder_deliveries"}
+
+
+def retry_scope(result: ToolResult) -> set[str]:
+    """The PRINTED fields a retry may replace: those a failed check reads, and those that
+    would not parse. Nothing else is taken from the second reading (Block 3, C7b)."""
+    scope: set[str] = set()
+    for flag in result.data["consistency_flags"]:
+        scope.update(flag.get("fields") or ())
+    for problem in result.data["field_problems"]:
+        root = problem.get("source") or problem["field"].split("[", 1)[0].split(".", 1)[0]
+        scope.add(_PRINTED_ROOT.get(root, root))
+    return scope
+
+
 def _burden(result: ToolResult) -> float:
     if result.status != "ok" or result.data is None:
         return float("inf")
@@ -582,13 +598,25 @@ def with_retry(
 ) -> ToolResult:
     """Choose between two readings of one page, and record what the retry changed. Pure.
 
-    The second reading is adopted only if it leaves FEWER problems and failed checks than
+    SCOPED (Block 3, C7b). The second reading is not taken whole: only the printed fields
+    the failed checks read, or that would not parse, come from it, and every other field
+    keeps its first reading. The merged reading is then normalised from scratch, so every
+    derived figure is recomputed by the code. The first version adopted the whole second
+    reading, and the eval showed why that is wrong on hard photos: the retry fixed the field
+    it was asked about and, re-reading everything, got three fields nobody asked about
+    wrong (3 correct->wrong, 0 wrong->correct).
+
+    The merged reading is adopted only if it leaves FEWER problems and failed checks than
     the first; otherwise the first stands and nothing is marked changed. An adopted reading
     names every normalised field whose value differs as `changed_on_retry`, and the agent
     and the page disclose them as less certain. If checks still fail on the reading that
     stands, it is `inconsistent` - accepted, disclosed, and never retried again.
     """
-    second_result = build_result(second, path, kind=kind, dpi=dpi, model=model)
+    schema = EXTRACTORS[kind]["schema"]
+    first_printed = schema.model_validate(first.data["printed"])
+    scope = retry_scope(first) & set(schema.model_fields)
+    merged = first_printed.model_copy(update={name: getattr(second, name) for name in scope})
+    second_result = build_result(merged, path, kind=kind, dpi=dpi, model=model)
     adopted = _burden(second_result) < _burden(first)
     final = second_result if adopted else first
     changed = (
@@ -611,6 +639,8 @@ def with_retry(
                 "consistency_flags": [f["relation"] for f in first.data["consistency_flags"]],
             },
             "adopted": adopted,
+            "scope": sorted(scope),
+            "second_printed": second.model_dump(),
             "first_normalised": first.data["normalised"],
             "first_activities": first.data["activities"],
             "first_field_problems": first.data["field_problems"],

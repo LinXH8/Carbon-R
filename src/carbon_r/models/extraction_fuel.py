@@ -407,13 +407,19 @@ def check_consistency_fuel(
             f"litres[{kind}] = sum(transaction litres)",
             derived,
             statement.litres_printed_by_kind.get(kind),
+            ("transactions", "product_totals"),
         )
 
     # A product the page totals but no transaction row produced: the transaction table was
     # read short. Reported in the same shape, with 0 as what was derived.
     for kind, printed in sorted(statement.litres_printed_by_kind.items()):
         if kind not in statement.litres_by_kind:
-            compare(f"litres[{kind}] = sum(transaction litres)", Decimal(0), printed)
+            compare(
+                f"litres[{kind}] = sum(transaction litres)",
+                Decimal(0),
+                printed,
+                ("transactions", "product_totals"),
+            )
 
     for index, transaction in enumerate(statement.transactions, start=1):
         if transaction.unit_price is not None and transaction.amount is not None:
@@ -421,6 +427,7 @@ def check_consistency_fuel(
                 f"transactions[{index}] amount = round2(litres x unit_price)",
                 round2(transaction.litres * transaction.unit_price),
                 transaction.amount,
+                ("transactions",),
             )
 
     amounts = [t.amount for t in statement.transactions if t.amount is not None]
@@ -429,6 +436,7 @@ def check_consistency_fuel(
             "gross_amount = sum(transaction amounts)",
             sum(amounts, Decimal(0)),
             statement.gross_amount_sgd,
+            ("transactions", "gross_amount"),
         )
 
     if statement.gross_amount_sgd is not None and statement.discount_amount_sgd is not None:
@@ -440,6 +448,7 @@ def check_consistency_fuel(
             - statement.discount_amount_sgd
             - (statement.credit_adjustment_sgd or Decimal(0)),
             statement.subtotal_sgd,
+            ("gross_amount", "discount_amount", "credit_adjustment", "subtotal"),
         )
 
     if statement.subtotal_sgd is not None and statement.gst_rate is not None:
@@ -447,6 +456,7 @@ def check_consistency_fuel(
             "gst_amount = round2(subtotal x gst_rate)",
             round2(statement.subtotal_sgd * statement.gst_rate),
             statement.gst_amount_sgd,
+            ("subtotal", "gst_percent", "gst_amount"),
         )
 
     if statement.subtotal_sgd is not None and statement.gst_amount_sgd is not None:
@@ -454,6 +464,7 @@ def check_consistency_fuel(
             "total = subtotal + gst_amount",
             statement.subtotal_sgd + statement.gst_amount_sgd,
             statement.total_sgd,
+            ("subtotal", "gst_amount", "total"),
         )
 
     return flags
