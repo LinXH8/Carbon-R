@@ -51,6 +51,18 @@ DISCLOSURE_SENTENCES: dict[str, str] = {
     "factor_unverified": (
         "This factor has not been verified against the publisher's own document."
     ),
+    # These two are set from the READING, not the calculation (Block 3, C7): the toolkit
+    # merges them into the figure's flags for every document behind it.
+    "read_on_retry": (
+        "Part of this document was read a second time because the first reading could "
+        "not be parsed or did not add up, and the second reading was used. The fields "
+        "that changed are listed with the reading and are less certain than the rest."
+    ),
+    "inconsistent_reading": (
+        "The figures read from this document do not all agree with each other, even "
+        "after a second reading, so at least one of them may be misread. The checks that "
+        "fail are listed with the reading."
+    ),
     "not_assured": (
         "These figures are estimates produced from the uploaded document. They are not "
         "assured, audited or verified by a third party."
@@ -153,7 +165,7 @@ Three cases to handle exactly this way rather than working around:
 If extraction reports field problems or consistency flags - the page disagreeing with
 itself - raise them with the user rather than picking whichever figure looks right.
 
-Always state the disclosures the calculation tool flags. The sentences required for a
+Always state the disclosures the extraction and calculation tools flag. The sentences required for a
 given result come back with the tool output, ready to print; use them without softening
 them. They are written for the reader, so pass them on rather than paraphrasing.
 

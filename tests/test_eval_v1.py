@@ -20,6 +20,7 @@ from eval_extraction import (
     compare_fields,
     discover,
     read_activities,
+    retry_buckets,
     select,
     summarise,
 )
@@ -207,3 +208,13 @@ def test_a_factor_lookup_error_is_retried_never_memoised_and_finally_aborts(monk
     monkeypatch.setattr(eval_extraction, "lookup_emission_factor", lambda *a: error("down"))
     with pytest.raises(eval_extraction.LookupFailed):
         eval_extraction._factor("c", "u", 2025)
+
+
+def test_retry_changes_are_bucketed_against_the_key():
+    before = {"a": {"correct": False}, "b": {"correct": True}, "c": {"correct": False}}
+    after = {"a": {"correct": True}, "b": {"correct": False}, "c": {"correct": False}}
+    buckets = retry_buckets(before, after, ["a", "b", "c", "transactions"])
+    assert buckets["wrong_to_correct"] == ["a"]
+    assert buckets["correct_to_wrong"] == ["b"]
+    assert buckets["wrong_to_wrong"] == ["c"]
+    assert buckets["unscored"] == ["transactions"]  # changed but unscored: listed, not dropped

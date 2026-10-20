@@ -38,6 +38,14 @@ from carbon_r.tools.extract import extract_from_document as _extract_from_docume
 from carbon_r.tools.factors import lookup_emission_factor as _lookup_emission_factor
 
 
+def _reading_flags(readings: list[dict]) -> dict[str, bool]:
+    """The disclosure flags a set of readings contributes (see DISCLOSURE_SENTENCES)."""
+    return {
+        "read_on_retry": any(r.get("changed_on_retry") for r in readings),
+        "inconsistent_reading": any(r.get("inconsistent") for r in readings),
+    }
+
+
 class Toolkit:
     """The tools bound to one session. One instance per request; cheap to build."""
 
@@ -127,7 +135,10 @@ class Toolkit:
             "activities": stored,
             "field_problems": result.data["field_problems"],
             "consistency_flags": result.data["consistency_flags"],
+            "changed_on_retry": result.data.get("changed_on_retry", []),
+            "inconsistent": result.data.get("inconsistent", False),
         }
+        trimmed["required_disclosures"] = render_disclosures(_reading_flags([trimmed]))
         self.session.readings[args.document_id] = trimmed
 
         hints: list[str] = []
@@ -230,14 +241,20 @@ class Toolkit:
         document_ids = sorted(
             {self.session.activities[pair.activity_ref]["document_id"] for pair in args.pairs}
         )
+        # A figure is no more certain than the readings behind it: their retry and
+        # consistency disclosures travel with it, so the page shows them beside the figure.
+        flags = result.data["disclosures"] | _reading_flags(
+            [self.session.readings[d] for d in document_ids if d in self.session.readings]
+        )
         data = result.data | {
+            "disclosures": flags,
             "calculation_ref": handle,
             "document_ids": document_ids,
             "activity_refs": [pair.activity_ref for pair in args.pairs],
             "factor_refs": [pair.factor_ref for pair in args.pairs],
             # The sentences this result must carry, rendered in one place so the wording
             # cannot drift between tools (CLAUDE.md rule 7).
-            "required_disclosures": render_disclosures(result.data["disclosures"]),
+            "required_disclosures": render_disclosures(flags),
         }
         self.session.calculations[handle] = data
         return ok(data, result.message)

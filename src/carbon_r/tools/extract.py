@@ -414,7 +414,7 @@ def extract_from_document(
     except RuntimeError as exc:
         return error(str(exc))
 
-    return build_result(
+    first = build_result(
         extracted,
         path,
         kind=kind,
@@ -422,6 +422,18 @@ def extract_from_document(
         model=model or settings.openai_model,
         classification=classification,
     )
+    if not needs_retry(first):
+        return first
+    try:
+        second = reread_page(path, kind=kind, message=retry_message(first), dpi=dpi, model=model)
+    except (OpenAIError, RuntimeError) as exc:
+        # The retry is a second opinion, not a precondition: if it fails, the first reading
+        # stands with its problems and flags reported, exactly as it would have before.
+        return ok(
+            first.data,
+            f"{first.message} A second reading was attempted and failed ({exc}).",
+        )
+    return with_retry(first, second, path, kind=kind, dpi=dpi, model=model or settings.openai_model)
 
 
 def build_result(
@@ -466,6 +478,10 @@ def build_result(
             "request_hash": REQUEST_HASH,
         },
         "usage": usage or {},
+        # Set by `with_retry` when a second reading was taken; see there.
+        "retry": None,
+        "changed_on_retry": [],
+        "inconsistent": bool(flags),
     }
 
     parts = [f"Read {path.name} as a {kind.replace('_', ' ')}"]
@@ -481,6 +497,136 @@ def build_result(
     if notes:
         parts.append(f"model noted: {notes}")
     return ok(data, ". ".join(parts) + ".")
+
+
+# --- retry with the error (Tier 2 Block 3, C7) ---------------------------------------------
+#
+# ONE further reading when the first could not be parsed or its arithmetic does not close.
+# The message names what failed - a field and what was transcribed for it, or a relation by
+# name - and NEVER a value the page should hold: the expected figure is exactly what the
+# model must read off the page, and a retry that hands it over measures nothing and invites
+# the model to copy it. For the same reason the message forbids adjusting a value to make
+# arithmetic agree; whether that holds is measured (correct->wrong) rather than assumed.
+#
+# Kept OUT of REQUEST_HASH: the first reading's request is unchanged, so every cached first
+# reading stays a hit. The retry is cached under its own key (see the eval).
+
+RETRY_INSTRUCTION = """You have already read this page once. Part of that reading could not be used:
+
+{items}
+
+Read the page again and transcribe every field, in the same schema. Re-read these exactly
+as printed. Do not change a value to make arithmetic agree; if the page's own figures
+disagree, transcribe them as printed."""
+
+RETRY_HASH = hashlib.sha256(RETRY_INSTRUCTION.encode()).hexdigest()[:8]
+
+
+def needs_retry(result: ToolResult) -> bool:
+    """A reading that parsed, but with fields that would not parse or sums that do not add."""
+    return (
+        result.status == "ok"
+        and result.data is not None
+        and bool(result.data["field_problems"] or result.data["consistency_flags"])
+    )
+
+
+def retry_message(result: ToolResult) -> str:
+    """What failed, by name. The model's own transcription may be quoted back to it; no
+    expected, printed-elsewhere or difference figure ever is."""
+    items = [
+        f"- {problem['field']}: you transcribed {problem['printed']!r}, which could not be "
+        "read as a value"
+        for problem in result.data["field_problems"]
+    ]
+    items += [
+        f"- on your reading, {flag['relation']} does not hold"
+        for flag in result.data["consistency_flags"]
+    ]
+    return RETRY_INSTRUCTION.format(items="\n".join(items))
+
+
+def reread_page(
+    path: Path,
+    *,
+    kind: str,
+    message: str,
+    dpi: int = DEFAULT_DPI,
+    model: str | None = None,
+    usage: list[dict] | None = None,
+) -> BaseModel:
+    """The one retry: the same page and schema, the kind's instruction plus `message`."""
+    spec = EXTRACTORS[kind]
+    settings = get_settings()
+    model = model or settings.openai_model
+    client = OpenAI(api_key=settings.openai_api_key)
+    return _parse(
+        client,
+        model,
+        rasterise(path, dpi),
+        spec["instruction"] + "\n\n" + message,
+        spec["schema"],
+        IMAGE_DETAIL,
+        usage,
+    )
+
+
+def _burden(result: ToolResult) -> float:
+    if result.status != "ok" or result.data is None:
+        return float("inf")
+    return len(result.data["field_problems"]) + len(result.data["consistency_flags"])
+
+
+def with_retry(
+    first: ToolResult, second: BaseModel, path: Path, *, kind: str, dpi: int, model: str
+) -> ToolResult:
+    """Choose between two readings of one page, and record what the retry changed. Pure.
+
+    The second reading is adopted only if it leaves FEWER problems and failed checks than
+    the first; otherwise the first stands and nothing is marked changed. An adopted reading
+    names every normalised field whose value differs as `changed_on_retry`, and the agent
+    and the page disclose them as less certain. If checks still fail on the reading that
+    stands, it is `inconsistent` - accepted, disclosed, and never retried again.
+    """
+    second_result = build_result(second, path, kind=kind, dpi=dpi, model=model)
+    adopted = _burden(second_result) < _burden(first)
+    final = second_result if adopted else first
+    changed = (
+        [
+            name
+            for name, value in second_result.data["normalised"].items()
+            if first.data["normalised"].get(name) != value
+        ]
+        if adopted
+        else []
+    )
+    data = final.data | {
+        "classification": first.data["classification"],
+        "changed_on_retry": changed,
+        "inconsistent": bool(final.data["consistency_flags"]),
+        "retry": {
+            "retry_hash": RETRY_HASH,
+            "triggered_by": {
+                "field_problems": [p["field"] for p in first.data["field_problems"]],
+                "consistency_flags": [f["relation"] for f in first.data["consistency_flags"]],
+            },
+            "adopted": adopted,
+            "first_normalised": first.data["normalised"],
+            "first_activities": first.data["activities"],
+            "first_field_problems": first.data["field_problems"],
+            "first_consistency_flags": first.data["consistency_flags"],
+        },
+    }
+    note = (
+        f"Re-read once after a failed check; the second reading was used and changed "
+        f"{', '.join(changed) or 'nothing'}"
+        if adopted
+        else "Re-read once after a failed check; the second reading was no better, so the "
+        "first was kept"
+    )
+    if data["inconsistent"]:
+        note += ". The figures still do not all agree, so the reading is marked inconsistent"
+    return ok(data, f"{final.message} {note}.")
 
 
 def _demo(path: str) -> None:  # pragma: no cover - manual verification aid

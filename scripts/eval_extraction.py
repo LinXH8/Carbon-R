@@ -64,6 +64,8 @@ Counts, never bare percentages (CLAUDE.md): "17 of 18" is a claim that can be ch
 
 import argparse
 import dataclasses
+import functools
+import hashlib
 import json
 import subprocess
 import sys
@@ -87,10 +89,15 @@ from carbon_r.tools.extract import (
     EXTRACTORS,
     IMAGE_DETAIL,
     REQUEST_HASH,
+    RETRY_HASH,
     build_result,
     cache_key,
     classify_page,
+    needs_retry,
     read_page,
+    reread_page,
+    retry_message,
+    with_retry,
 )
 from carbon_r.tools.factors import lookup_emission_factor
 
@@ -595,8 +602,101 @@ def load_reading(
     return classification.model_dump(), kind, extracted, False, usage
 
 
+def _score(result, *, key, spec, read_kind, kind_correct, expected_activities, from_key) -> dict:
+    """Score one reading against the key. Called for the first reading and, when a retry
+    ran, for the reading that stands - so the two are scored by the same code."""
+    reading = (
+        KINDS[read_kind].normalised_model.model_validate(result.data["normalised"])
+        if result.status == "ok"
+        else None
+    )
+    verdicts = compare_fields(key, reading, spec) if kind_correct else {}
+    found = result.data.get("activities", []) if result.data else []
+    from_reading = emissions_for(read_activities(found))
+    expected_kg = from_key["kg_co2e"]
+    actual_kg = from_reading["kg_co2e"]
+    return {
+        "reading": reading,
+        "verdicts": verdicts,
+        "activity": compare_activities(expected_activities, found),
+        "actual_kg": actual_kg,
+        "pipeline_exact": (
+            (expected_kg is None and actual_kg is None and from_key["refused"])
+            or (
+                expected_kg is not None
+                and actual_kg is not None
+                and Decimal(expected_kg) == Decimal(actual_kg)
+            )
+        ),
+        "note": from_reading["note"],
+        "substituted": from_reading["substituted"],
+    }
+
+
+BUCKETS = {
+    (False, True): "wrong_to_correct",
+    (True, False): "correct_to_wrong",
+    (False, False): "wrong_to_wrong",
+    (True, True): "correct_to_correct",
+}
+
+
+def retry_buckets(before: dict, after: dict, changed: list[str]) -> dict[str, list[str]]:
+    """Each field the retry changed, by whether it was right before and after, against
+    the key. `correct_to_wrong` is a true value the retry destroyed - the cost the retry
+    rule is most at risk of, and reported first. A changed field the eval does not score
+    (a transaction list, a charge line) is listed as `unscored`, never dropped."""
+    out: dict[str, list[str]] = {name: [] for name in BUCKETS.values()} | {"unscored": []}
+    for name in changed:
+        if name not in before or name not in after:
+            out["unscored"].append(name)
+            continue
+        out[BUCKETS[(before[name]["correct"], after[name]["correct"])]].append(name)
+    return out
+
+
+def load_retry(
+    pdf: Path,
+    doc_id: str,
+    first,
+    *,
+    kind: str,
+    model: str,
+    dpi: int,
+    use_cache: bool,
+    cache_dir: Path,
+):
+    """The retry's reading, from cache when the same retry was asked before.
+
+    Keyed by the first reading's key, the retry wording's hash, and a digest of the exact
+    message - which depends on what the CURRENT normaliser found wrong. A normaliser fix
+    that changes the failures therefore asks a different retry, and misses."""
+    message = retry_message(first)
+    digest = hashlib.sha256(message.encode()).hexdigest()[:8]
+    stem = cache_key(doc_id, model, dpi).removesuffix(".json")
+    path = cache_dir / f"{stem}-retry-{RETRY_HASH}-{digest}.json"
+    if use_cache and path.exists():
+        stored = json.loads(path.read_text())
+        return EXTRACTORS[kind]["schema"].model_validate(stored["printed"]), True, stored["usage"]
+    usage: list[dict] = []
+    second = reread_page(pdf, kind=kind, message=message, dpi=dpi, model=model, usage=usage)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({"message": message, "printed": second.model_dump(), "usage": usage}, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
+    return second, False, usage
+
+
 def evaluate(
-    refs: list[DocRef], *, model: str, dpi: int, use_cache: bool, root: Path = V1_ROOT
+    refs: list[DocRef],
+    *,
+    model: str,
+    dpi: int,
+    use_cache: bool,
+    root: Path = V1_ROOT,
+    retry_enabled: bool = True,
 ) -> dict:
     rows = []
     for ref in refs:
@@ -653,23 +753,47 @@ def evaluate(
             )
             continue
 
-        result = build_result(extracted, pdf, kind=read_kind, dpi=dpi, model=model)
-        reading = (
-            KINDS[read_kind].normalised_model.model_validate(result.data["normalised"])
-            if result.status == "ok"
-            else None
-        )
-
+        first = build_result(extracted, pdf, kind=read_kind, dpi=dpi, model=model)
         # Fields are only comparable when the kind was right: a reading parsed with the
         # wrong schema has no fields in common with the key.
         kind_correct = read_kind == true_kind
-        verdicts = compare_fields(key, reading, spec) if kind_correct else {}
-        found = result.data.get("activities", []) if result.data else []
-        activity = compare_activities(expected_activities, found)
-
-        from_reading = emissions_for(read_activities(found))
-        expected_kg = from_key["kg_co2e"]
-        actual_kg = from_reading["kg_co2e"]
+        score = functools.partial(
+            _score,
+            key=key,
+            spec=spec,
+            read_kind=read_kind,
+            kind_correct=kind_correct,
+            expected_activities=expected_activities,
+            from_key=from_key,
+        )
+        before = score(first)
+        result, after, retry = first, before, None
+        if retry_enabled and needs_retry(first):
+            second, retry_cached, retry_usage = load_retry(
+                pdf,
+                doc_id,
+                first,
+                kind=read_kind,
+                model=model,
+                dpi=dpi,
+                use_cache=use_cache,
+                cache_dir=reply_cache(root),
+            )
+            result = with_retry(first, second, pdf, kind=read_kind, dpi=dpi, model=model)
+            after = score(result)
+            retry = {
+                "cached": retry_cached,
+                "usage": retry_usage,
+                "adopted": result.data["retry"]["adopted"],
+                "changed_on_retry": result.data["changed_on_retry"],
+                "buckets": retry_buckets(
+                    before["verdicts"], after["verdicts"], result.data["changed_on_retry"]
+                ),
+                "activity_before": before["activity"]["correct"],
+                "activity_after": after["activity"]["correct"],
+                "pipeline_before": before["pipeline_exact"],
+                "pipeline_after": after["pipeline_exact"],
+            }
 
         rows.append(
             {
@@ -682,33 +806,37 @@ def evaluate(
                 "read_kind": read_kind,
                 "kind_correct": kind_correct,
                 "classification": classification,
-                "fields": verdicts,
-                "fields_correct": sum(v["correct"] for v in verdicts.values()),
-                "fields_scored": len(verdicts),
-                "activity": activity,
+                "fields": after["verdicts"],
+                "fields_correct": sum(v["correct"] for v in after["verdicts"].values()),
+                "fields_scored": len(after["verdicts"]),
+                "activity": after["activity"],
                 "field_problems": result.data.get("field_problems", []) if result.data else [],
                 "consistency_flags": (
                     result.data.get("consistency_flags", []) if result.data else []
                 ),
-                "expected_kg_co2e": expected_kg,
-                "actual_kg_co2e": actual_kg,
+                "inconsistent": bool(result.data and result.data.get("inconsistent")),
+                "expected_kg_co2e": from_key["kg_co2e"],
+                "actual_kg_co2e": after["actual_kg"],
                 # When the key itself cannot be costed - no factor published for the
                 # activity year - the honest result is no figure, and matching that is a
                 # pass rather than a miss.
                 "expected_refusal": from_key["refused"],
-                "pipeline_exact": (
-                    (expected_kg is None and actual_kg is None and from_key["refused"])
-                    or (
-                        expected_kg is not None
-                        and actual_kg is not None
-                        and Decimal(expected_kg) == Decimal(actual_kg)
-                    )
-                ),
-                "pipeline_note": from_reading["note"],
-                "factor_substituted": from_reading["substituted"],
+                "pipeline_exact": after["pipeline_exact"],
+                "pipeline_note": after["note"],
+                "factor_substituted": after["substituted"],
                 "factor_year_expected": key.factor_year,
-                "factor_year_read": reading.factor_year if reading else None,
+                "factor_year_read": after["reading"].factor_year if after["reading"] else None,
                 "model_notes": getattr(extracted, "notes", None),
+                # The same document scored on the first reading alone, so "with retry" and
+                # "without retry" come from one run and differ only by the retry.
+                "without_retry": {
+                    "fields": before["verdicts"],
+                    "fields_correct": sum(v["correct"] for v in before["verdicts"].values()),
+                    "fields_scored": len(before["verdicts"]),
+                    "activity_correct": before["activity"]["correct"],
+                    "pipeline_exact": before["pipeline_exact"],
+                },
+                "retry": retry,
             }
         )
     return {
@@ -722,6 +850,7 @@ def evaluate(
             "dpi": dpi,
             "image_detail": IMAGE_DETAIL,
             "request_hash": REQUEST_HASH,
+            "retry_hash": RETRY_HASH if retry_enabled else None,
             "cache_enabled": use_cache,
         },
         "document_count": len(rows),
@@ -776,14 +905,65 @@ def summarise(rows: list[dict]) -> dict:
         "small_n_below": SMALL_N,
         "by_tier": by_tier,
         "by_quirk": by_quirk,
-        "tokens_this_run": tokens(r for r in rows if not r["cached"]),
+        "tokens_this_run": tokens(rows),
+        "without_retry": {
+            kind: _without_retry_cell([r for r in rows if r["true_kind"] == kind])
+            for kind in KINDS
+            if any(r["true_kind"] == kind for r in rows)
+        },
+        "retry": retry_summary(rows),
+    }
+
+
+def _without_retry_cell(rows: list[dict]) -> dict:
+    """The kind's headline counts from the first readings alone."""
+    first = [r.get("without_retry") or {} for r in rows]
+    return {
+        "documents": len(rows),
+        "every_field": sum(
+            f.get("fields_scored", 0) > 0 and f["fields_correct"] == f["fields_scored"]
+            for f in first
+        ),
+        "activity": sum(bool(f.get("activity_correct")) for f in first),
+        "pipeline": sum(bool(f.get("pipeline_exact")) for f in first),
+    }
+
+
+def retry_summary(rows: list[dict]) -> dict:
+    retried = [r for r in rows if r.get("retry")]
+    totals = {name: 0 for name in [*BUCKETS.values(), "unscored"]}
+    for row in retried:
+        for name, fields in row["retry"]["buckets"].items():
+            totals[name] += len(fields)
+    return {
+        "triggered": len(retried),
+        "adopted": sum(r["retry"]["adopted"] for r in retried),
+        "changed_a_value": sum(bool(r["retry"]["changed_on_retry"]) for r in retried),
+        "field_buckets": totals,
+        "activity_correct_to_wrong": sum(
+            r["retry"]["activity_before"] and not r["retry"]["activity_after"] for r in retried
+        ),
+        "activity_wrong_to_correct": sum(
+            not r["retry"]["activity_before"] and r["retry"]["activity_after"] for r in retried
+        ),
+        "pipeline_correct_to_wrong": sum(
+            r["retry"]["pipeline_before"] and not r["retry"]["pipeline_after"] for r in retried
+        ),
+        "still_inconsistent": sum(r.get("inconsistent", False) for r in retried),
+        "documents": {r["doc_id"]: r["retry"]["buckets"] for r in retried},
     }
 
 
 def tokens(rows) -> dict:
-    """Token totals over the given rows' recorded calls. Run on the FRESH rows only, it is
-    what this run cost; cached rows cost nothing now."""
-    calls = [u for r in rows for u in (r.get("usage") or [])]
+    """What this run cost: the recorded calls of fresh first readings and fresh retries.
+    A cached reading or retry costs nothing now, so it is not counted."""
+    calls = [u for r in rows if not r["cached"] for u in (r.get("usage") or [])]
+    calls += [
+        u
+        for r in rows
+        if r.get("retry") and not r["retry"]["cached"]
+        for u in (r["retry"]["usage"] or [])
+    ]
     return {
         "calls": len(calls),
         "input_tokens": sum(u.get("input_tokens", 0) for u in calls),
@@ -808,6 +988,41 @@ def _print_table(title: str, table: dict[str, dict[str, dict]]) -> None:
         print(line)
 
 
+def _print_retry(summary: dict, rows: list[dict]) -> None:
+    retry = summary.get("retry")
+    if not retry or not retry["triggered"]:
+        print("\nRetry: none triggered")
+        return
+    b = retry["field_buckets"]
+    print(
+        f"\nRetry: {retry['triggered']} triggered, {retry['adopted']} adopted, "
+        f"{retry['changed_a_value']} changed a value, "
+        f"{retry['still_inconsistent']} still inconsistent"
+    )
+    # correct->wrong first: a true value the retry destroyed is the cost that matters.
+    marker = "   <- TRUE VALUES OVERWRITTEN" if b["correct_to_wrong"] else ""
+    print(f"  fields correct -> wrong   {b['correct_to_wrong']:3}{marker}")
+    print(f"  fields wrong -> correct   {b['wrong_to_correct']:3}")
+    print(f"  fields wrong -> wrong     {b['wrong_to_wrong']:3}")
+    print(f"  changed, not scored       {b['unscored']:3}  (transaction rows, charge lines)")
+    print(
+        f"  activity correct -> wrong {retry['activity_correct_to_wrong']:3}   "
+        f"wrong -> correct {retry['activity_wrong_to_correct']}   "
+        f"pipeline correct -> wrong {retry['pipeline_correct_to_wrong']}"
+    )
+    for doc_id, buckets in retry["documents"].items():
+        named = "; ".join(f"{k} {', '.join(v)}" for k, v in buckets.items() if v)
+        print(f"  {doc_id}: {named or 'no change adopted'}")
+    print("\nWithout retry vs with retry (every field / activity / pipeline)")
+    for kind, cell in summary["without_retry"].items():
+        in_kind = [r for r in rows if r["true_kind"] == kind]
+        now = _cell(in_kind)
+        print(
+            f"  {kind:22} {cell['every_field']} / {cell['activity']} / {cell['pipeline']}  ->  "
+            f"{now['every_field']} / {now['activity']} / {now['pipeline']}  of {cell['documents']}"
+        )
+
+
 def report(run: dict) -> int:
     rows = run["documents"]
     total = len(rows)
@@ -830,6 +1045,13 @@ def report(run: dict) -> int:
         print(f"  MIXED RUN: {cached} cached, {fresh} fresh - not a clean measurement")
     else:
         print(f"  {cached} cached, {fresh} fresh")
+    retried = [r for r in rows if r.get("retry")]
+    if retried:
+        fresh_retries = sum(not r["retry"]["cached"] for r in retried)
+        print(
+            f"  retries {run['request'].get('retry_hash')}: "
+            f"{len(retried) - fresh_retries} cached, {fresh_retries} fresh"
+        )
 
     kind_correct = sum(r["kind_correct"] for r in rows)
     activity_correct = sum(r["activity"]["correct"] for r in rows)
@@ -913,6 +1135,8 @@ def report(run: dict) -> int:
     summary = run.get("summary") or summarise(rows)
     _print_table("Per tier", summary["by_tier"])
     _print_table("Per quirk", summary["by_quirk"])
+    _print_retry(summary, rows)
+
     if run.get("factor_lookup_retries"):
         print(
             f"\nFactor lookups retried after a database error: {len(run['factor_lookup_retries'])}"
@@ -961,6 +1185,11 @@ def main() -> int:
         action="store_true",
         help="call the model again for every document, to measure run-to-run variation",
     )
+    parser.add_argument(
+        "--no-retry",
+        action="store_true",
+        help="score the first reading only (the 'without retry' figures are in every run)",
+    )
     args = parser.parse_args()
 
     settings = get_settings()
@@ -982,7 +1211,14 @@ def main() -> int:
         print("No documents selected.", file=sys.stderr)
         return 2
 
-    run = evaluate(refs, model=model, dpi=args.dpi, use_cache=not args.no_cache, root=root)
+    run = evaluate(
+        refs,
+        model=model,
+        dpi=args.dpi,
+        use_cache=not args.no_cache,
+        root=root,
+        retry_enabled=not args.no_retry,
+    )
     return report(run)
 
 
