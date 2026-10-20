@@ -415,3 +415,8 @@ def test_a_credit_for_a_charge_is_not_taken_as_the_charge():
     ]
     invoice, _ = normalise_lpg(reading(lines=lines))
     assert invoice.delivery_charge_sgd == Decimal("10.00")
+
+
+def test_an_inline_uen_label_is_dropped_on_lpg_too():
+    invoice, _ = normalise_lpg(reading(vendor_uen="UEN SYN-0000-0002"))
+    assert invoice.vendor_uen == "SYN-0000-0002"

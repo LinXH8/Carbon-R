@@ -364,3 +364,17 @@ def test_the_discount_relation_holds_whichever_way_the_page_printed_the_sign():
     for printed in ("−6.21", "6.21"):
         normalised, _ = normalise_fuel(reading(discount_amount=printed))
         assert check_consistency_fuel(normalised) == []
+
+
+@pytest.mark.parametrize(
+    ("printed", "expected"),
+    [
+        ("UEN SYN-0000-0003", "SYN-0000-0003"),  # Block 3 B6: label in the same text run
+        ("UEN: SYN-0000-0003", "SYN-0000-0003"),
+        ("SYN-0000-0003", "SYN-0000-0003"),
+        ("UEN", "UEN"),  # a label alone is not a UEN; never a confidently empty field
+    ],
+)
+def test_an_inline_uen_label_is_dropped(printed, expected):
+    statement, _ = normalise_fuel(reading(vendor_uen=printed))
+    assert statement.vendor_uen == expected

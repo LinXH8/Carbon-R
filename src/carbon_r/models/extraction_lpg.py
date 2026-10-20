@@ -42,6 +42,7 @@ from carbon_r.models.parsing import (
     parse_int,
     taker,
     text_of,
+    without_inline_label,
 )
 from carbon_r.money import round2
 
@@ -363,7 +364,6 @@ def normalise_lpg(
 
     for field in (
         "vendor_name",
-        "vendor_uen",
         "customer_name",
         "customer_address",
         "account_number",
@@ -371,6 +371,8 @@ def normalise_lpg(
         "currency",
     ):
         take(field, field, text_of)
+    # The UEN shares a text run with its label on some layouts (Block 3, B6).
+    take("vendor_uen", "vendor_uen", lambda printed: without_inline_label(printed, ("uen",)))
 
     for field in ("document_date", "period_start", "period_end"):
         take(field, field, parse_date)

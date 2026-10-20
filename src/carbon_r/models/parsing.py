@@ -190,6 +190,41 @@ def text_of(printed: object) -> str:
     return str(printed).strip()
 
 
+# A label must be followed by one of these before it counts as a label. Hyphen is NOT
+# included: "UEN-123456" is more plausibly a value than a labelled one, and treating the
+# hyphen as a separator would silently truncate it.
+_LABEL_SEPARATORS = " :·\t–—"
+
+
+def without_inline_label(printed: str, labels: tuple[str, ...]) -> str:
+    """Drop a leading field label the layout did not separate from its value.
+
+    Layouts print "UEN SYN-0000-0001 · <address>" as one text run, so a faithful
+    transcription begins with the label. Stripping it is reading the page correctly, not
+    correcting the model. Shared by all three kinds since Block 3 B6; it lived in the
+    electricity module, and LPG and fuel readings kept the "UEN " prefix.
+
+    The label must be followed by a separator, or it is not a label: without that check
+    "UENITED-1234" becomes "ITED-1234" - a mangled value presented with confidence. That
+    was caught by a test written alongside this function, which is the only reason the
+    narrower rule is here.
+    """
+    text = printed.strip()
+    for label in labels:
+        lowered = text.lower()
+        if not lowered.startswith(label):
+            continue
+        rest = text[len(label) :]
+        if not rest or rest[0] not in _LABEL_SEPARATORS:
+            continue
+        remainder = rest.lstrip(_LABEL_SEPARATORS)
+        # Only when something is actually left: "UEN" alone is not a UEN, and returning
+        # "" would turn a bad read into a confidently empty field.
+        if remainder:
+            return remainder
+    return text
+
+
 def taker(source: object, values: dict, problems: list[FieldProblem]):
     """Build the `take(target, field, parser)` helper each kind's `normalise` uses.
 

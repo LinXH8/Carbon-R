@@ -51,6 +51,7 @@ from carbon_r.models.parsing import (
     parse_reading_basis,
     taker,
     text_of,
+    without_inline_label,
 )
 from carbon_r.money import round2
 from carbon_r.prorate import days_by_year, split_by_year
@@ -186,34 +187,9 @@ _INLINE_LABELS = {
 }
 
 
-# A label must be followed by one of these before it counts as a label. Hyphen is NOT
-# included: "UEN-123456" is more plausibly a value than a labelled one, and treating the
-# hyphen as a separator would silently truncate it.
-_LABEL_SEPARATORS = " :·\t–—"
-
-
 def _without_inline_label(printed: str, field: str) -> str:
-    """Drop a leading field label the layout did not separate from its value.
-
-    The label must be followed by a separator, or it is not a label: without that check
-    "UENITED-1234" becomes "ITED-1234" - a mangled value presented with confidence. That
-    was caught by a test written alongside this function, which is the only reason the
-    narrower rule is here.
-    """
-    text = printed.strip()
-    for label in _INLINE_LABELS.get(field, ()):
-        lowered = text.lower()
-        if not lowered.startswith(label):
-            continue
-        rest = text[len(label) :]
-        if not rest or rest[0] not in _LABEL_SEPARATORS:
-            continue
-        remainder = rest.lstrip(_LABEL_SEPARATORS)
-        # Only when something is actually left: "UEN" alone is not a UEN, and returning
-        # "" would turn a bad read into a confidently empty field.
-        if remainder:
-            return remainder
-    return text
+    """Drop a leading field label the layout did not separate from its value."""
+    return without_inline_label(printed, _INLINE_LABELS.get(field, ()))
 
 
 def _split_plan_line(printed: str) -> tuple[str, str | None]:
