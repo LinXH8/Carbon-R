@@ -448,6 +448,13 @@ re-scored from the reply cache so that each change's effect is isolated:
 
 The holdout is scored once, separately, only after these.
 
+> **What happened next** (recorded in [TIER2_BLOCK3.md](TIER2_BLOCK3.md)): all five were
+> done in this order, one commit each, re-scored from the reply cache with no new model
+> calls. Field failures went 125 → 77 → 52 → 32 → 29; each normaliser fix removed exactly
+> the number it was predicted to (48, 25, 20, 3). The pipeline stayed at 166 of 166
+> throughout. The holdout was then scored once: pipeline 32 of 32, with two label gaps the
+> tuned layouts never showed.
+
 ## Known limits of this set
 
 - **Hard LPG and fuel are harder to read, not to interpret**, and their per-quirk results

@@ -377,8 +377,13 @@ once the eval harness reports per-quirk accuracy.
 >   restating the prior period is not modelled.
 > - **Implemented:** `estimated_reading`, `cross_month_period`, `cross_year_period`,
 >   `unit_mwh`, `lpg_cylinders`, `mixed_fuel`, `credit_adjustment`, `balance_forward`,
->   `gst_confusion`. **Deferred:** `missing_month` (Block 3 scenarios), `usd_invoice`
+>   `gst_confusion`. **Deferred at Block 2:** `missing_month` (Block 3 scenarios), `usd_invoice`
 >   (needs FX, Tier 3), `multiple_premises` (needs a two-meter schema), `ct_multiplier`.
+> - **Since Tier 2 Block 3:** `missing_month` exists as a property of a company-year
+>   scenario's document set, not as a page quirk, and `usd_invoice` exists as an LPG page in
+>   the scenarios, priced from its own USD list and never converted (conversion needs
+>   `convert_currency`, Tier 3). `multiple_premises` and `ct_multiplier` remain unbuilt. What
+>   each looks like is in QUIRKS.md.
 
 ### 5.2 Printed vs true values
 

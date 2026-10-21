@@ -3,9 +3,11 @@
 Upload a utility bill or fuel invoice, get a greenhouse-gas figure that carries its own
 receipts: the emission factor used, its unit, publisher, year, and the document it came from.
 
-**Status:** Tier 2, Block 1 complete — usable end to end in the browser. Upload an
+**Status:** Tier 2, Block 3 complete — usable end to end in the browser. Upload an
 electricity bill, an LPG invoice or a vehicle fuel-card statement and get a cited Scope 1
-or Scope 2 figure, with every line of the derivation shown.
+or Scope 2 figure, with every line of the derivation shown. The test set is 198 synthetic
+documents over four layouts and three difficulty tiers, one layout held out; results are
+under [What the evals measure](#what-the-evals-measure).
 
 ## The one design rule worth stating up front
 
@@ -15,13 +17,25 @@ by exact SQL. A model that is asked to multiply will sometimes produce a plausib
 number with no way to audit it; a model that is asked only to extract and to choose can be
 measured, and its mistakes show up in an eval instead of in a disclosure.
 
-See [CLAUDE.md](CLAUDE.md) for the full set of rules this repo holds itself to,
-[SOURCES.md](SOURCES.md) for every dataset's provenance and verification status,
-[SYNTHGEN_V0.md](SYNTHGEN_V0.md) for how the synthetic test documents are generated,
-[TIER1_BLOCK3.md](TIER1_BLOCK3.md) for the extraction/calculation design and its measured
-results, [TIER1_BLOCK4.md](TIER1_BLOCK4.md) for the agent loop and the API, and
-[TIER2_BLOCK1.md](TIER2_BLOCK1.md) for Scope 1 — the two new document kinds, the DESNZ
-factors, and the four defects the first eval run found.
+[CLAUDE.md](CLAUDE.md) holds the full set of rules this repo holds itself to, and
+[SOURCES.md](SOURCES.md) every dataset's provenance and verification status.
+
+The per-block records are written for someone who was not there — the decisions and their
+reasons, the defects and what caught them, and the evidence behind every number:
+
+| | |
+|---|---|
+| [TIER1_BLOCK3.md](TIER1_BLOCK3.md) | extraction, factor lookup, the deterministic calculation |
+| [TIER1_BLOCK4.md](TIER1_BLOCK4.md) | the agent loop and the API |
+| [TIER1_BLOCK5.md](TIER1_BLOCK5.md) | the page, streamed tool calls, Tier 1 sign-off |
+| [TIER2_BLOCK1.md](TIER2_BLOCK1.md) | Scope 1: two new document kinds, the DESNZ factors, and the four defects the first eval run found |
+| [TIER2_BLOCK2.md](TIER2_BLOCK2.md) | four layouts per kind, the quirk catalogue, difficulty tiers, and the first baseline on 166 documents |
+| [TIER2_BLOCK3.md](TIER2_BLOCK3.md) | the eval harness: per-tier and per-quirk tables, four normaliser fixes, the scoped retry, the company-year scenarios, and the holdout scored last |
+| [QUIRKS.md](QUIRKS.md) | what each quirk looks like on the page and what it tests, per generator version |
+| [SYNTHGEN_SPEC.md](SYNTHGEN_SPEC.md) | the generator's specification and its open VERIFY items |
+
+[SYNTHGEN_V0.md](SYNTHGEN_V0.md) describes the **superseded v0** generator — 18 bills, one
+layout — and is kept for the record rather than as a current description.
 
 ## What works today, and what it measures
 
@@ -29,9 +43,14 @@ Three tools, each returning `{status, data, message}`:
 
 | Tool | What it does |
 |---|---|
-| `extract_from_document` | Establishes what kind of document a page is, then has a vision model transcribe what is printed and returns the measurable activities it carries. It is never asked for a derived figure. A kind it cannot establish is refused, not guessed. |
+| `extract_from_document` | Establishes what kind of document a page is, then has a vision model transcribe what is printed and returns the measurable activities it carries. It is never asked for a derived figure. A kind it cannot establish is refused, not guessed. When a printed figure fails a consistency check, it retries **once**, with the error and without the answer, and takes back only the fields that check reads. |
 | `lookup_emission_factor` | Exact SQL (`category`, `unit`, `year`), never similarity search. Returns the factor with publisher, source document, page, scope, method, gas basis and retrieval date. |
 | `calculate_emissions` | Plain Python. Takes a list of (activity, factor) pairs and returns each line and the total, with every input used, the derivation written out, and structured disclosure flags. |
+
+Rolling a year of documents up into a company total, and allocating a share of it to one
+customer, are **plain Python in `tools/company_year.py`** (`roll_up`, `allocate`). They are
+not agent tools yet — exposing them is a Tier 3 item — but the company-year scenarios are
+scored through them, so the arithmetic they do is measured.
 
 ### Three document kinds, two scopes
 
@@ -41,28 +60,25 @@ Three tools, each returning `{status, data, message}`:
 | LPG invoice | kg of gas, computed from the cylinder lines | DESNZ, per tonne | 1, combustion |
 | Fuel-card statement | litres **per product** | DESNZ, per litre, diesel and petrol separately | 1, combustion |
 
-Measured by `make eval` on **36 synthetic documents** in the `clean` tier — 18 bills, 12
-LPG invoices, 6 fuel-card statements — in two independent fresh runs with identical
-results:
+Every measured result lives in one place — [What the evals
+measure](#what-the-evals-measure) — so there is no second set of counts to quote by
+accident. In short: on the 166 non-holdout documents of the v1 set, **every emissions
+figure is exact on every tier and every quirk (166 of 166)**, and the field-level numbers
+are lower and mostly limited by Python normalisation rather than by the model. The held-out
+layout was scored once, last.
 
-| | Count |
-|---|---|
-| Document kind identified correctly | **36 of 36** |
-| Activities recovered, in the right units | **36 of 36** |
-| Every scored field correct — electricity bills, 24 fields | **18 of 18** |
-| Every scored field correct — LPG invoices, 18 fields | **12 of 12** |
-| Every scored field correct — fuel-card statements, 17 fields | **6 of 6** |
-| End-to-end kgCO₂e matching the answer key | **36 of 36** |
+Two behaviours those counts depend on are worth stating here, because both are cases where
+the honest output is *no* figure:
 
-Two of those counts are worth reading twice. **9 of 36** documents exercise the
-factor-year substitution, which is stated on the result rather than applied silently. And
-**1 of 36** is an *expected refusal*: an LPG invoice whose supply period is 2024, for which
-no DESNZ factor is published at or before that year. Producing no figure is the correct
-outcome there, and the eval scores it as a pass — a harness that counted it as a miss would
-be rewarding a guess.
+- **A factor that is not published is a refusal, not a substitution.** Where no factor
+  exists at or before a document's activity year, the tool returns `no_results` and the
+  agent says which years the table does hold. An eval that counted that as a miss would be
+  rewarding a guess, so it is scored as a pass.
+- **A kind that cannot be established is a refusal too.** A file that is not one of the
+  three kinds, or holds two at once, is reported and asked about rather than read under a
+  guessed schema.
 
-What these figures do **not** cover is set out under [Limitations](#limitations) — one
-layout per kind, crisp synthetic PDFs, and a small sample.
+What these figures do **not** cover is set out under [Limitations](#limitations).
 
 ### The agent that drives them
 
@@ -92,6 +108,162 @@ The same property holds all the way to the screen: `/chat` returns the structure
 each `calculate_emissions` alongside the prose, and the page renders the figure from that.
 A number a user reads has come from the Python that computed it, not from the model's
 transcription of it.
+
+## What the evals measure
+
+### Reproducing the test set
+
+The documents are not committed; the generator and its seed are, so the set can be rebuilt
+bit-for-bit at the answer-key level:
+
+- **seed** `20261016`, recorded in each kind's `manifest.json`;
+- **generators** `synthgen-electricity-3`, `synthgen-lpg-2`, `synthgen-fuel-card-2`;
+- **output** `data/generated/synthgen_v1/<kind>/<clean|moderate|hard>/`, each document a
+  page (`.pdf`, or `.png` for a scanned or photographed one) beside its JSON answer key.
+
+synthgen v1 holds **198 documents**: 93 electricity bills, 51 LPG invoices and 54 fuel-card
+statements, over four layouts per kind and three difficulty tiers. Layout `d` of each kind
+is **held out**: never looked at while tuning, and excluded from `make eval` by default.
+Every injected quirk appears on at least 15 non-holdout documents per kind; `make
+docs-plan` prints the table. Arithmetic closes to the cent on all 198. Determinism is
+asserted on the JSON keys and the HTML; PDF bytes carry a WeasyPrint timestamp and are not
+compared.
+
+What each quirk looks like on the page, and what it tests, is described per version in
+[QUIRKS.md](QUIRKS.md).
+
+### The synthgen v1 baseline
+
+One fresh run on the 166 non-holdout documents, at commit `719b840` (clean tree), model
+`gpt-5.4-mini-2026-03-17`, request `1788ce3e`, 20 Oct 2026:
+
+| Measure | Result |
+|---|---|
+| Document kind correct | 166 of 166 |
+| Activity recovered (kind, amount, unit **and year**) | 166 of 166 |
+| **Pipeline kgCO2e exact** | **166 of 166**: clean 69 of 69 · moderate 48 of 48 · hard 49 of 49 |
+| Every field correct, electricity | 57 of 82 (29 of 29 clean · 20 of 26 moderate · 8 of 27 hard) |
+| Every field correct, fuel card | 27 of 42 (14 of 18 · 11 of 12 · 2 of 12) |
+| Every field correct, LPG | 0 of 42 (two normaliser defects; see below) |
+
+Every emissions figure was right on every tier and every quirk, including 15 bills split
+across 31 December, 24 printed in MWh, and every credit, balance forward and GST-inclusive
+headline. **The field-level numbers are lower, and mostly not because of the model.**
+Of the 125 failing fields:
+- 96 trace to Python normalisation: MWh meter readings not converted; an LPG charge row
+  dropped when its quantity is a word; the rental row's label not recognised; an inline
+  "UEN" label not stripped;
+- 8 trace to two layouts that print two fields under one label;
+- 3 are the model "correcting" an odd-looking identifier;
+- 18 are genuine misreads, 15 of them on phone-photo pages.
+
+The credit column needs a caveat. The eval itself had a defect: it compared against a field
+name the answer key does not use. The figures above re-score that column from the same
+recorded replies against the right field (165 of 166), with no new model calls; the run as
+printed, defect included, is kept in [TIER2_BLOCK2.md](TIER2_BLOCK2.md).
+
+**What this did not measure.**
+- It is one run, so run-to-run variation is unmeasured.
+- The held-out layout was not part of it. It was scored once, after Block 3's fixes;
+  see below.
+- The documents are synthetic.
+
+### After Tier 2 Block 3: the eval fixed, the normaliser fixed, the holdout scored
+
+Details, commits and evidence: [TIER2_BLOCK3.md](TIER2_BLOCK3.md). Every figure below is a
+count from a recorded run.
+
+**The same 166 replies, re-scored after each fix** (0 model calls; commit `eb4b86a`):
+
+| Measure | Baseline | Now |
+|---|---|---|
+| Pipeline kgCO2e exact | 166 of 166 | 166 of 166 |
+| Every field correct, electricity | 57 of 82 | **80 of 82** |
+| Every field correct, LPG | 0 of 42 | **40 of 42** |
+| Every field correct, fuel card | 27 of 42 | **28 of 42** |
+| Field failures | 125 | **29** |
+
+The eval's credit-column defect was fixed first. Then four normaliser changes, one per
+commit, removed exactly the number of failures each was predicted to: 48, 25, 20 and 3.
+The 29 that remain:
+- 18 genuine misreads, 15 of them on phone photos;
+- 8 where a layout prints two fields under one label;
+- 3 where the model "corrects" an odd identifier.
+
+**One retry, with the error and never the answer.** When a field will not parse or the
+page's arithmetic does not close, the page is read once more. The model is told which
+check failed, never which value is expected.
+
+The first version took the whole second reading, and overwrote **3 correct fields while
+fixing 0**. It now takes only the fields the failed check reads: **0 correct → wrong**.
+Counts so far:
+- on the tuned set, 2 unscored values corrected, both checked against the key by hand;
+- on the holdout, 1 scored field corrected (wrong → correct).
+
+That is five triggers in all: a small sample.
+
+**The held-out layout, scored once, last** (32 documents, fresh):
+- document kind, activity and **pipeline kgCO2e: 32 of 32**;
+- every field: electricity 0 of 11, LPG 7 of 9, fuel 5 of 12.
+
+24 of the 26 field failures come from two labels that layout `d` prints and the normaliser,
+tuned on layouts a–c, did not know: "Registration" for the UEN, and "Low Tension supply".
+That is overfitting, which is what a holdout is there to show. It is recorded, not fixed.
+
+**Company-year scenarios.** 21 scenarios run at calculation level:
+- one fictional business's year, Makan Mates, with 15 variations;
+- five other businesses.
+
+Each scenario's truth activities go through factor lookup, calculation, a year roll-up and
+a revenue-share allocation. The results are checked against an independent exact-rational
+route and against the honesty facts each scenario defines. **21 of 21 pass all ten
+checks:**
+- Scope 1, Scope 2 and the allocation are exact;
+- gaps are listed exactly;
+- estimated readings are listed;
+- documents with no published factor are named;
+- factor-year substitutions are disclosed;
+- days outside the year are listed, not counted;
+- USD invoices are listed and not converted;
+- a scope with no document has no figure rather than 0.
+
+Tests show this check fails a roll-up that hides gaps, drops exclusions or counts a
+neighbouring year.
+
+| Makan Mates 2025 | kg CO2e |
+|---|---|
+| Scope 1 (LPG 7.7 t, diesel 3,775.19 L; DESNZ 2025, non-Singapore) | 32,680.936 |
+| Scope 2 (99,740 kWh; EMA 2024 factor, substituted and disclosed; location-based) | 40,095.480 |
+| Allocated to one buyer (Scope 1 + 2 × 720,000 / 2,400,000 revenue; an assumption) | 21,832.925 |
+
+These are computed from the activities and the verified factors in the database. They are
+not the 30.1 / 39.4 / 21 t of the project's illustrative context.
+
+**End to end, three scenarios through extraction** (107 documents):
+- activity and pipeline: 107 of 107;
+- the year's figures equal the calculation level in all three;
+- the March gap and the two estimated readings were flagged **from what was read**.
+
+The scenarios are synthetic, and each was run once.
+
+`make flow-block2` passed 4 of 4 on all six checks. That includes a bill across 31 Dec 2023
+that the agent split into two lines with two EMA factors (0.412 and 0.402), each cited.
+
+The flow checks are flow checks, not measurements: a handful of documents asked one
+question cannot measure accuracy, and the script says so on every line it prints. They
+check that the loop finishes, that its figure equals the answer key's, that every factor is
+cited, that the disclosures are stated, that no number appears which no tool produced, and
+that a document with no published factor is refused rather than guessed.
+
+`make flow-scope1`, on the Block 1 set, is **4 of 4 on all six checks** across the three
+kinds, 15 turns, with one unit conversion, one two-line total and one honest refusal.
+`make eval` over the 166 non-holdout v1 documents remains the measured number; the flow
+checks only show the whole path runs.
+
+`make eval` caches each model reply, keyed on the document, model, DPI and a hash of the
+prompt *and* the response schema. A cache hit skips only the model call — every step after
+it re-runs against current code, so a fix can be re-measured against the same replies at no
+API cost. Changing the prompt or the schema misses the cache by construction.
 
 ## Running it
 
@@ -181,160 +353,8 @@ make agent-smoke  # end-to-end flow check of /upload + /chat on 5 Block 1 bills
 make flow-10      # the same flow on 10 Block 1 bills spanning both factor years
 make flow-scope1  # one Block 1 document of each kind, including a refusal
 make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forward, a photo
-make check        # ruff + the full test suite (585 tests)
+make check        # ruff + the full test suite (585 tests, 1 skipped)
 ```
-
-### Reproducing the test set
-
-The documents are not committed; the generator and its seed are, so the set can be rebuilt
-bit-for-bit at the answer-key level:
-
-- **seed** `20261016`, recorded in each kind's `manifest.json`;
-- **generators** `synthgen-electricity-3`, `synthgen-lpg-2`, `synthgen-fuel-card-2`;
-- **output** `data/generated/synthgen_v1/<kind>/<clean|moderate|hard>/`, each document a
-  page (`.pdf`, or `.png` for a scanned or photographed one) beside its JSON answer key.
-
-synthgen v1 holds **198 documents**: 93 electricity bills, 51 LPG invoices and 54 fuel-card
-statements, over four layouts per kind and three difficulty tiers. Layout `d` of each kind
-is **held out**: never looked at while tuning, and excluded from `make eval` by default.
-Every injected quirk appears on at least 15 non-holdout documents per kind; `make
-docs-plan` prints the table. Arithmetic closes to the cent on all 198. Determinism is
-asserted on the JSON keys and the HTML; PDF bytes carry a WeasyPrint timestamp and are not
-compared.
-
-What each quirk looks like on the page, and what it tests, is described per version in
-[QUIRKS.md](QUIRKS.md).
-
-#### The synthgen v1 baseline
-
-One fresh run on the 166 non-holdout documents, at commit `719b840` (clean tree), model
-`gpt-5.4-mini-2026-03-17`, request `1788ce3e`, 20 Oct 2026:
-
-| Measure | Result |
-|---|---|
-| Document kind correct | 166 of 166 |
-| Activity recovered (kind, amount, unit **and year**) | 166 of 166 |
-| **Pipeline kgCO2e exact** | **166 of 166**: clean 69 of 69 · moderate 48 of 48 · hard 49 of 49 |
-| Every field correct, electricity | 57 of 82 (29 of 29 clean · 20 of 26 moderate · 8 of 27 hard) |
-| Every field correct, fuel card | 27 of 42 (14 of 18 · 11 of 12 · 2 of 12) |
-| Every field correct, LPG | 0 of 42 (two normaliser defects; see below) |
-
-Every emissions figure was right on every tier and every quirk, including 15 bills split
-across 31 December, 24 printed in MWh, and every credit, balance forward and GST-inclusive
-headline. **The field-level numbers are lower, and mostly not because of the model.**
-Of the 125 failing fields:
-- 96 trace to Python normalisation: MWh meter readings not converted; an LPG charge row
-  dropped when its quantity is a word; the rental row's label not recognised; an inline
-  "UEN" label not stripped;
-- 8 trace to two layouts that print two fields under one label;
-- 3 are the model "correcting" an odd-looking identifier;
-- 18 are genuine misreads, 15 of them on phone-photo pages.
-
-The credit column needs a caveat. The eval itself had a defect: it compared against a field
-name the answer key does not use. The figures above re-score that column from the same
-recorded replies against the right field (165 of 166), with no new model calls; the run as
-printed, defect included, is kept in [TIER2_BLOCK2.md](TIER2_BLOCK2.md).
-
-**What this does not measure.**
-- It is one run, so run-to-run variation is unmeasured.
-- The held-out layout has not been scored.
-- The documents are synthetic.
-
-#### After Tier 2 Block 3: the eval fixed, the normaliser fixed, the holdout scored
-
-Details, commits and evidence: [TIER2_BLOCK3.md](TIER2_BLOCK3.md). Every figure below is a
-count from a recorded run.
-
-**The same 166 replies, re-scored after each fix** (0 model calls; commit `eb4b86a`):
-
-| Measure | Baseline | Now |
-|---|---|---|
-| Pipeline kgCO2e exact | 166 of 166 | 166 of 166 |
-| Every field correct, electricity | 57 of 82 | **80 of 82** |
-| Every field correct, LPG | 0 of 42 | **40 of 42** |
-| Every field correct, fuel card | 27 of 42 | **28 of 42** |
-| Field failures | 125 | **29** |
-
-The eval's credit-column defect was fixed first. Then four normaliser changes, one per
-commit, removed exactly the number of failures each was predicted to: 48, 25, 20 and 3.
-The 29 that remain:
-- 18 genuine misreads, 15 of them on phone photos;
-- 8 where a layout prints two fields under one label;
-- 3 where the model "corrects" an odd identifier.
-
-**One retry, with the error and never the answer.** When a field will not parse or the
-page's arithmetic does not close, the page is read once more. The model is told which
-check failed, never which value is expected.
-
-The first version took the whole second reading, and overwrote **3 correct fields while
-fixing 0**. It now takes only the fields the failed check reads: **0 correct → wrong**.
-Counts so far:
-- on the tuned set, 2 unscored values corrected, both checked against the key by hand;
-- on the holdout, 1 scored field corrected (wrong → correct).
-
-That is five triggers in all: a small sample.
-
-**The held-out layout, scored once, last** (32 documents, fresh):
-- document kind, activity and **pipeline kgCO2e: 32 of 32**;
-- every field: electricity 0 of 11, LPG 7 of 9, fuel 5 of 12.
-
-24 of the 26 field failures come from two labels that layout `d` prints and the normaliser,
-tuned on layouts a–c, did not know: "Registration" for the UEN, and "Low Tension supply".
-That is overfitting, which is what a holdout is there to show. It is recorded, not fixed.
-
-**Company-year scenarios.** 21 scenarios run at calculation level:
-- one fictional business's year, Makan Mates, with 15 variations;
-- five other businesses.
-
-Each scenario's truth activities go through factor lookup, calculation, a year roll-up and
-a revenue-share allocation. The results are checked against an independent exact-rational
-route and against the honesty facts each scenario defines. **21 of 21 pass all ten
-checks:**
-- Scope 1, Scope 2 and the allocation are exact;
-- gaps are listed exactly;
-- estimated readings are listed;
-- documents with no published factor are named;
-- factor-year substitutions are disclosed;
-- days outside the year are listed, not counted;
-- USD invoices are listed and not converted;
-- a scope with no document has no figure rather than 0.
-
-Tests show this check fails a roll-up that hides gaps, drops exclusions or counts a
-neighbouring year.
-
-| Makan Mates 2025 | kg CO2e |
-|---|---|
-| Scope 1 (LPG 7.7 t, diesel 3,775.19 L; DESNZ 2025, non-Singapore) | 32,680.936 |
-| Scope 2 (99,740 kWh; EMA 2024 factor, substituted and disclosed; location-based) | 40,095.480 |
-| Allocated to one buyer (Scope 1 + 2 × 720,000 / 2,400,000 revenue; an assumption) | 21,832.925 |
-
-These are computed from the activities and the verified factors in the database. They are
-not the 30.1 / 39.4 / 21 t of the project's illustrative context.
-
-**End to end, three scenarios through extraction** (107 documents):
-- activity and pipeline: 107 of 107;
-- the year's figures equal the calculation level in all three;
-- the March gap and the two estimated readings were flagged **from what was read**.
-
-The scenarios are synthetic, and each was run once.
-
-`make flow-block2` passed 4 of 4 on all six checks. That includes a bill across 31 Dec 2023
-that the agent split into two lines with two EMA factors (0.412 and 0.402), each cited.
-
-The flow checks are flow checks, not measurements: documents of one layout asked one
-question cannot measure accuracy, and the script says so on every line it prints. They
-check that the loop finishes, that its figure equals the answer key's, that every factor is
-cited, that the disclosures are stated, that no number appears which no tool produced, and
-that a document with no published factor is refused rather than guessed.
-
-`make flow-scope1` is **4 of 4 on all six checks** across the three kinds, 15 turns, with
-one unit conversion, one two-line total and one honest refusal. `make eval` (36 of 36)
-remains the measured number.
-
-`make eval` caches each model reply, keyed on the document, model, DPI and a hash of the
-prompt *and* the response schema. A cache hit skips only the model call — every step after
-it re-runs against current code, so a fix can be re-measured against the same replies at no
-API cost. Changing the prompt or the schema misses the cache by construction.
 
 ## Data provenance
 
@@ -366,18 +386,19 @@ Stated plainly, because they bound what any number here means:
   available is a judgement, not a measurement.
 - **Diesel and petrol use the 100%-mineral rows on an unverified assumption** about the
   biofuel content of Singapore pump fuel. NEA's own fuel specification has not been read.
-- The Block 1 figures (36 of 36) describe **one layout per kind, crisp PDFs, no quirks**. The
-  synthgen v1 figures cover scans, photos and quirks, but each is **one run**, on synthetic
-  documents.
+- **Every figure here is one run.** The synthgen v1 numbers cover four layouts, three
+  tiers, scans, photos and quirks — but each measure was run once, so run-to-run variation
+  is unmeasured. A clean run is weak evidence of correctness, not proof of it.
 - **A CO2-only electricity figure is labelled "kg CO2e".** `calculate_emissions` names its
   unit "kg CO2e" whatever the factor's gas basis. Mixing CO2 and CO2e lines is disclosed;
   a figure that is CO2 only is not labelled as such.
 - **In synthgen v1, a hard LPG or fuel document is harder to read, not harder to
   interpret**: their injected quirks are all money decoys, and every hard one carries the
   same three, so per-quirk results on them are confounded. See TIER2_BLOCK2.md.
-- **Two runs is a small sample.** Every defect found in this block appeared in the first
-  live run and none in a test, which is a reminder that a clean run is weak evidence of
-  correctness, not proof of it.
+- **The evals have found defects that the tests did not.** In Block 1 four, in Block 2 a
+  defect in the eval itself, in Block 3 a memoised database error and a retry that
+  overwrote correct fields. Each is recorded in its block's write-up. A green suite is not
+  evidence that a measurement is sound.
 - **The LPG documents carry less variation than their count suggests.** Gas is delivered in
   whole cylinders. synthgen v1 adds per-delivery invoices, top-up visits and mixed sizes,
   but a steady account's monthly invoices still often share a kg figure.
@@ -413,14 +434,18 @@ src/carbon_r/
   models/      Pydantic domain models: answer keys, extraction targets, activities,
                factor citations, and the document-kind classification
   xlsx.py      a read-only xlsx reader, for transcribing publishers' workbooks
-  synthgen/    the synthetic-document generator (answer first, then the document)
-  tools/       the tools the agent is allowed to call
+  synthgen/    the synthetic-document generator (answer first, then the document):
+               layouts, quirks, degradation, and the company-year scenarios
+  tools/       what the agent may call, plus company_year.py — a roll-up and an
+               allocation that are Python only, not yet exposed as tools
   agent/       the tool-calling loop, the session workspace, the figure audit
   api/         request and response models, upload storage, the SSE stream
   static/      the page: one HTML file, its stylesheet, its script, and a spring
 db/migrations/ schema, applied in filename order
-scripts/       operational scripts: factor loading, document generation, the eval, the flow check
-tests/         437 tests, every one of them offline: no .env, no database, no API key
+scripts/       factor loading, document and scenario generation, the extraction eval,
+               the scenario eval, the flow checks
+tests/         585 tests and 1 skipped, every one of them offline: no .env, no
+               database, no API key
 data/uploads/  documents uploaded at runtime — git-ignored, never committed
 data/raw/      source documents and publishers' workbooks — git-ignored, never committed
 data/generated/ synthetic documents, answer keys, eval runs — git-ignored

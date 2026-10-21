@@ -23,6 +23,7 @@ established until then.
 | 12 | GST treatment of Singapore pump prices and fuel-card statements | — | `synthgen` fuel-card money lines | — | **secondary only — VERIFY** |
 | 13 | Common Singapore LPG cylinder sizes and pricing basis | — | `synthgen` LPG invoice shape | — | **secondary only — VERIFY** |
 | 14 | How Singapore bills show credits, balances brought forward and GST-inclusive headlines; LPG per-delivery billing | — | `synthgen` v1 quirk shapes | — | **not claimed — fictional** |
+| 15 | Whether a Singapore tax invoice in a foreign currency must also show the GST amount in SGD (IRAS) | — | `usd_invoice` scenario pages | — | **not claimed — VERIFY** |
 
 ---
 
@@ -303,3 +304,26 @@ Singapore document, and no claim is made that real bills look like this.** They 
 put a specific reading trap on the page. Every price, rate, rebate and plan in
 `synthgen/profiles.py` is fictional. Nothing here can move an emission factor; the
 activities the traps guard are what the eval scores.
+
+
+---
+
+## 15. GST on a foreign-currency tax invoice — not claimed, VERIFY outstanding
+
+Raised in Tier 2 Block 3, when the `usd_invoice` scenario pages were written.
+
+Those pages are LPG invoices denominated in USD, priced from a separate fictional USD price
+list rather than converted from the SGD list at any rate. Each charges GST at 9% **in USD**.
+
+**Whether IRAS requires a tax invoice issued in a foreign currency to also state the GST
+amount in SGD has not been checked against IRAS's own guidance.** The synthetic page
+therefore makes no claim either way, and nothing in the repo asserts that its presentation
+is correct.
+
+The cost of being wrong is nil for every figure this project produces: the quirk changes
+the currency of the money lines only. The cylinders, and so the kilograms, and so the
+emissions, do not depend on it — and there is no FX conversion anywhere in Tier 2, so no
+rate is applied to anything. It must still be read from IRAS before any claim is made that
+the invoice layout is realistic.
+
+Described, with what the page shows, in [QUIRKS.md](QUIRKS.md) under `usd_invoice`.
