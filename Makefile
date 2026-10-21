@@ -7,7 +7,7 @@ export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 # the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
 export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
 
-.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout
+.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout ingest-methodology eval-retrieval
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
@@ -75,6 +75,14 @@ scenarios:  ## Render the 21 company-year scenarios to data/generated/scenarios/
 
 eval-scenarios-e2e:  ## Base, missing-month and estimated scenarios THROUGH extraction (model calls)
 	uv run python scripts/eval_scenarios.py --end-to-end
+
+# Methodology RAG (Tier 2 Block 4). Local only: the GHG Protocol PDFs are git-ignored and
+# may not be redistributed, so neither target runs in CI.
+ingest-methodology:  ## Chunk + embed the GHG Protocol standards into document_chunks (idempotent)
+	uv run python scripts/ingest_methodology.py
+
+eval-retrieval:  ## Score methodology retrieval on the dev split (hit@k, both refusal levels)
+	uv run python scripts/eval_retrieval.py --split dev
 
 agent-smoke:  ## End-to-end flow check of /upload + /chat on 5 bills (NOT an accuracy measurement)
 	uv run python scripts/agent_flow_check.py --root data/generated

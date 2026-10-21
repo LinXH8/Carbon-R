@@ -28,7 +28,7 @@ from typing import Any, Protocol
 
 from openai import OpenAI, OpenAIError
 
-from carbon_r.agent.audit import audit_figures
+from carbon_r.agent.audit import audit_figures, audit_quotes
 from carbon_r.agent.prompt import MAX_TURNS, SYSTEM_PROMPT
 from carbon_r.agent.session import Session
 from carbon_r.agent.tools import Toolkit
@@ -63,6 +63,7 @@ class AgentRun:
     turns_used: int = 0
     stopped_reason: str = "completed"  # completed | max_turns | provider_error
     unverified_figures: list[str] = field(default_factory=list)
+    unverified_quotes: list[str] = field(default_factory=list)
 
     # The `calculate_emissions` payloads produced by THIS run, in order. Collected here
     # rather than read from `session.calculations` because that dict accumulates across
@@ -197,5 +198,6 @@ def run_agent(
         turns_used=turns,
         stopped_reason=stopped,
         unverified_figures=audit_figures(reply, session.tool_payloads),
+        unverified_quotes=audit_quotes(reply, session.tool_payloads),
         figures=figures,
     )

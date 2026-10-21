@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # No default. The model id must come from the account that will be billed for it;
     # `scripts/list_models.py` prints the real list. See CLAUDE.md on unverified values.
     openai_model: str = ""
+    # Same rule: no default. Embeddings from different models are not comparable, so this
+    # value is stored on every chunk and every search filters on it (tools/methodology.py).
+    openai_embedding_model: str = ""
 
     # Singapore GST, as a fraction. Verified from IRAS's own e-Tax guide (9% effective
     # 1 Jan 2024) — see SOURCES.md §4. Config rather than a literal so the generator and

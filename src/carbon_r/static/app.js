@@ -258,6 +258,11 @@ function renderAnswer(final) {
       `Do not use these numbers: ${final.unverified_figures.join(', ')}. `
       + 'They were not returned by any tool in this session.'));
   }
+  if (final.unverified_quotes?.length) {
+    parts.push(notice('bad', 'The reply quotes words no source contains',
+      `These quotations were not found in any passage a tool returned: `
+      + `${final.unverified_quotes.map((q) => `"${q}"`).join('; ')}. Do not rely on them.`));
+  }
 
   for (const figure of final.figures || []) parts.push(figureCard(figure));
 

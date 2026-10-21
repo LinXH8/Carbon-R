@@ -228,6 +228,11 @@ class ChatResponse(BaseModel):
         description="Numbers in the reply that no tool produced. Must be empty; a "
         "non-empty list means the model stated a figure it was not given."
     )
+    unverified_quotes: list[str] = Field(
+        default_factory=list,
+        description="Quoted spans in the reply that no tool returned verbatim. Must be "
+        "empty; a non-empty list means the model put words in a source's mouth.",
+    )
     figures: list[FigureOut] = Field(
         default_factory=list,
         description="Every figure `calculate_emissions` produced in this turn, with the "
@@ -243,5 +248,6 @@ class ChatResponse(BaseModel):
             turns_used=run.turns_used,
             stopped_reason=run.stopped_reason,
             unverified_figures=run.unverified_figures,
+            unverified_quotes=run.unverified_quotes,
             figures=[FigureOut.from_payload(payload) for payload in run.figures],
         )

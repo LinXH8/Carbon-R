@@ -114,6 +114,7 @@ def test_the_final_event_is_the_chat_response(configured, monkeypatch):
         "turns_used",
         "stopped_reason",
         "unverified_figures",
+        "unverified_quotes",
         "figures",
     }
     assert final["reply"] == ANSWERED.reply

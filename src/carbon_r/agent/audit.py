@@ -22,6 +22,14 @@ Three equivalences are allowed, and they are allowed deliberately rather than by
 Everything else - a sum, a difference, a per-month average, an invented total - is
 flagged. A number buried in a word (`CO2e`, `Scope2`) is not a figure and is not scanned;
 the literal phrases `Scope 1/2/3` are removed before scanning for the same reason.
+
+Quotes get the same treatment (`audit_quotes`, Tier 2 Block 4). A span in double quotes,
+straight or curly, presents words as someone else's - in practice a GHG Protocol passage -
+so it must appear verbatim (whitespace-normalised) in some string a tool returned, or it is
+flagged in `unverified_quotes`. No attempt is made to decide which quotes are "attributed to
+methodology": any quoted span is a claim that those words exist somewhere, and the check is
+the same for all of them. An ellipsis inside a quote marks an omission, so each piece either
+side of it is checked separately.
 """
 
 from __future__ import annotations
@@ -37,6 +45,10 @@ _NUMBER = re.compile(r"(?<![A-Za-z0-9_.])[-+]?\d[\d,]*(?:\.\d+)?(?![A-Za-z0-9_])
 _NON_QUANTITIES = re.compile(r"\b(?:scope|tier)\s*[-–]?\s*\d+\b", re.IGNORECASE)
 
 _MAX_PLACES = 6
+
+# A quoted span: straight double quotes or curly ones, on one line.
+_QUOTED = re.compile(r'"([^"\n]+)"|\u201c([^\u201d\n]+)\u201d')
+_ELLIPSIS = re.compile(r"\.\.\.|\u2026")
 
 
 def _to_decimal(token: str) -> Decimal | None:
@@ -101,4 +113,32 @@ def audit_figures(reply: str, tool_payloads: list[dict]) -> list[str]:
         if number is None or number in allowed:
             continue
         unverified.append(token)
+    return unverified
+
+
+def _normalise(text: str) -> str:
+    return " ".join(text.split())
+
+
+def strings_in(value: object) -> list[str]:
+    """Every string reachable in a tool payload, however deeply nested."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [s for item in value.values() for s in strings_in(item)]
+    if isinstance(value, list | tuple):
+        return [s for item in value for s in strings_in(item)]
+    return []
+
+
+def audit_quotes(reply: str, tool_payloads: list[dict]) -> list[str]:
+    """Quoted spans in `reply` that appear in no tool payload, as written, in order."""
+    haystacks = [_normalise(s) for payload in tool_payloads for s in strings_in(payload)]
+    unverified: list[str] = []
+    for match in _QUOTED.finditer(reply):
+        span = match.group(1) or match.group(2)
+        pieces = [_normalise(p) for p in _ELLIPSIS.split(span)]
+        pieces = [p for p in pieces if p]
+        if pieces and not all(any(p in h for h in haystacks) for p in pieces):
+            unverified.append(span)
     return unverified

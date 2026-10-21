@@ -1,15 +1,19 @@
 """Postgres access.
 
 Emission factors are fetched with exact SQL and never by similarity search, so this
-module stays small on purpose: a connection helper and a liveness check. See CLAUDE.md.
+module stays small on purpose: a connection helper, a liveness check, and the migration
+runner every loader shares. See CLAUDE.md.
 """
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from pathlib import Path
 
 import psycopg
 
-from carbon_r.config import get_settings
+from carbon_r.config import PROJECT_ROOT, get_settings
+
+MIGRATIONS_DIR = PROJECT_ROOT / "db" / "migrations"
 
 
 class DatabaseNotConfiguredError(RuntimeError):
@@ -37,3 +41,11 @@ def check_connection() -> bool:
         return True
     except (DatabaseNotConfiguredError, psycopg.Error, OSError):
         return False
+
+
+def apply_migrations(conn: psycopg.Connection) -> list[Path]:
+    """Run every migration in filename order. Each is idempotent, so this is safe to repeat."""
+    applied = sorted(MIGRATIONS_DIR.glob("*.sql"))
+    for path in applied:
+        conn.execute(path.read_text())
+    return applied

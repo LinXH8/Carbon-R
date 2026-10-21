@@ -61,6 +61,7 @@ def test_the_system_prompt_is_sent_every_turn(session, toolkit):
             "extract_from_document",
             "lookup_emission_factor",
             "calculate_emissions",
+            "search_methodology",
         }
 
 

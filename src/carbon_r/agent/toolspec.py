@@ -26,7 +26,7 @@ quantities, and rule 3 requires them exact. A wrong year is visible in the citat
 tool returns (`year_requested`), so it cannot pass silently.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -88,6 +88,21 @@ class CalculateArgs(BaseModel):
     )
 
 
+class SearchMethodologyArgs(BaseModel):
+    """Arguments for `search_methodology`."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    question: str = Field(
+        description="The methodology question, in plain words. Ask one thing at a time."
+    )
+    source_id: Literal["ghgp_corporate", "ghgp_scope2", "ghgp_scope3"] | None = Field(
+        default=None,
+        description="Restrict to one standard: ghgp_corporate (Corporate Standard), "
+        "ghgp_scope2 (Scope 2 Guidance) or ghgp_scope3 (Scope 3 Standard). Null searches all.",
+    )
+
+
 TOOL_DESCRIPTIONS: dict[str, str] = {
     "extract_from_document": (
         "Establish what kind of document an uploaded file is, then read it with a vision "
@@ -116,12 +131,20 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
         "produces the total. If any pair cannot be calculated, the whole call fails and "
         "returns no figure, rather than a total that is quietly short."
     ),
+    "search_methodology": (
+        "Search the GHG Protocol Corporate Standard, Scope 2 Guidance and Scope 3 Standard "
+        "for passages that answer a methodology question, and return verified verbatim "
+        "quotes with their document and page. Returns no_results when nothing in those "
+        "documents is close to the question, or when the closest passages do not actually "
+        "answer it. Never returns an emission factor and never produces a figure."
+    ),
 }
 
 ARG_MODELS: dict[str, type[BaseModel]] = {
     "extract_from_document": ExtractArgs,
     "lookup_emission_factor": LookupFactorArgs,
     "calculate_emissions": CalculateArgs,
+    "search_methodology": SearchMethodologyArgs,
 }
 
 # Schema keywords the provider's strict mode does not accept. Stripped rather than
@@ -178,6 +201,7 @@ __all__ = [
     "CalculatePair",
     "ExtractArgs",
     "LookupFactorArgs",
+    "SearchMethodologyArgs",
     "schema_for",
     "tool_schemas",
 ]

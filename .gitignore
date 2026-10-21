@@ -25,6 +25,10 @@ data/uploads/*
 !data/generated/.gitkeep
 !data/uploads/.gitkeep
 
+# The retrieval eval's anchor quotes are verbatim GHG Protocol text, which its terms do not
+# let us publish. Only their hashes are committed (data/evals/methodology_questions.json).
+data/evals/local/
+
 # Belt-and-braces: no third-party document ever enters the repo by accident,
 # whatever directory it lands in.
 *.pdf

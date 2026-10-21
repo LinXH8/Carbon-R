@@ -1,0 +1,819 @@
+{
+  "version": 1,
+  "drafted": "2026-10-22",
+  "review_status": "reviewed",
+  "questions": [
+    {
+      "id": "corp_equity_share",
+      "question": "Under the equity share approach, how does a company account for emissions from an operation it partly owns?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 19
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 19,
+        "sha256": "58f18245bca40ec0647092e82f7e5324fcde8a10c29b6369ce492d25e4e315f1"
+      },
+      "split": "test"
+    },
+    {
+      "id": "corp_significance_threshold",
+      "question": "Who determines the significance threshold that triggers a base year emissions recalculation?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 37
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 37,
+        "sha256": "da2a6d1583db6cb784cfbac9bc4bb2a01242ebce43e179995faabb3a9e5b19e7"
+      },
+      "split": "test"
+    },
+    {
+      "id": "corp_six_gases",
+      "question": "Which greenhouse gases does the Corporate Standard cover?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 5
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 5,
+        "sha256": "7f751a43daa064c09bd2a0b5607d4d3b7462ab626589474563600971727dc6e9"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "corp_base_year_choice",
+      "question": "What are the requirements for choosing a base year?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 37
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 37,
+        "sha256": "7785dcafccfc1d2fda105545f7209673ac3e9790c18d090d2ba23c1bd38b546d"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "corp_leased_operated",
+      "question": "We rent a small warehouse and run it ourselves. Do the emissions from running it count as ours?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 34
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 34,
+        "sha256": "cf3771eaee508b949ea5c8f7b7ca6c44eb1a90022e7c42429cef06d20ec6c9ba"
+      },
+      "split": "test"
+    },
+    {
+      "id": "corp_company_vans",
+      "question": "We have three delivery vans that we own. Where does the fuel they burn show up in our footprint?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 29
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 29,
+        "sha256": "aef94f49a3b13e8586e91d59c88f9348d30d2cddda2a038143a04bca75edf649"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "corp_sold_solar",
+      "question": "We generate power on site and sell some of it to the building next door. Can we subtract that from our own emissions?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 29
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 29,
+        "sha256": "527db033a95239638a0ce17fbc8206089432c40cb3d89ba6d978a7cedb328b8e"
+      },
+      "split": "test"
+    },
+    {
+      "id": "corp_biomass",
+      "question": "Our bakery oven burns wood pellets. Do we add that CO2 to our direct emissions like any other fuel?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 27
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 27,
+        "sha256": "fe819c477bffabb37dfdb4e19d8e75478c9e9c0aaac6d77e7e11fa67e3cfd870"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "corp_operational_control",
+      "question": "we only own 40% of the joint venture but we the one running the place, then how we decide whether we control it ah?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 20
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 20,
+        "sha256": "6ad3b05c8839f79efda0300336a7652c27dd829f2e738aa3b6c918cb309c6ff0"
+      },
+      "split": "test"
+    },
+    {
+      "id": "corp_scope1_kitchen",
+      "question": "our own gas stove in the kitchen burn gas, that one count under which scope ah",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 29
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 27
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 29,
+        "sha256": "e3fb51b27600e12df931afd61ef450f8b529f1c774bfa28f4ad369485b1927a7"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "corp_scope2_grid",
+      "question": "we just buy electricity from the grid only, the power station emission also count under us meh?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 27
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 27,
+        "sha256": "d27b9ac49813d3850197cf2ab80c99f118e1e437bd07d852d688246201088bdd"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "corp_outsourced",
+      "question": "we outsource the packing to another company, their emission we put inside which scope sia?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 31
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_corporate",
+        "pdf_page": 31,
+        "sha256": "7fabca47e0ff5ffb2406944ee8ccdc25948ba433e1e657f4bd772e098b337430"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s2_dual_reporting",
+      "question": "When must a company report scope 2 emissions using both the location-based and market-based methods?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 10
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 10,
+        "sha256": "fa19209ef0a079a41f573873fb3dac5951b76f30c650400bbec9c35003f1d8c2"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s2_location_based",
+      "question": "What does the location-based method for scope 2 reflect?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 10
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 10,
+        "sha256": "b56fff7154989f1ddeb12d684912c183cfe88682c0f2c641d93177fdeea1a882"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s2_vintage",
+      "question": "What does vintage mean in the Scope 2 Quality Criteria?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 66
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 109
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 66,
+        "sha256": "ecdf739267595b39d6aa614c9bfc7e972e09393e0c2d1e16000b5991d149da41"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s2_chp_allocation",
+      "question": "How should emissions be allocated when purchasing heat or electricity from a combined heat and power plant?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 37
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 37,
+        "sha256": "c784e978eb563708ffc280d8e75271cf23645c082fba97959fbc43799d084811"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s2_tenant",
+      "question": "We rent an office unit and pay the electricity bill ourselves. Is that electricity ours to report, or the landlord's?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 36
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 36,
+        "sha256": "4e84470b5334820b6a40bc836994330e1a74c10be935ba02b9160684b5c402e0"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s2_own_generation",
+      "question": "Our factory runs its own gas generator and isn't connected to the grid. Do we still report electricity emissions separately?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 37
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 37,
+        "sha256": "18109380520a87f2d14a1d70fd14d52f91b256d0b74ed2980d594c8001b805b5"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s2_net_metering",
+      "question": "We have solar panels and the utility only bills us for the net amount after what we export. Can we just use the number on the bill?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 40
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 40,
+        "sha256": "88d91ca1d8a2da79c8384f841513b024b8c5509bebd3c1b663a44ffddeeb8188"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s2_market_based",
+      "question": "If we sign a green electricity contract, which way of calculating our electricity emissions would actually show that?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 10
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 10,
+        "sha256": "5740519b7db7b81e0176628e64246acdcab2271e53e85e827397f92021b8ec94"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s2_td_losses",
+      "question": "the electricity lost along the cables before reach us, the emission count inside our electricity number or not?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 29
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 29,
+        "sha256": "7bcaafce0baabfcde52d07299882fa1fc5550266bfaf83c43e0cd3fe12c38599"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s2_residual_mix",
+      "question": "no green cert, no supplier rate also, then the market-based one we use what factor ah?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 10
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 11
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 10,
+        "sha256": "09d5f20aeb4ba8b115af3a16b6047fa2274870a87760aa9b03910a9a978e1c36"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s2_sold_certificates",
+      "question": "we sell away the green certs from our own solar panel, still can claim our electricity is green or not?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 42
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 42,
+        "sha256": "1e080b1dd68e8d816dde9e571f6287319a0526d61733ab28718d250d60110909"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s2_district_cooling",
+      "question": "the chilled water for aircon we buy from the district cooling plant, also count as scope 2 or not ah?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 36
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 7
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope2",
+        "pdf_page": 36,
+        "sha256": "13ad7e5f8066d4cd149322aa1e6688ae945220e2dd678cf7df568a49df35d5e1"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s3_fifteen_categories",
+      "question": "How many categories of scope 3 emissions does the Scope 3 Standard define?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 33
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 34
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 35
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 33,
+        "sha256": "1b1471050bde37449e72133657859f6d68332512d6ab3a9f5555059f19ddc8cc"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s3_exclusions",
+      "question": "What does the Scope 3 Standard require regarding exclusions from the scope 3 inventory?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 61
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 23
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 61,
+        "sha256": "d2c9ce16a597638fad4b112a978c59acbafcaf3e1633439cd07dd99de6cc13eb"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s3_data_quality",
+      "question": "What do the data quality indicators for scope 3 data describe?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 77
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 77,
+        "sha256": "ca36691aebad5c8c90488a12a89fee7696677c487a5f47ad24cab69cff98a37d"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s3_investments",
+      "question": "Under category 15, what are a reporting company's scope 3 emissions from investments?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 53
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 53,
+        "sha256": "0e23e92ddbee972f25dda24215f636fbd1f4a044b236a721dd6b78db56f29f11"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s3_teleworking",
+      "question": "Most of our staff work from home now. Can we count that as part of our commuting emissions?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 48
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 37
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 48,
+        "sha256": "ec35bba62d16d3a2c956a8ada25ffd82362a926ca2bb1f12b64bd6821b724c0f"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s3_inbound_courier",
+      "question": "We pay a courier company to bring stock from our supplier to our shop. Where do those delivery emissions go?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 46
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 47
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 46,
+        "sha256": "7e79fca8d01ffadd5c3ad48d16e458763a85e791f1dee71e4906fbc08881c1f2"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s3_spend_caution",
+      "question": "Can we just rank our suppliers by how much we spend with them to decide which emissions matter most?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 68
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 68,
+        "sha256": "7eeb992bf906c177749c394097c44b83931546793f3f82b61162d02ac9638915"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s3_allocation",
+      "question": "Our supplier makes lots of different products in one factory. How do we work out how much of their emissions belongs to what we bought?",
+      "answerable": true,
+      "phrasing": "user",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 90
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 89
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 91
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 90,
+        "sha256": "8c9ccac3142128d48bd4fa055622f1b736d1705afa00aab4f12d1531a088efe2"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s3_business_travel",
+      "question": "our staff fly to KL for client meeting, the flight emission go under which one ah?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 48
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 48,
+        "sha256": "e3530042199045aa90a1919a90efb6b2f6592c34fef7197b3fe5eb20ed0a5237"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "s3_use_of_sold",
+      "question": "we sell aircon units, the electricity the customer use after that also must count meh?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 50
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 50,
+        "sha256": "ec4a6eb11a139939b183133bd89eabb17bec9b6eb7e40cd6c7f5bb7937d5c0ce"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s3_purchased_goods",
+      "question": "the flour and packaging we buy from supplier, the emission from making them we count where ah?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 40
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 40,
+        "sha256": "8e09b2338d51cf6e233c9be129a0174f378c96d8ccbfcb4eb47d2a6b59a73ef7"
+      },
+      "split": "test"
+    },
+    {
+      "id": "s3_waste",
+      "question": "our rubbish is collected by the waste contractor, that one need to count or not?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "expected": [
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 46
+        }
+      ],
+      "anchor": {
+        "source_id": "ghgp_scope3",
+        "pdf_page": 46,
+        "sha256": "34a277a29efe39d059e05112304c4f79a7a27cbd4918d030b667a3a38ab13dfd"
+      },
+      "split": "dev"
+    },
+    {
+      "id": "u_sg_carbon_tax",
+      "question": "What is Singapore's carbon tax rate per tonne of CO2e for 2026?",
+      "answerable": false,
+      "phrasing": "textbook",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "split": "dev"
+    },
+    {
+      "id": "u_sg_grid_factor",
+      "question": "What grid emission factor does the GHG Protocol specify for electricity consumed in Singapore?",
+      "answerable": false,
+      "phrasing": "textbook",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "split": "test"
+    },
+    {
+      "id": "u_hfc134a_gwp",
+      "question": "What 100-year global warming potential value is assigned to HFC-134a?",
+      "answerable": false,
+      "phrasing": "textbook",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "split": "dev"
+    },
+    {
+      "id": "u_nea_deadline",
+      "question": "What is the deadline for Singapore companies to submit their annual emissions report to the National Environment Agency?",
+      "answerable": false,
+      "phrasing": "textbook",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "split": "test"
+    },
+    {
+      "id": "u_sgx_scope3_timeline",
+      "question": "When do Singapore-listed companies have to start reporting their Scope 3 emissions to SGX?",
+      "answerable": false,
+      "phrasing": "user",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "split": "dev"
+    },
+    {
+      "id": "u_refrigerant_leak_rate",
+      "question": "What yearly refrigerant leak rate should we assume for the air-conditioners in our shop?",
+      "answerable": false,
+      "phrasing": "user",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "split": "dev"
+    },
+    {
+      "id": "u_diesel_factor_sg",
+      "question": "What's the emission factor for one litre of diesel in Singapore?",
+      "answerable": false,
+      "phrasing": "user",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "split": "test"
+    },
+    {
+      "id": "u_energy_audit_grant",
+      "question": "Which Singapore government grant can help pay for an energy audit of our shop?",
+      "answerable": false,
+      "phrasing": "user",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "split": "test"
+    },
+    {
+      "id": "u_gst_electricity",
+      "question": "GST for electricity bill now how many percent ah?",
+      "answerable": false,
+      "phrasing": "singlish",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "split": "dev"
+    },
+    {
+      "id": "u_sp_tariff",
+      "question": "SP tariff this quarter how much per kWh for small business?",
+      "answerable": false,
+      "phrasing": "singlish",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "split": "test"
+    },
+    {
+      "id": "u_cut_by_2030",
+      "question": "the GHG Protocol say we must cut how many percent of emission by 2030 one?",
+      "answerable": false,
+      "phrasing": "singlish",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "split": "dev"
+    },
+    {
+      "id": "u_rec_price_sg",
+      "question": "one green cert in Singapore cost how much ah?",
+      "answerable": false,
+      "phrasing": "singlish",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "split": "test"
+    }
+  ]
+}
