@@ -584,8 +584,9 @@ db/migrations/ schema, applied in filename order
 scripts/       factor loading, document and scenario generation, the extraction,
                scenario and retrieval evals, methodology ingest, peer intake, the flow
                checks, the container entrypoint
-tests/         663 pass with no .env, no database, no API key and no corpus (that is
-               what CI runs); tests needing one of those skip without it
+tests/         in a clean clone (what CI runs): 644 pass, 20 skip - the ones needing a
+               database, the workbooks, the corpus or the peer reports. With all of
+               those present locally: 663 pass, 1 skip
 docs/          architecture diagram, ADRs, the GHG Protocol skim guide
 data/evals/    the retrieval key (hashes, no GHG Protocol text) and committed eval runs
 data/peer_sources.json  provenance of the peer reports (the reports are local)
