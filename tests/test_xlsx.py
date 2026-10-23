@@ -5,6 +5,7 @@ are absent - a fresh clone runs `make check` before anything has been downloaded
 addressing behaviour that matters most is tested without any file at all.
 """
 
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -24,11 +25,42 @@ def test_column_strips_the_row_number():
     assert column("D100") == "D"
 
 
-def test_a_missing_sheet_names_the_sheets_that_exist():
+def _tiny_workbook(path: Path, sheets: list[str]) -> Path:
+    """The two parts the reader resolves names through, and nothing else."""
+    rels = "".join(
+        f'<Relationship Id="rId{i}" Target="worksheets/sheet{i}.xml"/>'
+        for i, _ in enumerate(sheets, 1)
+    )
+    entries = "".join(
+        f'<sheet name="{name}" sheetId="{i}" r:id="rId{i}"/>' for i, name in enumerate(sheets, 1)
+    )
+    with zipfile.ZipFile(path, "w") as archive:
+        archive.writestr(
+            "xl/_rels/workbook.xml.rels",
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            f"{rels}</Relationships>",
+        )
+        archive.writestr(
+            "xl/workbook.xml",
+            '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+            'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+            f"<sheets>{entries}</sheets></workbook>",
+        )
+    return path
+
+
+def test_a_missing_sheet_names_the_sheets_that_exist(tmp_path):
+    """Runs without the DESNZ workbook: a fresh clone has none.
+
+    The first version fell back to passing this test file itself as the workbook, which
+    raised a zip error rather than SheetNotFoundError, so it failed on every clone that had
+    not downloaded the workbooks - including CI. Found by the Tier 2 Block 5 clean-clone run.
+    """
+    workbook = _tiny_workbook(tmp_path / "tiny.xlsx", ["Index", "Fuels"])
     with pytest.raises(SheetNotFoundError) as caught:
-        read_sheet(WORKBOOK if WORKBOOK.exists() else Path(__file__), "No Such Sheet")
-    # Either the lookup failed as intended, or the file was not a workbook at all.
-    assert "No Such Sheet" in str(caught.value) or "zip" in str(caught.value).lower()
+        read_sheet(workbook, "No Such Sheet")
+    assert "No Such Sheet" in str(caught.value)
+    assert "Fuels" in str(caught.value) and "Index" in str(caught.value)
 
 
 @needs_workbook
