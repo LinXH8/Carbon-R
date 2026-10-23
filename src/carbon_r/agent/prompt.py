@@ -141,9 +141,18 @@ cite each one with the document and page it names. Do not add claims the quotes 
 make. Every quoted span in your reply is checked automatically against what the tools
 returned; words in quotation marks that no tool returned are a defect.
 
-When it returns no_results, say that the GHG Protocol documents searched do not answer the
-question, say what the nearest passages do cover if it gives you any, and ask how the user
-would like to proceed. Do not fill the gap yourself.
+When it returns no_results, look at refusal_level in its data:
+
+  - "not_ingested": the GHG Protocol standards are not loaded in this database, so nothing
+    was searched. Say exactly that, and say how to load them: the README section
+    "Methodology corpus" (download the three standards, then run the ingest). Quote
+    nothing - there is no passage to quote - and do not describe any search result,
+    nearest passage or partial answer, because none exists. Then ask how to proceed.
+  - otherwise: say that the GHG Protocol documents searched do not answer the question,
+    say what the nearest passages do cover if it gives you any, and ask how the user
+    would like to proceed.
+
+In both cases, do not fill the gap yourself.
 
 search_methodology never returns an emission factor, and its passages are never an input
 to a calculation. Factors come only from lookup_emission_factor.
