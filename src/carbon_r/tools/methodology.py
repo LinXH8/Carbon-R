@@ -42,11 +42,14 @@ from carbon_r.tools.base import ToolResult, error, no_results, ok
 # Passages retrieved per question.
 TOP_K = 5
 
-# Cosine similarity below which nothing is shown to the judge.
-# NOT YET CALIBRATED: 0.0 disables the retrieval-level check until the dev split has been
-# scored (scripts/eval_retrieval.py) and a value frozen here with its evidence in
-# TIER2_BLOCK4.md. The eval reads raw similarities, so it does not depend on this value.
-RETRIEVAL_THRESHOLD = 0.0
+# Cosine similarity below which nothing is shown to the judge. Frozen at 0.30 in Tier 2
+# Block 4 from the dev split (TIER2_BLOCK4.md), as a FLOOR, not a filter: on dev the nearest
+# passage scored 0.360-0.798 for answerable questions and 0.357-0.609 for unanswerable ones,
+# and every threshold above 0.3603 refused an answerable question while refusing only
+# unanswerable ones the generation-level check already refused. So on dev this check does no
+# measurable work; the refusals come from the judge. It stays as a guard against a question
+# with nothing remotely near it in the corpus.
+RETRIEVAL_THRESHOLD = 0.30
 
 # A quote shorter than this proves nothing: "the company" is a substring of most passages.
 MIN_QUOTE_WORDS = 5

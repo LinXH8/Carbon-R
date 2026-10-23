@@ -4,9 +4,9 @@ Written for someone who was not there: the design decisions and their reasons, t
 found and what caught them, and the evidence behind every number. Environment details and
 career notes live in the local build log, not here.
 
-**Status:** in progress. Part A (methodology RAG) code is at `51a221a`; the answer key was
-revised once (below); the retrieval threshold is **not yet frozen** and the test split has
-**not been run**. Part B (peer-disclosure hybrid search) follows Block 5.
+**Status:** Part A (methodology RAG) is done: code at `51a221a`, answer key revised once
+(`fc73d26`), one retrieval change tried and reverted, threshold frozen at 0.30, test split
+scored once (results below). Part B (peer-disclosure hybrid search) follows Block 5.
 
 ## What this block has to do
 
@@ -159,12 +159,63 @@ Per style under v2: textbook hit@5 4 of 6, user 3 of 6, singlish 5 of 6. Per doc
 Corporate 4 of 6, Scope 2 3 of 6, Scope 3 5 of 6. Refusals are unchanged by the key: the
 judge refused all 6 unanswerable dev questions, and 3 of 18 answerable ones.
 
-## The retrieval threshold (not yet frozen)
+## One retrieval change, tried on dev: the title in the embedded text — a negative result
+
+**Why it was tried.** The three standards restate the same rules, and a passage's own words
+do not say which standard they come from. Prepending the document's title to each chunk's
+EMBEDDING input (never to the stored text, so citations and quote checks were unaffected)
+might steer a question about "the Corporate Standard" to the Corporate Standard.
+
+**How.** One flag, `EMBED_TITLE`, folded into the chunker version, so the change re-embedded
+every row under a new version (`363fef74089f`, 768 rows replaced, 230793 tokens) and left
+none of the old. Code at `a5a65a3`; baseline the same dev split on key v2 at `fc73d26`.
+
+| Dev, key v2 | hit@1 | hit@5 | MRR | Answered, citing a key page |
+|---|---|---|---|---|
+| Overall, before → after | 4 → 5 of 18 | **12 → 10** of 18 | 0.383 → 0.389 | **12 of 15 → 9 of 16** |
+| textbook | 2 → 3 of 6 | 4 → 4 of 6 | 0.400 → 0.583 | 4 of 5 → 3 of 6 |
+| user | 2 → 1 of 6 | 3 → 3 of 6 | 0.389 → 0.278 | 3 of 5 → 3 of 4 |
+| singlish | 0 → 1 of 6 | 5 → 3 of 6 | 0.361 → 0.306 | 5 of 5 → 3 of 6 |
+| Corporate | 1 → 2 of 6 | 4 → 2 of 6 | 0.317 → 0.333 | 4 of 4 → 2 of 5 |
+| Scope 2 | 0 → 0 of 6 | 3 → 3 of 6 | 0.222 → 0.222 | 3 of 5 → 3 of 6 |
+| Scope 3 | 3 → 3 of 6 | 5 → 5 of 6 | 0.611 → 0.611 | 5 of 6 → 4 of 5 |
+
+Generation-level refusals: still 6 of 6 unanswerable; wrong refusals of answerable questions
+3 → 2.
+
+**Why it lost.** Two of the losses are the title doing the opposite of what was intended:
+corp_base_year_choice and corp_scope1_kitchen lost their key page from the top 5 to passages
+from a different standard than the one the question concerns. It helped top-1 for textbook
+questions, which use the documents' own vocabulary, and hurt the singlish and Corporate
+cells. Every difference is one or two questions in 18, so it is not evidence of a real
+effect either way; it is no evidence of a gain, which is what keeping it would need.
+
+**Reverted.** `EMBED_TITLE = False` restores the original chunker version exactly: re-ingest
+gave 768 rows under `20927f94c1b4`, 0 rows of `363fef74089f`, 220871 tokens (the same count
+as the first ingest). Both dev runs are committed under `data/evals/runs/`.
+
+## The retrieval threshold — frozen at 0.30
 
 On dev, nearest-passage similarity overlaps: answerable 0.360–0.798 (median 0.541),
 off-corpus 0.357–0.609, near-topic 0.369–0.587. Every threshold that refuses an unanswerable
 question refuses one the judge already refuses, so above 0.3603 a threshold only costs
 answerable questions. Decision (a judgement call on 6 unanswerable dev questions): a floor
 of about 0.30, recorded as doing **no measurable work on dev** — the refusals come from the
-generation-level check. To be frozen after the one retrieval change below has been
-measured.
+generation-level check. The title experiment's dev run showed the same overlap (answerable
+0.360–0.784, unanswerable up to 0.640). Frozen as `RETRIEVAL_THRESHOLD = 0.30` in
+`tools/methodology.py` before the test split was run.
+
+## Known limits
+
+- **A verified quote is real, not necessarily relevant.** In the title experiment,
+  corp_scope2_grid ("the power station emission also count under us?") was answered from
+  Corporate p.29, a passage on transmission and distribution losses. The quote passed the
+  verbatim check because it is on that page. The check proves the words exist in the
+  source; it does not prove they answer the question. Only the hit and cited-page metrics
+  against the hand-checked key catch that, and only on the eval set.
+- **The key's completeness is uneven between splits.** Test pages were added from grep
+  alone (see above).
+- **Small cells.** 6 answerable questions per style per split, 2 unanswerable. A difference
+  of one or two questions is not a result.
+- **The retrieval-level threshold does no measurable work** on dev; the refusals depend on
+  the judging model.

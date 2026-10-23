@@ -39,6 +39,7 @@ import argparse
 import hashlib
 import json
 import statistics
+import subprocess
 import sys
 from collections import defaultdict
 from datetime import UTC, datetime
@@ -57,11 +58,26 @@ from carbon_r.tools.methodology import (
     retrieve,
     verified_citations,
 )
-from eval_extraction import git_state
 
 RUNS_DIR = PROJECT_ROOT / "data" / "evals" / "runs"
 CACHE_DIR = PROJECT_ROOT / "data" / "generated" / "eval_cache" / "retrieval"
 STYLES = ("textbook", "user", "singlish")
+
+
+def git_state() -> dict:
+    """The commit measured, and whether anything other than this eval's own output is dirty.
+
+    `data/evals/runs/` is excluded: the eval writes its run file there, so counting it would
+    mark the second of two back-to-back runs dirty even though no code had changed.
+    """
+
+    def run(*args: str) -> str:
+        return subprocess.run(
+            ["git", *args], cwd=PROJECT_ROOT, capture_output=True, text=True, check=False
+        ).stdout.strip()
+
+    status = run("status", "--porcelain", "--", ".", ":(exclude)data/evals/runs")
+    return {"commit": run("rev-parse", "HEAD"), "dirty": bool(status)}
 
 
 def _digest(*parts: str) -> str:

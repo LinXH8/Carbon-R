@@ -58,11 +58,13 @@ OVERLAP_WORDS = 50
 CHUNKER_REVISION = "1"
 
 # Prepend the document's title to a chunk's text when it is EMBEDDED. The stored text - what
-# a citation shows and every quote is verified against - is never changed. Tried in Tier 2
-# Block 4 because the three standards restate the same rules, and a passage's own words do
-# not say which standard it is from. Part of CHUNKER_VERSION: a different embedding input is
-# a different vector for the same row. False reproduces the version before the flag existed.
-EMBED_TITLE = True
+# a citation shows and every quote is verified against - is never changed. Part of
+# CHUNKER_VERSION: a different embedding input is a different vector for the same row.
+#
+# OFF. Tried in Tier 2 Block 4 and measured on dev as a negative result (TIER2_BLOCK4.md):
+# hit@5 fell from 12 to 10 of 18, because the title pulled in passages from the wrong
+# standard. False reproduces the original chunker version, 20927f94c1b4.
+EMBED_TITLE = False
 
 # A footer page number, in the shapes the three standards use: a bare number, or a number
 # at either end of a line that also carries the running title ("28 Scope 2 Guidance"),

@@ -1,0 +1,1461 @@
+{
+  "split": "dev",
+  "git": {
+    "commit": "a5a65a35523907e73cabcb52858e2a33f20c182e",
+    "dirty": true
+  },
+  "embedding_model": "text-embedding-3-small",
+  "judge_model": "gpt-5.4-mini-2026-03-17",
+  "chunker_version": "363fef74089f",
+  "top_k": 5,
+  "threshold": 0.0,
+  "question_set": {
+    "version": 2,
+    "review_status": "reviewed"
+  },
+  "summary": {
+    "overall": {
+      "answerable": 18,
+      "unanswerable": 6,
+      "hit_at_1": 5,
+      "hit_at_5": 10,
+      "mrr": 0.389,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 24,
+      "generation_refused_unanswerable": 6,
+      "generation_refused_answerable": 2,
+      "answered_answerable": 16,
+      "answered_citing_expected_page": 9,
+      "quotes_dropped": 3
+    },
+    "textbook": {
+      "answerable": 6,
+      "unanswerable": 2,
+      "hit_at_1": 3,
+      "hit_at_5": 4,
+      "mrr": 0.583,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 8,
+      "generation_refused_unanswerable": 2,
+      "generation_refused_answerable": 0,
+      "answered_answerable": 6,
+      "answered_citing_expected_page": 3,
+      "quotes_dropped": 1
+    },
+    "user": {
+      "answerable": 6,
+      "unanswerable": 2,
+      "hit_at_1": 1,
+      "hit_at_5": 3,
+      "mrr": 0.278,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 8,
+      "generation_refused_unanswerable": 2,
+      "generation_refused_answerable": 2,
+      "answered_answerable": 4,
+      "answered_citing_expected_page": 3,
+      "quotes_dropped": 0
+    },
+    "singlish": {
+      "answerable": 6,
+      "unanswerable": 2,
+      "hit_at_1": 1,
+      "hit_at_5": 3,
+      "mrr": 0.306,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 8,
+      "generation_refused_unanswerable": 2,
+      "generation_refused_answerable": 0,
+      "answered_answerable": 6,
+      "answered_citing_expected_page": 3,
+      "quotes_dropped": 2
+    },
+    "ghgp_corporate": {
+      "answerable": 6,
+      "unanswerable": 0,
+      "hit_at_1": 2,
+      "hit_at_5": 2,
+      "mrr": 0.333,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 6,
+      "generation_refused_unanswerable": 0,
+      "generation_refused_answerable": 1,
+      "answered_answerable": 5,
+      "answered_citing_expected_page": 2,
+      "quotes_dropped": 1
+    },
+    "ghgp_scope2": {
+      "answerable": 6,
+      "unanswerable": 0,
+      "hit_at_1": 0,
+      "hit_at_5": 3,
+      "mrr": 0.222,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 6,
+      "generation_refused_unanswerable": 0,
+      "generation_refused_answerable": 0,
+      "answered_answerable": 6,
+      "answered_citing_expected_page": 3,
+      "quotes_dropped": 1
+    },
+    "ghgp_scope3": {
+      "answerable": 6,
+      "unanswerable": 0,
+      "hit_at_1": 3,
+      "hit_at_5": 5,
+      "mrr": 0.611,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 6,
+      "generation_refused_unanswerable": 0,
+      "generation_refused_answerable": 1,
+      "answered_answerable": 5,
+      "answered_citing_expected_page": 4,
+      "quotes_dropped": 1
+    }
+  },
+  "similarity_distribution": {
+    "answerable": {
+      "n": 18,
+      "min": 0.3601,
+      "median": 0.5185,
+      "max": 0.7835
+    },
+    "off_corpus": {
+      "n": 3,
+      "min": 0.3715,
+      "median": 0.3746,
+      "max": 0.6397
+    },
+    "near_topic": {
+      "n": 3,
+      "min": 0.3645,
+      "median": 0.4477,
+      "max": 0.5986
+    }
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.0,
+      "refuses_unanswerable": 0,
+      "refuses_answerable": 0
+    },
+    {
+      "threshold": 0.3601,
+      "refuses_unanswerable": 0,
+      "refuses_answerable": 0
+    },
+    {
+      "threshold": 0.3645,
+      "refuses_unanswerable": 0,
+      "refuses_answerable": 1
+    },
+    {
+      "threshold": 0.3715,
+      "refuses_unanswerable": 1,
+      "refuses_answerable": 1
+    },
+    {
+      "threshold": 0.3746,
+      "refuses_unanswerable": 2,
+      "refuses_answerable": 1
+    },
+    {
+      "threshold": 0.3756,
+      "refuses_unanswerable": 3,
+      "refuses_answerable": 1
+    },
+    {
+      "threshold": 0.3907,
+      "refuses_unanswerable": 3,
+      "refuses_answerable": 2
+    },
+    {
+      "threshold": 0.409,
+      "refuses_unanswerable": 3,
+      "refuses_answerable": 3
+    },
+    {
+      "threshold": 0.4477,
+      "refuses_unanswerable": 3,
+      "refuses_answerable": 4
+    },
+    {
+      "threshold": 0.4565,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 4
+    },
+    {
+      "threshold": 0.4653,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 5
+    },
+    {
+      "threshold": 0.5035,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 6
+    },
+    {
+      "threshold": 0.5049,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 7
+    },
+    {
+      "threshold": 0.5167,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 8
+    },
+    {
+      "threshold": 0.5202,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 9
+    },
+    {
+      "threshold": 0.5361,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 10
+    },
+    {
+      "threshold": 0.5595,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 11
+    },
+    {
+      "threshold": 0.5654,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 12
+    },
+    {
+      "threshold": 0.5655,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 13
+    },
+    {
+      "threshold": 0.5986,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 14
+    },
+    {
+      "threshold": 0.6397,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 14
+    },
+    {
+      "threshold": 0.6596,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 14
+    },
+    {
+      "threshold": 0.6686,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 15
+    },
+    {
+      "threshold": 0.715,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 16
+    },
+    {
+      "threshold": 0.7835,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 17
+    }
+  ],
+  "usage_tokens": 51621,
+  "rows": [
+    {
+      "id": "corp_six_gases",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          5,
+          0.715
+        ],
+        [
+          "ghgp_corporate",
+          97,
+          0.7029
+        ],
+        [
+          "ghgp_corporate",
+          6,
+          0.7023
+        ],
+        [
+          "ghgp_corporate",
+          26,
+          0.6998
+        ],
+        [
+          "ghgp_corporate",
+          5,
+          0.6924
+        ]
+      ],
+      "best_similarity": 0.715,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          5
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "corp_base_year_choice",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          38,
+          0.5049
+        ],
+        [
+          "ghgp_corporate",
+          81,
+          0.4996
+        ],
+        [
+          "ghgp_corporate",
+          81,
+          0.498
+        ],
+        [
+          "ghgp_scope3",
+          102,
+          0.4943
+        ],
+        [
+          "ghgp_scope2",
+          77,
+          0.4919
+        ]
+      ],
+      "best_similarity": 0.5049,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 3,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          38
+        ],
+        [
+          "ghgp_scope2",
+          77
+        ],
+        [
+          "ghgp_scope3",
+          102
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "corp_company_vans",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          94,
+          0.4653
+        ],
+        [
+          "ghgp_scope3",
+          33,
+          0.4635
+        ],
+        [
+          "ghgp_scope3",
+          96,
+          0.4596
+        ],
+        [
+          "ghgp_scope3",
+          7,
+          0.4576
+        ],
+        [
+          "ghgp_scope3",
+          33,
+          0.4498
+        ]
+      ],
+      "best_similarity": 0.4653,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "corp_biomass",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          64,
+          0.4565
+        ],
+        [
+          "ghgp_corporate",
+          46,
+          0.4341
+        ],
+        [
+          "ghgp_scope2",
+          102,
+          0.4319
+        ],
+        [
+          "ghgp_corporate",
+          94,
+          0.4302
+        ],
+        [
+          "ghgp_corporate",
+          94,
+          0.4249
+        ]
+      ],
+      "best_similarity": 0.4565,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          64
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "corp_scope1_kitchen",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          94,
+          0.3756
+        ],
+        [
+          "ghgp_scope2",
+          41,
+          0.3625
+        ],
+        [
+          "ghgp_scope2",
+          42,
+          0.3591
+        ],
+        [
+          "ghgp_scope2",
+          41,
+          0.3575
+        ],
+        [
+          "ghgp_scope2",
+          36,
+          0.3562
+        ]
+      ],
+      "best_similarity": 0.3756,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 1,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          36
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "corp_scope2_grid",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          39,
+          0.5167
+        ],
+        [
+          "ghgp_scope2",
+          49,
+          0.5146
+        ],
+        [
+          "ghgp_corporate",
+          30,
+          0.5127
+        ],
+        [
+          "ghgp_scope2",
+          27,
+          0.5079
+        ],
+        [
+          "ghgp_corporate",
+          29,
+          0.5041
+        ]
+      ],
+      "best_similarity": 0.5167,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          29
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s2_location_based",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          28,
+          0.6596
+        ],
+        [
+          "ghgp_scope2",
+          64,
+          0.6528
+        ],
+        [
+          "ghgp_scope2",
+          46,
+          0.6525
+        ],
+        [
+          "ghgp_scope2",
+          34,
+          0.6519
+        ],
+        [
+          "ghgp_scope2",
+          42,
+          0.6463
+        ]
+      ],
+      "best_similarity": 0.6596,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 3,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          28
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s2_vintage",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          45,
+          0.5361
+        ],
+        [
+          "ghgp_scope2",
+          66,
+          0.5319
+        ],
+        [
+          "ghgp_scope3",
+          86,
+          0.5256
+        ],
+        [
+          "ghgp_scope3",
+          79,
+          0.5241
+        ],
+        [
+          "ghgp_scope2",
+          42,
+          0.5175
+        ]
+      ],
+      "best_similarity": 0.5361,
+      "first_hit_rank": 2,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          66
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s2_tenant",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          88,
+          0.409
+        ],
+        [
+          "ghgp_corporate",
+          29,
+          0.4032
+        ],
+        [
+          "ghgp_scope3",
+          126,
+          0.4009
+        ],
+        [
+          "ghgp_corporate",
+          30,
+          0.3888
+        ],
+        [
+          "ghgp_scope3",
+          127,
+          0.3881
+        ]
+      ],
+      "best_similarity": 0.409,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          126
+        ],
+        [
+          "ghgp_scope3",
+          127
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s2_own_generation",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          29,
+          0.5655
+        ],
+        [
+          "ghgp_corporate",
+          30,
+          0.5653
+        ],
+        [
+          "ghgp_scope2",
+          37,
+          0.5535
+        ],
+        [
+          "ghgp_scope2",
+          98,
+          0.5499
+        ],
+        [
+          "ghgp_scope2",
+          39,
+          0.5485
+        ]
+      ],
+      "best_similarity": 0.5655,
+      "first_hit_rank": 3,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          29
+        ],
+        [
+          "ghgp_scope2",
+          37
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s2_sold_certificates",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          83,
+          0.5202
+        ],
+        [
+          "ghgp_scope2",
+          111,
+          0.4955
+        ],
+        [
+          "ghgp_scope2",
+          65,
+          0.4938
+        ],
+        [
+          "ghgp_scope2",
+          9,
+          0.4925
+        ],
+        [
+          "ghgp_scope2",
+          88,
+          0.49
+        ]
+      ],
+      "best_similarity": 0.5202,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 1,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          65
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s2_district_cooling",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          96,
+          0.5595
+        ],
+        [
+          "ghgp_scope2",
+          37,
+          0.5327
+        ],
+        [
+          "ghgp_scope2",
+          37,
+          0.5299
+        ],
+        [
+          "ghgp_scope2",
+          36,
+          0.5292
+        ],
+        [
+          "ghgp_scope2",
+          43,
+          0.5273
+        ]
+      ],
+      "best_similarity": 0.5595,
+      "first_hit_rank": 2,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          36
+        ],
+        [
+          "ghgp_scope2",
+          96
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s3_exclusions",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          62,
+          0.6686
+        ],
+        [
+          "ghgp_scope3",
+          62,
+          0.6589
+        ],
+        [
+          "ghgp_scope3",
+          26,
+          0.6536
+        ],
+        [
+          "ghgp_corporate",
+          33,
+          0.6534
+        ],
+        [
+          "ghgp_scope3",
+          63,
+          0.6523
+        ]
+      ],
+      "best_similarity": 0.6686,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 4,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          62
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s3_investments",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          53,
+          0.7835
+        ],
+        [
+          "ghgp_scope3",
+          56,
+          0.7821
+        ],
+        [
+          "ghgp_scope3",
+          54,
+          0.7674
+        ],
+        [
+          "ghgp_scope3",
+          55,
+          0.7641
+        ],
+        [
+          "ghgp_scope3",
+          53,
+          0.7585
+        ]
+      ],
+      "best_similarity": 0.7835,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 1,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          54
+        ],
+        [
+          "ghgp_scope3",
+          56
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s3_inbound_courier",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          32,
+          0.5035
+        ],
+        [
+          "ghgp_corporate",
+          33,
+          0.4963
+        ],
+        [
+          "ghgp_scope3",
+          96,
+          0.4826
+        ],
+        [
+          "ghgp_corporate",
+          32,
+          0.4731
+        ],
+        [
+          "ghgp_scope3",
+          48,
+          0.4688
+        ]
+      ],
+      "best_similarity": 0.5035,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s3_allocation",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          96,
+          0.5654
+        ],
+        [
+          "ghgp_scope3",
+          83,
+          0.5521
+        ],
+        [
+          "ghgp_scope3",
+          89,
+          0.5507
+        ],
+        [
+          "ghgp_scope3",
+          90,
+          0.546
+        ],
+        [
+          "ghgp_scope3",
+          91,
+          0.5434
+        ]
+      ],
+      "best_similarity": 0.5654,
+      "first_hit_rank": 3,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          89
+        ],
+        [
+          "ghgp_scope3",
+          91
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s3_business_travel",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          48,
+          0.3907
+        ],
+        [
+          "ghgp_corporate",
+          95,
+          0.3856
+        ],
+        [
+          "ghgp_corporate",
+          95,
+          0.376
+        ],
+        [
+          "ghgp_corporate",
+          44,
+          0.3738
+        ],
+        [
+          "ghgp_corporate",
+          28,
+          0.368
+        ]
+      ],
+      "best_similarity": 0.3907,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          48
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s3_waste",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          92,
+          0.3601
+        ],
+        [
+          "ghgp_scope3",
+          48,
+          0.3351
+        ],
+        [
+          "ghgp_scope3",
+          46,
+          0.3324
+        ],
+        [
+          "ghgp_scope3",
+          110,
+          0.302
+        ],
+        [
+          "ghgp_corporate",
+          34,
+          0.3013
+        ]
+      ],
+      "best_similarity": 0.3601,
+      "first_hit_rank": 3,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          46
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "u_sg_carbon_tax",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "off_corpus",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          28,
+          0.3715
+        ],
+        [
+          "ghgp_corporate",
+          93,
+          0.3709
+        ],
+        [
+          "ghgp_scope3",
+          149,
+          0.3661
+        ],
+        [
+          "ghgp_corporate",
+          31,
+          0.365
+        ],
+        [
+          "ghgp_corporate",
+          103,
+          0.3648
+        ]
+      ],
+      "best_similarity": 0.3715,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_hfc134a_gwp",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          100,
+          0.4477
+        ],
+        [
+          "ghgp_corporate",
+          101,
+          0.4467
+        ],
+        [
+          "ghgp_corporate",
+          1,
+          0.4386
+        ],
+        [
+          "ghgp_scope2",
+          97,
+          0.4377
+        ],
+        [
+          "ghgp_scope2",
+          105,
+          0.4365
+        ]
+      ],
+      "best_similarity": 0.4477,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_sgx_scope3_timeline",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "off_corpus",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          34,
+          0.6397
+        ],
+        [
+          "ghgp_scope3",
+          123,
+          0.633
+        ],
+        [
+          "ghgp_scope3",
+          124,
+          0.6285
+        ],
+        [
+          "ghgp_scope3",
+          28,
+          0.6164
+        ],
+        [
+          "ghgp_scope3",
+          23,
+          0.6124
+        ]
+      ],
+      "best_similarity": 0.6397,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_refrigerant_leak_rate",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          95,
+          0.3645
+        ],
+        [
+          "ghgp_corporate",
+          95,
+          0.3631
+        ],
+        [
+          "ghgp_corporate",
+          41,
+          0.3547
+        ],
+        [
+          "ghgp_scope2",
+          53,
+          0.3507
+        ],
+        [
+          "ghgp_scope3",
+          96,
+          0.3494
+        ]
+      ],
+      "best_similarity": 0.3645,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_gst_electricity",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "off_corpus",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          89,
+          0.3746
+        ],
+        [
+          "ghgp_corporate",
+          89,
+          0.3668
+        ],
+        [
+          "ghgp_corporate",
+          89,
+          0.3449
+        ],
+        [
+          "ghgp_scope2",
+          49,
+          0.3445
+        ],
+        [
+          "ghgp_scope2",
+          98,
+          0.3433
+        ]
+      ],
+      "best_similarity": 0.3746,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_cut_by_2030",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          80,
+          0.5986
+        ],
+        [
+          "ghgp_corporate",
+          80,
+          0.5887
+        ],
+        [
+          "ghgp_scope2",
+          76,
+          0.5876
+        ],
+        [
+          "ghgp_corporate",
+          80,
+          0.5857
+        ],
+        [
+          "ghgp_corporate",
+          78,
+          0.5767
+        ]
+      ],
+      "best_similarity": 0.5986,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    }
+  ]
+}
