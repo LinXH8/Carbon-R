@@ -13,8 +13,9 @@ services:
       POSTGRES_PASSWORD: carbon_r
       POSTGRES_DB: carbon_r
     ports:
-      # 5433 on the host: leaves a system Postgres on 5432 undisturbed.
-      - "5433:5432"
+      # 5433 on the host, and on localhost only: leaves a system Postgres on 5432
+      # undisturbed, and does not expose the fixed development login to the network.
+      - "127.0.0.1:5433:5432"
     volumes:
       - carbon_r_pgdata:/var/lib/postgresql/data
     healthcheck:
