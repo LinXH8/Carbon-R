@@ -25,8 +25,26 @@ from carbon_r.api.uploads import UploadRejected, save_upload
 from carbon_r.config import get_settings
 from carbon_r.db import check_connection
 
-# Carbon R's own loggers at INFO (the per-tool `run_id=` lines); uvicorn keeps its own config.
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+# Carbon R's own loggers at INFO (the per-tool `run_id=` lines), and nothing else: the root
+# logger is left alone, so libraries keep their defaults. The HTTP clients are pinned at
+# WARNING explicitly, because an earlier root-level basicConfig made them log every provider
+# request. uvicorn keeps its own configuration.
+HTTP_CLIENT_LOGGERS = ("httpx", "httpx2", "httpcore", "openai")
+
+
+def _configure_logging() -> None:
+    ours = logging.getLogger("carbon_r")
+    if not ours.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+        ours.addHandler(handler)
+    ours.setLevel(logging.INFO)
+    ours.propagate = False
+    for name in HTTP_CLIENT_LOGGERS:
+        logging.getLogger(name).setLevel(logging.WARNING)
+
+
+_configure_logging()
 
 app = FastAPI(
     title="Carbon R",
