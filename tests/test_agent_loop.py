@@ -157,3 +157,9 @@ def test_an_invented_figure_is_flagged(session, toolkit):
         toolkit=toolkit,
     )
     assert run.unverified_figures == ["673,430"]
+
+
+def test_every_run_has_its_own_run_id(session, toolkit):
+    first = run_agent(session, "q", client=fake_client(*FULL_SEQUENCE), model="m", toolkit=toolkit)
+    second = run_agent(session, "q", client=fake_client(*FULL_SEQUENCE), model="m", toolkit=toolkit)
+    assert len(first.run_id) == 32 and first.run_id != second.run_id

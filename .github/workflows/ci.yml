@@ -1,0 +1,52 @@
+# Lint and the offline test suite on every push, plus a check that the image builds.
+#
+# No secrets, by design: the evals need a database, an API key and (for retrieval) the
+# git-ignored GHG Protocol PDFs, so they run locally and their run files are committed with
+# the SHA they measured (README, "What CI runs, and what it does not"). Every test that
+# needs one of those resources skips without it.
+
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # The same system libraries as the Dockerfile: pdftoppm, and WeasyPrint's renderer.
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            poppler-utils libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.18"
+          python-version: "3.13"
+
+      - name: Install
+        run: uv sync --locked
+
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Tests (offline)
+        run: uv run pytest -q -rs
+
+  image:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t carbon-r:ci .
+      - name: System tools present in the image
+        run: |
+          docker run --rm --entrypoint sh carbon-r:ci -c \
+            'pdftoppm -v && python -c "import weasyprint; print(weasyprint.__version__)"'

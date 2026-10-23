@@ -7,6 +7,7 @@ handles, the arithmetic, the audit - lives in `carbon_r.agent`, which has no HTT
 and is tested without a server.
 """
 
+import logging
 from pathlib import Path
 from typing import Annotated
 
@@ -23,6 +24,9 @@ from carbon_r.api.stream import SSE_HEADERS, SSE_MEDIA_TYPE, stream_chat
 from carbon_r.api.uploads import UploadRejected, save_upload
 from carbon_r.config import get_settings
 from carbon_r.db import check_connection
+
+# Carbon R's own loggers at INFO (the per-tool `run_id=` lines); uvicorn keeps its own config.
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 app = FastAPI(
     title="Carbon R",

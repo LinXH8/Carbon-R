@@ -1,13 +1,45 @@
 # Carbon R
 
+[![ci](https://github.com/LinXH8/Carbon-R/actions/workflows/ci.yml/badge.svg)](https://github.com/LinXH8/Carbon-R/actions/workflows/ci.yml)
+
 Upload a utility bill or fuel invoice, get a greenhouse-gas figure that carries its own
 receipts: the emission factor used, its unit, publisher, year, and the document it came from.
 
-**Status:** Tier 2, Block 3 complete — usable end to end in the browser. Upload an
-electricity bill, an LPG invoice or a vehicle fuel-card statement and get a cited Scope 1
-or Scope 2 figure, with every line of the derivation shown. The test set is 198 synthetic
-documents over four layouts and three difficulty tiers, one layout held out; results are
-under [What the evals measure](#what-the-evals-measure).
+**Status:** Tier 2 — usable end to end in the browser, and from a fresh clone with
+`docker compose up`. Upload an electricity bill, an LPG invoice or a vehicle fuel-card
+statement and get a cited Scope 1 or Scope 2 figure, with every line of the derivation
+shown; ask a methodology question and get verbatim GHG Protocol quotes with their pages, or
+an honest "not answered". The test set is 198 synthetic documents over four layouts and
+three difficulty tiers, one layout held out; results are under [What the evals
+measure](#what-the-evals-measure).
+
+## Quick start (Docker)
+
+```bash
+git clone https://github.com/LinXH8/Carbon-R.git && cd Carbon-R
+echo "OPENAI_API_KEY=sk-..." > .env      # the only thing you need to supply
+docker compose up --build
+open http://localhost:8000
+```
+
+Compose runs its own Postgres (with pgvector), applies the migrations and seeds the
+emission factors on every start (idempotent), and pins the model ids the README's numbers
+were measured with (`OPENAI_MODEL`, `OPENAI_EMBEDDING_MODEL`; override either in `.env`).
+Without a key the stack still starts, and `/health` says what is missing. To try it without
+a bill of your own, render a synthetic one inside the container and upload it on the page:
+
+```bash
+docker compose exec app python scripts/generate_docs.py --kind electricity_bill --tiers clean --out /tmp/docs
+docker compose cp app:/tmp/docs/electricity_bill/clean/elec_001.pdf .
+```
+
+Methodology questions need the GHG Protocol standards, which cannot be redistributed; until
+they are ingested, `search_methodology` says so instead of answering. See [Methodology
+corpus](#methodology-corpus).
+
+More: [architecture](docs/architecture.md) · [data and its licences](DATA.md) ·
+[ADR 0001: exact SQL for factors](docs/adr/0001-exact-sql-for-factors.md) ·
+[ADR 0002: Postgres + pgvector, no ANN index yet](docs/adr/0002-postgres-pgvector.md)
 
 ## The one design rule worth stating up front
 
@@ -349,6 +381,32 @@ open http://localhost:8000
 `/health` reports whether the database and the model provider are configured, so a partly
 configured checkout tells you what is missing instead of crashing.
 
+Every `/chat` response carries a `run_id`; the server logs one `run_id=… tool=… status=…`
+line per tool call, so a reply on screen can be matched to the calls behind it.
+
+### Methodology corpus
+
+`search_methodology` searches the GHG Protocol Corporate Standard, Scope 2 Guidance and
+Scope 3 Standard. Their terms do not allow redistribution, so a clone does not include them
+and the database starts with none of their text. To enable it:
+
+1. Download the three PDFs from ghgprotocol.org (the [Corporate
+   Standard](https://ghgprotocol.org/corporate-standard), the [Scope 2
+   Guidance](https://ghgprotocol.org/scope-2-guidance) and the [Scope 3
+   Standard](https://ghgprotocol.org/corporate-value-chain-scope-3-standard)) and save them
+   as `data/raw/ghgp/ghg-protocol-revised.pdf`, `data/raw/ghgp/Scope 2 Guidance.pdf` and
+   `data/raw/ghgp/Scope 3 Standard.pdf`.
+2. Ingest them (about 220,000 embedding tokens, once):
+
+   ```bash
+   docker compose run --rm app python scripts/ingest_methodology.py   # Docker
+   make ingest-methodology                                            # local
+   ```
+
+The ingest checks each file's sha256 against the registry in `src/carbon_r/sources.py` and
+refuses one that differs — a re-published edition is a different document, and the eval's
+page labels would not apply to it.
+
 ### The page
 
 `http://localhost:8000` is a single page with no build step: drop a bill on it, ask a
@@ -422,7 +480,7 @@ make flow-scope1  # one Block 1 document of each kind, including a refusal
 make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forward, a photo
 make ingest-methodology  # chunk + embed the local GHG Protocol PDFs (idempotent; local only)
 make eval-retrieval      # score search_methodology on the dev split (model calls)
-make check        # ruff + the full test suite (655 tests, 1 skipped)
+make check        # ruff + the full test suite (663 tests, 1 skipped)
 ```
 
 ## Data provenance
@@ -507,7 +565,9 @@ Stated plainly, because they bound what any number here means:
 ```
 src/carbon_r/
   config.py    settings from the environment
-  db.py        connection helper
+  db.py        connection helper and the migration runner
+  sources.py   the source registry: every document read, with licence and sha256
+  rag/         methodology retrieval: chunking, embedding, ingestion, the eval key
   main.py      FastAPI app: the page, /health, /upload, /chat, /chat/stream
   money.py     one definition of "round to cents", shared by generator and extraction
   models/      Pydantic domain models: answer keys, extraction targets, activities,
@@ -515,17 +575,23 @@ src/carbon_r/
   xlsx.py      a read-only xlsx reader, for transcribing publishers' workbooks
   synthgen/    the synthetic-document generator (answer first, then the document):
                layouts, quirks, degradation, and the company-year scenarios
-  tools/       what the agent may call, plus company_year.py — a roll-up and an
-               allocation that are Python only, not yet exposed as tools
-  agent/       the tool-calling loop, the session workspace, the figure audit
+  tools/       what the agent may call (including methodology.py), plus company_year.py —
+               a roll-up and an allocation that are Python only, not yet exposed as tools
+  agent/       the tool-calling loop, the session workspace, the figure and quote audits
   api/         request and response models, upload storage, the SSE stream
   static/      the page: one HTML file, its stylesheet, its script, and a spring
 db/migrations/ schema, applied in filename order
-scripts/       factor loading, document and scenario generation, the extraction eval,
-               the scenario eval, the flow checks
-tests/         585 tests and 1 skipped, every one of them offline: no .env, no
-               database, no API key
+scripts/       factor loading, document and scenario generation, the extraction,
+               scenario and retrieval evals, methodology ingest, peer intake, the flow
+               checks, the container entrypoint
+tests/         663 pass with no .env, no database, no API key and no corpus (that is
+               what CI runs); tests needing one of those skip without it
+docs/          architecture diagram, ADRs, the GHG Protocol skim guide
+data/evals/    the retrieval key (hashes, no GHG Protocol text) and committed eval runs
+data/peer_sources.json  provenance of the peer reports (the reports are local)
 data/uploads/  documents uploaded at runtime — git-ignored, never committed
 data/raw/      source documents and publishers' workbooks — git-ignored, never committed
 data/generated/ synthetic documents, answer keys, eval runs — git-ignored
+Dockerfile, docker-compose.yml   the image and the two-container stack
+.github/workflows/ci.yml         lint, offline tests, image build
 ```

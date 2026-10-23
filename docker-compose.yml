@@ -1,9 +1,9 @@
-# Local Postgres, as an alternative to a hosted database.
+# Carbon R from a fresh clone: `docker compose up`, then http://localhost:8000.
 #
-# Carbon R currently runs against Supabase (see .env), but Tier 2's done-check requires the
-# repo to come up from a fresh `git clone` + `docker compose up`, so the local path is kept
-# working. pgvector is in the image from the start because Tier 2 Block 4 embeds the
-# methodology corpus into the same database the factors live in.
+# The stack runs its own Postgres (with pgvector) and seeds the emission factors on start;
+# no hosted database is needed. The only thing a fresh clone must supply is an OpenAI key,
+# in a `.env` beside this file - and even without one the stack starts and says what is
+# missing (`/health`).
 
 services:
   db:
@@ -23,5 +23,29 @@ services:
       timeout: 5s
       retries: 10
 
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Always the stack's own database, even if a developer's .env points at a hosted one.
+      DATABASE_URL: postgresql://carbon_r:carbon_r@db:5432/carbon_r
+      # The project's pinned snapshots. config.py has no defaults on purpose (a model id
+      # must be one the billed account has); these are the ids the README's numbers were
+      # measured with. Override either in the shell or .env.
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5.4-mini-2026-03-17}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+    volumes:
+      # The GHG Protocol PDFs, if downloaded (README "Methodology corpus"). Read-only.
+      - ./data/raw:/app/data/raw:ro
+      - carbon_r_uploads:/app/data/uploads
+
 volumes:
   carbon_r_pgdata:
+  carbon_r_uploads:

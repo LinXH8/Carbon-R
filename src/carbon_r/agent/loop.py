@@ -22,6 +22,8 @@ scripts a sequence of tool calls - see `tests/test_agent_loop.py`.
 
 from __future__ import annotations
 
+import logging
+import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Protocol
@@ -34,6 +36,10 @@ from carbon_r.agent.session import Session
 from carbon_r.agent.tools import Toolkit
 from carbon_r.agent.toolspec import tool_schemas
 from carbon_r.config import get_settings
+
+# One line per tool call, keyed by the run, so a reply on screen can be matched to the calls
+# that produced it in the server log. The same id is the trace id if tracing is enabled.
+log = logging.getLogger("carbon_r.agent")
 
 
 class SupportsResponses(Protocol):  # pragma: no cover - a shape, not behaviour
@@ -59,6 +65,7 @@ class AgentRun:
 
     session_id: str
     reply: str
+    run_id: str = field(default_factory=lambda: uuid.uuid4().hex)
     tool_calls: list[ToolCallRecord] = field(default_factory=list)
     turns_used: int = 0
     stopped_reason: str = "completed"  # completed | max_turns | provider_error
@@ -118,6 +125,8 @@ def run_agent(
     optional and defaults to doing nothing, which is what every non-streaming caller wants.
     """
     emit = on_event or (lambda event: None)
+    run_id = uuid.uuid4().hex
+    log.info("run_id=%s session=%s start", run_id, session.session_id)
     settings = get_settings()
     model = model or settings.openai_model
     if client is None:
@@ -160,6 +169,7 @@ def run_agent(
 
         for call in requested:
             result = toolkit.dispatch(call.name, call.arguments)
+            log.info("run_id=%s tool=%s status=%s", run_id, call.name, result.status)
             calls.append(
                 ToolCallRecord(
                     tool=call.name,
@@ -191,9 +201,11 @@ def run_agent(
         reply = _unfinished_reply(session, turns, max_turns)
 
     session.history = conversation
+    log.info("run_id=%s stopped=%s turns=%d", run_id, stopped, turns)
     return AgentRun(
         session_id=session.session_id,
         reply=reply,
+        run_id=run_id,
         tool_calls=calls,
         turns_used=turns,
         stopped_reason=stopped,

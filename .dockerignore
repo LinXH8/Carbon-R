@@ -1,0 +1,23 @@
+# Nothing secret and nothing third-party enters the image.
+.env
+.env.*
+!.env.example
+data/raw/
+data/generated/
+data/uploads/
+data/evals/local/
+
+# Local environments, caches and history.
+.venv*/
+.git/
+.github/
+.pytest_cache/
+.ruff_cache/
+**/__pycache__/
+.DS_Store
+.claude/
+
+# Personal notes and third-party reference material, as in .gitignore.
+PROGRESS.md
+Carbon R Project Checklist.md
+apple-design/

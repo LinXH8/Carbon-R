@@ -16,6 +16,7 @@ from carbon_r.tools.methodology import (
     AnswerabilityJudgement,
     JudgedCitation,
     Passage,
+    _count_sql,
     _resolve,
     _search_sql,
     quote_in_passage,
@@ -180,6 +181,7 @@ def test_the_judge_is_not_called_below_the_threshold():
         embed=fake_embed,
         fetch=lambda *_: [passage(similarity=0.1).model_dump()],
         judge=judge,
+        count=lambda _: 1,
     )
     assert result.status == "no_results" and result.data["refusal_level"] == "retrieval"
 
@@ -191,8 +193,34 @@ def test_the_composed_tool_answers_through_the_judge():
         embed=fake_embed,
         fetch=lambda *_: [passage().model_dump()],
         judge=lambda q, passages: judged(),
+        count=lambda _: 1,
     )
     assert result.status == "ok"
+
+
+def test_an_empty_corpus_is_reported_before_anything_is_embedded():
+    def embed(_):
+        raise AssertionError("must not embed when the corpus is empty")
+
+    result = search_methodology("q", embed=embed, count=lambda _: 0)
+    assert result.status == "no_results"
+    assert result.data["refusal_level"] == "not_ingested"
+    assert "Methodology corpus" in result.message
+
+
+@pytest.mark.parametrize("filter_source", [False, True])
+def test_the_count_uses_exactly_the_search_filter(filter_source):
+    count_sql, search_sql = (
+        _count_sql(filter_source=filter_source),
+        _search_sql(filter_source=filter_source),
+    )
+    for clause in (
+        "c.corpus = 'methodology'",
+        "c.embedding_model = %(embedding_model)s",
+        "c.chunker_version = %(chunker_version)s",
+    ):
+        assert clause in count_sql and clause in search_sql
+    assert ("c.source_id = %(source_id)s" in count_sql) is filter_source
 
 
 def test_an_empty_question_is_an_error():

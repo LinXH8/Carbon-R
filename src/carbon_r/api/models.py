@@ -220,6 +220,7 @@ class ChatResponse(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     session_id: str
+    run_id: str = Field(description="Identifies this turn in the server log (and trace, if on)")
     reply: str
     tool_calls: list[ToolCallOut]
     turns_used: int
@@ -243,6 +244,7 @@ class ChatResponse(BaseModel):
     def from_run(cls, run: AgentRun) -> "ChatResponse":
         return cls(
             session_id=run.session_id,
+            run_id=run.run_id,
             reply=run.reply,
             tool_calls=[ToolCallOut(**vars(call)) for call in run.tool_calls],
             turns_used=run.turns_used,

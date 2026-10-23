@@ -54,7 +54,27 @@ RETRIEVAL_THRESHOLD = 0.30
 # A quote shorter than this proves nothing: "the company" is a substring of most passages.
 MIN_QUOTE_WORDS = 5
 
-RefusalLevel = Literal["retrieval", "generation"]
+RefusalLevel = Literal["not_ingested", "retrieval", "generation"]
+
+NOT_INGESTED_MESSAGE = (
+    "The GHG Protocol methodology corpus is not loaded in this database: it is not "
+    "distributed with Carbon R, because its terms do not allow redistribution. See the "
+    "README section 'Methodology corpus' to download the three standards and ingest them. "
+    "Tell the user that methodology questions cannot be answered until then; do not answer "
+    "from memory."
+)
+
+# The filter every query against the corpus applies: one definition, so the count that
+# decides "not ingested" and the search that ranks can never disagree about what is there.
+_CORPUS_FILTER = """c.corpus = 'methodology'
+      and c.embedding_model = %(embedding_model)s
+      and c.chunker_version = %(chunker_version)s"""
+
+
+def _count_sql(*, filter_source: bool) -> str:
+    """How many searchable chunks exist, under exactly the search's filter."""
+    source_clause = "and c.source_id = %(source_id)s" if filter_source else ""
+    return f"select count(*) from document_chunks c where {_CORPUS_FILTER} {source_clause}"
 
 
 def _search_sql(*, filter_source: bool) -> str:
@@ -66,9 +86,7 @@ def _search_sql(*, filter_source: bool) -> str:
            1 - (c.embedding <=> %(query)s::vector) as similarity
     from document_chunks c
     join sources s on s.id = c.source_id
-    where c.corpus = 'methodology'
-      and c.embedding_model = %(embedding_model)s
-      and c.chunker_version = %(chunker_version)s
+    where {_CORPUS_FILTER}
       {source_clause}
     order by c.embedding <=> %(query)s::vector, c.id
     limit %(k)s
@@ -135,6 +153,7 @@ Passages:
 """
 
 Fetcher = Callable[[list[float], str | None, int], list[dict[str, Any]]]
+Counter = Callable[[str | None], int]
 Judge = Callable[[str, Sequence[Passage]], AnswerabilityJudgement]
 
 
@@ -235,6 +254,16 @@ def _db_fetch(vector: list[float], source_id: str | None, k: int) -> list[dict[s
         return cur.execute(_search_sql(filter_source=source_id is not None), params).fetchall()
 
 
+def _db_count(source_id: str | None) -> int:
+    params = {
+        "embedding_model": configured_model(),
+        "chunker_version": CHUNKER_VERSION,
+        "source_id": source_id,
+    }
+    with connect() as conn:
+        return conn.execute(_count_sql(filter_source=source_id is not None), params).fetchone()[0]
+
+
 def openai_judge(usage: list[dict] | None = None) -> Judge:
     from openai import OpenAI
 
@@ -284,11 +313,22 @@ def search_methodology(
     embed: Callable[[Sequence[str]], list[list[float]]] | None = None,
     fetch: Fetcher | None = None,
     judge: Judge | None = None,
+    count: Counter | None = None,
 ) -> ToolResult:
-    """Passages from the GHG Protocol standards that answer `question`, or no_results."""
+    """Passages from the GHG Protocol standards that answer `question`, or no_results.
+
+    An empty corpus - the normal state of a fresh clone, which cannot ship the standards -
+    is reported before anything is embedded, so it costs no API call and is never confused
+    with "nothing relevant was found".
+    """
     if not question.strip():
         return error("Cannot search methodology: the question is empty.")
     try:
+        if (count or _db_count)(source_id) == 0:
+            return no_results(
+                NOT_INGESTED_MESSAGE,
+                {"question": question, "refusal_level": "not_ingested"},
+            )
         passages = retrieve(question, source_id, k=k, embed=embed, fetch=fetch)
         judgement = None
         if passages and passages[0].similarity >= threshold:
