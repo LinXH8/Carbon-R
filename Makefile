@@ -84,20 +84,25 @@ ingest-methodology:  ## Chunk + embed the GHG Protocol standards into document_c
 eval-retrieval:  ## Score methodology retrieval on the dev split (hit@k, both refusal levels)
 	uv run python scripts/eval_retrieval.py --split dev
 
+# The three targets below ran on the Block 1 set (data/generated/<kind>/clean) until Tier 2
+# Block 5, when its schema_version 1 answer keys no longer validated. They now run on
+# synthgen v1, whose same ids keep the same intent (checked: elec_001-005 are 2024 bills,
+# elec_010-018 are 2025 bills, lpg_001 is a Dec 2024 invoice with no published factor).
 agent-smoke:  ## End-to-end flow check of /upload + /chat on 5 bills (NOT an accuracy measurement)
-	uv run python scripts/agent_flow_check.py --root data/generated
+	uv run python scripts/agent_flow_check.py
 
 # Ten documents chosen to span both factor years, so the factor-year substitution
-# disclosure is actually exercised. The first five bills all fall in 2024 and never hit it.
+# disclosure is actually exercised: the first five bills fall in 2024 and never hit it; the
+# last five are 2025 bills, which take EMA's 2024 factor and must say so.
 flow-10:  ## Flow check on 10 bills across both factor years (NOT an accuracy measurement)
-	uv run python scripts/agent_flow_check.py --root data/generated --docs \
+	uv run python scripts/agent_flow_check.py --docs \
 	  elec_001,elec_002,elec_003,elec_004,elec_005,elec_010,elec_013,elec_016,elec_017,elec_018
 
 # One document per kind, chosen to exercise what Block 1 added: the kg->tonnes conversion
 # (lpg_004), a two-product total the model must not compute (fuel_001), and a supply period
 # with no published factor, where the honest answer is no figure at all (lpg_001).
 flow-scope1:  ## Flow check across all three kinds incl. a refusal (NOT an accuracy measurement)
-	uv run python scripts/agent_flow_check.py --root data/generated --docs elec_001,lpg_004,lpg_001,fuel_001
+	uv run python scripts/agent_flow_check.py --docs elec_001,lpg_004,lpg_001,fuel_001
 
 # Four synthgen v1 documents, none on the held-out layout: elec_068 crosses 31 Dec 2023, so
 # its two lines take two DIFFERENT published EMA factors (2023 0.412, 2024 0.402) - a
