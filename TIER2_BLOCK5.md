@@ -73,10 +73,20 @@ is not loaded and pointing to the README. Regression checks against the hosted d
 |---|---|
 | **The no-corpus reply quoted a field value** — it wrote `the methodology corpus is "not ingested"` (the tool's `refusal_level` is `not_ingested`) and described a "nearest result" that did not exist | **The quote audit**, on the fresh-clone run: `unverified_quotes: ['not ingested']`. The prompt now branches on `refusal_level`: on `not_ingested`, say the corpus is not loaded and how to load it, quote nothing, describe no result |
 | `test_xlsx` passed its own `.py` file as a workbook when the DESNZ workbook was absent, raising a zip error instead of `SheetNotFoundError`: `make check` failed on **every fresh clone since Tier 2 Block 1** | The clean-clone test run before the first push. The test now builds a tiny workbook |
-| `make agent-smoke`, `flow-10` and `flow-scope1` cannot run: their Block 1 document set has `schema_version 1` answer keys, and the models now require 2 | Re-running them in this block. Covered by a v1 stand-in (above); the targets themselves are not yet repointed |
-| The figure audit flags a numbered-list marker: one no-corpus reply wrote "1. Download…" and got `unverified_figures: ['1']` | The three-run re-check. Recorded, not fixed: excluding list markers relaxes the audit, which is a decision, not a cleanup |
-| `logging.basicConfig` at INFO in `main.py` also raised the HTTP client's logs, so every provider request writes a log line (URLs only, no keys) | Reading the flow-check output. Not yet scoped to Carbon R's own loggers |
+| `make agent-smoke`, `flow-10` and `flow-scope1` cannot run: their Block 1 document set has `schema_version 1` answer keys, and the models now require 2 | Re-running them in this block. Covered by a v1 stand-in (above); repointed after the tag (below) |
+| The figure audit flags a numbered-list marker: one no-corpus reply wrote "1. Download…" and got `unverified_figures: ['1']` | The three-run re-check. Fixed after the tag, by decision (below) |
+| `logging.basicConfig` at INFO in `main.py` also raised the HTTP client's logs, so every provider request writes a log line (URLs only, no keys) | Reading the flow-check output. Fixed after the tag (below) |
 | The first push was rejected: the GitHub token lacked the `workflow` scope needed to add a workflow file | The push itself; fixed by refreshing the token's scopes |
+
+## Post-tag fixes (after `v0.2-tier2`; no new tag)
+
+Three defects from the table above, one commit each, on `main` after the tag:
+
+| Fix | Commit | Evidence |
+|---|---|---|
+| `agent-smoke`, `flow-10` and `flow-scope1` repointed at synthgen v1 (same ids, same intent: `elec_001`–`005` are 2024 bills, `elec_010`–`018` 2025 bills, `lpg_001` a Dec 2024 invoice with no factor) | `b845217` | `flow-10` **10 of 10** on all six checks, substitution 5 of 10; `flow-scope1` **4 of 4**, refusal 1 of 4; `agent-smoke` 5 of 5 on five checks but **cited 4 of 5** — `elec_003`'s reply gave the factor, publisher and source but not its year. Recorded as a failure, not re-run: the same bill cited its year in `flow-10` and in the 8-document run, so the model sometimes drops it |
+| Logging scoped to the `carbon_r` logger (own handler, INFO, no propagation); `httpx`, `httpx2`, `httpcore`, `openai` pinned at WARNING; root logger untouched | `21a1b34` | A live flow check printed 0 HTTP request lines and the `run_id=` lines as before; 3 tests |
+| Figure audit ignores a numbered-list marker: **one or two** digits at the start of a line, then `.` or `)` and a space. A figure later on the line is still checked | `c8dd936` | 6 tests, including "1. Use 0.42 kg" → `['0.42']` and "2024. That year's…" still flagged. The two-digit cap is a deliberate narrowing of "a number": without it, a line opening with a year would escape the audit. The earlier flagged reply now audits clean |
 
 ## Known limits
 
