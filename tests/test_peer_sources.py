@@ -3,6 +3,7 @@
 from collections import Counter
 
 import pytest
+
 from peer_intake import RAW, check, load_peer_sources
 
 SOURCES = load_peer_sources()
