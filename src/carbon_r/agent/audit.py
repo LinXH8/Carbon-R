@@ -44,6 +44,13 @@ _NUMBER = re.compile(r"(?<![A-Za-z0-9_.])[-+]?\d[\d,]*(?:\.\d+)?(?![A-Za-z0-9_])
 # Not quantities. `Scope 2` is a classification, and so is a tier.
 _NON_QUANTITIES = re.compile(r"\b(?:scope|tier)\s*[-–]?\s*\d+\b", re.IGNORECASE)
 
+# A numbered-list marker: one or two digits at the start of a line, then "." or ")" and a
+# space ("1. Download…", "2) Ingest…"). Not a quantity. Only the marker is removed, so a
+# figure later on the same line is still checked. Capped at two digits so a line that starts
+# with a year ("2024. The factor…") is still audited. Added after Tier 2 Block 5, when a
+# reply's "1." was flagged as an untraced figure.
+_LIST_MARKER = re.compile(r"^([ \t]*)\d{1,2}[.)](?=[ \t])", re.MULTILINE)
+
 _MAX_PLACES = 6
 
 # A quoted span: straight double quotes or curly ones, on one line.
@@ -105,7 +112,7 @@ def audit_figures(reply: str, tool_payloads: list[dict]) -> list[str]:
     from without hunting for which `0.42` was meant.
     """
     allowed = allowed_numbers(tool_payloads)
-    text = _NON_QUANTITIES.sub(" ", reply)
+    text = _NON_QUANTITIES.sub(" ", _LIST_MARKER.sub(r"\1", reply))
 
     unverified: list[str] = []
     for token in _NUMBER.findall(text):

@@ -109,3 +109,32 @@ def test_disclosure_sentences_are_printable_not_directives():
         assert not sentence.rstrip().endswith("years."), name
         assert "State " not in sentence, name
         assert "Say " not in sentence, name
+
+
+# --- numbered-list markers ---------------------------------------------------------------
+
+
+def test_a_list_marker_at_the_start_of_a_line_is_not_a_figure():
+    reply = "To load it:\n1. Download the three standards\n2) Run the ingest"
+    assert audit_figures(reply, []) == []
+
+
+def test_a_figure_later_on_a_list_line_is_still_flagged():
+    assert audit_figures("1. Use 0.42 kg per kWh", []) == ["0.42"]
+
+
+def test_an_indented_marker_is_a_marker_too():
+    assert audit_figures("Steps:\n  3. Ask again", []) == []
+
+
+def test_a_number_mid_line_followed_by_a_full_stop_is_still_flagged():
+    assert audit_figures("That was step 3. Then ask.", []) == ["3"]
+
+
+def test_a_decimal_at_the_start_of_a_line_is_not_a_marker():
+    assert audit_figures("1.5 kg was emitted.", []) == ["1.5"]
+
+
+def test_a_year_starting_a_line_is_still_audited():
+    """The marker is capped at two digits, so "2024. " is not mistaken for one."""
+    assert audit_figures("2024. That year's factor.", []) == ["2024"]
