@@ -39,13 +39,14 @@ layout — and is kept for the record rather than as a current description.
 
 ## What works today, and what it measures
 
-Three tools, each returning `{status, data, message}`:
+Four tools, each returning `{status, data, message}`:
 
 | Tool | What it does |
 |---|---|
 | `extract_from_document` | Establishes what kind of document a page is, then has a vision model transcribe what is printed and returns the measurable activities it carries. It is never asked for a derived figure. A kind it cannot establish is refused, not guessed. When a printed figure fails a consistency check, it retries **once**, with the error and without the answer, and takes back only the fields that check reads. |
 | `lookup_emission_factor` | Exact SQL (`category`, `unit`, `year`), never similarity search. Returns the factor with publisher, source document, page, scope, method, gas basis and retrieval date. |
 | `calculate_emissions` | Plain Python. Takes a list of (activity, factor) pairs and returns each line and the total, with every input used, the derivation written out, and structured disclosure flags. |
+| `search_methodology` | The one similarity search in the project: GHG Protocol methodology prose, never a factor. Returns verbatim quotes with document and page, or `no_results` — either because nothing is close (retrieval level) or because the closest passages do not answer the question (generation level, decided by a judging model whose quotes must be found verbatim in the passages). Nothing it returns can enter a calculation. |
 
 Rolling a year of documents up into a company total, and allocating a share of it to one
 customer, are **plain Python in `tools/company_year.py`** (`roll_up`, `allocate`). They are
@@ -92,6 +93,8 @@ structural rather than a matter of prompt wording:
   with two pairs, and the sum is Python's.
 - **Its answer is audited.** Every number in a reply is matched against the numbers the
   tools returned; anything untraceable comes back on the response as `unverified_figures`.
+  Every quoted span is matched against the strings the tools returned in the session;
+  anything not found verbatim comes back as `unverified_quotes`.
 
 The loop is bounded at 8 turns. On `no_results`, on an error, or when the turns run out,
 it reports what is missing and asks — it never assembles a figure to look finished. Three
@@ -265,6 +268,70 @@ prompt *and* the response schema. A cache hit skips only the model call — ever
 it re-runs against current code, so a fix can be re-measured against the same replies at no
 API cost. Changing the prompt or the schema misses the cache by construction.
 
+### Methodology retrieval (Tier 2 Block 4)
+
+`search_methodology` is scored against a key of 48 questions drafted by reading the three
+GHG Protocol standards (Corporate Standard, Scope 2 Guidance, Scope 3 Standard), never from
+retrieval output: 36 answerable — 12 in each of three phrasings (`textbook`, in the
+standards' own words; `user`, as an SME finance or operations person would ask;
+`singlish`, as a Singaporean user might type it) — and 12 that the standards do not answer.
+Each label carries an anchor sentence that a test finds on the labelled page of the PDF.
+The key was checked against the documents once, after the first dev run, under one rule (a
+page counts only if it states the answer itself); every added and rejected page is listed
+in [TIER2_BLOCK4.md](TIER2_BLOCK4.md). A hit is the right **page** in the top 5 passages.
+
+Final setup, commit `b2fc2e4`; the test split was scored **once**, after everything was
+frozen:
+
+| | Dev hit@1 | Dev hit@5 | Test hit@1 | Test hit@5 |
+|---|---|---|---|---|
+| All answerable | 4 of 18 | 12 of 18 | 8 of 18 | 14 of 18 |
+| textbook | 2 of 6 | 4 of 6 | 4 of 6 | 6 of 6 |
+| user | 2 of 6 | 3 of 6 | 1 of 6 | 4 of 6 |
+| singlish | 0 of 6 | 5 of 6 | 3 of 6 | 4 of 6 |
+| Corporate Standard | 1 of 6 | 4 of 6 | 3 of 6 | 5 of 6 |
+| Scope 2 Guidance | 0 of 6 | 3 of 6 | 3 of 6 | 5 of 6 |
+| Scope 3 Standard | 3 of 6 | 5 of 6 | 2 of 6 | 4 of 6 |
+
+| Refusals | Dev | Test |
+|---|---|---|
+| Unanswerable questions refused | 6 of 6 | 6 of 6 |
+| Answerable questions wrongly refused | 2 of 18 | 1 of 18 |
+| Answered, citing a labelled page | 11 of 16 | 12 of 17 |
+
+What these numbers do and do not show:
+
+- **Every refusal came from the generation-level check.** The retrieval-level floor (cosine
+  similarity 0.30) refused nothing on either split: similarity scores for answerable and
+  unanswerable questions overlap, so no threshold separated them without refusing
+  answerable questions. It is kept as a guard, and recorded as doing no measurable work.
+- **Cells are six questions.** Test scoring above dev is within what two draws of six can
+  produce, and is not the result of tuning.
+- **User-style questions retrieve worst at the top** (hit@1 2 of 6 and 1 of 6): phrasing a
+  question away from the standards' vocabulary costs the most.
+- **The judge is not deterministic.** Two dev runs on identical retrieval (top 5 equal on
+  24 of 24 questions) differed by one question on each judge-level count.
+- **One retrieval change was tried on dev and reverted** — embedding each chunk with its
+  document's title. hit@5 fell from 12 to 10 of 18 and answers citing a labelled page from
+  12 of 15 to 9 of 16, because the title pulled in passages from the wrong standard.
+- **A verified quote is real, not necessarily relevant.** In that experiment one answer
+  quoted, verbatim, a passage on transmission losses for a question about purchased
+  electricity. The verbatim check cannot catch that; only the labelled-page metrics can.
+
+The corpus is local only. The standards' terms prohibit public reproduction and extraction
+by data mining, so no GHG Protocol text is committed: the anchors are stored as hashes,
+the run files hold ids, pages and scores, and the PDFs and their chunks stay on the
+machine that ingested them.
+
+### What CI runs, and what it does not
+
+CI runs lint and the offline tests — the chunker on hand-written text fixtures, the refusal
+decisions, the quote and figure audits, the key's schema and balance — none of which need a
+database, an API key or the corpus. The extraction and retrieval evals need all three (the
+retrieval eval also needs the git-ignored GHG Protocol PDFs), so they run locally and their
+run files are committed with the commit SHA they measured. "Evals on every push" means
+those committed runs, not a CI job.
+
 ## Running it
 
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.13 (uv will fetch it).
@@ -353,7 +420,9 @@ make agent-smoke  # end-to-end flow check of /upload + /chat on 5 Block 1 bills
 make flow-10      # the same flow on 10 Block 1 bills spanning both factor years
 make flow-scope1  # one Block 1 document of each kind, including a refusal
 make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forward, a photo
-make check        # ruff + the full test suite (585 tests, 1 skipped)
+make ingest-methodology  # chunk + embed the local GHG Protocol PDFs (idempotent; local only)
+make eval-retrieval      # score search_methodology on the dev split (model calls)
+make check        # ruff + the full test suite (655 tests, 1 skipped)
 ```
 
 ## Data provenance
@@ -366,6 +435,12 @@ listed in [SOURCES.md](SOURCES.md) with its publisher, URL and retrieval date.
 |---|---|---|---|---|
 | Singapore grid electricity, 2005–2024 | EMA, *Singapore Energy Statistics 2025*, Table 2.4 | — | 2 | CO₂ only |
 | LPG, diesel, petrol, 2025–2026 | DESNZ, *GHG Conversion Factors*, sheet `Fuels` | Open Government Licence v3.0 | 1 | CO₂e |
+
+Methodology passages come from the GHG Protocol Corporate Standard (2004), Scope 2 Guidance
+(2015) and Scope 3 Standard (2011), WRI / WBCSD. They are used locally under
+ghgprotocol.org's Terms of Use, which prohibit public reproduction; their text is never
+committed or published. Licences and hashes are in [SOURCES.md](SOURCES.md) and the
+`sources` table.
 
 The DESNZ factors are **published for the UK, not Singapore**, and every result that uses
 one says so. They are also CO₂e where EMA's is CO₂ only, so a figure combining the two
@@ -416,6 +491,10 @@ Stated plainly, because they bound what any number here means:
   allocation are measured by the scenario eval; asking the chat for a year's total or an
   allocated figure arrives in Tier 3. Allocation by revenue share is an assumption, and
   is labelled as one.
+- **Methodology retrieval is measured on 48 questions**, 6 per cell, written by one person
+  from the documents. Its refusals depend on a judging model that is not deterministic, and
+  its quote check proves a quote exists in a source, not that it answers the question. A
+  public deployment would show citations rather than GHG Protocol passages.
 - Where no factor is published for a document's activity year, the latest factor at or
   before it is used, up to two years back, and the substitution is stated on the result.
   Beyond two years, or where nothing is published at or before that year at all, the tool

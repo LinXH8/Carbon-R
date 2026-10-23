@@ -15,7 +15,7 @@ commercial purpose" and extracting it with "data mining technology". The Corpora
 3 Standards carry a bare copyright notice; only the Scope 2 Guidance has an open licence,
 and it is NonCommercial-NoDerivatives. So the methodology corpus is local only: chunks live
 in the project's own database, no GHG Protocol text is committed, and a public deployment
-cites passages rather than displaying them. Permission has been requested from GHG Protocol.
+cites passages rather than displaying them. Permission is to be requested from GHG Protocol.
 """
 
 from __future__ import annotations

@@ -10,8 +10,9 @@ established until then.
 | # | Source | Publisher | Used for | Retrieved | Status |
 |---|--------|-----------|----------|-----------|--------|
 | 1 | [Singapore Energy Statistics 2025, Ch. 2](https://www.ema.gov.sg/resources/singapore-energy-statistics/chapter2) | EMA | Scope 2 grid emission factor | 2026-10-15 | **verified from primary** |
-| 2 | [GHG Protocol Corporate Standard (revised)](https://ghgprotocol.org/corporate-standard) | WRI / WBCSD | Methodology; Tier 2 RAG corpus | 2026-10-16 | obtained — skim pending, see guide |
-| 3 | [GHG Protocol Scope 2 Guidance](https://ghgprotocol.org/scope-2-guidance) | WRI / WBCSD | Location- vs market-based method | 2026-10-16 | obtained — skim pending, see guide |
+| 2 | [GHG Protocol Corporate Standard (revised)](https://ghgprotocol.org/corporate-standard) | WRI / WBCSD | Methodology; `search_methodology` corpus (local only) | 2026-10-16 | obtained — terms read; skim pending, see guide |
+| 3 | [GHG Protocol Scope 2 Guidance](https://ghgprotocol.org/scope-2-guidance) | WRI | Location- vs market-based method; `search_methodology` corpus (local only) | 2026-10-16 | obtained — licence read; skim pending, see guide |
+| 3a | [GHG Protocol Scope 3 Standard](https://ghgprotocol.org/corporate-value-chain-scope-3-standard) | WRI / WBCSD | `search_methodology` corpus (local only) | 2026-10-22 | obtained — terms read |
 | 4 | [IRAS — 2024 GST Rate Change Guide (1st ed.)](https://www.iras.gov.sg/media/docs/default-source/e-tax/etaxguide_2024-gst-rate-change---a-guide-for-gst-registered-businesses_1st-edition.pdf) | IRAS | Synthetic bill GST line | 2026-10-16 | **verified from primary** |
 | 5 | [NCCS — Carbon tax](https://www.nccs.gov.sg/singapores-climate-action/mitigation-efforts/carbontax/) | NCCS | Tier 3 carbon-tax insight line | 2026-10-16 | **verified from primary** |
 | 6 | SG non-residential tariff *structure* (flat rate per tension category) | — | Shape of `synthgen` bills | — | **secondary only — VERIFY** |
@@ -88,14 +89,41 @@ match exactly** (16 GEF + 16 Build Margin):
 Consequence for the code: no runtime fallback to the data.gov.sg API, ever. A missing
 factor is a `no_results`.
 
-## 2–3. GHG Protocol standards — obtained, checklist skim still open
+## 2–3a. GHG Protocol standards — obtained, terms read, checklist skim still open
 
-Both PDFs are in `data/raw/ghgp/` and permanently git-ignored — redistribution is not
-ours to grant, and the Completion check requires no third-party PDFs in the repo.
+All three PDFs are in `data/raw/ghgp/` and permanently git-ignored — redistribution is not
+ours to grant, and the Completion check requires no third-party PDFs in the repo. Each is
+registered in the `sources` table (`carbon_r/sources.py`) with the sha256 below, and the
+ingest refuses a local file whose bytes differ.
 
-Used for methodology language and, from Tier 2 Block 4, as the retrieval corpus for
-`search_methodology`, where each chunk keeps its document title and page so answers cite a
-page rather than paraphrase from memory.
+| Id | Document | PDF pages | sha256 | Licence, as stated |
+|---|---|---|---|---|
+| `ghgp_corporate` | Corporate Standard, revised edition (2004) | 116 | `cfcda4dd…c0fe3c` | "Copyright © World Resources Institute and World Business Council for Sustainable Development, March 2004" — no licence granted |
+| `ghgp_scope2` | Scope 2 Guidance (2015) | 120 | `b4f17030…893c894a` | "Copyright 2015 World Resources Institute. This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivative Works 3.0 License." |
+| `ghgp_scope3` | Corporate Value Chain (Scope 3) Accounting and Reporting Standard (2011) | 152 | `c748e352…bded54b91` | "Copyright © World Resources Institute and World Business Council for Sustainable Development, September 2011" — no licence granted |
+
+The Scope 3 Standard was fetched on 2026-10-22 (SGT) from the PDF link on the standard's own
+page, `/sites/default/files/standards/Corporate-Value-Chain-Accounting-Reporing-Standard_041613_2.pdf`.
+The site also lists a "List of Corrections for Scope 3 Standard", which is not ingested.
+
+**ghgprotocol.org Terms of Use** ("Last Updated: February 2023"), read 2026-10-22, verbatim
+in part:
+
+> You also agree that you will not use any robot, spider, rover, scraper, other data mining
+> technology or automatic or manual process to monitor, cache, frame, mask, extract data
+> from, copy or distribute the Services … or GHG Protocol Content …
+
+> You may not modify, frame, reproduce, archive, sell, … publish by hard copy or electronic
+> means, publicly perform, display, disseminate, distribute … or otherwise use the Services
+> or the GHG Protocol Content for any public or commercial purpose except as specifically
+> permitted by these Terms …
+
+**Decision.** The standards are the local retrieval corpus for `search_methodology`. Their
+text is never committed or published: the retrieval eval's anchors are committed as sha256
+hashes only (quotes in git-ignored `data/evals/local/`), committed run files hold no passage
+text, and a public deployment would show citations rather than passages. Whether local
+chunking and embedding is itself permitted is not settled by these terms; permission is to
+be requested from GHG Protocol, and this section will record the request and the answer.
 
 These are not numeric claims, so there is no VERIFY status to clear — the open item is
 Block 1's own checklist line, *"skim the contents pages,"* which only a human can do.

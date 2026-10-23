@@ -29,7 +29,7 @@ ingested:
 Decision: the corpus is local only. Chunks live in the project's own database; no GHG
 Protocol text is committed — the eval's anchors are committed as sha256 hashes only, with
 the quotes in a git-ignored file — and a public deployment would show citations, not
-passages. Permission has been requested from GHG Protocol. The run files committed under
+passages. Permission is to be requested from GHG Protocol. The run files committed under
 `data/evals/runs/` carry ids, pages, scores and counts, never passage text or the judge's
 quotes or reasons.
 
@@ -253,6 +253,22 @@ Reading the comparison:
   question of run-to-run noise; retrieval counts carry none.
 
 Cost: dev 50329 and test 51052 tokens (judge calls; question embeddings cached).
+
+## End to end through `/chat` (`d70010e`)
+
+One question not in the key, in user phrasing: "We lease two delivery vans and our own
+drivers run them every day. Does the diesel they burn count as our Scope 1, or is it someone
+else's?" The agent called `search_methodology` once (restricted to the Corporate Standard),
+which returned `ok` with 3 verified quotes from PDF pages 29, 31 and 32; the reply quoted
+them with document and page. 2 turns; `unverified_figures` and `unverified_quotes` both
+empty. Two things the audit does not catch, read by hand:
+
+- The reply is hedged ("if … owned/controlled by you under your consolidation approach")
+  where the standard has a direct rule for this case: under operational control "the lessee
+  only accounts for emissions from leased assets that it operates" (PDF p.34). That page
+  was not retrieved.
+- The third quote is a figure caption that carries the page footer ("30 CHAPTER 4") — the
+  reading-order artefact left in by decision, now visible to a user.
 
 ## Known limits
 
