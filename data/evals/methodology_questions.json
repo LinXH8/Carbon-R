@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "drafted": "2026-10-22",
   "review_status": "reviewed",
   "questions": [
@@ -12,6 +12,18 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 19
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 104
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 31
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 139
         }
       ],
       "anchor": {
@@ -30,6 +42,14 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 37
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 103
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 108
         }
       ],
       "anchor": {
@@ -48,6 +68,10 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 5
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 100
         }
       ],
       "anchor": {
@@ -102,6 +126,14 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 29
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 31
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 48
         }
       ],
       "anchor": {
@@ -138,6 +170,14 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 27
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 65
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 64
         }
       ],
       "anchor": {
@@ -156,6 +196,18 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 20
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 99
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 103
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 138
         }
       ],
       "anchor": {
@@ -178,6 +230,26 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 27
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 29
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 30
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 43
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 108
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 142
         }
       ],
       "anchor": {
@@ -196,6 +268,34 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 27
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 88
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 36
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 108
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 30
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 43
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 71
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 142
         }
       ],
       "anchor": {
@@ -214,6 +314,10 @@
         {
           "source_id": "ghgp_corporate",
           "pdf_page": 31
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 106
         }
       ],
       "anchor": {
@@ -232,6 +336,14 @@
         {
           "source_id": "ghgp_scope2",
           "pdf_page": 10
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 14
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 61
         }
       ],
       "anchor": {
@@ -250,6 +362,10 @@
         {
           "source_id": "ghgp_scope2",
           "pdf_page": 10
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 27
         }
       ],
       "anchor": {
@@ -362,6 +478,14 @@
         {
           "source_id": "ghgp_scope2",
           "pdf_page": 10
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 27
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 28
         }
       ],
       "anchor": {
@@ -380,6 +504,22 @@
         {
           "source_id": "ghgp_scope2",
           "pdf_page": 29
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 29
+        },
+        {
+          "source_id": "ghgp_corporate",
+          "pdf_page": 30
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 36
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 43
         }
       ],
       "anchor": {
@@ -402,6 +542,22 @@
         {
           "source_id": "ghgp_scope2",
           "pdf_page": 11
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 29
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 58
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 103
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 108
         }
       ],
       "anchor": {
@@ -420,6 +576,10 @@
         {
           "source_id": "ghgp_scope2",
           "pdf_page": 42
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 46
         }
       ],
       "anchor": {
@@ -442,6 +602,14 @@
         {
           "source_id": "ghgp_scope2",
           "pdf_page": 7
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 37
+        },
+        {
+          "source_id": "ghgp_scope2",
+          "pdf_page": 108
         }
       ],
       "anchor": {
@@ -490,6 +658,14 @@
         {
           "source_id": "ghgp_scope3",
           "pdf_page": 23
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 25
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 62
         }
       ],
       "anchor": {
@@ -508,6 +684,10 @@
         {
           "source_id": "ghgp_scope3",
           "pdf_page": 77
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 78
         }
       ],
       "anchor": {
@@ -570,6 +750,10 @@
         {
           "source_id": "ghgp_scope3",
           "pdf_page": 47
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 37
         }
       ],
       "anchor": {
@@ -650,6 +834,10 @@
         {
           "source_id": "ghgp_scope3",
           "pdf_page": 50
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 108
         }
       ],
       "anchor": {
@@ -686,6 +874,10 @@
         {
           "source_id": "ghgp_scope3",
           "pdf_page": 46
+        },
+        {
+          "source_id": "ghgp_scope3",
+          "pdf_page": 37
         }
       ],
       "anchor": {
