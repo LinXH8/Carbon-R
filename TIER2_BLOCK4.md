@@ -205,6 +205,55 @@ generation-level check. The title experiment's dev run showed the same overlap (
 0.360–0.784, unanswerable up to 0.640). Frozen as `RETRIEVAL_THRESHOLD = 0.30` in
 `tools/methodology.py` before the test split was run.
 
+## Results: dev and test, on the final setup (`b2fc2e4`)
+
+Chunker `20927f94c1b4`, `text-embedding-3-small`, k = 5, threshold 0.30, judge
+`gpt-5.4-mini-2026-03-17`, question set v2. Clean tree for both. Test was run **once**, after
+the threshold was frozen; nothing has been changed since.
+
+| | Dev hit@1 | Dev hit@5 | Dev MRR | **Test hit@1** | **Test hit@5** | **Test MRR** |
+|---|---|---|---|---|---|---|
+| Overall | 4 of 18 | 12 of 18 | 0.383 | **8 of 18** | **14 of 18** | **0.562** |
+| textbook | 2 of 6 | 4 of 6 | 0.400 | 4 of 6 | 6 of 6 | 0.792 |
+| user | 2 of 6 | 3 of 6 | 0.389 | 1 of 6 | 4 of 6 | 0.311 |
+| singlish | 0 of 6 | 5 of 6 | 0.361 | 3 of 6 | 4 of 6 | 0.583 |
+| Corporate | 1 of 6 | 4 of 6 | 0.317 | 3 of 6 | 5 of 6 | 0.667 |
+| Scope 2 | 0 of 6 | 3 of 6 | 0.222 | 3 of 6 | 5 of 6 | 0.575 |
+| Scope 3 | 3 of 6 | 5 of 6 | 0.611 | 2 of 6 | 4 of 6 | 0.444 |
+
+| Refusals and answers | Dev | Test |
+|---|---|---|
+| Retrieval-level refusals (threshold 0.30) | 0 of 6 unanswerable, 0 of 18 answerable | 0 of 6, 0 of 18 |
+| Generation-level refusals of unanswerable questions | 6 of 6 | 6 of 6 |
+| Generation-level refusals of answerable questions (wrong) | 2 of 18 | 1 of 18 |
+| Answered, citing a key page | 11 of 16 | 12 of 17 |
+
+Nearest-passage similarity on test: answerable 0.417–0.791, near-topic 0.364–0.635,
+off-corpus 0.382–0.484. No test question fell below 0.30, so on test too the floor did
+nothing.
+
+Reading the comparison:
+
+- Test scored higher than dev. With 6 questions a cell, that is the size of the difference
+  two draws of six questions can produce. It is not evidence that retrieval works better
+  on test questions, and it is not caused by tuning: the one change tried on dev was
+  reverted.
+- User-style questions are the weakest cell on both splits for hit@1 (2 of 6, 1 of 6).
+  Questions phrased away from the standards' vocabulary retrieve worst, which is what the
+  styles were built to show.
+- Test's five answered-off-key questions are recorded as failures against the key as it
+  stood when test ran: corp_sold_solar (cited S2 p.40, 46), s2_market_based (S2 p.51, 67),
+  s2_td_losses (S2 p.98, although the key page ranked 1st), s3_spend_caution (S3 p.82, key
+  page ranked 3rd) and s3_use_of_sold (S2 p.37, 51: Scope 2 pages for a Scope 3 question).
+  Some of these may be pages the grep-only check missed. The key is not revised after
+  test to find out. s3_purchased_goods was refused although it is answerable.
+- **The judge is not deterministic.** Dev was run twice on identical retrieval (top 5
+  identical for 24 of 24 questions, `fc73d26` and `b2fc2e4`). Answered went 15 → 16, citing
+  a key page 12 → 11, and wrong refusals 3 → 2. Generation-level counts carry about one
+  question of run-to-run noise; retrieval counts carry none.
+
+Cost: dev 50329 and test 51052 tokens (judge calls; question embeddings cached).
+
 ## Known limits
 
 - **A verified quote is real, not necessarily relevant.** In the title experiment,

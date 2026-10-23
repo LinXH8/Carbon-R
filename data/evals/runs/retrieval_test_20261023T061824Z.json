@@ -1,0 +1,1478 @@
+{
+  "split": "test",
+  "git": {
+    "commit": "b2fc2e4ff5dd92e9a5d4d4db34276c0aee1b6851",
+    "dirty": false
+  },
+  "embedding_model": "text-embedding-3-small",
+  "judge_model": "gpt-5.4-mini-2026-03-17",
+  "chunker_version": "20927f94c1b4",
+  "top_k": 5,
+  "threshold": 0.3,
+  "question_set": {
+    "version": 2,
+    "review_status": "reviewed"
+  },
+  "summary": {
+    "overall": {
+      "answerable": 18,
+      "unanswerable": 6,
+      "hit_at_1": 8,
+      "hit_at_5": 14,
+      "mrr": 0.562,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 24,
+      "generation_refused_unanswerable": 6,
+      "generation_refused_answerable": 1,
+      "answered_answerable": 17,
+      "answered_citing_expected_page": 12,
+      "quotes_dropped": 1
+    },
+    "textbook": {
+      "answerable": 6,
+      "unanswerable": 2,
+      "hit_at_1": 4,
+      "hit_at_5": 6,
+      "mrr": 0.792,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 8,
+      "generation_refused_unanswerable": 2,
+      "generation_refused_answerable": 0,
+      "answered_answerable": 6,
+      "answered_citing_expected_page": 6,
+      "quotes_dropped": 0
+    },
+    "user": {
+      "answerable": 6,
+      "unanswerable": 2,
+      "hit_at_1": 1,
+      "hit_at_5": 4,
+      "mrr": 0.311,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 8,
+      "generation_refused_unanswerable": 2,
+      "generation_refused_answerable": 0,
+      "answered_answerable": 6,
+      "answered_citing_expected_page": 3,
+      "quotes_dropped": 0
+    },
+    "singlish": {
+      "answerable": 6,
+      "unanswerable": 2,
+      "hit_at_1": 3,
+      "hit_at_5": 4,
+      "mrr": 0.583,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 8,
+      "generation_refused_unanswerable": 2,
+      "generation_refused_answerable": 1,
+      "answered_answerable": 5,
+      "answered_citing_expected_page": 3,
+      "quotes_dropped": 1
+    },
+    "ghgp_corporate": {
+      "answerable": 6,
+      "unanswerable": 0,
+      "hit_at_1": 3,
+      "hit_at_5": 5,
+      "mrr": 0.667,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 6,
+      "generation_refused_unanswerable": 0,
+      "generation_refused_answerable": 0,
+      "answered_answerable": 6,
+      "answered_citing_expected_page": 5,
+      "quotes_dropped": 0
+    },
+    "ghgp_scope2": {
+      "answerable": 6,
+      "unanswerable": 0,
+      "hit_at_1": 3,
+      "hit_at_5": 5,
+      "mrr": 0.575,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 6,
+      "generation_refused_unanswerable": 0,
+      "generation_refused_answerable": 0,
+      "answered_answerable": 6,
+      "answered_citing_expected_page": 4,
+      "quotes_dropped": 1
+    },
+    "ghgp_scope3": {
+      "answerable": 6,
+      "unanswerable": 0,
+      "hit_at_1": 2,
+      "hit_at_5": 4,
+      "mrr": 0.444,
+      "retrieval_refused_unanswerable": 0,
+      "retrieval_refused_answerable": 0,
+      "judged": 6,
+      "generation_refused_unanswerable": 0,
+      "generation_refused_answerable": 1,
+      "answered_answerable": 5,
+      "answered_citing_expected_page": 3,
+      "quotes_dropped": 0
+    }
+  },
+  "similarity_distribution": {
+    "answerable": {
+      "n": 18,
+      "min": 0.4169,
+      "median": 0.5813,
+      "max": 0.7913
+    },
+    "near_topic": {
+      "n": 3,
+      "min": 0.3641,
+      "median": 0.4473,
+      "max": 0.6352
+    },
+    "off_corpus": {
+      "n": 3,
+      "min": 0.3816,
+      "median": 0.4112,
+      "max": 0.484
+    }
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.0,
+      "refuses_unanswerable": 0,
+      "refuses_answerable": 0
+    },
+    {
+      "threshold": 0.3641,
+      "refuses_unanswerable": 0,
+      "refuses_answerable": 0
+    },
+    {
+      "threshold": 0.3816,
+      "refuses_unanswerable": 1,
+      "refuses_answerable": 0
+    },
+    {
+      "threshold": 0.4112,
+      "refuses_unanswerable": 2,
+      "refuses_answerable": 0
+    },
+    {
+      "threshold": 0.4169,
+      "refuses_unanswerable": 3,
+      "refuses_answerable": 0
+    },
+    {
+      "threshold": 0.4342,
+      "refuses_unanswerable": 3,
+      "refuses_answerable": 1
+    },
+    {
+      "threshold": 0.4473,
+      "refuses_unanswerable": 3,
+      "refuses_answerable": 2
+    },
+    {
+      "threshold": 0.4738,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 2
+    },
+    {
+      "threshold": 0.484,
+      "refuses_unanswerable": 4,
+      "refuses_answerable": 3
+    },
+    {
+      "threshold": 0.4902,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 3
+    },
+    {
+      "threshold": 0.5059,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 4
+    },
+    {
+      "threshold": 0.5437,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 5
+    },
+    {
+      "threshold": 0.5547,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 6
+    },
+    {
+      "threshold": 0.5668,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 7
+    },
+    {
+      "threshold": 0.5763,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 8
+    },
+    {
+      "threshold": 0.5862,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 9
+    },
+    {
+      "threshold": 0.5982,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 10
+    },
+    {
+      "threshold": 0.6158,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 11
+    },
+    {
+      "threshold": 0.6352,
+      "refuses_unanswerable": 5,
+      "refuses_answerable": 12
+    },
+    {
+      "threshold": 0.6913,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 12
+    },
+    {
+      "threshold": 0.706,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 13
+    },
+    {
+      "threshold": 0.7318,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 14
+    },
+    {
+      "threshold": 0.7501,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 15
+    },
+    {
+      "threshold": 0.7546,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 16
+    },
+    {
+      "threshold": 0.7913,
+      "refuses_unanswerable": 6,
+      "refuses_answerable": 17
+    }
+  ],
+  "usage_tokens": 51052,
+  "rows": [
+    {
+      "id": "corp_equity_share",
+      "phrasing": "textbook",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          19,
+          0.7913
+        ],
+        [
+          "ghgp_corporate",
+          22,
+          0.7728
+        ],
+        [
+          "ghgp_scope3",
+          54,
+          0.6961
+        ],
+        [
+          "ghgp_scope3",
+          31,
+          0.6932
+        ],
+        [
+          "ghgp_corporate",
+          19,
+          0.6906
+        ]
+      ],
+      "best_similarity": 0.7913,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 3,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          19
+        ],
+        [
+          "ghgp_scope3",
+          31
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "corp_significance_threshold",
+      "phrasing": "textbook",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          106,
+          0.6913
+        ],
+        [
+          "ghgp_corporate",
+          37,
+          0.6854
+        ],
+        [
+          "ghgp_scope3",
+          106,
+          0.6792
+        ],
+        [
+          "ghgp_corporate",
+          40,
+          0.6674
+        ],
+        [
+          "ghgp_corporate",
+          37,
+          0.6499
+        ]
+      ],
+      "best_similarity": 0.6913,
+      "first_hit_rank": 2,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          37
+        ],
+        [
+          "ghgp_scope3",
+          106
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "corp_leased_operated",
+      "phrasing": "user",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          34,
+          0.4902
+        ],
+        [
+          "ghgp_scope3",
+          127,
+          0.4791
+        ],
+        [
+          "ghgp_scope3",
+          127,
+          0.4707
+        ],
+        [
+          "ghgp_scope3",
+          96,
+          0.4605
+        ],
+        [
+          "ghgp_scope2",
+          36,
+          0.4562
+        ]
+      ],
+      "best_similarity": 0.4902,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          34
+        ],
+        [
+          "ghgp_scope2",
+          36
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "corp_sold_solar",
+      "phrasing": "user",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          46,
+          0.5668
+        ],
+        [
+          "ghgp_corporate",
+          63,
+          0.5636
+        ],
+        [
+          "ghgp_scope2",
+          46,
+          0.5554
+        ],
+        [
+          "ghgp_scope2",
+          38,
+          0.5484
+        ],
+        [
+          "ghgp_scope2",
+          40,
+          0.5373
+        ]
+      ],
+      "best_similarity": 0.5668,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 4,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          40
+        ],
+        [
+          "ghgp_scope2",
+          46
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "corp_operational_control",
+      "phrasing": "singlish",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          19,
+          0.4738
+        ],
+        [
+          "ghgp_corporate",
+          20,
+          0.4618
+        ],
+        [
+          "ghgp_corporate",
+          25,
+          0.4423
+        ],
+        [
+          "ghgp_corporate",
+          21,
+          0.4342
+        ],
+        [
+          "ghgp_corporate",
+          25,
+          0.4272
+        ]
+      ],
+      "best_similarity": 0.4738,
+      "first_hit_rank": 2,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 3,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          19
+        ],
+        [
+          "ghgp_corporate",
+          20
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "corp_outsourced",
+      "phrasing": "singlish",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_corporate",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          106,
+          0.5547
+        ],
+        [
+          "ghgp_corporate",
+          28,
+          0.5317
+        ],
+        [
+          "ghgp_scope3",
+          91,
+          0.5247
+        ],
+        [
+          "ghgp_corporate",
+          33,
+          0.5224
+        ],
+        [
+          "ghgp_scope3",
+          63,
+          0.5152
+        ]
+      ],
+      "best_similarity": 0.5547,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          33
+        ],
+        [
+          "ghgp_scope3",
+          106
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s2_dual_reporting",
+      "phrasing": "textbook",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          10,
+          0.7501
+        ],
+        [
+          "ghgp_scope2",
+          64,
+          0.7302
+        ],
+        [
+          "ghgp_scope2",
+          65,
+          0.722
+        ],
+        [
+          "ghgp_scope2",
+          63,
+          0.712
+        ],
+        [
+          "ghgp_scope2",
+          78,
+          0.707
+        ]
+      ],
+      "best_similarity": 0.7501,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          10
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s2_chp_allocation",
+      "phrasing": "textbook",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          96,
+          0.6158
+        ],
+        [
+          "ghgp_scope2",
+          57,
+          0.6085
+        ],
+        [
+          "ghgp_scope3",
+          91,
+          0.603
+        ],
+        [
+          "ghgp_scope2",
+          37,
+          0.5999
+        ],
+        [
+          "ghgp_scope2",
+          57,
+          0.5964
+        ]
+      ],
+      "best_similarity": 0.6158,
+      "first_hit_rank": 4,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          37
+        ],
+        [
+          "ghgp_scope2",
+          96
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s2_net_metering",
+      "phrasing": "user",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          107,
+          0.4169
+        ],
+        [
+          "ghgp_scope2",
+          46,
+          0.4131
+        ],
+        [
+          "ghgp_corporate",
+          30,
+          0.4009
+        ],
+        [
+          "ghgp_scope2",
+          72,
+          0.4007
+        ],
+        [
+          "ghgp_scope2",
+          40,
+          0.3952
+        ]
+      ],
+      "best_similarity": 0.4169,
+      "first_hit_rank": 5,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          40
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s2_market_based",
+      "phrasing": "user",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          67,
+          0.5982
+        ],
+        [
+          "ghgp_scope2",
+          50,
+          0.5938
+        ],
+        [
+          "ghgp_scope2",
+          9,
+          0.5884
+        ],
+        [
+          "ghgp_scope2",
+          51,
+          0.5874
+        ],
+        [
+          "ghgp_scope2",
+          9,
+          0.5803
+        ]
+      ],
+      "best_similarity": 0.5982,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 4,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          51
+        ],
+        [
+          "ghgp_scope2",
+          67
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s2_td_losses",
+      "phrasing": "singlish",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          36,
+          0.5059
+        ],
+        [
+          "ghgp_scope3",
+          71,
+          0.4867
+        ],
+        [
+          "ghgp_corporate",
+          89,
+          0.4825
+        ],
+        [
+          "ghgp_scope2",
+          98,
+          0.4786
+        ],
+        [
+          "ghgp_scope2",
+          98,
+          0.4752
+        ]
+      ],
+      "best_similarity": 0.5059,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 1,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          98
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s2_residual_mix",
+      "phrasing": "singlish",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope2",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          29,
+          0.5763
+        ],
+        [
+          "ghgp_scope2",
+          57,
+          0.5285
+        ],
+        [
+          "ghgp_scope2",
+          48,
+          0.5216
+        ],
+        [
+          "ghgp_scope2",
+          67,
+          0.5187
+        ],
+        [
+          "ghgp_scope2",
+          8,
+          0.5078
+        ]
+      ],
+      "best_similarity": 0.5763,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          29
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s3_fifteen_categories",
+      "phrasing": "textbook",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          33,
+          0.7546
+        ],
+        [
+          "ghgp_scope3",
+          28,
+          0.7218
+        ],
+        [
+          "ghgp_scope3",
+          30,
+          0.7045
+        ],
+        [
+          "ghgp_scope3",
+          29,
+          0.7011
+        ],
+        [
+          "ghgp_scope3",
+          37,
+          0.6916
+        ]
+      ],
+      "best_similarity": 0.7546,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          33
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s3_data_quality",
+      "phrasing": "textbook",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          77,
+          0.7318
+        ],
+        [
+          "ghgp_scope3",
+          86,
+          0.7064
+        ],
+        [
+          "ghgp_scope3",
+          78,
+          0.6958
+        ],
+        [
+          "ghgp_scope3",
+          77,
+          0.6524
+        ],
+        [
+          "ghgp_scope3",
+          76,
+          0.633
+        ]
+      ],
+      "best_similarity": 0.7318,
+      "first_hit_rank": 1,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          78
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s3_teleworking",
+      "phrasing": "user",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_corporate",
+          34,
+          0.5862
+        ],
+        [
+          "ghgp_corporate",
+          34,
+          0.5801
+        ],
+        [
+          "ghgp_scope3",
+          48,
+          0.5093
+        ],
+        [
+          "ghgp_scope3",
+          37,
+          0.4905
+        ],
+        [
+          "ghgp_scope3",
+          112,
+          0.4684
+        ]
+      ],
+      "best_similarity": 0.5862,
+      "first_hit_rank": 3,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_corporate",
+          34
+        ],
+        [
+          "ghgp_scope3",
+          48
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": true
+    },
+    {
+      "id": "s3_spend_caution",
+      "phrasing": "user",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          82,
+          0.706
+        ],
+        [
+          "ghgp_scope3",
+          123,
+          0.6318
+        ],
+        [
+          "ghgp_scope3",
+          68,
+          0.5929
+        ],
+        [
+          "ghgp_scope3",
+          80,
+          0.5924
+        ],
+        [
+          "ghgp_scope3",
+          63,
+          0.5805
+        ]
+      ],
+      "best_similarity": 0.706,
+      "first_hit_rank": 3,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope3",
+          82
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s3_use_of_sold",
+      "phrasing": "singlish",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          46,
+          0.4342
+        ],
+        [
+          "ghgp_scope2",
+          51,
+          0.4207
+        ],
+        [
+          "ghgp_scope2",
+          57,
+          0.4199
+        ],
+        [
+          "ghgp_corporate",
+          30,
+          0.4106
+        ],
+        [
+          "ghgp_scope2",
+          37,
+          0.4092
+        ]
+      ],
+      "best_similarity": 0.4342,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "ghgp_scope2",
+          37
+        ],
+        [
+          "ghgp_scope2",
+          51
+        ]
+      ],
+      "generation_refused": false,
+      "cited_expected_page": false
+    },
+    {
+      "id": "s3_purchased_goods",
+      "phrasing": "singlish",
+      "split": "test",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "document": "ghgp_scope3",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          50,
+          0.5437
+        ],
+        [
+          "ghgp_scope3",
+          70,
+          0.534
+        ],
+        [
+          "ghgp_scope3",
+          89,
+          0.531
+        ],
+        [
+          "ghgp_corporate",
+          95,
+          0.5295
+        ],
+        [
+          "ghgp_scope3",
+          59,
+          0.528
+        ]
+      ],
+      "best_similarity": 0.5437,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_sg_grid_factor",
+      "phrasing": "textbook",
+      "split": "test",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          49,
+          0.6352
+        ],
+        [
+          "ghgp_scope2",
+          55,
+          0.6103
+        ],
+        [
+          "ghgp_scope2",
+          56,
+          0.5918
+        ],
+        [
+          "ghgp_scope2",
+          55,
+          0.5889
+        ],
+        [
+          "ghgp_scope2",
+          56,
+          0.5768
+        ]
+      ],
+      "best_similarity": 0.6352,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_nea_deadline",
+      "phrasing": "textbook",
+      "split": "test",
+      "answerable": false,
+      "unanswerable_kind": "off_corpus",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          123,
+          0.484
+        ],
+        [
+          "ghgp_scope3",
+          124,
+          0.4677
+        ],
+        [
+          "ghgp_corporate",
+          64,
+          0.465
+        ],
+        [
+          "ghgp_corporate",
+          65,
+          0.4561
+        ],
+        [
+          "ghgp_scope3",
+          121,
+          0.4553
+        ]
+      ],
+      "best_similarity": 0.484,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_diesel_factor_sg",
+      "phrasing": "user",
+      "split": "test",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          49,
+          0.4473
+        ],
+        [
+          "ghgp_scope3",
+          70,
+          0.4284
+        ],
+        [
+          "ghgp_scope2",
+          56,
+          0.403
+        ],
+        [
+          "ghgp_scope2",
+          58,
+          0.3948
+        ],
+        [
+          "ghgp_scope2",
+          44,
+          0.3852
+        ]
+      ],
+      "best_similarity": 0.4473,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_energy_audit_grant",
+      "phrasing": "user",
+      "split": "test",
+      "answerable": false,
+      "unanswerable_kind": "off_corpus",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          94,
+          0.4112
+        ],
+        [
+          "ghgp_scope3",
+          149,
+          0.3965
+        ],
+        [
+          "ghgp_scope2",
+          86,
+          0.3584
+        ],
+        [
+          "ghgp_scope2",
+          88,
+          0.3507
+        ],
+        [
+          "ghgp_scope2",
+          110,
+          0.349
+        ]
+      ],
+      "best_similarity": 0.4112,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_sp_tariff",
+      "phrasing": "singlish",
+      "split": "test",
+      "answerable": false,
+      "unanswerable_kind": "off_corpus",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_scope2",
+          98,
+          0.3816
+        ],
+        [
+          "ghgp_corporate",
+          30,
+          0.3771
+        ],
+        [
+          "ghgp_scope2",
+          8,
+          0.3726
+        ],
+        [
+          "ghgp_scope2",
+          109,
+          0.3719
+        ],
+        [
+          "ghgp_corporate",
+          30,
+          0.3622
+        ]
+      ],
+      "best_similarity": 0.3816,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    },
+    {
+      "id": "u_rec_price_sg",
+      "phrasing": "singlish",
+      "split": "test",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "document": "none",
+      "ranked": [
+        [
+          "ghgp_scope3",
+          149,
+          0.3641
+        ],
+        [
+          "ghgp_scope2",
+          86,
+          0.3501
+        ],
+        [
+          "ghgp_scope2",
+          111,
+          0.3446
+        ],
+        [
+          "ghgp_scope2",
+          70,
+          0.3404
+        ],
+        [
+          "ghgp_scope2",
+          112,
+          0.3323
+        ]
+      ],
+      "best_similarity": 0.3641,
+      "first_hit_rank": null,
+      "retrieval_refused": false,
+      "judged": true,
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "generation_refused": true,
+      "cited_expected_page": false
+    }
+  ]
+}
