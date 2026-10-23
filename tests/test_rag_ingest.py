@@ -122,3 +122,25 @@ def test_rows_under_another_version_force_a_replace_even_if_the_current_ones_mat
 def test_no_chunks_is_refused_rather_than_deleting_the_source():
     with pytest.raises(ValueError):
         run(FakeStore(), CountingEmbedder(), window=20, overlap=5, pages=[Page(1, "", "")])
+
+
+def test_the_embedding_input_is_transformed_but_the_stored_text_is_not():
+    seen = []
+
+    def embed(texts):
+        seen.extend(texts)
+        return [[0.0] * 1536 for _ in texts]
+
+    store = FakeStore()
+    ingest_source(
+        store,
+        source_id="src",
+        corpus="methodology",
+        chunks=chunk_pages(PAGES[:1], offset=None, window=20, overlap=5),
+        chunker_version=chunker_version(20, 5),
+        embedding_model="m",
+        embed=embed,
+        embed_input=lambda text: f"TITLE\n\n{text}",
+    )
+    assert all(t.startswith("TITLE\n\n") for t in seen)
+    assert not any(r.chunk.text.startswith("TITLE") for r in store.rows)

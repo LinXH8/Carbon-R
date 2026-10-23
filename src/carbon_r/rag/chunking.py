@@ -57,6 +57,13 @@ OVERLAP_WORDS = 50
 # above do not capture - a change to `clean_page` produces different text from the same PDF.
 CHUNKER_REVISION = "1"
 
+# Prepend the document's title to a chunk's text when it is EMBEDDED. The stored text - what
+# a citation shows and every quote is verified against - is never changed. Tried in Tier 2
+# Block 4 because the three standards restate the same rules, and a passage's own words do
+# not say which standard it is from. Part of CHUNKER_VERSION: a different embedding input is
+# a different vector for the same row. False reproduces the version before the flag existed.
+EMBED_TITLE = True
+
 # A footer page number, in the shapes the three standards use: a bare number, or a number
 # at either end of a line that also carries the running title ("28 Scope 2 Guidance"),
 # optionally in square brackets as the Scope 3 Standard prints it ("[38] Corporate Value
@@ -75,15 +82,26 @@ _HYPHENATED_BREAK = re.compile(r"([A-Za-z])-\n([a-z])")
 _MARGIN_TAB_LETTER = re.compile(r"^\s*[A-Z]\s*$")
 
 
-def chunker_version(window: int = WINDOW_WORDS, overlap: int = OVERLAP_WORDS) -> str:
-    """A short, stable id for the chunk parameters and the cleaning revision."""
+def chunker_version(
+    window: int = WINDOW_WORDS, overlap: int = OVERLAP_WORDS, embed_title: bool | None = None
+) -> str:
+    """A short, stable id for the chunk parameters, cleaning revision and embedding input."""
     if not 0 <= overlap < window:
         raise ValueError(f"overlap must be in [0, window); got window={window}, {overlap=}")
+    embed_title = EMBED_TITLE if embed_title is None else embed_title
     key = f"rev={CHUNKER_REVISION}|window={window}|overlap={overlap}"
+    if embed_title:
+        key += "|embed_title=1"
     return hashlib.sha256(key.encode()).hexdigest()[:12]
 
 
 CHUNKER_VERSION = chunker_version()
+
+
+def embedding_input(title: str, text: str, embed_title: bool | None = None) -> str:
+    """The string sent to the embedding model for a chunk. Not what is stored."""
+    embed_title = EMBED_TITLE if embed_title is None else embed_title
+    return f"{title}\n\n{text}" if embed_title else text
 
 
 def normalise(text: str) -> str:

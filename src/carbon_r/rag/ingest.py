@@ -22,7 +22,7 @@ only other line of defence against that.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
@@ -87,15 +87,20 @@ def ingest_source(
     chunker_version: str,
     embedding_model: str,
     embed: Embedder,
+    embed_input: Callable[[str], str] = lambda text: text,
 ) -> IngestOutcome:
-    """Bring one source's stored chunks in line with `chunks`. Embeds only on replace."""
+    """Bring one source's stored chunks in line with `chunks`. Embeds only on replace.
+
+    `embed_input` maps a chunk's stored text to what is embedded (e.g. title + text); the
+    stored text itself is unchanged, so citations and quote checks are unaffected.
+    """
     if not chunks:
         raise ValueError(f"{source_id}: no chunks to ingest; refusing to delete its rows.")
     stored = store.summary(source_id, chunker_version, embedding_model)
     if decide(chunks, stored) == "unchanged":
         return IngestOutcome(source_id, "unchanged", inserted=0, deleted=0)
 
-    vectors = embed([c.text for c in chunks])
+    vectors = embed([embed_input(c.text) for c in chunks])
     rows = [
         ChunkRow(source_id, corpus, chunker_version, embedding_model, chunk, vector)
         for chunk, vector in zip(chunks, vectors, strict=True)

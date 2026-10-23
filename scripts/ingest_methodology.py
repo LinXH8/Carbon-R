@@ -29,9 +29,11 @@ import sys
 from carbon_r.db import DatabaseNotConfiguredError, apply_migrations, connect
 from carbon_r.rag.chunking import (
     CHUNKER_VERSION,
+    EMBED_TITLE,
     OVERLAP_WORDS,
     WINDOW_WORDS,
     chunk_pages,
+    embedding_input,
     extract_pages,
 )
 from carbon_r.rag.embed import configured_model, openai_embedder
@@ -91,7 +93,7 @@ def ingest(ids: tuple[str, ...]) -> int:
     model = configured_model()
     usage: list[dict] = []
     embed = openai_embedder(model, usage)
-    print(f"embedding model {model}; chunker {CHUNKER_VERSION}")
+    print(f"embedding model {model}; chunker {CHUNKER_VERSION} (title embedded: {EMBED_TITLE})")
 
     try:
         with connect() as conn:
@@ -114,6 +116,7 @@ def ingest(ids: tuple[str, ...]) -> int:
                     chunker_version=CHUNKER_VERSION,
                     embedding_model=model,
                     embed=embed,
+                    embed_input=lambda text, title=record.title: embedding_input(title, text),
                 )
                 conn.commit()
                 print(

@@ -14,6 +14,7 @@ from carbon_r.rag.chunking import (
     chunk_pages,
     chunker_version,
     clean_page,
+    embedding_input,
     footer_numbers,
     normalise,
     printed_page,
@@ -138,6 +139,16 @@ def test_chunks_carry_the_confirmed_printed_page():
 
 
 # --- version ----------------------------------------------------------------------------
+
+
+def test_the_title_flag_is_part_of_the_version_and_off_reproduces_the_original():
+    assert chunker_version(300, 50, embed_title=True) != chunker_version(300, 50, embed_title=False)
+    assert chunker_version(300, 50, embed_title=False) == "20927f94c1b4"
+
+
+def test_the_title_goes_into_the_embedding_input_only_when_asked():
+    assert embedding_input("Std", "body", embed_title=True) == "Std\n\nbody"
+    assert embedding_input("Std", "body", embed_title=False) == "body"
 
 
 def test_the_version_changes_with_either_parameter():
