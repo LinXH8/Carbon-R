@@ -1,504 +1,189 @@
-/* Carbon R - one page, no build step.
+/* Carbon R - the page (the "Anthracite" design).
  *
- * Two ideas run through this file. Type is sized *and tracked* together: tracking is
- * negative on display sizes and slightly positive on small labels, because one
- * letter-spacing value is wrong at some size by definition. And chrome is a translucent
- * material that content passes under, with weight used to say what is structural and what
- * is interactive - never two light translucent surfaces stacked, which destroys legibility.
- *
- * Restraint is deliberate. This is an audit trail: the sheet is directly manipulated and
- * so it is animated, and everything else is still. A figure that bounces is a figure that
- * invites less trust.
+ * The page, set on a dark slate photograph (Annie Spratt, Unsplash, under the
+ * Unsplash License: free to use, no attribution required). The photograph is the whole
+ * page background under a light scrim; every figure, source and caveat still sits on a
+ * solid panel. Dark only: the page outside the panels is the photograph, and dark text
+ * would not read on it. Without the image the page falls back to flat charcoal.
  */
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
+  --ground: #0e0f10;
+  --panel: #16181a;
+  --panel-2: #1d2023;
+  --edge: #2a2e32;
+  --edge-strong: #3b4046;
+  --ink: #e8e9ea;
+  --ink-2: #b7bbbf;
+  --ink-3: #8d9298;
+  --accent: #9cc3dc;
+  --caveat: #e0b25a;
+  --caveat-wash: #231d12;
+  --bad: #f2928a;
+  --bad-wash: #2a1716;
+  --ok: #9fcfae;
+  --photo-ink: #f2f3f4;
+  --photo-ink-2: #c9cdd1;
 
-  --ground: #f5f5f7;
-  --ground-deep: #ebebf0;
-  --surface: #ffffff;
-  --surface-sunken: #f7f7f9;
-  --glass: rgba(255, 255, 255, 0.72);
-  --glass-edge: rgba(255, 255, 255, 0.5);
-  --line: rgba(0, 0, 0, 0.1);
-  --line-strong: rgba(0, 0, 0, 0.18);
-
-  --ink: #1d1d1f;
-  --ink-soft: #5c5c66;
-  --ink-faint: #86868b;
-
-  --accent: #0a7d4b;          /* the figure, and the one primary action */
-  --accent-soft: rgba(10, 125, 75, 0.1);
-  --warn: #9a5b00;
-  --warn-soft: rgba(154, 91, 0, 0.1);
-  --bad: #b3261e;
-  --bad-soft: rgba(179, 38, 30, 0.1);
-
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
-  /* A bigger surface reads as thicker: a deeper, wider shadow than any card. */
-  --shadow-sheet: 0 -1px 0 var(--glass-edge), 0 -8px 40px rgba(0, 0, 0, 0.18);
-
-  --radius: 14px;
-  --radius-lg: 20px;
-  --gap: 1rem;
-  --bar-height: 4.25rem;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+  --sans: ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #000000;
-    --ground-deep: #0a0a0c;
-    --surface: #1c1c1e;
-    --surface-sunken: #141416;
-    --glass: rgba(28, 28, 30, 0.72);
-    --glass-edge: rgba(255, 255, 255, 0.12);
-    --line: rgba(255, 255, 255, 0.12);
-    --line-strong: rgba(255, 255, 255, 0.22);
-
-    --ink: #f5f5f7;
-    --ink-soft: #a1a1a8;
-    --ink-faint: #8a8a8f;
-
-    --accent: #3ddc97;
-    --accent-soft: rgba(61, 220, 151, 0.12);
-    --warn: #f5b544;
-    --warn-soft: rgba(245, 181, 68, 0.12);
-    --bad: #ff6b60;
-    --bad-soft: rgba(255, 107, 96, 0.12);
-
-    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5);
-    --shadow-sheet: 0 -1px 0 var(--glass-edge), 0 -8px 40px rgba(0, 0, 0, 0.6);
-  }
-}
 
 * { box-sizing: border-box; }
-
 body {
-  /* The platform font already ships optical sizing and tracking tables. Overriding it
-     would mean re-deriving all of that by hand for no gain here. */
-  font: 100%/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
   margin: 0;
-  background: var(--ground);
   color: var(--ink);
+  font: 1rem/1.55 var(--sans);
   -webkit-font-smoothing: antialiased;
+  /* The photograph is the page. The scrim (35%) takes its lighter centre down far enough
+     that the faintest text (--ink-3) stays above 4.5:1; panels stay solid on top of it. */
+  background:
+    linear-gradient(rgba(10, 11, 12, 0.35), rgba(10, 11, 12, 0.35)),
+    url("/static/assets/slate.jpg") center / cover fixed,
+    var(--ground);
 }
+.num { font-variant-numeric: tabular-nums lining-nums; }
+a { color: var(--accent); text-underline-offset: 0.18em; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-/* Spacing in rem so a larger text setting scales the layout with the text instead of
-   breaking it. */
-main {
-  max-width: 46rem;
-  margin: 0 auto;
-  padding: calc(var(--bar-height) + 1.5rem) 1.25rem 7rem;
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap);
-}
+/* --- masthead: text set straight on the page's photograph ----------------------------- */
 
-/* --- chrome ----------------------------------------------------------------------- */
+.masthead { color: var(--photo-ink); }
+.masthead-inner { max-width: 48rem; margin: 0 auto; padding: 1rem 1rem 4.5rem; }
 
-.bar {
-  position: fixed;
-  inset: 0 0 auto;
-  z-index: 10;
-  height: var(--bar-height);
-  padding: 0 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+.wordmark { display: inline-flex; align-items: center; gap: 0.5rem; font: 600 1.125rem/1.2 var(--serif); color: var(--photo-ink); text-decoration: none; letter-spacing: -0.005em; }
+.mark { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.mark circle { fill: currentColor; stroke: none; }
 
-  background: var(--glass);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  /* A bright top edge is the material catching light; the bottom is a fading mask rather
-     than a hard 1px divider, so the boundary only exists where content is behind it. */
-  border-top: 1px solid var(--glass-edge);
-  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent);
-  mask-image: linear-gradient(to bottom, #000 72%, transparent);
-}
+.masthead-copy { margin-top: 4.5rem; max-width: 34rem; }
+.masthead h1 { margin: 0; font: 500 clamp(2rem, 6vw, 3rem)/1.08 var(--serif); letter-spacing: -0.02em; }
+.masthead-copy p { margin: 0.875rem 0 0; color: var(--photo-ink-2); font-size: 1rem; }
 
-.bar h1 {
-  font-size: 1.0625rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  margin: 0;
-}
+/* --- page --------------------------------------------------------------------------- */
 
-/* Over a translucent surface, flat grey text loses legibility as the backdrop changes.
-   Slightly heavier and slightly tracked out instead. */
-.bar-note {
-  margin: 0;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.005em;
-  color: var(--ink-soft);
-}
+main { max-width: 48rem; margin: -2.5rem auto 0; padding: 0 1rem 4rem; display: flex; flex-direction: column; gap: 1rem; position: relative; }
 
-/* --- cards ------------------------------------------------------------------------ */
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  padding: 1.25rem;
-}
+.panel, .figure, .reply, .trail, .notice { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; }
+.panel { padding: 1.25rem; box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.6); }
 
-.label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  /* Small text wants a touch more tracking, not less. */
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin-bottom: 0.5rem;
-}
+.section-label { display: block; margin: 0 0 0.5rem; font: 600 0.75rem/1.3 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
 
-/* --- dropzone --------------------------------------------------------------------- */
+.dropzone { padding: 1.125rem 1.25rem; border: 1px dashed var(--edge-strong); border-radius: 4px; background: var(--panel-2); cursor: pointer; transition: border-color 140ms ease-out; }
+.dropzone:hover, .dropzone[data-dragging] { border-color: var(--accent); }
+.dropzone[data-busy] { opacity: 0.55; pointer-events: none; }
+.dropzone-title { margin: 0; font-weight: 600; }
+.dropzone-hint { margin: 0.25rem 0 0; color: var(--ink-3); font-size: 0.875rem; }
 
-.dropzone {
-  text-align: center;
-  cursor: pointer;
-  border-style: dashed;
-  border-color: var(--line-strong);
-  /* Only the press feedback transitions, and only for 100ms: this is on the input path. */
-  transition: transform 100ms ease-out, background-color 120ms ease-out,
-              border-color 120ms ease-out;
-}
+.docs { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+.docs:empty { display: none; }
+.doc { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--edge); font-size: 0.9375rem; }
+.doc-id { font: 0.8125rem var(--mono); color: var(--ink-3); }
 
-/* Feedback on pointer-DOWN, not on click. Waiting for the release feels dead. */
-.dropzone[data-pressed] { transform: scale(0.99); background: var(--surface-sunken); }
-.dropzone[data-dragging] { border-color: var(--accent); background: var(--accent-soft); }
-.dropzone:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.dropzone[data-busy] { opacity: 0.6; pointer-events: none; }
+.ask { margin-top: 1.25rem; }
+textarea { width: 100%; font: inherit; font-size: 0.9375rem; color: var(--ink); background: var(--panel-2); border: 1px solid var(--edge); border-radius: 4px; padding: 0.625rem 0.75rem; resize: vertical; }
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+.ask-row { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 0.875rem; }
+.ask-note { color: var(--ink-3); font-size: 0.875rem; }
+.button { font: 600 0.9375rem/1 var(--sans); padding: 0.75rem 1.25rem; background: var(--ink); color: var(--ground); border: 0; border-radius: 4px; cursor: pointer; }
+.button:hover { background: var(--ink-2); }
+.button:active { transform: translateY(1px); }
+.button:disabled { opacity: 0.5; cursor: default; transform: none; }
 
-.dropzone-glyph {
-  width: 1.75rem; height: 1.75rem;
-  stroke: var(--ink-faint); stroke-width: 1.5; fill: none;
-  stroke-linecap: round; stroke-linejoin: round;
-}
-.dropzone-title { margin: 0.5rem 0 0.25rem; font-weight: 600; letter-spacing: -0.005em; }
-.dropzone-hint {
-  margin: 0; font-size: 0.8125rem; color: var(--ink-faint);
-  max-width: 28rem; margin-inline: auto;
-}
+/* --- steps -------------------------------------------------------------------------- */
 
-/* --- document chips --------------------------------------------------------------- */
-
-.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.chips:empty { display: none; }
-
-.chip {
-  display: inline-flex; align-items: baseline; gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  box-shadow: var(--shadow-card);
-}
-.chip code { color: var(--ink-faint); font-size: 0.75rem; }
-
-/* --- buttons ---------------------------------------------------------------------- */
-
-.button {
-  font: inherit;
-  font-size: 0.9375rem;
-  font-weight: 560;
-  letter-spacing: -0.005em;
-  padding: 0.5rem 1.125rem;
-  border-radius: 999px;
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
-  color: var(--ink);
-  cursor: pointer;
-  transition: transform 100ms ease-out, opacity 100ms ease-out;
-}
-.button.primary { background: var(--accent); border-color: transparent; color: #fff; }
-@media (prefers-color-scheme: dark) { .button.primary { color: #06130d; } }
-
-.button:active { transform: scale(0.97); }
-.button:disabled { opacity: 0.45; cursor: default; transform: none; }
-.button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* --- ask -------------------------------------------------------------------------- */
-
-textarea {
-  width: 100%;
-  font: inherit;
-  font-size: 0.9375rem;
-  line-height: 1.45;
-  color: var(--ink);
-  background: var(--surface-sunken);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 0.75rem;
-  resize: vertical;
-}
-textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-.ask-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem; }
-.ask-note { font-size: 0.8125rem; color: var(--ink-faint); }
-
-/* --- steps ------------------------------------------------------------------------ */
-
-.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.375rem; }
+.steps { list-style: none; margin: 0; padding: 0 0.25rem; font-size: 0.875rem; }
 .steps:empty { display: none; }
-
-.step {
-  display: grid;
-  grid-template-columns: 1.25rem 1fr;
-  gap: 0.625rem;
-  align-items: start;
-  padding: 0.625rem 0.875rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-size: 0.875rem;
-  /* Blur and scale together, so the row arrives as a surface rather than fading in flat.
-     Not gesture-driven and not interruptible, so a keyframe is the right tool here. */
-  animation: materialize 320ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
-}
-
-@keyframes materialize {
-  from { opacity: 0; transform: scale(0.97) translateY(4px); filter: blur(6px); }
-  to   { opacity: 1; transform: none; filter: blur(0); }
-}
-
-.step-mark { font-size: 0.875rem; line-height: 1.45; text-align: center; }
-.step-tool { font-weight: 600; letter-spacing: -0.005em; }
-.step-message { color: var(--ink-soft); }
-.step[data-status="ok"] .step-mark { color: var(--accent); }
-/* A gap is a legitimate outcome, not a failure: styled as information. */
-.step[data-status="no_results"] .step-mark { color: var(--warn); }
+.step { display: grid; grid-template-columns: 1.25rem auto 1fr; gap: 0 0.625rem; padding: 0.4375rem 0; border-bottom: 1px solid var(--edge); }
+.step-mark { color: var(--ink-3); }
+.step[data-status="ok"] .step-mark { color: var(--ok); }
+.step[data-status="no_results"] .step-mark { color: var(--caveat); }
 .step[data-status="error"] .step-mark { color: var(--bad); }
-.step[data-status="running"] .step-mark { color: var(--ink-faint); }
+.step-tool { font: 0.8125rem var(--mono); }
+.step-status { color: var(--ink-3); }
+.step-message { grid-column: 2 / -1; color: var(--ink-2); }
+.step[data-status="running"] .step-tool { font-family: var(--sans); color: var(--ink-3); }
+.step[data-status="running"] .step-status { display: none; }
 
 /* --- the figure ------------------------------------------------------------------- */
 
-.figure-card { padding: 1.5rem 1.25rem 1.25rem; }
+.answer { display: flex; flex-direction: column; gap: 1rem; }
+.answer:empty { display: none; }
 
-.figure-value {
-  /* Large text: tight leading and negative tracking. Letters read too far apart as they
-     grow, and generous leading on one short line is just a hole in the layout. */
-  font-size: clamp(2rem, 7vw, 2.75rem);
-  font-weight: 680;
-  line-height: 1.05;
-  letter-spacing: -0.025em;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  margin: 0;
-}
-.figure-unit { font-size: 0.5em; font-weight: 600; letter-spacing: -0.01em; color: var(--ink-soft); }
-.figure-tonnes {
-  margin: 0.25rem 0 0; color: var(--ink-soft); font-size: 0.9375rem;
-  font-variant-numeric: tabular-nums;
-}
+.figure { padding: 1.75rem 1.5rem 1.25rem; border-top: 2px solid var(--ink); }
+.eyebrow { margin: 0; font: 0.8125rem var(--mono); color: var(--ink-3); }
+.figure-value { margin: 0.625rem 0 0; font: 500 clamp(2.75rem, 10vw, 4.25rem)/1 var(--serif); letter-spacing: -0.025em; }
+.figure-unit { font: 400 0.36em var(--sans); letter-spacing: 0; color: var(--ink-2); }
+.figure-alt { margin: 0.5rem 0 0; color: var(--ink-2); }
+.figure-method { margin: 0.125rem 0 0; color: var(--ink-3); font-size: 0.875rem; }
 
-.derivation {
-  margin-top: 1rem;
-  padding: 0.75rem 0.875rem;
-  background: var(--surface-sunken);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  overflow-x: auto;
-}
+.caveats { margin-top: 1.5rem; padding: 1rem 1.125rem; background: var(--caveat-wash); border: 1px solid color-mix(in srgb, var(--caveat) 45%, transparent); border-radius: 4px; }
+.caveats .section-label { color: var(--caveat); }
+.caveats ul { margin: 0; padding-left: 1.1rem; }
+.caveats li { font-size: 0.9375rem; }
+.caveats li + li { margin-top: 0.375rem; }
 
-/* Proximity implies relationship: the citation sits immediately under the number it
-   belongs to, not in a panel elsewhere. */
-.cite { margin-top: 1.25rem; display: grid; gap: 0.75rem 1.25rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
-.cite div { min-width: 0; }
-.cite dt {
-  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--ink-faint);
-}
-.cite dd {
-  margin: 0.125rem 0 0; font-size: 0.875rem; line-height: 1.4;
-  overflow-wrap: break-word;
-}
-.cite a { color: var(--accent); }
+.working { margin-top: 1.5rem; }
+.derivation { margin: 0; padding: 0.75rem 0.875rem; background: var(--panel-2); border-radius: 4px; font: 0.875rem/1.6 var(--mono); overflow-wrap: anywhere; }
+.scope-split { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+.scope-split li { display: flex; justify-content: space-between; padding: 0.375rem 0; border-bottom: 1px solid var(--edge); }
 
-.badge {
-  display: inline-block; margin-left: 0.375rem; padding: 0.0625rem 0.4375rem;
-  border-radius: 999px; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.01em;
-  background: var(--warn-soft); color: var(--warn);
-}
+.line { margin-top: 1.75rem; }
+.line + .line { padding-top: 1.75rem; border-top: 1px solid var(--edge); }
+.line-head { margin: 0 0 0.5rem; display: flex; justify-content: space-between; gap: 1rem; font: 600 1rem/1.4 var(--sans); }
+.line > .derivation { margin-bottom: 0.75rem; }
+.sub-derivation { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.875rem; }
 
-.disclosures { margin: 1.25rem 0 0; padding: 0.875rem 1rem 0.875rem 2rem; background: var(--surface-sunken); border-radius: var(--radius); }
-.disclosures li { font-size: 0.8125rem; line-height: 1.5; color: var(--ink-soft); }
-.disclosures li + li { margin-top: 0.375rem; }
+.prov { margin: 0; border-top: 1px solid var(--edge); }
+.prov-row { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--edge); }
+.prov dt { color: var(--ink-3); font-size: 0.875rem; }
+.prov dd { margin: 0; font-size: 0.9375rem; overflow-wrap: anywhere; }
+@media (max-width: 34rem) { .prov-row { grid-template-columns: 1fr; gap: 0.125rem; } }
 
-.audit-line {
-  margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
-  flex-wrap: wrap;
-  font-size: 0.8125rem; color: var(--ink-faint);
-}
+.badge { display: inline-block; margin-left: 0.5rem; padding: 0 0.375rem; border: 1px solid var(--caveat); border-radius: 3px; color: var(--caveat); font-size: 0.75rem; line-height: 1.5; vertical-align: 0.1em; }
 
-.notice {
-  display: flex; flex-direction: column; gap: 0.375rem;
-  padding: 0.875rem 1rem; border-radius: var(--radius);
-  border: 1px solid var(--line); font-size: 0.875rem; line-height: 1.5;
-  margin-bottom: var(--gap);
-}
-.notice strong { letter-spacing: -0.005em; }
-.notice[data-kind="warn"] { background: var(--warn-soft); border-color: transparent; color: var(--warn); }
-.notice[data-kind="bad"] { background: var(--bad-soft); border-color: transparent; color: var(--bad); }
-.notice[data-kind="plain"] { background: var(--surface); box-shadow: var(--shadow-card); }
+.figure-audit { margin-top: 1.5rem; padding-top: 0.875rem; border-top: 1px solid var(--edge); display: grid; grid-template-columns: auto 1fr; gap: 0.125rem 0.5rem; font-size: 0.875rem; color: var(--ink-2); }
+.audit-mark { color: var(--ok); font-weight: 700; }
+.audit-ref { grid-column: 2; font: 0.8125rem var(--mono); color: var(--ink-3); }
+.figure-audit[data-state="fail"], .figure-audit[data-state="fail"] .audit-mark { color: var(--bad); }
+.figure[data-audit="fail"] { border-top-color: var(--bad); }
 
-.reply { margin-top: var(--gap); }
-.reply-text { margin: 0; white-space: pre-wrap; font-size: 0.9375rem; line-height: 1.55; }
+/* --- notices, reply, trail --------------------------------------------------------- */
 
-/* --- sheet ------------------------------------------------------------------------ */
+.notice { display: grid; gap: 0.25rem; padding: 0.875rem 1rem; font-size: 0.9375rem; }
+.notice[data-kind="bad"] { background: var(--bad-wash); border-color: var(--bad); color: var(--bad); }
+.notice[data-kind="warn"] { border-color: var(--caveat); color: var(--caveat); }
 
-.scrim {
-  position: fixed; inset: 0; z-index: 20;
-  background: rgba(0, 0, 0, 0.4);
-  opacity: 0;              /* driven per-frame from the sheet's position */
-  will-change: opacity;
-}
+.reply { padding: 1.25rem 1.5rem; }
+.reply-text { margin: 0; white-space: pre-wrap; font: 1.0625rem/1.6 var(--serif); }
+.reply-note { margin: 0.5rem 0 0; color: var(--ink-3); font-size: 0.8125rem; }
 
-.sheet {
-  position: fixed;
-  inset: auto 0 0;
-  z-index: 21;
-  height: 85vh;
-  display: flex;
-  flex-direction: column;
-
-  /* Heavier material than the cards: this is a structural layer over content, and it
-     never sits on another translucent surface. */
-  background: var(--glass);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  box-shadow: var(--shadow-sheet);
-
-  /* Only transform and opacity are animated, and only transform is driven by the drag. */
-  transform: translate3d(0, 100%, 0);
-  touch-action: none;
-}
-.sheet[data-dragging] { will-change: transform; }
-
-.grabber { padding: 0.75rem 0; cursor: grab; flex: none; touch-action: none; }
-.grabber::after {
-  content: ""; display: block; width: 2.25rem; height: 0.3125rem;
-  margin: 0 auto; border-radius: 999px; background: var(--line-strong);
-}
-.sheet[data-dragging] .grabber { cursor: grabbing; }
-
-.sheet-head {
-  flex: none;
-  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
-  padding: 0 1.25rem 0.75rem;
-  cursor: grab;
-  touch-action: none;
-}
-.sheet-head h2 { margin: 0; font-size: 1.0625rem; font-weight: 650; letter-spacing: -0.01em; }
-
-.sheet-body {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
-  touch-action: pan-y;
-  display: flex; flex-direction: column; gap: 0.75rem;
-}
-
-.call {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 0.875rem 1rem;
-}
-.call-head { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
-.call-tool { font-weight: 620; letter-spacing: -0.005em; font-size: 0.9375rem; }
-.call-status { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
-.call[data-status="ok"] .call-status { color: var(--accent); }
-.call[data-status="no_results"] .call-status { color: var(--warn); }
+.trail summary { padding: 0.875rem 1.25rem; cursor: pointer; font-weight: 600; font-size: 0.9375rem; }
+.trail-list { list-style: none; margin: 0; padding: 0 1.25rem 0.5rem; }
+.call { padding: 0.75rem 0; border-top: 1px solid var(--edge); }
+.call-head { display: flex; gap: 0.75rem; align-items: baseline; }
+.call-tool { font: 600 0.875rem var(--mono); }
+.call-status { font-size: 0.8125rem; color: var(--ink-3); }
+.call[data-status="no_results"] .call-status { color: var(--caveat); }
 .call[data-status="error"] .call-status { color: var(--bad); }
-.call-message { margin: 0.375rem 0 0; font-size: 0.875rem; line-height: 1.5; color: var(--ink-soft); }
-.call pre {
-  margin: 0.625rem 0 0; padding: 0.625rem 0.75rem;
-  background: var(--surface-sunken); border-radius: 10px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.75rem; line-height: 1.5;
-  overflow-x: auto;
+.call-message { margin: 0.25rem 0 0; color: var(--ink-2); font-size: 0.875rem; }
+.call pre { margin: 0.5rem 0 0; padding: 0.625rem 0.75rem; background: var(--panel-2); border-radius: 4px; font: 0.75rem/1.5 var(--mono); overflow-x: auto; }
+
+.colophon { max-width: 48rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; border-top: 1px solid var(--edge); color: var(--ink-3); font-size: 0.8125rem; }
+.colophon p { margin: 0; }
+
+@media (max-width: 34rem) {
+  .masthead-copy { margin-top: 3rem; }
+  .figure { padding-inline: 1.125rem; }
 }
-
-.empty { color: var(--ink-faint); font-size: 0.875rem; }
-
-/* --- accessibility: three independent signals, not just one ----------------------- */
-
-@media (prefers-reduced-motion: reduce) {
-  /* Not "no feedback" - a gentler, non-vestibular equivalent. Opacity still carries the
-     change; travel, scale and blur do not. The sheet's drag keeps working: spring.js
-     jumps to the target instead of springing to it. */
-  .step { animation: fade-in 180ms ease-out both; }
-  .button:active, .dropzone[data-pressed] { transform: none; }
-  * { scroll-behavior: auto !important; }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  body { background: var(--ground); }
 }
-
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-
-@media (prefers-reduced-transparency: reduce) {
-  .bar, .sheet {
-    background: var(--surface);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-  .bar { -webkit-mask-image: none; mask-image: none; border-bottom: 1px solid var(--line); }
-}
-
-@media (prefers-contrast: more) {
-  :root {
-    --glass: var(--surface);
-    --line: var(--line-strong);
-    --ink-soft: var(--ink);
-    --ink-faint: var(--ink);
-  }
-  .bar, .sheet { backdrop-filter: none; -webkit-backdrop-filter: none; border: 1px solid var(--line-strong); }
-  .card, .step, .call { border-width: 1px; border-color: var(--line-strong); }
-}
-
-/* --- a figure's lines -------------------------------------------------------------- */
-/* One block per activity. Separated by a rule rather than a card so the lines read as
-   parts of one figure rather than as several figures that happen to be adjacent. */
-.figure-line + .figure-line { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
-.figure-line-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  margin-bottom: 0.4rem;
-  font-size: 0.9375rem;
-}
-.figure-line-head strong { font-variant-numeric: tabular-nums; }
-
-/* The per-scope split. Present only when a total spans more than one scope, because a
-   combined number cannot honestly be reported against a single scope. */
-.scope-split {
-  list-style: none;
-  margin: 0.75rem 0 0;
-  padding: 0.6rem 0.75rem;
-  background: var(--surface-sunken);
-  border-radius: 8px;
-  font-size: 0.875rem;
-}
-.scope-split li { display: flex; justify-content: space-between; gap: 1rem; }
-.scope-split li + li { margin-top: 0.3rem; }
-.scope-split strong { font-variant-numeric: tabular-nums; }
-
-/* A derivation that explains an input rather than the figure: the cylinder arithmetic
-   behind an LPG quantity, or a unit conversion and the authority for it. */
-.sub-derivation {
-  margin-top: 0.35rem;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--ink-soft);
+@media print {
+  body { background: #fff; }
+  .masthead { color: #000; }
+  .masthead-copy, .intake, .steps, .trail { display: none; }
 }

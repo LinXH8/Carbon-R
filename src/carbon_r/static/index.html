@@ -2,62 +2,50 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Carbon R</title>
 <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
 
-<!-- A translucent layer with content scrolling under it, not an opaque strip that eats
-     a band of the viewport. The scroll edge is a gradient mask in app.css, not a rule. -->
-<header class="bar">
-  <h1>Carbon R</h1>
-  <p class="bar-note">Every number is computed in Python and carries its source.</p>
+<!-- The page is set on a photograph; nothing that carries a figure, a source or a
+     caveat is set on it directly. Those sit on solid panels. -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="wordmark" href="/"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20.2 7.25v9.5L12 21.5l-8.2-4.75v-9.5Z"/><circle cx="12" cy="2.5" r="1.6"/><circle cx="20.2" cy="7.25" r="1.6"/><circle cx="20.2" cy="16.75" r="1.6"/><circle cx="12" cy="21.5" r="1.6"/><circle cx="3.8" cy="16.75" r="1.6"/><circle cx="3.8" cy="7.25" r="1.6"/></svg>Carbon R</a>
+    <div class="masthead-copy">
+      <h1>Every tonne, traced to its source.</h1>
+      <p>Greenhouse-gas figures from your bills and statements. Calculated in Python, never by the model, and shown with the factor, publisher, year and caveats they rest on.</p>
+    </div>
+  </div>
 </header>
 
 <main>
-  <!-- 1. The document -------------------------------------------------------------- -->
-  <section class="card dropzone" id="dropzone" tabindex="0" role="button"
-           aria-label="Choose or drop an electricity bill">
-    <svg class="dropzone-glyph" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 16V4m0 0L8 8m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
-    </svg>
-    <p class="dropzone-title">Drop an electricity bill</p>
-    <p class="dropzone-hint">PDF, PNG or JPEG, up to 10 MB. Nothing leaves this machine
-      except the page image sent to the model.</p>
-    <input type="file" id="file" accept=".pdf,.png,.jpg,.jpeg" hidden>
-  </section>
+  <section class="panel intake" aria-label="Document and question">
+    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose or drop a document">
+      <p class="dropzone-title">Choose or drop a document</p>
+      <p class="dropzone-hint">Electricity bill, LPG invoice or fuel-card statement · PDF, PNG or JPEG, up to 10 MB</p>
+      <input type="file" id="file" accept=".pdf,.png,.jpg,.jpeg" hidden>
+    </div>
+    <ul class="docs" id="docs" aria-label="Uploaded documents"></ul>
 
-  <ul class="chips" id="docs" aria-label="Uploaded documents"></ul>
-
-  <!-- 2. The question ------------------------------------------------------------- -->
-  <section class="card ask" hidden id="ask-card">
-    <label class="label" for="question">Question</label>
-    <textarea id="question" rows="3" spellcheck="false">What are the emissions from this document? Show the factor you used and where it comes from.</textarea>
-    <div class="ask-row">
-      <button class="button primary" id="ask">Ask</button>
-      <span class="ask-note" id="ask-note"></span>
+    <div class="ask" id="ask-card" hidden>
+      <label class="section-label" for="question">Question</label>
+      <textarea id="question" rows="2" spellcheck="false">What are the emissions from this document? Show the factor you used and where it comes from.</textarea>
+      <div class="ask-row">
+        <button class="button" id="ask">Calculate</button>
+        <span class="ask-note" id="ask-note"></span>
+      </div>
     </div>
   </section>
 
-  <!-- 3. What the agent is doing, as it does it ----------------------------------- -->
   <ol class="steps" id="steps" aria-live="polite" aria-label="Tool calls"></ol>
-
-  <!-- 4. The answer, rendered from the structured figure and never from the prose -- -->
-  <div id="answer"></div>
+  <div class="answer" id="answer"></div>
 </main>
 
-<!-- The full transcript lives in a sheet you pull up. It is the one surface here that is
-     directly manipulated, so it is the one that gets springs, momentum and rubber-banding. -->
-<div class="scrim" id="scrim" hidden></div>
-<section class="sheet" id="sheet" aria-label="Audit trail" aria-hidden="true" hidden>
-  <div class="grabber" id="grabber" role="separator" aria-label="Drag to resize"></div>
-  <header class="sheet-head">
-    <h2>Audit trail</h2>
-    <button class="button" id="sheet-close">Done</button>
-  </header>
-  <div class="sheet-body" id="sheet-body"></div>
-</section>
+<footer class="colophon">
+  <p>The language model reads documents and chooses tools. It never does arithmetic. Estimates are not assured.</p>
+</footer>
 
 <script type="module" src="/static/app.js"></script>
 </body>

@@ -1,14 +1,13 @@
-/* Carbon R - the answer renderer shared by the three design previews.
+/* Carbon R - the answer renderer.
  *
- * The same rule as app.js: **the numbers on screen come from `figures`, never from
+ * One rule governs this file: **the numbers on screen come from `figures`, never from
  * `reply`.** Nothing is parsed out of the prose, nothing is converted to a Number, and the
  * only formatting is digit grouping. Every node is built with textContent.
  *
- * Two layouts of one figure. `statement` (minimal, soft) puts the total first and the
- * citation under it; `schedule` (workpaper) sets the lines out as an accounting schedule
- * with lettered source references and numbered notes. Both show, without any interaction,
- * every factor's value, unit, publisher, year (used and requested), source document, page,
- * jurisdiction, verification state, and every caveat sentence the server sent.
+ * A figure is laid out as a statement: the total first, then its caveats, its working
+ * and one citation per line. Without any interaction it shows every factor's value, unit,
+ * publisher, year (used and requested), source document, page, jurisdiction, verification
+ * state, and every caveat sentence the server sent.
  */
 
 export function h(tag, props = {}, children = []) {
@@ -55,7 +54,7 @@ export function notice(kind, title, detail) {
 
 /* --- the answer ----------------------------------------------------------------------- */
 
-export function renderAnswer(final, variant = 'statement') {
+export function renderAnswer(final) {
   const parts = [];
 
   if (final.stopped_reason === 'max_turns') {
@@ -83,8 +82,7 @@ export function renderAnswer(final, variant = 'statement') {
   // The audit sentence on a figure states what the audit found. app.js printed the pass
   // sentence unconditionally, under a red notice saying the opposite.
   const audit = flaggedFigures.length || flaggedQuotes.length ? 'fail' : 'pass';
-  const render = variant === 'schedule' ? scheduleFigure : statementFigure;
-  for (const figure of final.figures || []) parts.push(render(figure, audit));
+  for (const figure of final.figures || []) parts.push(statementFigure(figure, audit));
 
   if (!final.figures?.length && final.stopped_reason === 'completed') {
     parts.push(notice('plain', 'No figure was calculated',
@@ -217,93 +215,6 @@ function statementFigure(figure, audit) {
       single ? null : h('p', { class: 'derivation', text: line.derivation }),
       provenance(line),
     ])),
-    auditFooter(figure, audit),
-  ]);
-}
-
-/* --- schedule: lines as rows, a ruled total, lettered sources and numbered notes ----- */
-
-const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
-
-function scheduleFigure(figure, audit) {
-  const lines = figure.lines || [];
-  const caveats = caveatsFor(figure);
-  const scopes = (figure.scopes || []).map((n) => `Scope ${n}`).join(' + ');
-  const methods = (figure.methods || []).join(', ');
-
-  // One wrapper per cell, so a row stacked on a narrow screen is exactly label + value.
-  const cell = (label, children, cls) => h('td', { 'data-label': label, class: cls }, [
-    h('span', { class: 'cell-val' }, [].concat(children).map((c) => (typeof c === 'string' ? document.createTextNode(c) : c))),
-  ]);
-  const head = ['Activity', 'Quantity', 'Factor', 'Factor year', 'Source', 'kg CO2e'];
-
-  const body = lines.map((line, i) => {
-    const f = line.factor;
-    return h('tr', {}, [
-      h('th', { scope: 'row', 'data-label': 'Activity' }, [
-        h('span', { text: line.kind }),
-        h('span', { class: 'cell-sub', text: [line.scope ? `Scope ${line.scope}` : null, line.method, line.gas_basis].filter(Boolean).join(', ') }),
-      ]),
-      cell('Quantity', `${group(line.activity_amount)} ${line.activity_unit}`, 'num'),
-      cell('Factor', `${group(f.factor)} ${f.unit}`, 'num'),
-      cell('Factor year', [
-        String(f.year_used),
-        f.substituted ? h('span', { class: 'badge', text: `requested ${f.year_requested}` }) : null,
-      ].filter(Boolean), 'num'),
-      cell('Source', [
-        h('a', { class: 'ref', href: `#src-${figure.calculation_ref}-${i}`, text: `(${LETTERS[i]})` }),
-        ` ${f.publisher}`,
-        f.jurisdiction === 'SG' ? null : h('span', { class: 'badge', text: 'non-Singapore' }),
-      ].filter(Boolean)),
-      cell('kg CO2e', group(line.kg_co2e), 'num result'),
-    ]);
-  });
-
-  const byScope = Object.entries(figure.kg_co2e_by_scope || {});
-  const foot = [
-    h('tr', { class: 'total' }, [
-      h('th', { scope: 'row', colspan: 5, text: `Total, ${scopes}` }),
-      cell('Total kg CO2e', group(figure.kg_co2e), 'num result'),
-    ]),
-    ...(byScope.length > 1 ? byScope.map(([scope, kg]) => h('tr', { class: 'of-which' }, [
-      h('th', { scope: 'row', colspan: 5, text: `of which Scope ${scope}` }),
-      cell(`Scope ${scope}`, group(kg), 'num result'),
-    ])) : []),
-    h('tr', { class: 'tonnes' }, [
-      h('th', { scope: 'row', colspan: 5, text: 'Total in tonnes CO2e' }),
-      cell('Tonnes CO2e', group(figure.tonnes_co2e), 'num result'),
-    ]),
-  ];
-
-  return h('article', { class: 'schedule', 'data-audit': audit }, [
-    h('header', { class: 'schedule-head' }, [
-      h('p', { class: 'eyebrow', text: `Schedule ${figure.calculation_ref} · ${(figure.document_ids || []).join(', ')}` }),
-      h('h2', { class: 'schedule-title', text: `${lines.map((l) => l.kind).join(' and ')} emissions` }),
-      h('p', { class: 'schedule-sub', text: `${scopes} · ${methods} · estimate, not assured` }),
-    ]),
-    h('div', { class: 'table-wrap' }, [
-      h('table', { class: 'sched' }, [
-        h('thead', {}, [h('tr', {}, head.map((t, i) => h('th', { scope: 'col', class: i === 0 || i === 4 ? null : 'num', text: t })))]),
-        h('tbody', {}, body),
-        h('tfoot', {}, foot),
-      ]),
-    ]),
-    h('p', { class: 'derivation' }, [h('span', { class: 'derivation-label', text: 'Working  ' }), document.createTextNode(figure.derivation)]),
-    ...lines.flatMap((line) => inputNotes(line)),
-    caveats.length ? h('section', { class: 'notes', 'aria-label': 'Notes to the schedule' }, [
-      h('h3', { class: 'section-label', text: 'Notes to the schedule' }),
-      h('ol', {}, caveats.map((text) => h('li', { text }))),
-    ]) : null,
-    h('section', { class: 'sources', 'aria-label': 'Sources' }, [
-      h('h3', { class: 'section-label', text: 'Sources' }),
-      h('ol', { class: 'source-list' }, lines.map((line, i) => h('li', { id: `src-${figure.calculation_ref}-${i}` }, [
-        h('span', { class: 'source-letter', text: `(${LETTERS[i]})`, 'aria-hidden': true }),
-        h('div', {}, [
-          h('p', { class: 'source-title', text: `${line.kind}: ${line.factor.source_document}` }),
-          provenance(line),
-        ]),
-      ]))),
-    ]),
     auditFooter(figure, audit),
   ]);
 }
