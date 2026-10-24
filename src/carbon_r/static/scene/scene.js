@@ -20,18 +20,21 @@ export const LABELS = {
   vehicle: 'Scope 1: fuel burned in vehicles you own',
   factory: 'Scope 1: fuel burned on site',
   plant: 'Scope 2 for the businesses that buy its electricity',
+  // A carrier's fuel is its operator's Scope 1; for a business that uses it, Scope 3.
+  ship: 'Scope 1 for the operator; Scope 3 for businesses that ship goods on it',
+  plane: 'Scope 1 for the operator; Scope 3 for business travel on it',
 };
 
 const FOV = 30;
-const FRAME_RADIUS = 10.5;     // world units kept in view vertically
-const FRAME_WIDTH = 12.6;      // and horizontally: the whole water ring
-const ELEVATION = 0.5;         // rad above the horizon; steeper on a portrait screen,
-const ELEVATION_PORTRAIT = 0.78; // where a tall frame suits a more top-down view
+const FRAME_RADIUS = 10.8;     // world units kept in view vertically
+const FRAME_WIDTH = 13;        // and horizontally: the island, the sea cropping at the sides
+const ELEVATION = 0.42;        // rad above the horizon; steeper on a portrait screen,
+const ELEVATION_PORTRAIT = 0.72; // where a tall frame suits a more top-down view
 const ORBIT_SPEED = 0.03;      // rad/s
 const PARALLAX = { x: 0.16, y: 0.05 };
 const MAX_DT = 1 / 20;         // s: clamp a dropped frame or a resume from pause
 const PREWARM = 8;             // s of simulation before the first frame
-const TARGET = new THREE.Vector3(0, 1.1, 0.4);
+const TARGET = new THREE.Vector3(0, 1.2, 1.2);
 
 function spring(duration, ratio = 1) {
   return {
@@ -72,8 +75,8 @@ export function mountScene(container, { small = false, showStats = false } = {})
   renderer.info.autoReset = false;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(FOV, 1, 1, 200);
-  const smoke = new Smoke(small ? 320 : 640);
+  const camera = new THREE.PerspectiveCamera(FOV, 1, 1, 300);
+  const smoke = new Smoke(small ? 380 : 900);
   const world = buildWorld({ smoke, small, shadows: !small });
   scene.add(world.root, smoke.points);
 
@@ -130,6 +133,7 @@ export function mountScene(container, { small = false, showStats = false } = {})
     statsEl.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:9;padding:6px 8px;background:#16181a;color:#e8e9ea;font:12px/1.4 ui-sans-serif,system-ui;font-variant-numeric:tabular-nums;border-radius:4px;white-space:pre;pointer-events:none';
     document.body.append(statsEl);
     window.__sceneStats = stats;
+    window.__sceneDebug = { camera, ...world.debug };
   }
   function record(ms, workMs) {
     frameTimes[frames % WINDOW] = ms;

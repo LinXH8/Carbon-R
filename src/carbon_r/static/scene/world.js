@@ -1,12 +1,21 @@
-/* The diorama: an island with a power plant, a factory, a road loop with traffic, trees
- * and clouds. Procedural geometry only - no models, no textures, no signage, no brands.
+/* The diorama: an island with a power plant, a factory, a road loop with traffic, a
+ * harbour, an airfield, trees and clouds, in a rippling sea. Procedural geometry only - no
+ * models, no textures, no signage, no brands.
  *
  * Layout is fixed by hand and by a seeded generator, so every visit sees the same world.
  * update() runs every frame and allocates nothing: it writes into scratch objects declared
- * once at module level.
+ * once at module level. Static parts are merged into a few draw calls at the end of
+ * buildWorld (merge.js).
  */
 
 import * as THREE from 'three';
+import { curveTable, lambert, motion, mulberry32, place } from './kit.js';
+import { mergeStatic } from './merge.js';
+import { buildWater } from './water.js';
+import { buildHarbour } from './harbour.js';
+import { buildAirfield } from './airfield.js';
+
+const ISLAND = 14;
 
 const COLOR = {
   grass: 0x5f7a52,
@@ -42,23 +51,6 @@ const _t = new THREE.Vector3();
 const _s = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 
-function mulberry32(seed) {
-  return () => {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const lambert = (color) => new THREE.MeshLambertMaterial({ color, flatShading: true });
-
-/* Vertex-shader motion shared by the trees and the water: one time uniform and the wind,
-   updated once a frame. Flat shading derives normals from screen-space derivatives, so a
-   displaced vertex is lit correctly without recomputing anything. */
-const motion = { uTime: { value: 0 }, uWind: { value: new THREE.Vector2() } };
-
 // Trees bend from the ground up, the tip most, each on its own phase. Local space is world
 // space here: tree instances are translated and scaled, never rotated.
 const SWAY = /* glsl */ `#include <begin_vertex>
@@ -74,29 +66,6 @@ function sway(material) {
   return material;
 }
 
-// Water: a slow swell outward from the island and a cross-chop, faceted by flat shading.
-const RIPPLE = /* glsl */ `#include <begin_vertex>
-  float r = length(position.xz);
-  float rim = smoothstep(12.2, 11.3, r); // still at the outer wall, so the edge never lifts off it
-  transformed.y += rim * (0.08 * sin(r * 1.7 - uTime * 1.1) + 0.05 * sin(position.x * 0.9 + position.z * 0.6 + uTime * 0.8));`;
-
-function ripple(material) {
-  material.onBeforeCompile = (shader) => {
-    Object.assign(shader.uniforms, motion);
-    shader.vertexShader = 'uniform float uTime;\nuniform vec2 uWind;\n' +
-      shader.vertexShader.replace('#include <begin_vertex>', RIPPLE);
-  };
-  return material;
-}
-
-function place(geometry, material, x, y, z, { cast = true, receive = false } = {}) {
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(x, y, z);
-  mesh.castShadow = cast;
-  mesh.receiveShadow = receive;
-  return mesh;
-}
-
 /* --- the road: a closed curve sampled once into an even-spaced lookup table ----------- */
 
 const ROAD_SAMPLES = 240;
@@ -108,19 +77,10 @@ function buildRoad() {
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2;
     const wobble = 1 + 0.06 * Math.sin(a * 3 + 0.7);
-    points.push(new THREE.Vector3(Math.cos(a) * 7.2 * wobble, 0.03, 3 + Math.sin(a) * 3.6 * wobble));
+    points.push(new THREE.Vector3(Math.cos(a) * 6.0 * wobble, 0.03, 2 + Math.sin(a) * 3.8 * wobble));
   }
-  const curve = new THREE.CatmullRomCurve3(points, true, 'centripetal');
-  const length = curve.getLength();
-  const pos = new Float32Array(ROAD_SAMPLES * 3);
-  const tan = new Float32Array(ROAD_SAMPLES * 3);
-  for (let i = 0; i < ROAD_SAMPLES; i++) {
-    const u = i / ROAD_SAMPLES;
-    curve.getPointAt(u, _p);
-    curve.getTangentAt(u, _t);
-    pos.set([_p.x, _p.y, _p.z], i * 3);
-    tan.set([_t.x, _t.y, _t.z], i * 3);
-  }
+  const table = curveTable(new THREE.CatmullRomCurve3(points, true, 'centripetal'), ROAD_SAMPLES);
+  const { pos, tan } = table;
 
   // A flat ribbon either side of the centre line.
   const half = 0.48;
@@ -144,24 +104,11 @@ function buildRoad() {
   const mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: COLOR.road }));
   mesh.receiveShadow = true;
 
-  /** Position and unit tangent at u in [0, 1), linearly interpolated. Writes into outs. */
+  /** Position and unit tangent at u, the tangent kept level. Writes into outs. */
   function sample(u, outPos, outTan) {
-    const f = (((u % 1) + 1) % 1) * ROAD_SAMPLES;
-    const i0 = Math.floor(f);
-    const i1 = (i0 + 1) % ROAD_SAMPLES;
-    const k = f - i0;
-    const a = i0 * 3;
-    const b = i1 * 3;
-    outPos.set(
-      pos[a] + (pos[b] - pos[a]) * k,
-      pos[a + 1] + (pos[b + 1] - pos[a + 1]) * k,
-      pos[a + 2] + (pos[b + 2] - pos[a + 2]) * k,
-    );
-    outTan.set(
-      tan[a] + (tan[b] - tan[a]) * k,
-      0,
-      tan[a + 2] + (tan[b + 2] - tan[a + 2]) * k,
-    ).normalize();
+    table.sample(u, outPos, outTan);
+    outTan.y = 0;
+    outTan.normalize();
   }
 
   function distanceTo(x, z) {
@@ -174,13 +121,15 @@ function buildRoad() {
     return Math.sqrt(best);
   }
 
-  return { mesh, length, sample, distanceTo };
+  return { mesh, length: table.length, sample, distanceTo };
 }
 
 /* --- the world ---------------------------------------------------------------------- */
 
 export function buildWorld({ smoke, small, shadows }) {
   const root = new THREE.Group();
+  const statics = new THREE.Group(); // harbour and airfield parts that never move
+  root.add(statics);
   const rand = mulberry32(20261024);
   const hoverTargets = [];
   const tag = (object, kind) => {
@@ -192,13 +141,14 @@ export function buildWorld({ smoke, small, shadows }) {
   // scene's contrast never collapses; its colour warms as it drops.
   const hemi = new THREE.HemisphereLight(0xdfe7f0, 0x3a3226, 1.25);
   const sun = new THREE.DirectionalLight(0xfff1e0, 2.4);
-  sun.position.set(9, 16, 7);
+  sun.position.set(13, 24, 10);
   const sunLow = new THREE.Color(0xffc995);
   const sunHigh = new THREE.Color(0xfff4e6);
   sun.castShadow = shadows;
   if (shadows) {
+    // Fitted to the island plus the harbour, which reaches out to x = -17.6.
     sun.shadow.mapSize.set(1024, 1024);
-    Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 50 });
+    Object.assign(sun.shadow.camera, { left: -18.5, right: 18.5, top: 18.5, bottom: -18.5, near: 5, far: 70 });
     sun.shadow.bias = -0.0005;
     sun.shadow.normalBias = 0.03;
   }
@@ -207,27 +157,17 @@ export function buildWorld({ smoke, small, shadows }) {
   // Ground and water.
   const earth = lambert(COLOR.earth);
   const island = place(
-    new THREE.CylinderGeometry(10, 9.3, 1.2, 28),
+    new THREE.CylinderGeometry(ISLAND, ISLAND - 0.8, 1.2, 36),
     [earth, lambert(COLOR.grass), earth],
     0, -0.6, 0, { cast: false, receive: true },
   );
-  const waterSurface = place(
-    new THREE.RingGeometry(9.4, 12.2, 56, 8).rotateX(-Math.PI / 2),
-    ripple(lambert(COLOR.water)),
-    0, -0.45, 0, { cast: false, receive: true },
-  );
-  const waterSide = place(
-    new THREE.CylinderGeometry(12.2, 12.2, 0.9, 56, 1, true),
-    lambert(COLOR.waterSide),
-    0, -0.9, 0, { cast: false },
-  );
-  root.add(island, waterSurface, waterSide);
+  root.add(island, ...buildWater(COLOR.water, COLOR.waterSide));
 
   // Power plant: a hall, two stacks, a cooling tower.
   const plant = new THREE.Group();
   const concrete = lambert(COLOR.concrete);
-  plant.add(place(new THREE.BoxGeometry(3.4, 1.6, 2.2), concrete, -4.6, 0.8, -2.6, { receive: true }));
-  plant.add(place(new THREE.BoxGeometry(3.6, 0.15, 2.4), lambert(COLOR.roof), -4.6, 1.675, -2.6));
+  plant.add(place(new THREE.BoxGeometry(3.4, 1.6, 2.2), concrete, -4.6, 0.8, -4.6, { receive: true }));
+  plant.add(place(new THREE.BoxGeometry(3.6, 0.15, 2.4), lambert(COLOR.roof), -4.6, 1.675, -4.6));
   const stackGeo = new THREE.CylinderGeometry(0.22, 0.32, 4.6, 8);
   const bandGeo = new THREE.CylinderGeometry(0.235, 0.24, 0.3, 8);
   const stackMat = lambert(COLOR.stack);
@@ -236,31 +176,32 @@ export function buildWorld({ smoke, small, shadows }) {
   const lightGeo = new THREE.SphereGeometry(0.08, 6, 4);
   const stackX = [-6.0, -5.2];
   for (const x of stackX) {
-    plant.add(place(stackGeo, stackMat, x, 2.3, -3.6));
-    plant.add(place(bandGeo, bandMat, x, 4.3, -3.6));
-    plant.add(place(lightGeo, redLight, x, 4.68, -3.6, { cast: false }));
+    plant.add(place(stackGeo, stackMat, x, 2.3, -5.6));
+    plant.add(place(bandGeo, bandMat, x, 4.3, -5.6));
+    plant.add(place(lightGeo, redLight, x, 4.68, -5.6, { cast: false }));
   }
   const towerProfile = [[1.6, 0], [1.35, 0.8], [1.05, 2.0], [1.0, 2.6], [1.12, 3.4]]
     .map(([r, y]) => new THREE.Vector2(r, y));
-  const towerMat = new THREE.MeshLambertMaterial({ color: COLOR.tower, flatShading: true, side: THREE.DoubleSide });
-  plant.add(place(new THREE.LatheGeometry(towerProfile, 20), towerMat, -1.4, 0, -4.8));
+  const towerMat = lambert(COLOR.tower, { side: THREE.DoubleSide });
+  plant.add(place(new THREE.LatheGeometry(towerProfile, 20), towerMat, -1.4, 0, -6.8));
   tag(plant, 'plant');
   root.add(plant);
 
   // Factory: a sawtooth-roofed shed, a chimney, an annex with a turning roof vent.
   const factory = new THREE.Group();
-  factory.add(place(new THREE.BoxGeometry(3.8, 1.3, 2.6), lambert(COLOR.brick), 4.2, 0.65, -2.6, { receive: true }));
+  factory.add(place(new THREE.BoxGeometry(3.8, 1.3, 2.6), lambert(COLOR.brick), 4.2, 0.65, -4.6, { receive: true }));
   const tooth = new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(1.267, 0), new THREE.Vector2(0, 0.62)]);
   const toothGeo = new THREE.ExtrudeGeometry(tooth, { depth: 2.6, bevelEnabled: false }).translate(0, 0, -1.3);
   const metal = lambert(COLOR.metal);
-  for (let i = 0; i < 3; i++) factory.add(place(toothGeo, metal, 2.3 + i * 1.267, 1.3, -2.6));
-  factory.add(place(new THREE.CylinderGeometry(0.2, 0.28, 3.2, 8), lambert(COLOR.brick), 5.6, 1.6, -4.1));
+  for (let i = 0; i < 3; i++) factory.add(place(toothGeo, metal, 2.3 + i * 1.267, 1.3, -4.6));
+  factory.add(place(new THREE.CylinderGeometry(0.2, 0.28, 3.2, 8), lambert(COLOR.brick), 5.6, 1.6, -6.1));
   const amberLight = new THREE.MeshBasicMaterial({ color: 0xffb340 });
-  factory.add(place(lightGeo, amberLight, 5.6, 3.28, -4.1, { cast: false }));
-  factory.add(place(new THREE.BoxGeometry(1.6, 0.8, 1.2), concrete, 6.6, 0.4, -1.2, { receive: true }));
-  factory.add(place(new THREE.CylinderGeometry(0.34, 0.34, 0.22, 10), metal, 6.6, 0.91, -1.2));
+  factory.add(place(lightGeo, amberLight, 5.6, 3.28, -6.1, { cast: false }));
+  factory.add(place(new THREE.BoxGeometry(1.6, 0.8, 1.2), concrete, 6.4, 0.4, -3.0, { receive: true }));
+  factory.add(place(new THREE.CylinderGeometry(0.34, 0.34, 0.22, 10), metal, 6.4, 0.91, -3.0));
   const vent = new THREE.Group();
-  vent.position.set(6.6, 1.06, -1.2);
+  vent.userData.dynamic = true;
+  vent.position.set(6.4, 1.06, -3.0);
   const bladeGeo = new THREE.BoxGeometry(0.62, 0.03, 0.11);
   const bladeMat = lambert(COLOR.roof);
   for (let i = 0; i < 4; i++) {
@@ -312,7 +253,7 @@ export function buildWorld({ smoke, small, shadows }) {
     mesh.castShadow = true;
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     // Cars move along the whole loop, so cull and raycast against the loop, not a pose.
-    mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 3), 9);
+    mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 2), 8);
   }
   tag(bodies, 'vehicle');
   tag(cabins, 'vehicle');
@@ -322,29 +263,38 @@ export function buildWorld({ smoke, small, shadows }) {
   const share = small ? 0.5 : 1;
   for (const x of stackX) {
     smoke.addEmitter({
-      count: Math.round(110 * share), origin: new THREE.Vector3(x, 4.75, -3.6),
+      count: Math.round(110 * share), origin: new THREE.Vector3(x, 4.75, -5.6),
       life: [6, 8], size: [0.5, 2.6], rise: 0.9, spread: 0.12, alpha: 0.55, drift: 1, tints: SMOKE_TINTS,
     });
   }
   smoke.addEmitter({
-    count: Math.round(200 * share), origin: new THREE.Vector3(-1.4, 3.45, -4.8),
+    count: Math.round(200 * share), origin: new THREE.Vector3(-1.4, 3.45, -6.8),
     life: [8, 10], size: [1.0, 3.8], rise: 0.7, spread: 0.75, alpha: 0.42, drift: 0.8, tints: STEAM_TINTS,
   });
   smoke.addEmitter({
-    count: Math.round(110 * share), origin: new THREE.Vector3(5.6, 3.32, -4.1),
+    count: Math.round(110 * share), origin: new THREE.Vector3(5.6, 3.32, -6.1),
     life: [6, 8], size: [0.45, 2.4], rise: 0.85, spread: 0.1, alpha: 0.5, drift: 1, tints: SMOKE_TINTS,
   });
 
-  // Trees, kept clear of the road, the buildings and the shore.
-  const keepOut = [[-4.6, -2.6, 2.6], [-5.6, -3.6, 1.0], [-1.4, -4.8, 2.0], [4.2, -2.6, 2.6], [5.6, -4.1, 0.8], [6.6, -1.2, 1.3]];
-  const treeCount = small ? 20 : 36;
+  // Harbour (west) and airfield (east).
+  const harbour = buildHarbour({ smoke, small, statics, root, tag });
+  const airfield = buildAirfield({ smoke, small, statics, root, tag });
+
+  // Trees, kept clear of the road, the buildings, the harbour, the airfield and the shore.
+  const keepOut = [
+    [-4.6, -4.6, 2.6], [-5.6, -5.6, 1.0], [-1.4, -6.8, 2.0], [4.2, -4.6, 2.6], [5.6, -6.1, 0.8], [6.4, -3.0, 1.3],
+    ...harbour.keepOut, ...airfield.keepOut,
+  ];
+  const [rx0, rx1, rz0, rz1] = airfield.keepOutRect;
+  const treeCount = small ? 34 : 64;
   const trees = [];
-  for (let attempts = 0; trees.length < treeCount && attempts < 4000; attempts++) {
-    const r = Math.sqrt(rand()) * 9.1;
+  for (let attempts = 0; trees.length < treeCount && attempts < 8000; attempts++) {
+    const r = Math.sqrt(rand()) * (ISLAND - 0.9);
     const a = rand() * Math.PI * 2;
     const x = Math.cos(a) * r;
     const z = Math.sin(a) * r;
     if (road.distanceTo(x, z) < 1.0) continue;
+    if (x > rx0 && x < rx1 && z > rz0 && z < rz1) continue;
     if (keepOut.some(([kx, kz, kr]) => Math.hypot(x - kx, z - kz) < kr)) continue;
     if (trees.some((t) => Math.hypot(x - t.x, z - t.z) < 0.85)) continue;
     trees.push({ x, z, s: 0.7 + rand() * 0.6, phase: rand() * Math.PI * 2 });
@@ -365,26 +315,32 @@ export function buildWorld({ smoke, small, shadows }) {
   });
   for (const mesh of [trunks, cones]) {
     mesh.castShadow = true;
-    mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 11);
+    mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), ISLAND + 1);
   }
   root.add(trunks, cones);
 
   // Clouds: a few blobs each, drifting with the wind and shrinking away at the edge of
   // the world before they wrap, so nothing pops.
-  const cloudCount = small ? 3 : 5;
+  const cloudCount = small ? 3 : 6;
   const blobs = [[-0.9, 0, 0, 0.75], [0, 0.25, 0, 1], [0.9, 0.05, 0.1, 0.8], [0.25, 0.1, -0.55, 0.7]];
   const clouds = [];
   for (let i = 0; i < cloudCount; i++) {
     const a = (i / cloudCount) * Math.PI * 2 + rand();
-    const r = 5 + rand() * 8;
-    clouds.push({ x: Math.cos(a) * r, z: Math.sin(a) * r, y: 9.2 + rand() * 1.4, s: 0.6 + rand() * 0.35, phase: rand() * 6.28 });
+    const r = 5 + rand() * 12;
+    clouds.push({ x: Math.cos(a) * r, z: Math.sin(a) * r, y: 11 + rand() * 1.5, s: 0.8 + rand() * 0.4, phase: rand() * 6.28 });
   }
   const cloudMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), lambert(COLOR.cloud), cloudCount * blobs.length);
   cloudMesh.castShadow = shadows;
   cloudMesh.frustumCulled = false;
   cloudMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   root.add(cloudMesh);
-  const CLOUD_EDGE = 15;
+  const CLOUD_EDGE = 21;
+
+  // Bake the static parts: tens of meshes become a handful of draw calls.
+  mergeStatic(plant);
+  mergeStatic(factory);
+  mergeStatic(vent);
+  mergeStatic(statics);
 
   const redOn = new THREE.Color(0xff5a4a);
   const redOff = new THREE.Color(0x3a1a17);
@@ -398,9 +354,9 @@ export function buildWorld({ smoke, small, shadows }) {
     const elevation = 0.5 + 0.6 * height;
     const azimuth = 0.9 + 0.8 * day;
     sun.position.set(
-      20 * Math.cos(elevation) * Math.cos(azimuth),
-      20 * Math.sin(elevation),
-      20 * Math.cos(elevation) * Math.sin(azimuth),
+      30 * Math.cos(elevation) * Math.cos(azimuth),
+      30 * Math.sin(elevation),
+      30 * Math.cos(elevation) * Math.sin(azimuth),
     );
     sun.color.lerpColors(sunLow, sunHigh, height);
     sun.intensity = 2.1 + 0.5 * height;
@@ -434,6 +390,9 @@ export function buildWorld({ smoke, small, shadows }) {
     motion.uTime.value = time;
     motion.uWind.value.set(wind.x, wind.z);
 
+    harbour.update(time, dt, wind);
+    airfield.update(time, dt, wind);
+
     // Clouds.
     let k = 0;
     for (let i = 0; i < cloudCount; i++) {
@@ -462,5 +421,7 @@ export function buildWorld({ smoke, small, shadows }) {
     cloudMesh.instanceMatrix.needsUpdate = true;
   }
 
-  return { root, update, hoverTargets };
+  // For ?stats measurements only: what the camera should be checked against.
+  const debug = { plane: airfield.plane, moored: harbour.moored };
+  return { root, update, hoverTargets, debug };
 }

@@ -37,6 +37,11 @@ def test_the_landing_assets_are_served():
         ("/static/scene/scene.js", "javascript"),
         ("/static/scene/world.js", "javascript"),
         ("/static/scene/smoke.js", "javascript"),
+        ("/static/scene/kit.js", "javascript"),
+        ("/static/scene/merge.js", "javascript"),
+        ("/static/scene/water.js", "javascript"),
+        ("/static/scene/harbour.js", "javascript"),
+        ("/static/scene/airfield.js", "javascript"),
     ):
         response = client.get(path)
         assert response.status_code == 200, path
@@ -63,6 +68,8 @@ def test_the_hover_labels_keep_their_exact_wording():
         "Scope 1: fuel burned in vehicles you own",
         "Scope 1: fuel burned on site",
         "Scope 2 for the businesses that buy its electricity",
+        "Scope 1 for the operator; Scope 3 for businesses that ship goods on it",
+        "Scope 1 for the operator; Scope 3 for business travel on it",
     ):
         assert f"'{wording}'" in script, wording
 

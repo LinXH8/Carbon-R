@@ -32,7 +32,7 @@ varying float vAlpha;
 varying vec3 vTint;
 void main() {
   float d = length(gl_PointCoord - 0.5);
-  float a = smoothstep(0.5, 0.04, d) * vAlpha;
+  float a = (1.0 - smoothstep(0.04, 0.5, d)) * vAlpha;
   if (a < 0.004) discard;
   gl_FragColor = vec4(vTint, a);
 }`;
@@ -56,6 +56,7 @@ export class Smoke {
     this.size1 = new Float32Array(capacity);
     this.alphaMax = new Float32Array(capacity);
     this.rise = new Float32Array(capacity);
+    this.lift = new Float32Array(capacity);
     this.drift = new Float32Array(capacity);
 
     const geometry = new THREE.BufferGeometry();
@@ -87,9 +88,11 @@ export class Smoke {
 
   /**
    * Reserve a slice of the pool. `origin` is a Vector3 the caller may move every frame.
-   * life, size: [min, max] seconds and [start, end] world-unit diameters.
+   * life, size: [min, max] seconds and [start, end] world-unit diameters. `lift` is the
+   * vertical speed left once buoyancy has decayed: 0 keeps a wake on the water. Set
+   * `enabled` on the returned emitter to pause spawning; live particles still finish.
    */
-  addEmitter({ count, origin, life, size, rise, spread, alpha, drift, tints }) {
+  addEmitter({ count, origin, life, size, rise, spread, alpha, drift, tints, lift = 0.05 }) {
     const start = this.used;
     count = Math.min(count, this.capacity - this.used);
     this.used += count;
@@ -102,7 +105,8 @@ export class Smoke {
     }
     this.attrs.aTint.needsUpdate = true;
     const emitter = {
-      start, count, cursor: 0, carry: 0, origin, life, size, rise, spread, alpha, drift,
+      start, count, cursor: 0, carry: 0, origin, life, size, rise, spread, alpha, drift, lift,
+      enabled: true,
       rate: count / ((life[0] + life[1]) / 2),
     };
     this.emitters.push(emitter);
@@ -128,12 +132,17 @@ export class Smoke {
     this.alphaMax[i] = e.alpha * (0.8 + Math.random() * 0.2);
     this.rise[i] = e.rise * (0.85 + Math.random() * 0.3);
     this.drift[i] = e.drift;
+    this.lift[i] = e.lift;
   }
 
   /** Advance every live particle. `wind` is {x, z} in world units per second. */
   update(dt, wind) {
     for (let k = 0; k < this.emitters.length; k++) {
       const e = this.emitters[k];
+      if (!e.enabled) {
+        e.carry = 0;
+        continue;
+      }
       e.carry += e.rate * dt;
       while (e.carry >= 1) {
         e.carry -= 1;
@@ -155,7 +164,7 @@ export class Smoke {
       const p = i * 3;
       // Buoyant at the mouth, then carried: lift decays, the wind's share grows with age
       // and a little with height, and the particle's own spread is damped away.
-      const lift = this.rise[i] * Math.exp(-age[i] * 0.35) + 0.05;
+      const lift = this.rise[i] * Math.exp(-age[i] * 0.35) + this.lift[i];
       const carried = Math.min(age[i] * 0.6, 1) * this.drift[i] * (0.6 + position[p + 1] * 0.08);
       const damp = 1 - Math.min(dt * 0.6, 1);
       velocity[p] *= damp;

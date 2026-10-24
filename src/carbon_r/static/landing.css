@@ -42,7 +42,7 @@ body {
   width: 100%;
   max-width: 88rem;
   margin: 0 auto;
-  padding: clamp(2.5rem, 9vh, 6rem) var(--gutter) clamp(1.75rem, 5vh, 3rem);
+  padding: clamp(1.5rem, 5vh, 3.5rem) var(--gutter) clamp(1.25rem, 3vh, 2rem);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
   align-items: end;
@@ -54,7 +54,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.2em;
-  font: 500 clamp(3.25rem, 10vw, 6rem)/0.95 var(--serif);
+  font: 500 clamp(3rem, 8vw, 5rem)/0.95 var(--serif);
   letter-spacing: -0.03em;
 }
 .mark { flex: none; width: 0.52em; height: 0.52em; fill: none; stroke: currentColor; stroke-width: 1.4; }
@@ -88,7 +88,7 @@ body {
 
 /* --- the scene ---------------------------------------------------------------------- */
 
-.scene { position: relative; min-height: 26rem; overflow: hidden; }
+.scene { position: relative; min-height: max(26rem, 72svh); overflow: hidden; }
 .scene canvas {
   position: absolute;
   inset: 0;
@@ -144,6 +144,6 @@ body {
   .intro { grid-template-columns: minmax(0, 1fr); align-items: start; }
 }
 @media (max-width: 767px) {
-  .intro { padding-top: clamp(2rem, 7vh, 3.5rem); }
-  .scene { min-height: 58svh; }
+  .intro { padding-top: clamp(1.5rem, 5vh, 2.5rem); }
+  .scene { min-height: 64svh; }
 }
