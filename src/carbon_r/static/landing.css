@@ -34,7 +34,7 @@ body {
 ::selection { background: var(--accent); color: var(--ground); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-/* --- the first screen: the words, then the world ------------------------------------- */
+/* --- the first screen: name, line and action centred at the top, then the world ---------- */
 
 .landing { min-height: 100svh; display: grid; grid-template-rows: auto 1fr; }
 
@@ -42,17 +42,19 @@ body {
   width: 100%;
   max-width: 88rem;
   margin: 0 auto;
-  padding: clamp(1.5rem, 5vh, 3.5rem) var(--gutter) clamp(1.25rem, 3vh, 2rem);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
-  align-items: end;
-  gap: 1.75rem 4rem;
+  padding: clamp(1.5rem, 5vh, 3.5rem) var(--gutter) clamp(1rem, 2.5vh, 1.75rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
 }
 
 .intro h1 {
   margin: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.2em;
   font: 500 clamp(3rem, 8vw, 5rem)/0.95 var(--serif);
   letter-spacing: -0.03em;
@@ -60,10 +62,10 @@ body {
 .mark { flex: none; width: 0.52em; height: 0.52em; fill: none; stroke: currentColor; stroke-width: 1.4; }
 .mark circle { fill: currentColor; stroke: none; }
 
-.intro-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+.intro-copy { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
 .lede {
   margin: 0;
-  max-width: 26rem;
+  max-width: 30rem;
   color: var(--photo-ink-2);
   font-size: clamp(1.125rem, 1.3vw, 1.1875rem);
   line-height: 1.5;
@@ -99,6 +101,9 @@ body {
   transition: opacity 900ms ease;
 }
 .scene[data-ready] canvas { opacity: 1; }
+/* The sea runs past the frame; its top edge dissolves into the page rather than stopping
+   in a line under the button. (Fog does the same deeper in the scene.) */
+.scene canvas { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 64px); mask-image: linear-gradient(to bottom, transparent, #000 64px); }
 
 /* Without WebGL (or without the CDN) the scene is a plain field one tone up. */
 .no-webgl .scene { background: var(--panel); }
@@ -139,11 +144,7 @@ body {
   .scene canvas { transition-duration: 200ms; }
 }
 
-/* Below this the name would wrap beside the copy column: stack them instead. */
-@media (max-width: 1023px) {
-  .intro { grid-template-columns: minmax(0, 1fr); align-items: start; }
-}
 @media (max-width: 767px) {
-  .intro { padding-top: clamp(1.5rem, 5vh, 2.5rem); }
+  .intro { padding-top: clamp(1.25rem, 4vh, 2rem); }
   .scene { min-height: 64svh; }
 }

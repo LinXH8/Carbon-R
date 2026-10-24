@@ -42,6 +42,10 @@ def test_the_landing_assets_are_served():
         ("/static/scene/water.js", "javascript"),
         ("/static/scene/harbour.js", "javascript"),
         ("/static/scene/airfield.js", "javascript"),
+        ("/static/scene/terrain.js", "javascript"),
+        ("/static/scene/roads.js", "javascript"),
+        ("/static/scene/industry.js", "javascript"),
+        ("/static/scene/farm.js", "javascript"),
     ):
         response = client.get(path)
         assert response.status_code == 200, path

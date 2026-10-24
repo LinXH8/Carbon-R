@@ -1,18 +1,20 @@
-/* The sea around the island: a vertex-displaced ring, and a JS copy of the same height
- * function so ships float on the surface the viewer actually sees.
+/* The sea: one large plane reaching past the edges of the frame, so there is no rim to see;
+ * the far side fades into the page through the scene's fog. A JS copy of the height
+ * function lets boats float on the surface the viewer actually sees.
  *
  * Four directional waves of different length, direction and speed, summed (Gerstner
  * style): each lifts the surface and pushes it a little sideways toward its crest. The
  * sideways chop is held at CHOP (15%) of the vertical amplitude, so the height at a world
  * point stays close to the plain sum the JS sampler computes. The swell grows with the
- * wind. Crests are lit a little lighter, troughs darker, and a pale band runs along the
- * shore. Everything tapers to still water at the outer wall and at the island.
+ * wind and dies away at the coast, where a pale band marks the shore. Crests are lit a
+ * little lighter, troughs darker.
  */
 
 import * as THREE from 'three';
 import { lambert, motion, place } from './kit.js';
+import { SEA_DISTANCE_GLSL, seaDistance } from './terrain.js';
 
-export const WATER = { inner: 13.4, outer: 20.5, level: -0.45 };
+export const WATER = { level: -0.45, size: 160 };
 
 // [direction (rad), wavelength, amplitude, angular speed (rad/s)]
 const WAVES = [
@@ -23,7 +25,6 @@ const WAVES = [
 ];
 const CHOP = 0.15;
 const AMPLITUDE_SUM = WAVES.reduce((n, w) => n + w[2], 0);
-const SHORE = 13.7; // where the island's side meets the water
 const f = (n) => n.toFixed(4);
 
 const waveTerms = WAVES.map(([dir, length, amp, speed]) => /* glsl */ `
@@ -35,21 +36,19 @@ const waveTerms = WAVES.map(([dir, length, amp, speed]) => /* glsl */ `
   }`).join('');
 
 const VERTEX = /* glsl */ `#include <begin_vertex>
-  float r = length(position.xz);
-  float taper = smoothstep(${f(WATER.inner)}, ${f(WATER.inner + 1.2)}, r)
-    * (1.0 - smoothstep(${f(WATER.outer - 1.0)}, ${f(WATER.outer)}, r));
-  float swell = (0.6 + 0.8 * length(uWind)) * taper;
+  float shore = seaDistance(position.xz);
+  float swell = (0.6 + 0.8 * length(uWind)) * smoothstep(0.0, 1.4, shore);
   float h = 0.0;
   vec2 shift = vec2(0.0);
   ${waveTerms}
   transformed.y += h * swell;
   transformed.xz += shift * swell;
   vWave = clamp(0.5 + h / ${f(2 * AMPLITUDE_SUM)}, 0.0, 1.0);
-  vRadius = r;`;
+  vShore = shore;`;
 
 const FRAGMENT = /* glsl */ `#include <color_fragment>
   diffuseColor.rgb *= 0.82 + 0.36 * vWave;
-  float foam = 1.0 - smoothstep(${f(SHORE + 0.15)}, ${f(SHORE + 0.9)}, vRadius);
+  float foam = 1.0 - smoothstep(0.1, 0.9, vShore);
   diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.55, 0.64, 0.67), foam * 0.35);`;
 
 const smooth = (a, b, x) => {
@@ -59,33 +58,24 @@ const smooth = (a, b, x) => {
 
 /** Surface height at (x, z): the vertex shader's sum, without its small sideways chop. */
 export function waveHeight(x, z, time, windStrength) {
-  const r = Math.hypot(x, z);
-  const taper = smooth(WATER.inner, WATER.inner + 1.2, r) * (1 - smooth(WATER.outer - 1, WATER.outer, r));
   let h = 0;
   for (let i = 0; i < WAVES.length; i++) {
     const w = WAVES[i];
     const ph = ((2 * Math.PI) / w[1]) * (Math.cos(w[0]) * x + Math.sin(w[0]) * z) - w[3] * time;
     h += w[2] * Math.sin(ph);
   }
-  return WATER.level + h * (0.6 + 0.8 * windStrength) * taper;
+  return WATER.level + h * (0.6 + 0.8 * windStrength) * smooth(0, 1.4, seaDistance(x, z));
 }
 
-export function buildWater(colour, sideColour) {
+export function buildWater(colour) {
   const material = lambert(colour);
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, motion);
-    shader.vertexShader = 'uniform float uTime;\nuniform vec2 uWind;\nvarying float vWave;\nvarying float vRadius;\n' +
+    shader.vertexShader = `uniform float uTime;\nuniform vec2 uWind;\nvarying float vWave;\nvarying float vShore;\n${SEA_DISTANCE_GLSL}\n` +
       shader.vertexShader.replace('#include <begin_vertex>', VERTEX);
-    shader.fragmentShader = 'varying float vWave;\nvarying float vRadius;\n' +
+    shader.fragmentShader = 'varying float vWave;\nvarying float vShore;\n' +
       shader.fragmentShader.replace('#include <color_fragment>', FRAGMENT);
   };
-  const surface = place(
-    new THREE.RingGeometry(WATER.inner, WATER.outer, 96, 18).rotateX(-Math.PI / 2),
-    material, 0, WATER.level, 0, { cast: false, receive: true },
-  );
-  const side = place(
-    new THREE.CylinderGeometry(WATER.outer, WATER.outer, 0.9, 96, 1, true),
-    lambert(sideColour), 0, WATER.level - 0.45, 0, { cast: false },
-  );
-  return [surface, side];
+  const geometry = new THREE.PlaneGeometry(WATER.size, WATER.size, 140, 140).rotateX(-Math.PI / 2);
+  return place(geometry, material, 0, WATER.level, 0, { cast: false, receive: true });
 }

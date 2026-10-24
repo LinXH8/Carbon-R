@@ -4,15 +4,16 @@
  * prefers-reduced-motion it never runs: the world is simulated forward a few seconds in
  * fixed steps and rendered once, so the smoke is already there in the still.
  *
- * The camera orbits on its own and leans a little toward the pointer through a critically
- * damped spring (Apple's response/damping mapping: stiffness = (2PI / duration)^2,
- * damping = 4PI * ratio / duration), so the parallax has weight instead of snapping. There
- * are no orbit controls and no wheel handling, so scrolling the page never fights it.
+ * The camera is fixed: only the world moves. It is placed once per size so the whole
+ * island fits the frame - turned a quarter so the island's long side runs up a portrait
+ * screen - and fog the colour of the page fades the far sea into it, so the water has no
+ * edge to see. No controls and no wheel handling, so scrolling the page never fights it.
  */
 
 import * as THREE from 'three';
 import { Smoke } from './smoke.js';
 import { buildWorld } from './world.js';
+import { coastPoint } from './terrain.js';
 
 // Kept exactly this careful: the plant's own emissions are its Scope 1; they become
 // Scope 2 only for the business that buys its electricity.
@@ -23,35 +24,30 @@ export const LABELS = {
   // A carrier's fuel is its operator's Scope 1; for a business that uses it, Scope 3.
   ship: 'Scope 1 for the operator; Scope 3 for businesses that ship goods on it',
   plane: 'Scope 1 for the operator; Scope 3 for business travel on it',
+  freight: 'Scope 1 for the operator; Scope 3 for businesses that ship goods on it',
 };
 
 const FOV = 30;
-const FRAME_RADIUS = 10.8;     // world units kept in view vertically
-const FRAME_WIDTH = 13;        // and horizontally: the island, the sea cropping at the sides
-const ELEVATION = 0.42;        // rad above the horizon; steeper on a portrait screen,
-const ELEVATION_PORTRAIT = 0.72; // where a tall frame suits a more top-down view
-const ORBIT_SPEED = 0.03;      // rad/s
-const PARALLAX = { x: 0.16, y: 0.05 };
+const AZIMUTH = 0.25;           // rad: the view from a little east of south
+const ELEVATION = 0.62;        // rad above the horizon; steeper on a portrait screen
+const ELEVATION_PORTRAIT = 0.86;
+const FIT = { x: 0.97, y: 0.88 }; // how much of the frame the island may fill
 const MAX_DT = 1 / 20;         // s: clamp a dropped frame or a resume from pause
 const PREWARM = 8;             // s of simulation before the first frame
-const TARGET = new THREE.Vector3(0, 1.2, 1.2);
+const TARGET = new THREE.Vector3(0, 0.8, 0.6);
+const PAGE = 0x0e0f10;         // the page's ground colour, which the fog fades to
+const WATER_LEVEL = -0.45;
 
-function spring(duration, ratio = 1) {
-  return {
-    value: 0, velocity: 0, target: 0,
-    stiffness: ((2 * Math.PI) / duration) ** 2,
-    damping: (4 * Math.PI * ratio) / duration,
-  };
-}
-function stepSpring(s, dt) {
-  const accel = -s.stiffness * (s.value - s.target) - s.damping * s.velocity;
-  s.velocity += accel * dt;
-  s.value += s.velocity * dt;
-}
+// Points that must stay in frame: the coast all round, the quay's end, the tallest things.
+const FIT_POINTS = [
+  ...Array.from({ length: 36 }, (_, i) => coastPoint((i / 36) * Math.PI * 2)),
+  new THREE.Vector3(-19.6, 0, 1), new THREE.Vector3(-7, 5, -7.8), new THREE.Vector3(-2.8, 3.6, -8.2),
+  new THREE.Vector3(6, 4.6, 8.6), new THREE.Vector3(12, 4.6, 6.6),
+];
 
-/* Wind: one slowly turning vector shared by smoke, clouds and trees. It blows across the
-   frame and a little away from the viewer, turning with the orbit: wind toward the camera
-   foreshortens every plume into a blob. Screen-right for a camera at azimuth a is -a. */
+/* Wind: one slowly turning vector shared by smoke, clouds, trees and turbines. It blows
+   across the frame and a little away from the viewer: wind toward the camera would
+   foreshorten every plume into a blob. Screen-right for a camera at azimuth a is -a. */
 function windAt(time, azimuth, out) {
   const heading = -azimuth - 0.35 + 0.25 * Math.sin(time * 0.05) + 0.1 * Math.sin(time * 0.13 + 1.3);
   const strength = 0.55 + 0.15 * Math.sin(time * 0.09 + 0.4);
@@ -76,31 +72,49 @@ export function mountScene(container, { small = false, showStats = false } = {})
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(FOV, 1, 1, 300);
-  const smoke = new Smoke(small ? 380 : 900);
+  const smoke = new Smoke(small ? 500 : 1000);
   const world = buildWorld({ smoke, small, shadows: !small });
   scene.add(world.root, smoke.points);
 
+  scene.fog = new THREE.Fog(PAGE, 60, 120);
+
   const wind = { x: 0, z: 0 };
-  const lean = { x: spring(1.4), y: spring(1.4) };
-  let distance = 40;
-  let baseElevation = ELEVATION;
+  let azimuth = AZIMUTH;
   let time = 0;
 
   function advance(dt) {
     time += dt;
-    stepSpring(lean.x, dt);
-    stepSpring(lean.y, dt);
-    const azimuth = 0.35 + time * ORBIT_SPEED + lean.x.value;
     windAt(time, azimuth, wind);
     world.update(time, dt, wind);
     smoke.update(dt, wind);
-    const elevation = baseElevation + lean.y.value;
+  }
+
+  /* Place the camera at `distance` along the current view direction. */
+  function aim(distance, elevation) {
     camera.position.set(
       TARGET.x + distance * Math.cos(elevation) * Math.sin(azimuth),
       TARGET.y + distance * Math.sin(elevation),
       TARGET.z + distance * Math.cos(elevation) * Math.cos(azimuth),
     );
     camera.lookAt(TARGET);
+    camera.updateMatrixWorld();
+  }
+
+  /* The nearest distance at which every fit point lands inside the frame. */
+  function fit(elevation) {
+    const v = new THREE.Vector3();
+    let near = 5;
+    let far = 300;
+    for (let i = 0; i < 30; i++) {
+      const mid = (near + far) / 2;
+      aim(mid, elevation);
+      const inside = FIT_POINTS.every((p) => {
+        v.copy(p).project(camera);
+        return Math.abs(v.x) <= FIT.x && Math.abs(v.y) <= FIT.y;
+      });
+      if (inside) far = mid; else near = mid;
+    }
+    return far;
   }
 
   /* --- size --------------------------------------------------------------------------- */
@@ -110,11 +124,20 @@ export function mountScene(container, { small = false, showStats = false } = {})
     if (!width || !height) return;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
-    const vfov = THREE.MathUtils.degToRad(FOV);
-    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
-    distance = Math.max(FRAME_RADIUS / Math.sin(vfov / 2), FRAME_WIDTH / Math.sin(hfov / 2));
-    baseElevation = camera.aspect < 1 ? ELEVATION_PORTRAIT : ELEVATION;
     camera.updateProjectionMatrix();
+    const portrait = camera.aspect < 1;
+    azimuth = portrait ? AZIMUTH + Math.PI / 2 : AZIMUTH;
+    const elevation = portrait ? ELEVATION_PORTRAIT : ELEVATION;
+    const distance = fit(elevation);
+    aim(distance, elevation);
+    // Fog: clear out to the island's farthest point, fully faded where the top edge of the
+    // frame meets the sea, so the water dissolves into the page instead of ending.
+    let farthest = 0;
+    for (const p of FIT_POINTS) farthest = Math.max(farthest, camera.position.distanceTo(p));
+    const below = elevation - THREE.MathUtils.degToRad(FOV) / 2; // the top edge's angle down
+    const horizon = below > 0.02 ? (camera.position.y - WATER_LEVEL) / Math.sin(below) : farthest * 2;
+    scene.fog.near = farthest * 1.02;
+    scene.fog.far = Math.max(horizon, farthest * 1.1);
     smoke.setViewport(renderer.getDrawingBufferSize(new THREE.Vector2()).y, FOV);
     if (!running) draw();
   }
@@ -205,7 +228,7 @@ export function mountScene(container, { small = false, showStats = false } = {})
   const io = new IntersectionObserver(([entry]) => { onscreen = entry.isIntersecting; sync(); });
   const ro = new ResizeObserver(resize);
 
-  /* --- pointer: parallax and hover labels (fine pointers only) ---------------------- */
+  /* --- pointer: hover labels (fine pointers only) ----------------------------------- */
 
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const raycaster = new THREE.Raycaster();
@@ -216,10 +239,7 @@ export function mountScene(container, { small = false, showStats = false } = {})
   function hideLabel() { delete label.dataset.show; }
 
   function onPointerMove(event) {
-    if (event.pointerType !== 'mouse') return;
-    lean.x.target = -((event.clientX / window.innerWidth) * 2 - 1) * PARALLAX.x;
-    lean.y.target = ((event.clientY / window.innerHeight) * 2 - 1) * PARALLAX.y;
-    if (!finePointer.matches || event.timeStamp - lastHover < 50) return;
+    if (event.pointerType !== 'mouse' || !finePointer.matches || event.timeStamp - lastHover < 50) return;
     lastHover = event.timeStamp;
 
     const rect = canvas.getBoundingClientRect();
@@ -240,9 +260,10 @@ export function mountScene(container, { small = false, showStats = false } = {})
 
   /* --- start ------------------------------------------------------------------------ */
 
-  // Simulate forward in fixed steps so the first frame already has smoke in the air.
-  for (let t = 0; t < PREWARM; t += 1 / 30) advance(1 / 30);
+  // Size first (it places the camera, which sets the wind's heading), then simulate forward
+  // in fixed steps so the first frame already has smoke in the air.
   resize();
+  for (let t = 0; t < PREWARM; t += 1 / 30) advance(1 / 30);
   draw();
 
   document.addEventListener('visibilitychange', onVisibility);
