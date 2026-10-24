@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carbon R · Design previews</title>
+<link rel="stylesheet" href="/static/preview/minimal.css">
+</head>
+<body>
+<header class="masthead">
+  <a class="wordmark" href="/">Carbon R</a>
+  <p class="tagline">Three design directions, built as previews before the main page changes.</p>
+</header>
+<main>
+  <section>
+    <h2 class="section-label">Directions</h2>
+    <dl class="prov">
+      <div class="prov-row"><dt><a href="/static/preview/minimal.html?sample=electricity">A · Minimal</a></dt>
+        <dd>A report page. Warm paper, ink, a serif figure, hairline rules and no shadows. Caveats are set at body size behind an amber rule.</dd></div>
+      <div class="prov-row"><dt><a href="/static/preview/soft.html?sample=electricity">B · Soft</a></dt>
+        <dd>Calm through softness. A sage ground, nested double-bezel cards, diffuse depth, and provenance as a grid of readable tiles.</dd></div>
+      <div class="prov-row"><dt><a href="/static/preview/workpaper.html?sample=fuel">C · Workpaper</a></dt>
+        <dd>An auditor's schedule. Inputs on the left, record on the right. Ruled totals, lettered sources, numbered notes, and it prints.</dd></div>
+      <div class="prov-row"><dt><a href="/static/preview/basalt.html?sample=electricity">D · Basalt</a></dt>
+        <dd>Dark-first, from a basalt photograph. The rock is the masthead only and fades into a charcoal page. Figures, sources and caveats sit on solid panels, never on the image.</dd></div>
+      <div class="prov-row"><dt><a href="/static/preview/graphite.html?sample=electricity">E · Graphite</a></dt>
+        <dd>Basalt without the photograph. A graphene lattice, graphite grain and metallic sheen, all drawn in code, so nothing needs a licence. Same solid panels for every figure.</dd></div>
+      <div class="prov-row"><dt><a href="/static/preview/anthracite.html?sample=electricity">F · Anthracite</a></dt>
+        <dd>Dark only, set on a slate photograph (Annie Spratt, Unsplash License) that fills the page behind a light scrim. Figures, sources and caveats stay on solid panels.</dd></div>
+    </dl>
+  </section>
+  <section>
+    <h2 class="section-label">Data</h2>
+    <p>Every page runs live against <code>/upload</code> and <code>/chat/stream</code>. Add <code>?sample=electricity</code>, <code>fuel</code> or <code>flagged</code> to replay a turn from <code>sample.json</code>, which <code>scripts/build_ui_sample.py</code> produces by running the real <code>calculate_emissions</code> and figure audit on the offline test fixtures.</p>
+  </section>
+</main>
+</body>
+</html>

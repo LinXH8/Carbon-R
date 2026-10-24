@@ -50,3 +50,9 @@ Carbon R Project Checklist.md
 .DS_Store
 .idea/
 .vscode/
+
+# Design-preview imagery stays local unless its licence allows shipping it; each committed
+# image is listed by name below. Pages fall back to a flat colour without their image.
+src/carbon_r/static/preview/assets/*
+# Annie Spratt, Unsplash (Unsplash License: free to use, no attribution required).
+!src/carbon_r/static/preview/assets/slate.jpg

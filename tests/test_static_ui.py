@@ -48,3 +48,62 @@ def test_the_page_renders_figures_rather_than_parsing_the_reply():
     assert "reply.match" not in script
     assert "parseFloat" not in script
     assert "Number(" not in script
+
+
+PREVIEWS = ("minimal", "soft", "workpaper", "basalt", "graphite", "anthracite")
+
+
+def test_the_design_previews_and_their_assets_are_served():
+    for name in (*PREVIEWS, "index"):
+        response = client.get(f"/static/preview/{name}.html")
+        assert response.status_code == 200, name
+        assert "<title>Carbon R" in response.text, name
+    for name in PREVIEWS:
+        assert "text/css" in client.get(f"/static/preview/{name}.css").headers["content-type"]
+    for path in ("/static/preview/render.js", "/static/preview/preview.js"):
+        assert "javascript" in client.get(path).headers["content-type"], path
+
+
+def test_the_preview_renderer_takes_numbers_from_figures_only():
+    """The same guard as the main page, on the renderer the previews share."""
+    script = client.get("/static/preview/render.js").text
+    assert "final.figures" in script
+    assert "figure.kg_co2e" in script
+    assert "reply.match" not in script
+    assert "parseFloat" not in script
+    assert "Number(" not in script
+
+
+def test_the_preview_renderer_shows_every_part_of_a_citation():
+    """Factor, unit, publisher, both years, source, page, jurisdiction, verification, caveats."""
+    script = client.get("/static/preview/render.js").text
+    for field in (
+        "f.factor",
+        "f.unit",
+        "f.publisher",
+        "f.year_used",
+        "f.year_requested",
+        "f.source_document",
+        "f.source_page",
+        "f.jurisdiction",
+        "f.verified",
+        "f.substitution_note",
+        "f.source_url",
+        "required_disclosures",
+    ):
+        assert field in script, field
+
+
+def test_the_preview_sample_figures_were_computed_and_audited():
+    """sample.json comes from scripts/build_ui_sample.py, not from a hand-typed number."""
+    import json
+
+    samples = json.loads(client.get("/static/preview/sample.json").text)
+    assert set(samples) == {"electricity", "fuel", "flagged"}
+    for key, sample in samples.items():
+        final = sample["final"]
+        assert final["figures"], key
+        for figure in final["figures"]:
+            assert figure["lines"] and all(line["factor"]["publisher"] for line in figure["lines"])
+    assert samples["electricity"]["final"]["unverified_figures"] == []
+    assert samples["flagged"]["final"]["unverified_figures"]  # the audit caught the reply

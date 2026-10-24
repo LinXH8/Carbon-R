@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carbon R · Anthracite</title>
+<link rel="stylesheet" href="/static/preview/anthracite.css">
+</head>
+<body data-variant="statement">
+
+<!-- The texture lives in the masthead only. Nothing that carries a figure, a source or a
+     caveat is ever set over it. -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <nav class="preview-nav" aria-label="Preview controls">
+      <a class="wordmark" href="/static/preview/index.html"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20.2 7.25v9.5L12 21.5l-8.2-4.75v-9.5Z"/><circle cx="12" cy="2.5" r="1.6"/><circle cx="20.2" cy="7.25" r="1.6"/><circle cx="20.2" cy="16.75" r="1.6"/><circle cx="12" cy="21.5" r="1.6"/><circle cx="3.8" cy="16.75" r="1.6"/><circle cx="3.8" cy="7.25" r="1.6"/></svg>Carbon R</a>
+      <span class="nav-group"><span class="nav-label">Direction</span>
+        <a data-direction href="/static/preview/minimal.html">Minimal</a>
+        <a data-direction href="/static/preview/soft.html">Soft</a>
+        <a data-direction href="/static/preview/workpaper.html">Workpaper</a>
+        <a data-direction href="/static/preview/basalt.html">Basalt</a>
+        <a data-direction href="/static/preview/graphite.html">Graphite</a>
+        <a data-direction href="/static/preview/anthracite.html" aria-current="page">Anthracite</a></span>
+      <span class="nav-group"><span class="nav-label">Data</span>
+        <a data-sample="live" href="?">Live</a>
+        <a data-sample="electricity" href="?sample=electricity">Electricity</a>
+        <a data-sample="fuel" href="?sample=fuel">Fuel card</a>
+        <a data-sample="flagged" href="?sample=flagged">Flagged</a></span>
+    </nav>
+    <div class="masthead-copy">
+      <h1>Every tonne, traced to its source.</h1>
+      <p>Greenhouse-gas figures from your bills and statements. Calculated in Python, never by the model, and shown with the factor, publisher, year and caveats they rest on.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p class="mode" id="mode" role="status" hidden></p>
+
+  <section class="panel intake" aria-label="Document and question">
+    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose or drop a document">
+      <p class="dropzone-title">Choose or drop a document</p>
+      <p class="dropzone-hint">Electricity bill, LPG invoice or fuel-card statement · PDF, PNG or JPEG, up to 10 MB</p>
+      <input type="file" id="file" accept=".pdf,.png,.jpg,.jpeg" hidden>
+    </div>
+    <ul class="docs" id="docs" aria-label="Uploaded documents"></ul>
+
+    <div class="ask" id="ask-card" hidden>
+      <label class="section-label" for="question">Question</label>
+      <textarea id="question" rows="2" spellcheck="false">What are the emissions from this document? Show the factor you used and where it comes from.</textarea>
+      <div class="ask-row">
+        <button class="button" id="ask">Calculate</button>
+        <span class="ask-note" id="ask-note"></span>
+      </div>
+    </div>
+  </section>
+
+  <ol class="steps" id="steps" aria-live="polite" aria-label="Tool calls"></ol>
+  <div class="answer" id="answer"></div>
+</main>
+
+<footer class="colophon">
+  <p>The language model reads documents and chooses tools. It never does arithmetic. Estimates are not assured.</p>
+</footer>
+
+<script type="module" src="/static/preview/preview.js"></script>
+</body>
+</html>

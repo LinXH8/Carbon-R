@@ -1,0 +1,367 @@
+{
+ "electricity": {
+  "filename": "elec_001.pdf",
+  "document_id": "doc_test",
+  "final": {
+   "type": "final",
+   "session_id": "sess_preview",
+   "run_id": "run_preview",
+   "reply": "I read the bill, looked up the Singapore grid emission factor and calculated the emissions. The factor is from an earlier year than the bill; the note under the figure says why.",
+   "tool_calls": [
+    {
+     "tool": "extract_from_document",
+     "arguments": "{\"document_id\": \"doc_test\"}",
+     "status": "ok",
+     "message": "Read elec_001.pdf. Activities: act_1 = 139600 kWh of electricity in 2025."
+    },
+    {
+     "tool": "lookup_emission_factor",
+     "arguments": "{\"category\": \"electricity_grid_sg\", \"unit\": \"kg CO2 / kWh\", \"year\": 2025}",
+     "status": "ok",
+     "message": "0.402 kg CO2 / kWh (Energy Market Authority (EMA)). Stored as factor_1; pass it to calculate_emissions."
+    },
+    {
+     "tool": "calculate_emissions",
+     "arguments": "{\"pairs\": [{\"activity_ref\": \"act_1\", \"factor_ref\": \"factor_1\"}]}",
+     "status": "ok",
+     "message": "56,119.2 kg CO2e across 1 line(s) (Scope 2; Energy Market Authority (EMA))."
+    }
+   ],
+   "turns_used": 4,
+   "stopped_reason": "completed",
+   "unverified_figures": [],
+   "unverified_quotes": [],
+   "figures": [
+    {
+     "kg_co2e": "56119.200",
+     "tonnes_co2e": "56.119200",
+     "derivation": "139,600 kWh x 0.402 kg CO2 / kWh = 56,119.2 kg CO2e",
+     "lines": [
+      {
+       "kind": "electricity",
+       "kg_co2e": "56119.200",
+       "tonnes_co2e": "56.119200",
+       "derivation": "139,600 kWh x 0.402 kg CO2 / kWh = 56,119.2 kg CO2e",
+       "scope": 2,
+       "method": "location-based",
+       "gas_basis": "CO2",
+       "activity_amount": "139600",
+       "activity_unit": "kWh",
+       "activity_derivation": null,
+       "conversion": null,
+       "factor": {
+        "category": "electricity_grid_sg",
+        "factor": "0.402",
+        "unit": "kg CO2 / kWh",
+        "year_requested": 2025,
+        "year_used": 2024,
+        "substituted": true,
+        "substitution_note": "No 2025 factor is published for this category; used the 2024 factor instead (a 1-year substitution). Energy Market Authority (EMA) publishes in arrears.",
+        "publisher": "Energy Market Authority (EMA)",
+        "source_document": "Singapore Energy Statistics 2025, Chapter 2",
+        "source_url": "https://www.ema.gov.sg/singapore-energy-statistics",
+        "source_page": "Table 2.4",
+        "retrieved_at": "2026-10-16",
+        "jurisdiction": "SG",
+        "verified": true,
+        "notes": null,
+        "scope": 2,
+        "method": "location-based",
+        "gas_basis": "CO2"
+       }
+      }
+     ],
+     "scopes": [
+      2
+     ],
+     "methods": [
+      "location-based"
+     ],
+     "gas_bases": [
+      "CO2"
+     ],
+     "kg_co2e_by_scope": {
+      "2": "56119.200"
+     },
+     "disclosures": {
+      "estimated_reading": false,
+      "factor_year_substituted": true,
+      "non_singapore_factor": false,
+      "factor_unverified": false,
+      "unit_converted": false,
+      "mixed_scopes": false,
+      "mixed_gas_basis": false,
+      "not_assured": true,
+      "read_on_retry": false,
+      "inconsistent_reading": false
+     },
+     "required_disclosures": [
+      "The emission factor is not from the activity year: no factor has been published for that year yet, so the latest published year at or before it was used.",
+      "These figures are estimates produced from the uploaded document. They are not assured, audited or verified by a third party."
+     ],
+     "document_ids": [
+      "doc_test"
+     ],
+     "calculation_ref": "calc_1"
+    }
+   ]
+  }
+ },
+ "fuel": {
+  "filename": "fuel_001.pdf",
+  "document_id": "doc_test",
+  "final": {
+   "type": "final",
+   "session_id": "sess_preview",
+   "run_id": "run_preview",
+   "reply": "The statement has diesel and petrol on it, so each product was calculated with its own factor. Both factors are UK DESNZ values, not Singapore ones.",
+   "tool_calls": [
+    {
+     "tool": "extract_from_document",
+     "arguments": "{\"document_id\": \"doc_test\"}",
+     "status": "ok",
+     "message": "Read fuel_001.pdf. Activities: act_1 = 156.79 litres of diesel in 2026, act_2 = 116.79 litres of petrol in 2026."
+    },
+    {
+     "tool": "lookup_emission_factor",
+     "arguments": "{\"category\": \"fuel_diesel\", \"unit\": \"kg CO2e / litres\", \"year\": 2026}",
+     "status": "ok",
+     "message": "2.66155 kg CO2e / litres (Department for Energy Security and Net Zero). Stored as factor_1; pass it to calculate_emissions."
+    },
+    {
+     "tool": "lookup_emission_factor",
+     "arguments": "{\"category\": \"fuel_petrol\", \"unit\": \"kg CO2e / litres\", \"year\": 2026}",
+     "status": "ok",
+     "message": "2.35372 kg CO2e / litres (Department for Energy Security and Net Zero). Stored as factor_2; pass it to calculate_emissions."
+    },
+    {
+     "tool": "calculate_emissions",
+     "arguments": "{\"pairs\": [{\"activity_ref\": \"act_1\", \"factor_ref\": \"factor_1\"}, {\"activity_ref\": \"act_2\", \"factor_ref\": \"factor_2\"}]}",
+     "status": "ok",
+     "message": "692.195 kg CO2e across 2 line(s) (Scope 1; Department for Energy Security and Net Zero)."
+    }
+   ],
+   "turns_used": 5,
+   "stopped_reason": "completed",
+   "unverified_figures": [],
+   "unverified_quotes": [],
+   "figures": [
+    {
+     "kg_co2e": "692.195",
+     "tonnes_co2e": "0.692195",
+     "derivation": "  156.79 litres x 2.66155 kg CO2e / litres = 417.3044245 kg CO2e\n  116.79 litres x 2.35372 kg CO2e / litres = 274.8909588 kg CO2e\n  = 692.195 kg CO2e in total",
+     "lines": [
+      {
+       "kind": "diesel",
+       "kg_co2e": "417.304",
+       "tonnes_co2e": "0.417304",
+       "derivation": "156.79 litres x 2.66155 kg CO2e / litres = 417.3044245 kg CO2e",
+       "scope": 1,
+       "method": "combustion",
+       "gas_basis": "CO2e",
+       "activity_amount": "156.79",
+       "activity_unit": "litres",
+       "activity_derivation": "3 diesel transaction(s): 52.30 + 48.21 + 56.28 = 156.79 litres",
+       "conversion": null,
+       "factor": {
+        "category": "fuel_diesel",
+        "factor": "2.66155",
+        "unit": "kg CO2e / litres",
+        "year_requested": 2026,
+        "year_used": 2026,
+        "substituted": false,
+        "substitution_note": null,
+        "publisher": "Department for Energy Security and Net Zero",
+        "source_document": "UK Government GHG Conversion Factors for Company Reporting 2026, full set, sheet 'Fuels'",
+        "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2026",
+        "source_page": "sheet 'Fuels', row 76, column D (Diesel (100% mineral diesel), litres)",
+        "retrieved_at": "2026-10-18",
+        "jurisdiction": "UK",
+        "verified": true,
+        "notes": "Diesel combustion, all greenhouse gases as CO2e.",
+        "scope": 1,
+        "method": "combustion",
+        "gas_basis": "CO2e"
+       }
+      },
+      {
+       "kind": "petrol",
+       "kg_co2e": "274.891",
+       "tonnes_co2e": "0.274891",
+       "derivation": "116.79 litres x 2.35372 kg CO2e / litres = 274.8909588 kg CO2e",
+       "scope": 1,
+       "method": "combustion",
+       "gas_basis": "CO2e",
+       "activity_amount": "116.79",
+       "activity_unit": "litres",
+       "activity_derivation": "3 petrol transaction(s): 38.11 + 41.02 + 37.66 = 116.79 litres",
+       "conversion": null,
+       "factor": {
+        "category": "fuel_petrol",
+        "factor": "2.35372",
+        "unit": "kg CO2e / litres",
+        "year_requested": 2026,
+        "year_used": 2026,
+        "substituted": false,
+        "substitution_note": null,
+        "publisher": "Department for Energy Security and Net Zero",
+        "source_document": "UK Government GHG Conversion Factors for Company Reporting 2026, full set, sheet 'Fuels'",
+        "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2026",
+        "source_page": "sheet 'Fuels', row 100, column D (Petrol (100% mineral petrol), litres)",
+        "retrieved_at": "2026-10-18",
+        "jurisdiction": "UK",
+        "verified": true,
+        "notes": "Petrol combustion, all greenhouse gases as CO2e.",
+        "scope": 1,
+        "method": "combustion",
+        "gas_basis": "CO2e"
+       }
+      }
+     ],
+     "scopes": [
+      1
+     ],
+     "methods": [
+      "combustion"
+     ],
+     "gas_bases": [
+      "CO2e"
+     ],
+     "kg_co2e_by_scope": {
+      "1": "692.195"
+     },
+     "disclosures": {
+      "estimated_reading": false,
+      "factor_year_substituted": false,
+      "non_singapore_factor": true,
+      "factor_unverified": false,
+      "unit_converted": false,
+      "mixed_scopes": false,
+      "mixed_gas_basis": false,
+      "not_assured": true,
+      "read_on_retry": false,
+      "inconsistent_reading": false
+     },
+     "required_disclosures": [
+      "This emission factor is not published for Singapore. It is applied here as the closest available, and the figure should be read with that in mind.",
+      "These figures are estimates produced from the uploaded document. They are not assured, audited or verified by a third party."
+     ],
+     "document_ids": [
+      "doc_test"
+     ],
+     "calculation_ref": "calc_1"
+    }
+   ]
+  }
+ },
+ "flagged": {
+  "filename": "elec_001.pdf",
+  "document_id": "doc_test",
+  "final": {
+   "type": "final",
+   "session_id": "sess_preview",
+   "run_id": "run_preview",
+   "reply": "The bill comes to roughly 56,000 kg CO2e.",
+   "tool_calls": [
+    {
+     "tool": "extract_from_document",
+     "arguments": "{\"document_id\": \"doc_test\"}",
+     "status": "ok",
+     "message": "Read elec_001.pdf. Activities: act_1 = 139600 kWh of electricity in 2025."
+    },
+    {
+     "tool": "lookup_emission_factor",
+     "arguments": "{\"category\": \"electricity_grid_sg\", \"unit\": \"kg CO2 / kWh\", \"year\": 2025}",
+     "status": "ok",
+     "message": "0.402 kg CO2 / kWh (Energy Market Authority (EMA)). Stored as factor_1; pass it to calculate_emissions."
+    },
+    {
+     "tool": "calculate_emissions",
+     "arguments": "{\"pairs\": [{\"activity_ref\": \"act_1\", \"factor_ref\": \"factor_1\"}]}",
+     "status": "ok",
+     "message": "56,119.2 kg CO2e across 1 line(s) (Scope 2; Energy Market Authority (EMA))."
+    }
+   ],
+   "turns_used": 4,
+   "stopped_reason": "completed",
+   "unverified_figures": [
+    "56,000"
+   ],
+   "unverified_quotes": [],
+   "figures": [
+    {
+     "kg_co2e": "56119.200",
+     "tonnes_co2e": "56.119200",
+     "derivation": "139,600 kWh x 0.402 kg CO2 / kWh = 56,119.2 kg CO2e",
+     "lines": [
+      {
+       "kind": "electricity",
+       "kg_co2e": "56119.200",
+       "tonnes_co2e": "56.119200",
+       "derivation": "139,600 kWh x 0.402 kg CO2 / kWh = 56,119.2 kg CO2e",
+       "scope": 2,
+       "method": "location-based",
+       "gas_basis": "CO2",
+       "activity_amount": "139600",
+       "activity_unit": "kWh",
+       "activity_derivation": null,
+       "conversion": null,
+       "factor": {
+        "category": "electricity_grid_sg",
+        "factor": "0.402",
+        "unit": "kg CO2 / kWh",
+        "year_requested": 2025,
+        "year_used": 2024,
+        "substituted": true,
+        "substitution_note": "No 2025 factor is published for this category; used the 2024 factor instead (a 1-year substitution). Energy Market Authority (EMA) publishes in arrears.",
+        "publisher": "Energy Market Authority (EMA)",
+        "source_document": "Singapore Energy Statistics 2025, Chapter 2",
+        "source_url": "https://www.ema.gov.sg/singapore-energy-statistics",
+        "source_page": "Table 2.4",
+        "retrieved_at": "2026-10-16",
+        "jurisdiction": "SG",
+        "verified": true,
+        "notes": null,
+        "scope": 2,
+        "method": "location-based",
+        "gas_basis": "CO2"
+       }
+      }
+     ],
+     "scopes": [
+      2
+     ],
+     "methods": [
+      "location-based"
+     ],
+     "gas_bases": [
+      "CO2"
+     ],
+     "kg_co2e_by_scope": {
+      "2": "56119.200"
+     },
+     "disclosures": {
+      "estimated_reading": false,
+      "factor_year_substituted": true,
+      "non_singapore_factor": false,
+      "factor_unverified": false,
+      "unit_converted": false,
+      "mixed_scopes": false,
+      "mixed_gas_basis": false,
+      "not_assured": true,
+      "read_on_retry": false,
+      "inconsistent_reading": false
+     },
+     "required_disclosures": [
+      "The emission factor is not from the activity year: no factor has been published for that year yet, so the latest published year at or before it was used.",
+      "These figures are estimates produced from the uploaded document. They are not assured, audited or verified by a third party."
+     ],
+     "document_ids": [
+      "doc_test"
+     ],
+     "calculation_ref": "calc_1"
+    }
+   ]
+  }
+ }
+}
