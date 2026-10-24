@@ -59,6 +59,12 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/", include_in_schema=False)
+def landing() -> FileResponse:
+    """The landing page: what Carbon R does, and the way in. Decorative 3D, no figures."""
+    return FileResponse(STATIC_DIR / "landing.html")
+
+
+@app.get("/app", include_in_schema=False)
 def index() -> FileResponse:
     """The single-page UI. No build step: the files under static/ are served as written."""
     return FileResponse(STATIC_DIR / "index.html")
