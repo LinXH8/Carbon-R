@@ -24,7 +24,7 @@ def test_the_page_assets_are_served():
         ("/static/app.css", "text/css"),
         ("/static/app.js", "javascript"),
         ("/static/render.js", "javascript"),
-        ("/static/assets/slate.jpg", "image/jpeg"),
+        ("/static/assets/stone.jpg", "image/jpeg"),
     ):
         response = client.get(path)
         assert response.status_code == 200, path

@@ -1,7 +1,7 @@
 /* Carbon R - the page (the "Anthracite" design).
  *
- * The page, set on a dark slate photograph (Annie Spratt, Unsplash, under the
- * Unsplash License: free to use, no attribution required). The photograph is the whole
+ * The page, set on a dark rock photograph (David Jorre, Unsplash, under the Unsplash
+ * License: free to use, no attribution required). The photograph is the whole
  * page background under a light scrim; every figure, source and caveat still sits on a
  * solid panel. Dark only: the page outside the panels is the photograph, and dark text
  * would not read on it. Without the image the page falls back to flat charcoal.
@@ -16,7 +16,7 @@
   --edge-strong: #3b4046;
   --ink: #e8e9ea;
   --ink-2: #b7bbbf;
-  --ink-3: #8d9298;
+  --ink-3: #9ea3a8;
   --accent: #9cc3dc;
   --caveat: #e0b25a;
   --caveat-wash: #231d12;
@@ -28,6 +28,8 @@
 
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
   --sans: ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+  /* Strong ease-out for anything entering or answering a press. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
@@ -38,11 +40,13 @@ body {
   color: var(--ink);
   font: 1rem/1.55 var(--sans);
   -webkit-font-smoothing: antialiased;
-  /* The photograph is the page. The scrim (35%) takes its lighter centre down far enough
-     that the faintest text (--ink-3) stays above 4.5:1; panels stay solid on top of it. */
+  /* The photograph is the page, held back under a 55% scrim so it reads as texture
+     rather than picture. It is very dark to begin with (median 13/255, 99th percentile
+     77), so every text colour clears 4.5:1 even over its brightest specks. Panels stay
+     solid on top of it. */
   background:
-    linear-gradient(rgba(10, 11, 12, 0.35), rgba(10, 11, 12, 0.35)),
-    url("/static/assets/slate.jpg") center / cover fixed,
+    linear-gradient(rgba(10, 11, 12, 0.55), rgba(10, 11, 12, 0.55)),
+    url("/static/assets/stone.jpg") center / cover fixed,
     var(--ground);
 }
 .num { font-variant-numeric: tabular-nums lining-nums; }
@@ -72,8 +76,12 @@ main { max-width: 48rem; margin: -2.5rem auto 0; padding: 0 1rem 4rem; display: 
 
 .section-label { display: block; margin: 0 0 0.5rem; font: 600 0.75rem/1.3 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
 
-.dropzone { padding: 1.125rem 1.25rem; border: 1px dashed var(--edge-strong); border-radius: 4px; background: var(--panel-2); cursor: pointer; transition: border-color 140ms ease-out; }
-.dropzone:hover, .dropzone[data-dragging] { border-color: var(--accent); }
+.dropzone { padding: 1.125rem 1.25rem; border: 1px dashed var(--edge-strong); border-radius: 4px; background: var(--panel-2); cursor: pointer; transition: border-color 150ms ease, transform 160ms var(--ease-out); }
+.dropzone[data-dragging] { border-color: var(--accent); }
+.dropzone:active { transform: scale(0.99); }
+@media (hover: hover) and (pointer: fine) {
+  .dropzone:hover { border-color: var(--accent); }
+}
 .dropzone[data-busy] { opacity: 0.55; pointer-events: none; }
 .dropzone-title { margin: 0; font-weight: 600; }
 .dropzone-hint { margin: 0.25rem 0 0; color: var(--ink-3); font-size: 0.875rem; }
@@ -89,8 +97,11 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 .ask-row { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 0.875rem; }
 .ask-note { color: var(--ink-3); font-size: 0.875rem; }
 .button { font: 600 0.9375rem/1 var(--sans); padding: 0.75rem 1.25rem; background: var(--ink); color: var(--ground); border: 0; border-radius: 4px; cursor: pointer; }
-.button:hover { background: var(--ink-2); }
-.button:active { transform: translateY(1px); }
+.button { transition: transform 160ms var(--ease-out), background-color 150ms ease; }
+.button:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) {
+  .button:hover { background: var(--ink-2); }
+}
 .button:disabled { opacity: 0.5; cursor: default; transform: none; }
 
 /* --- steps -------------------------------------------------------------------------- */
@@ -182,6 +193,27 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   body { background: var(--ground); }
 }
+/* --- motion --------------------------------------------------------------------------- */
+/* Tool steps arrive one at a time and the answer arrives at once; both enter rather than
+   appear, briefly and plainly - this is a reporting tool. Transitions, not keyframes, so a
+   step that lands while another is still entering never restarts it. The answer's
+   sections follow each other by 40ms so the figure lands before its citations. */
+.step, .answer > * { transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+@starting-style {
+  .step, .answer > * { opacity: 0; transform: translateY(6px); }
+}
+.answer > :nth-child(2) { transition-delay: 40ms; }
+.answer > :nth-child(3) { transition-delay: 80ms; }
+.answer > :nth-child(n + 4) { transition-delay: 120ms; }
+
+/* Reduced motion: the fades stay, the movement goes. */
+@media (prefers-reduced-motion: reduce) {
+  @starting-style {
+    .step, .answer > * { transform: none; }
+  }
+  .button:active, .dropzone:active { transform: none; }
+}
+
 @media print {
   body { background: #fff; }
   .masthead { color: #000; }

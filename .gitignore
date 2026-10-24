@@ -54,5 +54,5 @@ Carbon R Project Checklist.md
 # Page imagery stays local unless its licence allows shipping it; each committed image is
 # listed by name below. The page falls back to a flat colour without its image.
 src/carbon_r/static/assets/*
-# Annie Spratt, Unsplash (Unsplash License: free to use, no attribution required).
-!src/carbon_r/static/assets/slate.jpg
+# David Jorre, Unsplash (Unsplash License: free to use, no attribution required).
+!src/carbon_r/static/assets/stone.jpg
