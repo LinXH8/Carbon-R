@@ -23,6 +23,22 @@ Everything else - a sum, a difference, a per-month average, an invented total - 
 flagged. A number buried in a word (`CO2e`, `Scope2`) is not a figure and is not scanned;
 the literal phrases `Scope 1/2/3` are removed before scanning for the same reason.
 
+One tool's text is not a source of numbers: `search_peer_disclosures` (Part B). Its passages
+are PDF text layers in which footnote markers fuse onto figures (a total of 240,576
+with note 3 attached reads "240,5763") and table columns lose their years, so a number
+found only in a peer passage, a judge's quote from one, or the judge's reason about one is
+not a number any report states.
+Those three fields are dropped before numbers are collected (`_figure_view`); the passage's
+structured fields - page, report year, period - still count. A reply that states a peer
+figure in its own words is therefore flagged.
+
+What is NOT flagged is a number inside a verified quote of at least five words: a quoted
+span that `audit_quotes` would accept is the source's sentence, and its numbers are
+reported, not computed (`_without_verified_quotes`). That holds for every tool. The peer
+tool withholds the quotes most likely to carry misread table numbers (`is_table_like`), and
+a table-like span gets no exemption here even when verbatim - so what can be quoted with its
+numbers is prose that happens to contain one.
+
 Quotes get the same treatment (`audit_quotes`, Tier 2 Block 4). A span in double quotes,
 straight or curly, presents words as someone else's - in practice a GHG Protocol passage -
 so it must appear verbatim (whitespace-normalised) in some string a tool returned, or it is
@@ -37,9 +53,13 @@ from __future__ import annotations
 import re
 from decimal import Decimal, InvalidOperation
 
-# A standalone number: not preceded or followed by a letter, so `CO2e` and `elec_001`
-# contribute nothing. Thousands separators are part of the token and stripped after.
-_NUMBER = re.compile(r"(?<![A-Za-z0-9_.])[-+]?\d[\d,]*(?:\.\d+)?(?![A-Za-z0-9_])")
+# A standalone number: not joined to letters, so `CO2e`, `PM2.5` and `elec_001` contribute
+# nothing - and, since Part B, not joined to letters by a hyphen either (`R-32`, a
+# refrigerant, or `GHG-2`), which is an identifier, not a figure. Thousands separators are
+# part of the token and stripped after.
+_NUMBER = re.compile(
+    r"(?<![A-Za-z0-9_.])(?<![A-Za-z]-)[-+]?\d[\d,]*(?:\.\d+)?(?![A-Za-z0-9_])(?!-[A-Za-z])"
+)
 
 # Not quantities. `Scope 2` is a classification, and so is a tier.
 _NON_QUANTITIES = re.compile(r"\b(?:scope|tier)\s*[-–]?\s*\d+\b", re.IGNORECASE)
@@ -52,6 +72,12 @@ _NON_QUANTITIES = re.compile(r"\b(?:scope|tier)\s*[-–]?\s*\d+\b", re.IGNORECAS
 _LIST_MARKER = re.compile(r"^([ \t]*)\d{1,2}[.)](?=[ \t])", re.MULTILINE)
 
 _MAX_PLACES = 6
+
+# A quoted span this long or longer, found verbatim in a tool payload, is the source's own
+# sentence: its numbers are the source's, reported, not the model's. Shorter spans get no
+# exemption - a bare "2,5113" in quotation marks is a figure dressed as a quote. The same
+# floor `search_methodology` applies to a judge's quote (MIN_QUOTE_WORDS).
+_QUOTE_WORDS_FOR_FIGURES = 5
 
 # A quoted span: straight double quotes or curly ones, on one line.
 _QUOTED = re.compile(r'"([^"\n]+)"|\u201c([^\u201d\n]+)\u201d')
@@ -96,11 +122,29 @@ def _variants(number: Decimal) -> set[Decimal]:
     return forms
 
 
+# Tools whose free text is not evidence for a number, and the keys holding that text.
+_TEXT_NOT_FIGURES = {"search_peer_disclosures": frozenset({"text", "quote", "judge_reason"})}
+
+
+def _without_keys(value: object, keys: frozenset[str]) -> object:
+    if isinstance(value, dict):
+        return {k: _without_keys(v, keys) for k, v in value.items() if k not in keys}
+    if isinstance(value, list | tuple):
+        return [_without_keys(item, keys) for item in value]
+    return value
+
+
+def _figure_view(payload: dict) -> object:
+    """The part of a tool payload whose numbers a reply may state."""
+    keys = _TEXT_NOT_FIGURES.get(payload.get("tool", ""))
+    return _without_keys(payload, keys) if keys else payload
+
+
 def allowed_numbers(tool_payloads: list[dict]) -> set[Decimal]:
     """Every number a reply may state, given what the tools returned."""
     allowed: set[Decimal] = set()
     for payload in tool_payloads:
-        for number in numbers_in(payload):
+        for number in numbers_in(_figure_view(payload)):
             allowed |= _variants(number)
     return allowed
 
@@ -112,15 +156,66 @@ def audit_figures(reply: str, tool_payloads: list[dict]) -> list[str]:
     from without hunting for which `0.42` was meant.
     """
     allowed = allowed_numbers(tool_payloads)
-    text = _NON_QUANTITIES.sub(" ", _LIST_MARKER.sub(r"\1", reply))
+    prose = _without_verified_quotes(reply, _haystacks(tool_payloads))
+    return [token for token in figures_in(prose) if _to_decimal(token) not in allowed]
 
-    unverified: list[str] = []
-    for token in _NUMBER.findall(text):
-        number = _to_decimal(token)
-        if number is None or number in allowed:
-            continue
-        unverified.append(token)
-    return unverified
+
+# A quote is table-like - withheld, cited by page only - when it shows a fused footnote
+# marker (below), or when it holds more than
+# TABLE_MAX_NUMBERS figures, or figures make up more than TABLE_MAX_SHARE of its
+# whitespace-separated tokens. Figures are counted as the audit counts them (`figures_in`):
+# scope labels, list markers and identifiers such as R-32 or CO2e are not figures. Set by
+# the author in Part B and recorded, not tuned: a table row read out of a text layer is
+# exactly where a fused footnote marker or a lost column turns into a wrong number. The peer
+# tool withholds such quotes, and a table-like span in a reply earns no exemption below
+# even when it is verbatim in a payload (a passage's text still holds the row).
+TABLE_MAX_NUMBERS = 3
+TABLE_MAX_SHARE = 0.25
+
+
+# Two signs that a footnote marker has fused onto a figure, added by the author after the
+# first pass: a thousands group that is not exactly three digits ("240,5763" would be 240,576
+# plus note 3), and a scope that does not exist ("Total scope 17", Scope 1 plus note 7). Both
+# only between digits / after the word scope, so "in 2024, the bank" and "Scope 3 category
+# 15" are untouched. What they cannot see: a fusion with no comma ("500" plus note 1 reads
+# "5001") looks like any other number.
+_MALFORMED_THOUSANDS = re.compile(r"\d,(?:\d{1,2}|\d{4,})(?!\d)")
+_SCOPE_NUMBER = re.compile(r"\bscope\s*[-\u2013]?\s*(\d+)\b", re.IGNORECASE)
+
+
+def has_malformed_thousands(text: str) -> bool:
+    return _MALFORMED_THOUSANDS.search(text) is not None
+
+
+def has_impossible_scope(text: str) -> bool:
+    return any(int(n) not in (1, 2, 3) for n in _SCOPE_NUMBER.findall(text))
+
+
+def is_table_like(quote: str) -> bool:
+    if has_malformed_thousands(quote) or has_impossible_scope(quote):
+        return True
+    numbers = len(figures_in(quote))
+    tokens = len(quote.split())
+    return numbers > TABLE_MAX_NUMBERS or (tokens > 0 and numbers / tokens > TABLE_MAX_SHARE)
+
+
+def _without_verified_quotes(reply: str, haystacks: list[str]) -> str:
+    """The reply with every verified, not table-like quote of 5+ words blanked."""
+
+    def blank(match: re.Match) -> str:
+        span = match.group(1) or match.group(2)
+        long_enough = len(span.split()) >= _QUOTE_WORDS_FOR_FIGURES
+        exempt = long_enough and not is_table_like(span) and _is_verified(span, haystacks)
+        return " " if exempt else match.group(0)
+
+    return _QUOTED.sub(blank, reply)
+
+
+def figures_in(text: str) -> list[str]:
+    """The numeric tokens the audit treats as figures: not scope or tier labels, not list
+    markers, not numbers inside words. In order, as written."""
+    cleaned = _NON_QUANTITIES.sub(" ", _LIST_MARKER.sub(r"\1", text))
+    return [token for token in _NUMBER.findall(cleaned) if _to_decimal(token) is not None]
 
 
 def _normalise(text: str) -> str:
@@ -138,14 +233,23 @@ def strings_in(value: object) -> list[str]:
     return []
 
 
+def _haystacks(tool_payloads: list[dict]) -> list[str]:
+    return [_normalise(s) for payload in tool_payloads for s in strings_in(payload)]
+
+
+def _is_verified(span: str, haystacks: list[str]) -> bool:
+    """Every piece of the span (split at an ellipsis) appears verbatim in some payload."""
+    pieces = [_normalise(p) for p in _ELLIPSIS.split(span)]
+    pieces = [p for p in pieces if p]
+    return bool(pieces) and all(any(p in h for h in haystacks) for p in pieces)
+
+
 def audit_quotes(reply: str, tool_payloads: list[dict]) -> list[str]:
     """Quoted spans in `reply` that appear in no tool payload, as written, in order."""
-    haystacks = [_normalise(s) for payload in tool_payloads for s in strings_in(payload)]
+    haystacks = _haystacks(tool_payloads)
     unverified: list[str] = []
     for match in _QUOTED.finditer(reply):
         span = match.group(1) or match.group(2)
-        pieces = [_normalise(p) for p in _ELLIPSIS.split(span)]
-        pieces = [p for p in pieces if p]
-        if pieces and not all(any(p in h for h in haystacks) for p in pieces):
+        if not _is_verified(span, haystacks):
             unverified.append(span)
     return unverified

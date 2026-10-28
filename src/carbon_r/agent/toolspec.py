@@ -30,6 +30,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from carbon_r.peer_sources import load_peer_sources
+
 
 class ExtractArgs(BaseModel):
     """Arguments for `extract_from_document`."""
@@ -103,6 +105,33 @@ class SearchMethodologyArgs(BaseModel):
     )
 
 
+# The companies whose reports are ingested, from the committed data/peer_sources.json. A
+# Literal, so the model can only filter on a company that exists.
+PEER_COMPANIES: tuple[str, ...] = tuple(sorted({p.company for p in load_peer_sources().sources}))
+
+
+class SearchPeerDisclosuresArgs(BaseModel):
+    """Arguments for `search_peer_disclosures`."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    question: str = Field(
+        description="The question about how companies report, in plain words. One thing at "
+        "a time; for two companies, search each one separately."
+    )
+    company: Literal[PEER_COMPANIES] | None = Field(  # type: ignore[valid-type]
+        default=None, description="Restrict to one company's report(s). Null searches all."
+    )
+    sector: Literal["bank", "reit", "industrial", "energy"] | None = Field(
+        default=None, description="Restrict to one sector. Null searches all."
+    )
+    report_year: int | None = Field(
+        default=None,
+        description="The calendar year in which the report's period ENDS (a 1 April 2025 to "
+        "31 March 2026 report is 2026). Null searches every year.",
+    )
+
+
 TOOL_DESCRIPTIONS: dict[str, str] = {
     "extract_from_document": (
         "Establish what kind of document an uploaded file is, then read it with a vision "
@@ -138,6 +167,14 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
         "documents is close to the question, or when the closest passages do not actually "
         "answer it. Never returns an emission factor and never produces a figure."
     ),
+    "search_peer_disclosures": (
+        "Search the sustainability reports of 12 Singapore-listed companies (banks, REITs, "
+        "industrials, energy) for passages on how they report emissions - boundaries, "
+        "targets, methods, financed emissions - and return verified verbatim quotes with "
+        "company, report and page. Filters by company, sector and report year. Returns "
+        "passages, never figures: numbers in report text are not reliable, so cite the page "
+        "instead of stating one. Never an input to a calculation."
+    ),
 }
 
 ARG_MODELS: dict[str, type[BaseModel]] = {
@@ -145,6 +182,7 @@ ARG_MODELS: dict[str, type[BaseModel]] = {
     "lookup_emission_factor": LookupFactorArgs,
     "calculate_emissions": CalculateArgs,
     "search_methodology": SearchMethodologyArgs,
+    "search_peer_disclosures": SearchPeerDisclosuresArgs,
 }
 
 # Schema keywords the provider's strict mode does not accept. Stripped rather than
@@ -202,6 +240,7 @@ __all__ = [
     "ExtractArgs",
     "LookupFactorArgs",
     "SearchMethodologyArgs",
+    "SearchPeerDisclosuresArgs",
     "schema_for",
     "tool_schemas",
 ]

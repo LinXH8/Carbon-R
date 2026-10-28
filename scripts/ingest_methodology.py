@@ -23,7 +23,6 @@ tab, which is where a reading-order or cleaning defect would show first.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import sys
 
 from carbon_r.db import DatabaseNotConfiguredError, apply_migrations, connect
@@ -38,33 +37,10 @@ from carbon_r.rag.chunking import (
 )
 from carbon_r.rag.embed import configured_model, openai_embedder
 from carbon_r.rag.ingest import PostgresChunkStore, ingest_source
-from carbon_r.sources import BY_ID, METHODOLOGY_IDS, REGISTRY, UPSERT, SourceRecord
+from carbon_r.sources import BY_ID, METHODOLOGY_IDS, REGISTRY, UPSERT, check_local_files
 
 PREVIEW_SOURCE = "ghgp_corporate"
 PREVIEW_PAGE = 20
-
-
-def file_sha256(record: SourceRecord) -> str:
-    digest = hashlib.sha256()
-    with record.path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def check_local_files(ids: tuple[str, ...]) -> list[str]:
-    """Problems with the local copies, as messages. Empty means every file is the registered one."""
-    problems = []
-    for source_id in ids:
-        record = BY_ID[source_id]
-        if not record.path.exists():
-            problems.append(f"{source_id}: {record.local_path} is missing")
-        elif (actual := file_sha256(record)) != record.sha256:
-            problems.append(
-                f"{source_id}: sha256 {actual[:12]}... does not match the registered "
-                f"{record.sha256[:12]}... - not the document that was registered"
-            )
-    return problems
 
 
 def preview() -> int:

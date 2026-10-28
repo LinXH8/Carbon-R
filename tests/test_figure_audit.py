@@ -8,7 +8,16 @@ audit gets switched off and then catches nothing.
 
 from decimal import Decimal
 
-from carbon_r.agent.audit import audit_figures, numbers_in
+import pytest
+
+from carbon_r.agent.audit import (
+    audit_figures,
+    figures_in,
+    has_impossible_scope,
+    has_malformed_thousands,
+    is_table_like,
+    numbers_in,
+)
 
 PAYLOADS = [
     {
@@ -138,3 +147,56 @@ def test_a_decimal_at_the_start_of_a_line_is_not_a_marker():
 def test_a_year_starting_a_line_is_still_audited():
     """The marker is capped at two digits, so "2024. " is not mistaken for one."""
     assert audit_figures("2024. That year's factor.", []) == ["2024"]
+
+
+@pytest.mark.parametrize("identifier", ["R-32", "R-410a", "CO2e", "PM2.5", "GHG-2", "32-R"])
+def test_a_number_joined_to_letters_is_an_identifier_not_a_figure(identifier):
+    assert figures_in(f"The refrigerant {identifier} was replaced.") == []
+
+
+def test_a_negative_number_and_a_year_range_are_still_figures():
+    assert figures_in("The change was -3.5 tonnes.") == ["-3.5"]
+    assert "2024" in figures_in("In FY 2024-25 usage rose.")
+
+
+# --- fused footnote markers make a quote table-like (Part B) --------------------------------
+
+
+@pytest.mark.parametrize(
+    ("text", "malformed"),
+    [
+        ("Total 240,5763 tCO2e", True),  # 240,576 + note 3 (invented)
+        ("Total 2,5113 tCO2e", True),
+        ("Total 1,48 tCO2e", True),  # two digits after the comma
+        ("Total 240,576 tCO2e", False),
+        ("Total 1,234,567 tCO2e", False),
+        ("In 2024, the bank cut 3, then 4, sites.", False),  # commas in prose
+        ("Total 12345 tCO2e", False),  # no comma: a fusion here is invisible to this rule
+    ],
+)
+def test_a_malformed_thousands_group(text, malformed):
+    assert has_malformed_thousands(text) is malformed
+
+
+@pytest.mark.parametrize(
+    ("text", "impossible"),
+    [
+        ("Total scope 17 1,250 tCO2e", True),  # Scope 1 + note 7 (invented)
+        ("Scope 4 avoided emissions", True),
+        ("Scope 1, Scope 2 and Scope 3", False),
+        ("Scope 3 category 15 investments", False),
+        ("Scope 3 categories 1-15", False),
+    ],
+)
+def test_an_impossible_scope_label(text, impossible):
+    assert has_impossible_scope(text) is impossible
+
+
+def test_the_fused_example_is_table_like_although_it_has_one_figure():
+    quote = "Total scope 17 2,5113 tCO2e."
+    assert len(figures_in(quote)) == 1  # the count and share rules alone would let it through
+    assert is_table_like(quote)
+
+
+def test_ordinary_prose_with_a_scope_and_a_number_is_not_table_like():
+    assert not is_table_like("We cut Scope 3 category 6 travel emissions by 1,200 tonnes.")

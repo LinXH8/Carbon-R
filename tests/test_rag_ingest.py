@@ -9,7 +9,15 @@ from dataclasses import dataclass, field
 import pytest
 
 from carbon_r.rag.chunking import Page, chunk_pages, chunker_version
-from carbon_r.rag.ingest import ChunkRow, StoredSummary, decide, ingest_source, positions
+from carbon_r.rag.ingest import (
+    ChunkRow,
+    PeerMetadata,
+    StoredSummary,
+    decide,
+    ingest_source,
+    positions,
+    row_position,
+)
 
 
 @dataclass
@@ -25,7 +33,7 @@ class FakeStore:
             if r.chunker_version == chunker_version and r.embedding_model == embedding_model
         ]
         return StoredSummary(
-            current=positions([r.chunk for r in current]),
+            current=frozenset(row_position(r) for r in current),
             other_rows=len(mine) - len(current),
         )
 
@@ -51,15 +59,27 @@ PAGES = [
 ]
 
 
-def run(store, embed, *, window, overlap, model="model-a", pages=PAGES, source="src"):
+def run(
+    store,
+    embed,
+    *,
+    window,
+    overlap,
+    model="model-a",
+    pages=PAGES,
+    source="src",
+    offset=None,
+    peer=None,
+):
     return ingest_source(
         store,
         source_id=source,
         corpus="methodology",
-        chunks=chunk_pages(pages, offset=None, window=window, overlap=overlap),
+        chunks=chunk_pages(pages, offset=offset, window=window, overlap=overlap),
         chunker_version=chunker_version(window, overlap),
         embedding_model=model,
         embed=embed,
+        peer=peer,
     )
 
 
@@ -144,3 +164,35 @@ def test_the_embedding_input_is_transformed_but_the_stored_text_is_not():
     )
     assert all(t.startswith("TITLE\n\n") for t in seen)
     assert not any(r.chunk.text.startswith("TITLE") for r in store.rows)
+
+
+DBS = PeerMetadata(company="DBS", sector="bank", report_year=2025)
+
+
+def test_peer_metadata_is_written_on_every_row_and_methodology_rows_carry_none():
+    store, embed = FakeStore(), CountingEmbedder()
+    run(store, embed, window=20, overlap=5, source="peer", peer=DBS)
+    run(store, embed, window=20, overlap=5, source="method")
+    peer_rows = [r for r in store.rows if r.source_id == "peer"]
+    method_rows = [r for r in store.rows if r.source_id == "method"]
+    assert {(r.company, r.sector, r.report_year) for r in peer_rows} == {("DBS", "bank", 2025)}
+    assert {(r.company, r.sector, r.report_year) for r in method_rows} == {(None, None, None)}
+    assert run(store, embed, window=20, overlap=5, source="peer", peer=DBS).action == "unchanged"
+
+
+def test_corrected_peer_metadata_replaces_rows_whose_text_is_unchanged():
+    store, embed = FakeStore(), CountingEmbedder()
+    run(store, embed, window=20, overlap=5, peer=DBS)
+    fixed = PeerMetadata(company="DBS", sector="bank", report_year=2024)
+    assert run(store, embed, window=20, overlap=5, peer=fixed).action == "replaced"
+    assert {r.report_year for r in store.rows} == {2024}
+
+
+def test_setting_a_page_offset_later_replaces_the_stale_printed_pages():
+    # Page 3 whose footer prints "1": with offset 2 its printed page is 1, without it None.
+    pages = [Page(3, " ".join(f"w{i}" for i in range(10)), "body\n\n1")]
+    store, embed = FakeStore(), CountingEmbedder()
+    run(store, embed, window=20, overlap=5, pages=pages)
+    assert {r.chunk.printed_page for r in store.rows} == {None}
+    assert run(store, embed, window=20, overlap=5, pages=pages, offset=2).action == "replaced"
+    assert {r.chunk.printed_page for r in store.rows} == {1}

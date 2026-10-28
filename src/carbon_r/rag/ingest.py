@@ -4,8 +4,9 @@ A source is ingested as a unit. Its rows are either already exactly right, or th
 replaced inside one transaction - there is no partial update to reason about:
 
     unchanged   the stored rows for (source, chunker_version, embedding_model) are exactly
-                the chunks computed now - same positions, same text hashes - and the source
-                has no row under any OTHER version or model. Nothing is embedded or written.
+                the rows computed now - same positions, text hashes, printed pages and peer
+                metadata - and the source has no row under any OTHER version or model.
+                Nothing is embedded or written.
     replace     anything else. Every row of the source is deleted (stale versions, stale
                 models and the current pair alike) and the fresh chunks are inserted.
 
@@ -17,7 +18,10 @@ filter. Deleting the whole source closes that.
 
 `content_sha256` is compared as well as position because the cleaning can change text
 without changing how many chunks a page makes, and a hand-bumped CHUNKER_REVISION is the
-only other line of defence against that.
+only other line of defence against that. `printed_page` and the peer metadata (company,
+sector, report year) are compared for the same reason: setting a report's page offset, or
+correcting its company, changes what a citation says without changing a word of the text,
+and a comparison that ignored them would call the stale rows "unchanged" forever.
 """
 
 from __future__ import annotations
@@ -29,7 +33,8 @@ from typing import Literal, Protocol
 from carbon_r.rag.chunking import Chunk
 from carbon_r.rag.embed import Embedder, to_pgvector
 
-Position = tuple[int, int, str]  # (pdf_page, chunk_index, content_sha256)
+# (pdf_page, chunk_index, content_sha256, printed_page, company, sector, report_year)
+Position = tuple[int, int, str, int | None, str | None, str | None, int | None]
 
 
 @dataclass(frozen=True)
@@ -48,6 +53,17 @@ class ChunkRow:
     embedding_model: str
     chunk: Chunk
     embedding: list[float]
+    # Peer reports only (Part B); None for methodology rows.
+    company: str | None = None
+    sector: str | None = None
+    report_year: int | None = None
+
+
+@dataclass(frozen=True)
+class PeerMetadata:
+    company: str
+    sector: str
+    report_year: int
 
 
 class ChunkStore(Protocol):
@@ -68,12 +84,31 @@ class IngestOutcome:
     deleted: int
 
 
-def positions(chunks: Sequence[Chunk]) -> frozenset[Position]:
-    return frozenset((c.pdf_page, c.chunk_index, c.content_sha256) for c in chunks)
+def positions(chunks: Sequence[Chunk], peer: PeerMetadata | None = None) -> frozenset[Position]:
+    company, sector, year = (peer.company, peer.sector, peer.report_year) if peer else (None,) * 3
+    return frozenset(
+        (c.pdf_page, c.chunk_index, c.content_sha256, c.printed_page, company, sector, year)
+        for c in chunks
+    )
 
 
-def decide(chunks: Sequence[Chunk], stored: StoredSummary) -> Literal["unchanged", "replace"]:
-    if stored.other_rows == 0 and stored.current == positions(chunks):
+def row_position(row: ChunkRow) -> Position:
+    c = row.chunk
+    return (
+        c.pdf_page,
+        c.chunk_index,
+        c.content_sha256,
+        c.printed_page,
+        row.company,
+        row.sector,
+        row.report_year,
+    )
+
+
+def decide(
+    chunks: Sequence[Chunk], stored: StoredSummary, peer: PeerMetadata | None = None
+) -> Literal["unchanged", "replace"]:
+    if stored.other_rows == 0 and stored.current == positions(chunks, peer):
         return "unchanged"
     return "replace"
 
@@ -88,21 +123,24 @@ def ingest_source(
     embedding_model: str,
     embed: Embedder,
     embed_input: Callable[[str], str] = lambda text: text,
+    peer: PeerMetadata | None = None,
 ) -> IngestOutcome:
     """Bring one source's stored chunks in line with `chunks`. Embeds only on replace.
 
     `embed_input` maps a chunk's stored text to what is embedded (e.g. title + text); the
-    stored text itself is unchanged, so citations and quote checks are unaffected.
+    stored text itself is unchanged, so citations and quote checks are unaffected. `peer`
+    is written onto every row of a peer report, and is None for methodology.
     """
     if not chunks:
         raise ValueError(f"{source_id}: no chunks to ingest; refusing to delete its rows.")
     stored = store.summary(source_id, chunker_version, embedding_model)
-    if decide(chunks, stored) == "unchanged":
+    if decide(chunks, stored, peer) == "unchanged":
         return IngestOutcome(source_id, "unchanged", inserted=0, deleted=0)
 
     vectors = embed([embed_input(c.text) for c in chunks])
+    meta = (peer.company, peer.sector, peer.report_year) if peer else (None,) * 3
     rows = [
-        ChunkRow(source_id, corpus, chunker_version, embedding_model, chunk, vector)
+        ChunkRow(source_id, corpus, chunker_version, embedding_model, chunk, vector, *meta)
         for chunk, vector in zip(chunks, vectors, strict=True)
     ]
     deleted = store.replace_source(source_id, rows)
@@ -113,15 +151,16 @@ class PostgresChunkStore:
     """`ChunkStore` over a psycopg connection. The caller owns the transaction boundary."""
 
     _SUMMARY = """
-    select pdf_page, chunk_index, content_sha256,
+    select pdf_page, chunk_index, content_sha256, printed_page, company, sector, report_year,
            (chunker_version = %(version)s and embedding_model = %(model)s) as is_current
     from document_chunks where source_id = %(source)s
     """
 
     _INSERT = """
     insert into document_chunks (source_id, corpus, chunker_version, embedding_model,
-        pdf_page, chunk_index, printed_page, section, text, content_sha256, embedding)
-    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector)
+        pdf_page, chunk_index, printed_page, section, text, content_sha256, embedding,
+        company, sector, report_year)
+    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector, %s, %s, %s)
     """
 
     def __init__(self, conn) -> None:
@@ -132,8 +171,8 @@ class PostgresChunkStore:
             self._SUMMARY,
             {"version": chunker_version, "model": embedding_model, "source": source_id},
         ).fetchall()
-        current = frozenset((r[0], r[1], r[2]) for r in rows if r[3])
-        return StoredSummary(current=current, other_rows=sum(1 for r in rows if not r[3]))
+        current = frozenset(tuple(r[:7]) for r in rows if r[7])
+        return StoredSummary(current=current, other_rows=sum(1 for r in rows if not r[7]))
 
     def replace_source(self, source_id: str, rows: Sequence[ChunkRow]) -> int:
         with self.conn.transaction():
@@ -156,6 +195,9 @@ class PostgresChunkStore:
                             r.chunk.text,
                             r.chunk.content_sha256,
                             to_pgvector(r.embedding),
+                            r.company,
+                            r.sector,
+                            r.report_year,
                         )
                         for r in rows
                     ],

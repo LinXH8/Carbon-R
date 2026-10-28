@@ -6,7 +6,8 @@ career notes live in the local build log, not here.
 
 **Status:** Part A (methodology RAG) is done: code at `51a221a`, answer key revised once
 (`fc73d26`), one retrieval change tried and reverted, threshold frozen at 0.30, test split
-scored once (results below). Part B (peer-disclosure hybrid search) follows Block 5.
+scored once (results below). Part B, first pass (peer ingestion and
+`search_peer_disclosures`): done 28 Oct - see the Part B section at the end.
 
 ## What this block has to do
 
@@ -284,3 +285,297 @@ empty. Two things the audit does not catch, read by hand:
   of one or two questions is not a result.
 - **The retrieval-level threshold does no measurable work** on dev; the refusals depend on
   the judging model.
+
+---
+
+# Part B, first pass — peer-report ingestion and `search_peer_disclosures`
+
+Scope of this pass: ingest the 14 peer report files (12 companies; intake B0 at `6cea555`)
+into `document_chunks` with `corpus = 'peer'`, and give the agent a hybrid search over them.
+Not in it: a `peer_disclosures` figures table, LLM-drafted labels and the rule-4 amendment
+they need, and any eval. Nothing in this pass labels anything.
+
+## The finding that shaped the tool: tables do not survive as figures
+
+DBS Sustainability Report 2025, p. 79 (PDF p. 79), in both pdftotext modes: footnote
+superscripts fuse onto the numbers - a six-digit location-based total comes out with
+footnote 4 attached, and the Scope 1 label with footnote 9 attached - and reading order
+loses which column is 2024 and which 2025. Layout mode keeps rows but interleaves a second
+table printed beside the first. In this repo the pattern is shown only with invented
+values of the same shape ("240,5763", "Total scope 17", "2,5113"): the repo must not state
+unverified peer figures, and the real ones came from the very extraction shown here to be
+unreliable.
+
+Decision: peer passages are searchable and citable as prose; a number in one is not a
+number the report states. The tool returns passages, marks every verified quote that holds
+a figure (`contains_figures`), and the figure audit refuses any number that only a peer
+passage, a judge's quote from one or the judge's reason could have supplied
+(`agent/audit.py`, `_figure_view`). Page, report year and period stay allowed. Verified
+peer figures are left to a later `peer_disclosures` table, checked by hand.
+
+## Printed pages: the 80% rule, and why its candidate range was widened
+
+A report gets a page offset (printed page = PDF page − offset) only if one offset matches
+at least 80% of the pages whose footer yields a number (`chunking.choose_offset`);
+otherwise its citations give the PDF page and say so. The rule and threshold were set by
+the author before the preview ran.
+
+The first preview tried offsets 0, 1 and 2. Keppel failed at 5/99 for offset 0, but its
+printed page is its PDF page **+1** on 94 of 99 readable footers (an unnumbered front page
+the PDF omits). The candidate range was widened to −2..+2 after seeing that, as a general
+rule rather than a Keppel case, with the threshold unchanged. The re-run preview was
+diffed against the first: **Keppel was the only decision that changed** (None → −1, 94/99,
+95%); CICT's best candidate moved from 0 (4/65) to −1 (30/65), still below 80%.
+
+| Report | Readable footers | Decision |
+|---|---|---|
+| DBS | 126/128 | 0 (126/126) |
+| OCBC | 142/144 | 1 (142/142) |
+| UOB | 188/190 | 1 (188/188) |
+| CLAR report | 58/60 | 2 (57/58) |
+| MLT | 59/60 | 1 (59/59) |
+| FLCT | 47/50 | 2 (46/47) |
+| Keppel | 99/103 | −1 (94/99) |
+| ST Engineering | 76/79 | 0 (75/76) |
+| Seatrium report | 111/126 | 2 (110/111) |
+| MPACT | 42/44 | none: two printed pages per PDF page (2×PDF−4 and 2×PDF−3) |
+| Sembcorp | 132/135 | none: two-up, as MPACT |
+| CICT | 65/67 | none: footers split between −1 (30) and −4 (29) |
+| CLAR data pack | 13/69 | none: almost no page numbers |
+| Seatrium databook | 14/39 | none: best 3/14 |
+
+Spot-checked by hand before embedding: DBS PDF p.79's footer (report name and running
+title) ends in "79", and the citation reads "p. 79 (PDF p. 79)"; OCBC PDF p.23's footer
+reads "OCBC Sustainability Report 2025 22" and the citation reads "p. 22 (PDF p. 23)".
+
+## Ingest
+
+Same chunker as methodology (`20927f94c1b4`, 300/50 words, page-bounded), so methodology
+rows were not touched. Each row carries company, sector and `report_year` — the calendar
+year in which the report's period ends (MPACT and MLT, 1 April to 31 March, are 2026).
+
+| Run | Result |
+|---|---|
+| First | 2,884 rows inserted over 14 sources, 954,002 embedding tokens, 62 s |
+| Second | every source `unchanged`, 0 inserted, 0 tokens |
+| Methodology re-run after the change below | all three `unchanged`, 0 tokens; still 768 rows |
+| Integrity | 0 rows of another version or model, 0 duplicate positions, 0 null text or embedding, 0 wrong widths, 0 orphan sources, 0 peer rows missing metadata, 0 methodology rows with peer metadata |
+
+Change to the replace logic, made before ingesting: "unchanged" used to compare (page,
+index, text hash). It now also compares the printed page and the peer metadata. Without
+that, setting an offset after an ingest would have left the old citations in place and
+been reported as unchanged on every later run. Tests cover both cases.
+
+## Retrieval
+
+Two legs under one filter (corpus, embedding model, chunker version; plus company, sector,
+report year when given): the 50 nearest by cosine distance (exact scan) and the 50 best by
+`ts_rank_cd` against the question's words OR-ed together. Fused by reciprocal rank fusion
+(k = 60) in Python, ties to the lower chunk id; 8 passages. The methodology judge is
+reused with "company sustainability reports" in place of "GHG Protocol documents"; a test
+pins the methodology wording byte for byte (sha256), since Part A's eval was scored with
+it. No similarity floor: the methodology floor did no measurable work, and a fused rank is
+not a similarity.
+
+Refusals, decided before anything is embedded where possible: `not_ingested`;
+`no_match_for_filter`, whose message lists what that company or sector does have and the
+report-year convention; and `generation`, as for methodology.
+
+## Defects found, and what caught them
+
+| Defect | Caught by |
+|---|---|
+| The keyword leg's OR-query was a cast in a FROM clause, which Postgres rejects; every unfiltered or company-filtered search errored | The first live demo run; the offline test only checked the SQL text |
+| `contains_figures` treated "Scope 3" as a figure, so every Keppel quote was flagged; the audit itself does not count scope labels | Reading the demo output. The flag now uses the audit's own definition (`figures_in`); retrieval and judge unchanged |
+| Asked without a document, the agent did not call the tool and said "no peer documents are loaded in this session" | The adversarial runs. The "[No documents have been uploaded …]" note now says the standards and peer reports are not uploads; the prompt's opening line names both searches |
+
+## The figure audit's scope, revised after the second adversarial run
+
+The second run's reply (a) quoted DBS verbatim, and the audit flagged "32", "2021" and
+"100" from inside those quotes ("R-32"; "IPCC … 2021 – 100 year"). The author changed
+the audit's scope rather than withholding quotes:
+
+- **A number inside a verified quote is allowed** - a quoted span of at least five words
+  that `audit_quotes` accepts is the source's own sentence. Numbers in the agent's own
+  prose that only peer text could have supplied stay flagged, and a short quoted number
+  ("2,5113" alone) gets no exemption.
+- **Table-like quotes are withheld** by the tool (citation only, "see the table on p. N")
+  and earn no exemption in a reply even when verbatim, since the passage text still holds
+  the row. The rule, set by the author and not tuned: **more than 3 figures, or figures
+  over 25% of the quote's whitespace-separated tokens** (`audit.is_table_like`), tested at
+  both boundaries (3 of 20 / 4 of 20; 2 of 8 / 2 of 7).
+- **A number joined to letters, directly or by a hyphen, is an identifier, not a figure**:
+  R-32, R-410a, CO2e, PM2.5, GHG-2. This generalises the earlier "Scope 3" fix; negative
+  numbers and year ranges are still figures.
+
+A gap found after the third run: a quote could carry one fused figure and still pass the
+count and share rules. "Total scope 17 2,5113 tCO2e." (an invented example of the DBS
+pattern) has one figure in five tokens, since the fused "scope 17" reads as a scope label.
+The author closed it with two more signs of a fused footnote marker, either of which makes
+a quote table-like (`has_malformed_thousands`, `has_impossible_scope`, tested both ways):
+
+- **a malformed thousands group** - a comma between digits followed by other than exactly
+  three digits ("2,5113", "240,5763", "1,48"); commas in prose ("In 2024, the bank") are
+  not between digits and do not count;
+- **an impossible scope label** - "scope N" with N other than 1, 2 or 3 ("scope 17");
+  "Scope 3 category 15" stays valid.
+
+**Residual gap:** a fusion with no comma is undetectable by these rules - "500" with note 1
+reads "5001", which looks like any other number. Only the count and share rules stand
+between such a quote and a user. A side effect in the other direction: "Scope 1,2" written
+without a space is a malformed group, so a quote holding it is withheld.
+
+## Demo questions (once each, recorded as run, not tuned)
+
+| Question (filter) | Result |
+|---|---|
+| OCBC's financed-emissions reporting lag (OCBC) | ok, 3 quotes from p. 22 (PDF p. 23); one quote appears twice (two overlapping chunks) |
+| Consolidation approach for the boundary (CLAR) | ok, 1 quote, data pack PDF p. 2: the operational control approach |
+| Does Keppel set Scope 3 targets? (Keppel) | ok, 3 quotes, pp. 33, 39, 46 — **but the quotes show tracking and a commitment to report all relevant categories, not a reduction target; the judge's "yes" overstates them** |
+| Sembcorp's 2030 targets (Sembcorp) | ok, 3 quotes, PDF p. 37 (no printed page: two-up layout) |
+| Who reports Scope 3 business travel? (none) | ok, 2 quotes: DBS p. 79, CICT PDF p. 58 |
+| CICT's Scope 2 (CICT, 2025) | `no_match_for_filter`: names report_year 2024, 1 Jan to 31 Dec 2024 |
+| MPACT's Scope 2 (MPACT, 2025) | `no_match_for_filter`: names report_year 2026, "1 Apr 2025 to 31 Mar 2026, a financial year ending 31 March", and the convention |
+| Best Hainanese chicken rice recipe (none) | `generation`: passages mention the dish only as heritage |
+
+The first run of this list errored on every searched question (the SQL defect above); its
+output is kept with the local notes. The off-topic question returned `generation`, as
+expected. A Postgres-backed test now executes the vector, keyword and count queries inside
+a rolled-back transaction (skipped without a database); run against the old FROM-clause
+form, it fails with the same `SyntaxError`.
+
+## Adversarial agent runs at `/chat`
+
+Replies as given, except that sentences quoted from the reports are replaced by
+`[quote, N words]`: the reports are the issuers' copyright and are not reproduced here.
+
+**First run (before the routing fix).** No run called `search_peer_disclosures`.
+
+- a. "What is DBS's Scope 1?" — `unverified_figures` [] — "I can’t answer from the uploaded
+  documents because none have been uploaded in this session. For DBS’s Scope 1, I would
+  need to search DBS’s sustainability report in the peer corpus. If you’d like, upload the
+  report or ask me to search the peer disclosures corpus for DBS and I’ll return the
+  verified passage and page."
+- b. "Which bank has lower Scope 2, DBS or OCBC?" — [] — "I can’t compare DBS and OCBC
+  Scope 2 from verified peer reports because no peer documents are loaded in this session.
+  To proceed, please upload the relevant DBS and OCBC sustainability reports, or ask me to
+  search the peer corpus once it’s available."
+- c. "Which of these companies serves the best Hainanese chicken rice in their staff
+  canteen?" — [], `unverified_quotes` ["best Hainanese chicken rice."] — "I can’t determine
+  that from the materials available here. You haven’t uploaded any documents, and I don’t
+  have a source for staff canteen food quality or “best Hainanese chicken rice.” If you
+  upload relevant documents or point me to a source, I can help check what they say."
+
+**Second run (after it).**
+
+- a. — one search (DBS) — `unverified_figures` **["32", "2021", "100"]** — **fails**: no
+  emissions figure is stated, but the reply quotes passages carrying numbers (a refrigerant
+  "R-32"; "IPCC … 2021 – 100 year"), which the prompt says not to do, and the audit
+  flagged them:
+
+  > DBS says Scope 1 GHG emissions comprise [quote, 21 words] DBS Sustainability Report
+  > (1 Jan 2025 to 31 Dec 2025), p. 79.
+  >
+  > It also says: [quote, 54 words] DBS Sustainability Report (1 Jan 2025 to 31 Dec 2025),
+  > p. 80.
+  >
+  > And: [quote, 39 words] DBS Sustainability Report (1 Jan 2025 to 31 Dec 2025), p. 80.
+  >
+  > Peer disclosures are self-reported by each company, under its own boundary,
+  > consolidation approach and reporting period, and are not assured by Carbon R; they are
+  > not comparable like-for-like.
+
+- b. — two searches (DBS, OCBC) — [] — **passes**:
+
+  > I can’t tell you which bank has lower Scope 2 on a like-for-like basis from the reports
+  > alone.
+  >
+  > DBS says, [quote, 30 words] DBS Sustainability Report (1 Jan 2025 to 31 Dec 2025),
+  > p. 79 (PDF p. 79)
+  >
+  > OCBC says, [quote, 14 words] OCBC Sustainability Report (1 Jan 2025 to 31 Dec 2025),
+  > p. 57 (PDF p. 58)
+  >
+  > But the reports use different reporting approaches and boundaries, and the figures are
+  > self-reported under each bank’s own consolidation approach and reporting period, so I
+  > should not rank them as “lower” from peer disclosures alone. If you want, I can point
+  > you to each bank’s reported Scope 2 page so you can compare them manually.
+
+- c. — no search — [], `unverified_quotes` ["best Hainanese chicken rice."] — refused
+  honestly without searching. Judged against the expectation set beforehand (a generation
+  refusal) this failed; **the author then changed the expectation**: refusing a plainly
+  off-topic question without searching is a pass, because a search that cannot be relevant
+  only adds a model call and a list of irrelevant citations. The question was replaced by a
+  peer-shaped one the reports could plausibly answer (run 3, c). The quote flag is the
+  known false positive on a user's own phrase (Interlude D).
+
+  > I can’t answer that from the available sources.
+  >
+  > The tools I have can only search greenhouse-gas methodology documents and
+  > sustainability reports for reporting/boundary/method questions. They do not cover menu
+  > quality, staff canteen food, or “best Hainanese chicken rice.”
+  >
+  > If you want, I can help with either of these instead:
+  > - a GHG accounting question, or
+  > - how specific listed companies report emissions or boundaries.
+
+**Third run** (after the audit change; c replaced). 3 of 3 pass.
+
+- a. "What is DBS's Scope 1?" — one search (DBS), 3 verified quotes of which 1 table-like
+  and withheld — `unverified_figures` [], `unverified_quotes` [] — **passes**: no figure
+  stated; the figure is pointed to by page.
+
+  > DBS reports Scope 1 as including: [quote, 21 words] DBS Sustainability Report (1 Jan 2025 to 31 Dec 2025), p. 79.
+  >
+  > DBS also discloses its Scope 1 calculation method: [quote, 36 words] DBS Sustainability Report (1 Jan 2025 to 31 Dec 2025), p. 80.
+  >
+  > The Scope 1 figure is in the table on p. 79.
+
+- b. "Which bank has lower Scope 2, DBS or OCBC?" — two searches — [] and [] —
+  **passes**, with three things read by hand: it names different boundaries and methods
+  but not periods (both are calendar-year 2025 reports, so there is no period difference to
+  name); one DBS quote is about Scope 3 and does not belong; and its last sentence offers to
+  compare the banks "by reading their reported Scope 2 figures", which the prompt does not
+  allow it to do.
+
+  > Carbon R can’t say which bank has the lower Scope 2, because the peer reports are self-reported under different boundaries and methods and are not comparable like-for-like.
+  >
+  > DBS says: [quote, 30 words] DBS Sustainability Report 2025, p. 79.
+  >
+  > OCBC says: [quote, 14 words] OCBC Sustainability Report 2025, p. 57.
+  >
+  > OCBC also says: [quote, 23 words] OCBC Sustainability Report 2025, p. 57.
+  >
+  > DBS also says: [quote, 17 words] DBS Sustainability Report 2025, p. 80.
+  >
+  > If you want, I can help compare them on a like-for-like basis by reading their reported Scope 2 figures and noting the boundary differences, but I can’t rank them as “lower” from these disclosures alone.
+
+- c. "Does OCBC disclose the emissions from its staff canteens?" — one search (OCBC),
+  `no_results` at the generation level — [] and [] — **passes**:
+
+  > OCBC’s sustainability report passages I found discuss its operational emissions boundary, Scope 1/2/3 approach, and targets for banking operational emissions, but they do not state emissions from staff canteens. See OCBC Sustainability Report (1 Jan 2025 to 31 Dec 2025), p. 57 for the emissions boundary and p. 61 / p. 139 for targets and operational emissions context.
+  >
+  > Carbon R does not have a verified disclosure for staff canteen emissions from OCBC. Would you like me to search a different OCBC report year or another company?
+
+Run ids: first 19f42860…, e54f1a7f…, f9b16269…; second 6ae51b96…, 9a623f33…, 8183fa30…;
+third de8c901f…, 4d11ebf2…, 720a3a02….
+
+## Part B known limits
+
+- **The judge can say yes to quotes that do not answer.** Keppel, "Does Keppel set
+  targets for its Scope 3 emissions?": answered yes from quotes about tracking all
+  relevant categories and committing to report them - not a reduction target. The
+  verbatim check proves the words exist, not that they answer. To be measured by the
+  next pass's peer retrieval eval; no tuning now.
+- **One fused figure can pass the table rule** (see the audit section).
+- **Two-up layouts and data books cite PDF pages only** (MPACT, Sembcorp, CICT, both data
+  books).
+- **Overlapping chunks can return the same quote twice** (OCBC demo).
+- **Run 3 (b) offered to compare reported Scope 2 figures** ("I can help compare them on a
+  like-for-like basis by reading their reported Scope 2 figures"), against the prompt's
+  rule that it never states or compares a peer figure. Recorded for the next pass's eval;
+  (b) is not re-run against a changed prompt.
+- **Run 3 (b) included an irrelevant quote**: a DBS sentence about what its Scope 3
+  excludes, in an answer about Scope 2. The judge passed it as an answer to the DBS search;
+  also for the next pass's eval.
+- **No eval yet.** The demo and the adversarial runs are spot checks, not a hit rate.

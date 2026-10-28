@@ -42,6 +42,7 @@ const TOOL_WORDS = {
   lookup_emission_factor: ['Looking up the emission factor', 'Looked up the emission factor'],
   calculate_emissions: ['Calculating', 'Calculated the emissions'],
   search_methodology: ['Searching the GHG Protocol', 'Searched the GHG Protocol'],
+  search_peer_disclosures: ['Searching peer reports', 'Searched peer reports'],
 };
 const doing = (tool) => TOOL_WORDS[tool]?.[0] || 'Deciding what to do next';
 export const done = (tool) => TOOL_WORDS[tool]?.[1] || tool;

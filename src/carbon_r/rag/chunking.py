@@ -153,6 +153,61 @@ def printed_page(layout_text: str, pdf_page: int, offset: int | None) -> int | N
     return expected if expected >= 1 and expected in footer_numbers(layout_text) else None
 
 
+# The share of pages with a readable footer number that one offset must explain before it
+# is used for a document (Tier 2 Block 4 Part B, set by the author). Below it, the document
+# has no offset and every citation gives the PDF page and says so.
+OFFSET_MATCH_THRESHOLD = 0.8
+
+# The offsets tried. Widened from 0..2 to -2..+2 after the first peer preview: Keppel's
+# printed page is its PDF page + 1 (offset -1) on 94 of 99 readable footers, which 0..2
+# could not express. A negative offset is a cover or other unnumbered front page that the
+# PDF omits; nothing about the rule is specific to one report.
+OFFSET_CANDIDATES = (-2, -1, 0, 1, 2)
+
+
+@dataclass(frozen=True)
+class OffsetDecision:
+    """Which page offset, if any, a document's footers support - with the evidence."""
+
+    readable: int  # pages whose footer yields at least one number
+    matches: dict[int, int]  # offset -> pages whose footer prints pdf_page - offset
+    offset: int | None
+    reason: str
+
+    def rate(self, offset: int) -> float:
+        return self.matches[offset] / self.readable if self.readable else 0.0
+
+
+def choose_offset(
+    footers: list[tuple[int, set[int]]],
+    candidates: tuple[int, ...] = OFFSET_CANDIDATES,
+    threshold: float = OFFSET_MATCH_THRESHOLD,
+) -> OffsetDecision:
+    """The offset that at least `threshold` of the readable footers confirm, else None.
+
+    `footers` is (pdf_page, footer_numbers(layout_text)) per page. A page with no footer
+    number is not evidence either way, so it is left out of the denominator.
+    """
+    readable = [(page, numbers) for page, numbers in footers if numbers]
+    matches = {
+        k: sum(1 for page, numbers in readable if page - k >= 1 and page - k in numbers)
+        for k in candidates
+    }
+    if not readable:
+        return OffsetDecision(0, matches, None, "no page has a readable footer number")
+    # Ties go to the offset nearest zero, then the smaller one: deterministic either way.
+    best = max(candidates, key=lambda k: (matches[k], -abs(k), -k))
+    rate = matches[best] / len(readable)
+    if rate >= threshold:
+        reason = f"offset {best} matches {matches[best]}/{len(readable)} ({rate:.0%})"
+        return OffsetDecision(len(readable), matches, best, reason)
+    reason = (
+        f"best is offset {best} at {matches[best]}/{len(readable)} ({rate:.0%}), "
+        f"below {threshold:.0%}"
+    )
+    return OffsetDecision(len(readable), matches, None, reason)
+
+
 @dataclass(frozen=True)
 class Page:
     """One PDF page: its reading-order text (cleaned) and its layout text (footer only)."""

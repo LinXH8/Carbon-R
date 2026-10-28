@@ -9,18 +9,21 @@ flowchart LR
     api --> loop[Agent loop<br/>agent/loop.py<br/>max 8 turns]
     loop <-->|tool calls| provider[(OpenAI<br/>Responses API)]
 
-    subgraph tools[Four tools - agent/tools.py]
+    subgraph tools[Five tools - agent/tools.py]
         extract[extract_from_document<br/>classify, transcribe, one retry]
         lookup[lookup_emission_factor<br/>exact SQL]
         calc[calculate_emissions<br/>plain Python]
         method[search_methodology<br/>pgvector + judge]
+        peer[search_peer_disclosures<br/>vector + keyword, RRF, judge]
     end
 
-    loop --> extract & lookup & calc & method
+    loop --> extract & lookup & calc & method & peer
     extract -->|pdftoppm page images| vision[(OpenAI vision)]
     lookup -->|category, unit, year| factors[(emission_factors)]
     method -->|cosine, filtered by model<br/>and chunker version| chunks[(document_chunks)]
     method -->|answerability, quotes| judge[(OpenAI judge)]
+    peer -->|cosine + tsvector, filtered by<br/>company, sector, year| chunks
+    peer -->|answerability, quotes| judge
     extract -.->|act_N handles| calc
     lookup -.->|factor_N handles| calc
 
@@ -34,8 +37,12 @@ What the diagram encodes:
   into the session, never a number typed by the model (dotted arrows).
 - **Two retrieval paths that never cross.** Factors come by exact SQL
   ([ADR 0001](adr/0001-exact-sql-for-factors.md)); methodology prose comes by similarity
-  ([ADR 0002](adr/0002-postgres-pgvector.md)). Nothing from `search_methodology` can enter
-  a calculation.
+  ([ADR 0002](adr/0002-postgres-pgvector.md)), and so do peer-report passages. Nothing from
+  either search can enter a calculation.
+- **Peer passages are prose, never figures.** Their PDF text layers fuse footnote markers
+  onto table numbers, so the figure audit refuses any number in the agent's own words that
+  only peer text could have supplied, and the tool withholds table-like quotes (cited by
+  page only).
 - **Both audits run on every reply.** A number no tool produced, or a quoted span no tool
   returned, is listed on the response and shown on the page.
 

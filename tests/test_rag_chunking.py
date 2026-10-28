@@ -10,6 +10,7 @@ import pytest
 from carbon_r.rag.chunking import (
     CHUNKER_VERSION,
     Page,
+    choose_offset,
     chunk_page,
     chunk_pages,
     chunker_version,
@@ -170,3 +171,76 @@ def test_the_version_changes_with_the_revision(monkeypatch):
 def test_an_overlap_that_cannot_advance_is_refused(window, overlap):
     with pytest.raises(ValueError):
         chunker_version(window, overlap)
+
+
+# --- choose_offset: the 80% rule for a document's printed-page offset (Part B) ---------
+
+
+def _footers(pairs):
+    return [(page, set(numbers)) for page, numbers in pairs]
+
+
+def test_an_offset_confirmed_on_80_percent_of_readable_footers_is_used():
+    # 10 readable pages: 8 print pdf_page - 2, 2 print something else; 3 have no number.
+    footers = [(p, {p - 2}) for p in range(3, 11)] + [(11, {99}), (12, {98})]
+    footers += [(13, set()), (14, set()), (15, set())]
+    decision = choose_offset(_footers(footers))
+    assert decision.readable == 10
+    assert decision.matches[2] == 8 and decision.rate(2) == 0.8
+    assert decision.offset == 2
+
+
+def test_79_percent_is_not_enough():
+    footers = [(p, {p}) for p in range(1, 80)] + [(p, {999}) for p in range(80, 101)]
+    decision = choose_offset(_footers(footers))
+    assert decision.rate(0) == 0.79
+    assert decision.offset is None
+    assert "below 80%" in decision.reason
+
+
+def test_a_negative_offset_that_passes_is_used():
+    # Printed page = PDF page + 1 on 9 of 10 readable footers (an unnumbered cover omitted).
+    footers = [(p, {p + 1}) for p in range(1, 10)] + [(10, {500})]
+    decision = choose_offset(_footers(footers))
+    assert decision.rate(-1) == 0.9
+    assert decision.offset == -1
+
+
+def test_a_negative_offset_below_the_threshold_is_not_used():
+    footers = [(p, {p + 2}) for p in range(1, 8)] + [(p, {700 + p}) for p in range(8, 11)]
+    decision = choose_offset(_footers(footers))
+    assert decision.rate(-2) == 0.7
+    assert decision.offset is None
+
+
+def test_every_candidate_from_minus_two_to_two_is_scored():
+    decision = choose_offset(_footers([(5, {5})]))
+    assert sorted(decision.matches) == [-2, -1, 0, 1, 2]
+
+
+def test_no_readable_footer_means_no_offset():
+    decision = choose_offset(_footers([(1, ()), (2, ())]))
+    assert decision.readable == 0 and decision.offset is None
+
+
+def test_a_citation_uses_the_printed_page_only_when_an_offset_is_set():
+    from carbon_r.tools.methodology import Passage
+
+    base = dict(
+        chunk_id=1,
+        source_id="s",
+        title="Report",
+        publisher="P",
+        year=2025,
+        url="u",
+        text="t",
+        similarity=0.5,
+    )
+    with_offset = Passage(**base, pdf_page=12, printed_page=10)
+    without = Passage(**base, pdf_page=12, printed_page=None)
+    assert with_offset.citation == "Report, p. 10 (PDF p. 12)"
+    assert without.citation == "Report, PDF p. 12 (no printed page number)"
+    # And chunking gives a printed page only under an offset the footer confirms.
+    page = Page(12, "words here", "body\n\n10")
+    assert chunk_pages([page], offset=2)[0].printed_page == 10
+    assert chunk_pages([page], offset=None)[0].printed_page is None

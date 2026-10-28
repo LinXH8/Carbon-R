@@ -4,13 +4,13 @@
 
 ## Context
 
-Tier 2 Block 4 added similarity search over GHG Protocol methodology prose; Part B will add
-peer sustainability reports. The options were a dedicated vector store (a hosted service or
+Tier 2 Block 4 added similarity search over GHG Protocol methodology prose; its Part B added
+14 peer sustainability report files, searched by vector and keyword together. The options were a dedicated vector store (a hosted service or
 a separate container) or the `vector` extension in the Postgres that already holds the
 factors and the source registry.
 
-The corpus is small: 768 chunks from three documents. The retrieval eval is meant to be
-reproducible from a commit SHA.
+The corpus is small: 768 methodology chunks from three documents and 2,884 peer chunks from
+14 files (3,652 rows). The retrieval eval is meant to be reproducible from a commit SHA.
 
 ## Decision
 
@@ -19,6 +19,9 @@ reproducible from a commit SHA.
    migration path, and `docker compose up` stays two containers.
 2. **No approximate index (HNSW or IVFFlat) yet.** Every search is an exact scan, filtered
    first on corpus, embedding model and chunker version.
+3. **Keyword search in the same table** (Part B): a generated `tsvector` column with a GIN
+   index, fused with the vector ranking by reciprocal rank fusion in Python. Postgres
+   full-text search makes a separate search engine unnecessary too.
 
 ## Why
 
@@ -26,7 +29,7 @@ reproducible from a commit SHA.
   `sources` by foreign key in the same query, not from a copy kept in another system's
   metadata that could drift.
 - **A second database buys nothing at this size.** It would add a service, credentials and
-  a consistency boundary in exchange for speed that 768 rows do not need.
+  a consistency boundary in exchange for speed that a few thousand rows do not need.
 - **Exact scan is deterministic.** An ANN index trades recall for speed and can return a
   different neighbour set after a rebuild. The eval's two dev runs on identical retrieval
   matched on 24 of 24 questions; with an approximate index that equality would not be
@@ -37,7 +40,7 @@ reproducible from a commit SHA.
 ## Consequences and the upgrade path
 
 - Search cost grows linearly with the corpus. That is fine for three standards and a dozen
-  peer reports.
+  peer reports (3,652 rows in all; the peer filter alone scans at most 2,884).
 - **Add HNSW when** the searchable set per filter reaches tens of thousands of chunks, or
   when measured search latency becomes a visible share of a `/chat` turn. Then: an HNSW
   index on `embedding vector_cosine_ops`, a partial index or a filtered query plan so the

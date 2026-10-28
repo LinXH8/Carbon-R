@@ -35,6 +35,8 @@ packages = ["src/carbon_r"]
 [tool.ruff]
 line-length = 100
 src = ["src", "tests", "scripts"]
+# The author's local plan notes, never committed: keep them out of `make check`.
+extend-exclude = ["Claude Plans"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

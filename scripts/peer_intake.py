@@ -25,60 +25,13 @@ import hashlib
 import re
 import subprocess
 import sys
-from datetime import date
 from pathlib import Path
-from typing import Literal
-
-from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from carbon_r.config import PROJECT_ROOT
+from carbon_r.peer_sources import load_peer_sources
 
 RAW = PROJECT_ROOT / "data" / "raw"
 ACCOUNTED = {"ghgp", "ema", "desnz"}
-PEER_SOURCES = PROJECT_ROOT / "data" / "peer_sources.json"
-
-
-class PeerSource(BaseModel):
-    """One file of one company's report, as committed in data/peer_sources.json."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    company: str
-    sector: Literal["bank", "reit", "industrial", "energy"]  # Carbon R's labels, not SGX's
-    document_kind: Literal["sustainability_report", "data_pack", "databook", "annual_report"]
-    period_start: date
-    period_end: date
-    # stated: both dates read from the report. from_companion: taken from the companion
-    # report named in `notes`. start_assumed: only the end date is stated.
-    period_basis: Literal["stated", "from_companion", "start_assumed"]
-    period_pdf_page: int = Field(ge=1)
-    period_printed_page: int | None
-    url: str
-    url_note: str | None
-    local_filename: str = Field(pattern=r"^peer/.+\.pdf$")
-    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    page_count: int = Field(ge=1)
-    licence_note: str
-    notes: str
-
-    @model_validator(mode="after")
-    def _period(self) -> PeerSource:
-        if self.period_end <= self.period_start:
-            raise ValueError(f"{self.local_filename}: period ends before it starts")
-        return self
-
-
-class PeerSources(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    version: int
-    drafted: str
-    note: str
-    sources: list[PeerSource]
-
-
-def load_peer_sources(path: Path = PEER_SOURCES) -> PeerSources:
-    return PeerSources.model_validate_json(path.read_text())
 
 
 # Phrases a report uses to state its own period. Deliberately broad: the output is read by

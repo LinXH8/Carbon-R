@@ -134,8 +134,13 @@ class AnswerabilityJudgement(BaseModel):
     reason: str = Field(description="One sentence: why the passages do or do not answer it")
 
 
+# `{corpus}` names what the passages are. The methodology judge fills it with
+# METHODOLOGY_CORPUS, which reproduces the instruction Part A's eval was scored with byte for
+# byte (a test pins it); the peer search (`tools.peer`) reuses the same judge and rules.
+METHODOLOGY_CORPUS = "GHG Protocol documents"
+
 JUDGE_INSTRUCTION = """\
-You are checking whether passages from GHG Protocol documents answer a question.
+You are checking whether passages from {corpus} answer a question.
 
 Rules:
 - Use only the passages below. Do not use anything you know from elsewhere.
@@ -264,7 +269,7 @@ def _db_count(source_id: str | None) -> int:
         return conn.execute(_count_sql(filter_source=source_id is not None), params).fetchone()[0]
 
 
-def openai_judge(usage: list[dict] | None = None) -> Judge:
+def openai_judge(usage: list[dict] | None = None, corpus: str = METHODOLOGY_CORPUS) -> Judge:
     from openai import OpenAI
 
     settings = get_settings()
@@ -274,7 +279,7 @@ def openai_judge(usage: list[dict] | None = None) -> Judge:
         listing = "\n\n".join(f"[chunk_id {p.chunk_id}] {p.citation}\n{p.text}" for p in passages)
         response = client.responses.parse(
             model=settings.openai_model,
-            input=JUDGE_INSTRUCTION.format(question=question, passages=listing),
+            input=JUDGE_INSTRUCTION.format(corpus=corpus, question=question, passages=listing),
             text_format=AnswerabilityJudgement,
         )
         if usage is not None and getattr(response, "usage", None) is not None:

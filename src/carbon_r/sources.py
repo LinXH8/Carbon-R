@@ -2,8 +2,10 @@
 
 Literals rather than rows discovered on disk, for the same reason `scripts/seed_factors.py`
 carries its factors as literals: `data/raw/` is git-ignored, and a fresh clone must still be
-able to register its sources. The sha256 is what was measured from the local copy when it
-was registered; an ingest that finds different bytes refuses to read them.
+able to register its sources. The peer reports are the exception that proves it: they come
+from `data/peer_sources.json`, which is committed for the same reason (`carbon_r.peer_sources`).
+The sha256 is what was measured from the local copy when it was registered; an ingest that
+finds different bytes refuses to read them.
 
 Each licence below was read from the document itself or the publisher's own page - see
 docs/SOURCES.md for the verbatim wording. `None` means not yet read, which is not the same as
@@ -20,6 +22,7 @@ cites passages rather than displaying them. Permission is to be requested from G
 
 from __future__ import annotations
 
+import hashlib
 from datetime import date
 from pathlib import Path
 from typing import Literal
@@ -27,6 +30,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from carbon_r.config import PROJECT_ROOT
+from carbon_r.peer_sources import PRINTED_PAGE_OFFSETS, PeerSource, load_peer_sources
 
 SourceKind = Literal["methodology", "factor_dataset", "peer_report"]
 VerificationStatus = Literal["verified from primary", "secondary only"]
@@ -66,7 +70,7 @@ class SourceRecord(BaseModel):
         return self.model_dump(exclude={"local_path"})
 
 
-REGISTRY: tuple[SourceRecord, ...] = (
+_LITERALS: tuple[SourceRecord, ...] = (
     SourceRecord(
         id="ghgp_corporate",
         title="The Greenhouse Gas Protocol: A Corporate Accounting and Reporting Standard "
@@ -162,9 +166,59 @@ REGISTRY: tuple[SourceRecord, ...] = (
     ),
 )
 
+
+def peer_record(peer: PeerSource) -> SourceRecord:
+    """A peer report as a registry row. The report is its own primary source."""
+    return SourceRecord(
+        id=peer.source_id,
+        title=peer.title,
+        publisher=peer.company,
+        year=peer.report_year,
+        url=peer.url,
+        licence=peer.licence_note,
+        # B0 recorded the files as downloaded by the author before it ran on this date.
+        retrieved_at=date(2026, 10, 23),
+        sha256=peer.sha256,
+        kind="peer_report",
+        verification_status="verified from primary",
+        printed_page_offset=PRINTED_PAGE_OFFSETS.get(peer.source_id),
+        notes=f"Downloaded on or before 2026-10-23. {peer.notes}",
+        local_path=f"data/raw/{peer.local_filename}",
+    )
+
+
+PEERS: dict[str, PeerSource] = {p.source_id: p for p in load_peer_sources().sources}
+
+REGISTRY: tuple[SourceRecord, ...] = _LITERALS + tuple(peer_record(p) for p in PEERS.values())
+
 BY_ID: dict[str, SourceRecord] = {record.id: record for record in REGISTRY}
 
 METHODOLOGY_IDS: tuple[str, ...] = tuple(r.id for r in REGISTRY if r.kind == "methodology")
+PEER_IDS: tuple[str, ...] = tuple(r.id for r in REGISTRY if r.kind == "peer_report")
+
+
+def file_sha256(record: SourceRecord) -> str:
+    digest = hashlib.sha256()
+    with record.path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def check_local_files(ids: tuple[str, ...]) -> list[str]:
+    """Problems with the local copies, as messages. Empty means every file is the registered one."""
+    problems = []
+    for source_id in ids:
+        record = BY_ID[source_id]
+        if not record.path.exists():
+            problems.append(f"{source_id}: {record.local_path} is missing")
+        elif (actual := file_sha256(record)) != record.sha256:
+            problems.append(
+                f"{source_id}: sha256 {actual[:12]}... does not match the registered "
+                f"{record.sha256[:12]}... - not the document that was registered"
+            )
+    return problems
+
 
 UPSERT = """
 insert into sources (id, title, publisher, year, url, licence, retrieved_at, sha256, kind,
@@ -181,4 +235,14 @@ returning (xmax = 0) as inserted
 """
 
 
-__all__ = ["BY_ID", "METHODOLOGY_IDS", "REGISTRY", "UPSERT", "SourceRecord"]
+__all__ = [
+    "BY_ID",
+    "METHODOLOGY_IDS",
+    "PEERS",
+    "PEER_IDS",
+    "REGISTRY",
+    "UPSERT",
+    "SourceRecord",
+    "check_local_files",
+    "file_sha256",
+]

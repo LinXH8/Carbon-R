@@ -35,7 +35,8 @@ docker compose cp app:/tmp/docs/electricity_bill/clean/elec_001.pdf .
 
 Methodology questions need the GHG Protocol standards, which cannot be redistributed; until
 they are ingested, `search_methodology` says so instead of answering. See [Methodology
-corpus](#methodology-corpus).
+corpus](#methodology-corpus). The same holds for the peer companies' reports and
+`search_peer_disclosures`: see [Peer corpus](#peer-corpus).
 
 More: [architecture](docs/architecture.md) · [data and its licences](docs/DATA.md) ·
 [ADR 0001: exact SQL for factors](docs/adr/0001-exact-sql-for-factors.md) ·
@@ -71,14 +72,15 @@ layout — and is kept for the record rather than as a current description.
 
 ## What works today, and what it measures
 
-Four tools, each returning `{status, data, message}`:
+Five tools, each returning `{status, data, message}`:
 
 | Tool | What it does |
 |---|---|
 | `extract_from_document` | Establishes what kind of document a page is, then has a vision model transcribe what is printed and returns the measurable activities it carries. It is never asked for a derived figure. A kind it cannot establish is refused, not guessed. When a printed figure fails a consistency check, it retries **once**, with the error and without the answer, and takes back only the fields that check reads. |
 | `lookup_emission_factor` | Exact SQL (`category`, `unit`, `year`), never similarity search. Returns the factor with publisher, source document, page, scope, method, gas basis and retrieval date. |
 | `calculate_emissions` | Plain Python. Takes a list of (activity, factor) pairs and returns each line and the total, with every input used, the derivation written out, and structured disclosure flags. |
-| `search_methodology` | The one similarity search in the project: GHG Protocol methodology prose, never a factor. Returns verbatim quotes with document and page, or `no_results` — either because nothing is close (retrieval level) or because the closest passages do not answer the question (generation level, decided by a judging model whose quotes must be found verbatim in the passages). Nothing it returns can enter a calculation. |
+| `search_methodology` | Similarity search over GHG Protocol methodology prose, never a factor. Returns verbatim quotes with document and page, or `no_results` — either because nothing is close (retrieval level) or because the closest passages do not answer the question (generation level, decided by a judging model whose quotes must be found verbatim in the passages). Nothing it returns can enter a calculation. |
+| `search_peer_disclosures` | Hybrid search (vector and keyword rankings fused, filtered by company, sector and report year) over 12 Singapore-listed companies' sustainability reports: how they draw boundaries, set targets, treat financed emissions. Returns verified verbatim quotes with company, report and page, or `no_results` (not ingested; a filter that matches nothing, with what does exist; or passages that do not answer). **Never a figure**: the reports' PDF text layers fuse footnote markers onto table numbers, so table-like quotes are withheld and cited by page, and the figure audit flags any peer number stated outside a verified quote. Peer disclosures are self-reported under differing boundaries and periods, and every result says so. |
 
 Rolling a year of documents up into a company total, and allocating a share of it to one
 customer, are **plain Python in `tools/company_year.py`** (`roll_up`, `allocate`). They are
@@ -407,6 +409,25 @@ The ingest checks each file's sha256 against the registry in `src/carbon_r/sourc
 refuses one that differs — a re-published edition is a different document, and the eval's
 page labels would not apply to it.
 
+### Peer corpus
+
+`search_peer_disclosures` searches 14 report files from 12 companies (banks, REITs,
+industrials, energy), listed with URLs, periods and sha256 in
+[`data/peer_sources.json`](data/peer_sources.json). They are the issuers' copyright, so a
+clone includes only that list. To enable the search, save each file under `data/raw/peer/`
+with the `local_filename` the list gives, then:
+
+```bash
+uv run python scripts/peer_intake.py check     # every file present, with the listed bytes
+uv run python scripts/ingest_peer.py --preview # page offsets and sample chunks; no API calls
+make ingest-peer                               # about 950,000 embedding tokens, once
+```
+
+A report's printed page numbers are used only where one offset matches at least 80% of its
+pages' footers; otherwise its citations give the PDF page and say so. `report_year` is the
+calendar year in which a report's period ends, so the April-to-March trusts (MPACT, MLT)
+are 2026.
+
 ### The page
 
 `http://localhost:8000` is a single page with no build step: drop a bill on it, ask a
@@ -480,7 +501,8 @@ make flow-scope1  # one Block 1 document of each kind, including a refusal
 make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forward, a photo
 make ingest-methodology  # chunk + embed the local GHG Protocol PDFs (idempotent; local only)
 make eval-retrieval      # score search_methodology on the dev split (model calls)
-make check        # ruff + the full test suite (663 tests, 1 skipped)
+make ingest-peer         # chunk + embed the local peer reports (idempotent; local only)
+make check        # ruff + the full test suite (760 pass, 1 skipped, with everything local)
 ```
 
 ## Data provenance
@@ -500,6 +522,10 @@ ghgprotocol.org's Terms of Use, which prohibit public reproduction; their text i
 committed or published. Licences and hashes are in [SOURCES.md](docs/SOURCES.md) and the
 `sources` table.
 
+Peer passages come from 12 companies' own sustainability reports (copyright of each
+issuer), used locally; only their provenance is committed (`data/peer_sources.json`). A
+public deployment would cite them, not display them.
+
 The DESNZ factors are **published for the UK, not Singapore**, and every result that uses
 one says so. They are also CO₂e where EMA's is CO₂ only, so a figure combining the two
 carries a disclosure that the carbon-dioxide-only line excludes methane and nitrous oxide.
@@ -513,6 +539,11 @@ Stated plainly, because they bound what any number here means:
 
 - All documents processed so far are **synthetic**. None are real customer documents.
 - Emission estimates produced here are **not assured** by any third party.
+- **Peer search returns prose, not figures.** No peer emissions figure has been verified
+  yet; the reports' text layers misread tables. Its judge can accept quotes that are real
+  but do not answer (seen once in the demo questions), and there is no peer retrieval eval
+  yet — the checks so far are 8 demo questions and 3 adversarial agent runs, recorded in
+  [TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
 - Electricity figures are **location-based** (average grid intensity), not market-based.
 - **The fuel factors are not Singapore factors.** LPG, diesel and petrol use UK DESNZ
   values, flagged as non-Singapore on every affected result. That they are the closest
@@ -567,7 +598,8 @@ src/carbon_r/
   config.py    settings from the environment
   db.py        connection helper and the migration runner
   sources.py   the source registry: every document read, with licence and sha256
-  rag/         methodology retrieval: chunking, embedding, ingestion, the eval key
+  peer_sources.py  the peer reports' committed list, and their page offsets
+  rag/         retrieval: chunking, embedding, ingestion, the methodology eval key
   main.py      FastAPI app: the page, /health, /upload, /chat, /chat/stream
   money.py     one definition of "round to cents", shared by generator and extraction
   models/      Pydantic domain models: answer keys, extraction targets, activities,
@@ -575,18 +607,18 @@ src/carbon_r/
   xlsx.py      a read-only xlsx reader, for transcribing publishers' workbooks
   synthgen/    the synthetic-document generator (answer first, then the document):
                layouts, quirks, degradation, and the company-year scenarios
-  tools/       what the agent may call (including methodology.py), plus company_year.py —
+  tools/       what the agent may call (including methodology.py, peer.py), plus company_year.py —
                a roll-up and an allocation that are Python only, not yet exposed as tools
   agent/       the tool-calling loop, the session workspace, the figure and quote audits
   api/         request and response models, upload storage, the SSE stream
   static/      the page: one HTML file, its stylesheet, its script, and a spring
 db/migrations/ schema, applied in filename order
 scripts/       factor loading, document and scenario generation, the extraction,
-               scenario and retrieval evals, methodology ingest, peer intake, the flow
+               scenario and retrieval evals, methodology and peer ingest, peer intake, the flow
                checks, the container entrypoint
-tests/         in a clean clone (what CI runs): 644 pass, 20 skip - the ones needing a
+tests/         in a clean copy (no .env, data or database; what CI runs): 740 pass, 21 skip - the ones needing a
                database, the workbooks, the corpus or the peer reports. With all of
-               those present locally: 663 pass, 1 skip
+               those present locally: 760 pass, 1 skip
 docs/          architecture diagram, ADRs, the GHG Protocol skim guide
 data/evals/    the retrieval key (hashes, no GHG Protocol text) and committed eval runs
 data/peer_sources.json  provenance of the peer reports (the reports are local)

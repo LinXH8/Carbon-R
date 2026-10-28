@@ -7,7 +7,7 @@ export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 # the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
 export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
 
-.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout ingest-methodology eval-retrieval
+.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout ingest-methodology eval-retrieval ingest-peer
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
@@ -83,6 +83,11 @@ ingest-methodology:  ## Chunk + embed the GHG Protocol standards into document_c
 
 eval-retrieval:  ## Score methodology retrieval on the dev split (hit@k, both refusal levels)
 	uv run python scripts/eval_retrieval.py --split dev
+
+# Peer reports (Tier 2 Block 4 Part B). Local only, like the methodology corpus: the reports
+# are the issuers' copyright and git-ignored. Run with --preview first (see the script).
+ingest-peer:  ## Chunk + embed the 14 peer reports into document_chunks (idempotent)
+	uv run python scripts/ingest_peer.py
 
 # The three targets below ran on the Block 1 set (data/generated/<kind>/clean) until Tier 2
 # Block 5, when its schema_version 1 answer keys no longer validated. They now run on

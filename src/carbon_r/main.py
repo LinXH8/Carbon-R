@@ -207,7 +207,14 @@ def _with_document_context(message: str, session: Session, document_ids: list[st
     what keeps a provider-side cache useful.
     """
     if not document_ids:
-        return message + "\n\n[No documents have been uploaded in this session.]"
+        # The second sentence exists because the first, alone, was read as "nothing can be
+        # searched": in Part B's first agent runs, all three peer questions were answered
+        # "no peer documents are loaded" without calling search_peer_disclosures.
+        return message + (
+            "\n\n[No documents have been uploaded in this session. The GHG Protocol "
+            "standards and the peer companies' reports are not uploads: search_methodology "
+            "and search_peer_disclosures search them without one.]"
+        )
     listed = "\n".join(
         f"- {document_id} ({session.documents[document_id].filename})"
         for document_id in document_ids

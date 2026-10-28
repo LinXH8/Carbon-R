@@ -1,4 +1,4 @@
-"""The four tools as the agent sees them: handles in, `{status, data, message}` out.
+"""The five tools as the agent sees them: handles in, `{status, data, message}` out.
 
 A thin layer over `carbon_r.tools.*`, and every bit of thinness is deliberate - the
 arithmetic, the SQL and the vision call stay where they are. What this layer adds is:
@@ -16,8 +16,9 @@ arithmetic, the SQL and the vision call stay where they are. What this layer add
 The implementations are injected rather than imported at call time, so the loop can be
 tested end to end with no API key, no database and no network.
 
-`search_methodology` (Tier 2 Block 4) is passed through untouched: it creates no handle,
-because nothing it returns may enter a calculation.
+`search_methodology` (Tier 2 Block 4) and `search_peer_disclosures` (its Part B) are passed
+through untouched: they create no handle, because nothing they return may enter a
+calculation.
 
 What changed in Tier 2 Block 1: there is no longer a single activity per document, and no
 `ACTIVITY_UNIT` constant. A document yields a list of activities, each with its own unit,
@@ -40,12 +41,14 @@ from carbon_r.agent.toolspec import (
     ExtractArgs,
     LookupFactorArgs,
     SearchMethodologyArgs,
+    SearchPeerDisclosuresArgs,
 )
 from carbon_r.tools.base import ToolResult, error, ok
 from carbon_r.tools.calculate import calculate_emissions as _calculate_emissions
 from carbon_r.tools.extract import extract_from_document as _extract_from_document
 from carbon_r.tools.factors import lookup_emission_factor as _lookup_emission_factor
 from carbon_r.tools.methodology import search_methodology as _search_methodology
+from carbon_r.tools.peer import search_peer_disclosures as _search_peer_disclosures
 
 
 def _reading_flags(readings: list[dict]) -> dict[str, bool]:
@@ -67,12 +70,14 @@ class Toolkit:
         lookup: Callable[..., ToolResult] = _lookup_emission_factor,
         calculate: Callable[..., ToolResult] = _calculate_emissions,
         search: Callable[..., ToolResult] = _search_methodology,
+        search_peers: Callable[..., ToolResult] = _search_peer_disclosures,
     ) -> None:
         self.session = session
         self._extract = extract
         self._lookup = lookup
         self._calculate = calculate
         self._search = search
+        self._search_peers = search_peers
 
     # --- dispatch ----------------------------------------------------------------
 
@@ -110,6 +115,7 @@ class Toolkit:
             "lookup_emission_factor": self.lookup_emission_factor,
             "calculate_emissions": self.calculate_emissions,
             "search_methodology": self.search_methodology,
+            "search_peer_disclosures": self.search_peer_disclosures,
         }[name]
         return handler(args)  # type: ignore[arg-type]
 
@@ -275,3 +281,12 @@ class Toolkit:
     def search_methodology(self, args: SearchMethodologyArgs) -> ToolResult:
         """GHG Protocol passages, or an honest no_results. No handle: never an input."""
         return self._search(args.question, args.source_id)
+
+    def search_peer_disclosures(self, args: SearchPeerDisclosuresArgs) -> ToolResult:
+        """Peer-report passages, or an honest no_results. No handle: never an input."""
+        return self._search_peers(
+            args.question,
+            company=args.company,
+            sector=args.sector,
+            report_year=args.report_year,
+        )
