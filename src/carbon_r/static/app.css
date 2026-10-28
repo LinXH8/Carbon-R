@@ -1,10 +1,8 @@
 /* Carbon R - the page (the "Anthracite" design).
  *
- * The page, set on a dark rock photograph (David Jorre, Unsplash, under the Unsplash
- * License: free to use, no attribution required). The photograph is the whole
- * page background under a light scrim; every figure, source and caveat still sits on a
- * solid panel. Dark only: the page outside the panels is the photograph, and dark text
- * would not read on it. Without the image the page falls back to flat charcoal.
+ * Flat charcoal, the same ground as the landing page, so the way in from it (the camera
+ * dives into fog of this colour) lands on one continuous surface. Every figure, source and
+ * caveat sits on a solid panel one tone up. Dark only.
  */
 
 :root {
@@ -23,8 +21,8 @@
   --bad: #f2928a;
   --bad-wash: #2a1716;
   --ok: #9fcfae;
-  --photo-ink: #f2f3f4;
-  --photo-ink-2: #c9cdd1;
+  --masthead-ink: #f2f3f4;
+  --masthead-ink-2: #c9cdd1;
 
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
   --sans: ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
@@ -34,90 +32,159 @@
 }
 
 
+/* Arriving from the landing page, the island there flies into the mark here and the name
+   into the wordmark (landing.css names the other ends; the opt-in is inline in the page's
+   head). Timing is below, under motion. */
+.wordmark .mark { view-transition-name: world; }
+.wordmark .brand { view-transition-name: brand; }
+
 * { box-sizing: border-box; }
+html { background: var(--ground); }
 body {
   margin: 0;
   color: var(--ink);
   font: 1rem/1.55 var(--sans);
   -webkit-font-smoothing: antialiased;
-  /* The photograph is the page, held back under a 55% scrim so it reads as texture
-     rather than picture. It is very dark to begin with (median 13/255, 99th percentile
-     77), so every text colour clears 4.5:1 even over its brightest specks. Panels stay
-     solid on top of it. */
-  background:
-    linear-gradient(rgba(10, 11, 12, 0.55), rgba(10, 11, 12, 0.55)),
-    url("/static/assets/stone.jpg") center / cover fixed,
-    var(--ground);
+  background: var(--ground);
 }
 .num { font-variant-numeric: tabular-nums lining-nums; }
 a { color: var(--accent); text-underline-offset: 0.18em; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-/* --- masthead: text set straight on the page's photograph ----------------------------- */
+/* --- layout: a conversation ------------------------------------------------------------ */
+/* Empty, the greeting and the composer meet in the middle of the screen. Once a question is
+   asked the thread takes the height and the composer is pinned to the bottom, so the newest
+   answer is always just above where the next question is typed. */
 
-.masthead { color: var(--photo-ink); }
-.masthead-inner { max-width: 48rem; margin: 0 auto; padding: 1rem 1rem 4.5rem; }
+body { min-height: 100dvh; display: flex; flex-direction: column; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-.wordmark { display: inline-flex; align-items: center; gap: 0.5rem; font: 600 1.125rem/1.2 var(--serif); color: var(--photo-ink); text-decoration: none; letter-spacing: -0.005em; }
+.topbar { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.875rem 1rem; background: var(--ground); }
+
+.wordmark { display: inline-flex; align-items: center; gap: 0.5rem; font: 600 1.125rem/1.2 var(--serif); color: var(--masthead-ink); text-decoration: none; letter-spacing: -0.005em; }
 .mark { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.4; }
 .mark circle { fill: currentColor; stroke: none; }
 
-.masthead-copy { margin-top: 4.5rem; max-width: 34rem; }
-.masthead h1 { margin: 0; font: 500 clamp(2rem, 6vw, 3rem)/1.08 var(--serif); letter-spacing: -0.02em; }
-.masthead-copy p { margin: 0.875rem 0 0; color: var(--photo-ink-2); font-size: 1rem; }
+.new-chat { font: 500 0.875rem/1 var(--sans); padding: 0.5rem 0.75rem; color: var(--ink-2); background: transparent; border: 1px solid var(--edge-strong); border-radius: 999px; cursor: pointer; transition: color 150ms ease, border-color 150ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .new-chat:hover { color: var(--ink); border-color: var(--ink-3); }
+}
 
-/* --- page --------------------------------------------------------------------------- */
+.thread { flex: 1; width: 100%; max-width: 48rem; margin: 0 auto; padding: 1rem 1rem 2rem; display: flex; flex-direction: column; gap: 2.5rem; }
+body[data-empty] .thread { justify-content: flex-end; padding-bottom: 1.75rem; }
 
-main { max-width: 48rem; margin: -2.5rem auto 0; padding: 0 1rem 4rem; display: flex; flex-direction: column; gap: 1rem; position: relative; }
+.welcome { color: var(--masthead-ink); }
+.welcome h1 { margin: 0; font: 500 clamp(2rem, 6vw, 3rem)/1.08 var(--serif); letter-spacing: -0.02em; }
+.welcome p { margin: 0.875rem 0 0; max-width: 36rem; color: var(--masthead-ink-2); }
+body:not([data-empty]) .welcome { display: none; }
 
+/* --- turns ------------------------------------------------------------------------------ */
 
-.panel, .figure, .reply, .trail, .notice { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; }
-.panel { padding: 1.25rem; box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.6); }
+.turn { display: flex; flex-direction: column; gap: 1rem; }
+.user-msg { align-self: flex-end; max-width: min(36rem, 88%); padding: 0.75rem 1rem; background: var(--panel-2); border: 1px solid var(--edge); border-radius: 14px 14px 4px 14px; }
+.user-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.user-msg .chips { margin-bottom: 0.5rem; }
+.user-msg .chips:only-child { margin-bottom: 0; }
+.assistant { display: flex; flex-direction: column; gap: 0.625rem; }
+
+/* --- the composer ------------------------------------------------------------------------ */
+
+.dock { position: sticky; bottom: 0; z-index: 2; width: 100%; max-width: 48rem; margin: 0 auto; padding: 0 1rem 0.75rem; background: linear-gradient(to bottom, transparent, var(--ground) 1.5rem); }
+body[data-empty] .dock { position: static; flex: 1; background: none; }
+
+.composer { padding: 0.75rem 0.75rem 0.625rem; background: var(--panel); border: 1px solid var(--edge-strong); border-radius: 16px; box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.6); transition: border-color 150ms ease; }
+.composer:focus-within { border-color: var(--ink-3); }
+
+textarea { display: block; width: 100%; max-height: 14rem; margin: 0; padding: 0.25rem 0.375rem; font: inherit; font-size: 1rem; color: var(--ink); background: transparent; border: 0; resize: none; overflow-y: auto; }
+textarea::placeholder { color: var(--ink-3); }
+textarea:focus-visible { outline: none; }
+
+.composer-row { display: flex; align-items: center; gap: 0.625rem; margin-top: 0.5rem; }
+.composer-hint { flex: 1; min-width: 0; color: var(--ink-3); font-size: 0.8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.composer-hint[data-kind="bad"] { color: var(--bad); white-space: normal; }
+
+.icon-button, .send { flex: none; display: grid; place-items: center; width: 2.25rem; height: 2.25rem; padding: 0; border-radius: 10px; cursor: pointer; transition: transform 160ms var(--ease-out), background-color 150ms ease, color 150ms ease; }
+.icon-button svg, .send svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.icon-button { color: var(--ink-2); background: transparent; border: 1px solid var(--edge-strong); }
+.send { color: var(--ground); background: var(--ink); border: 0; }
+.icon-button:active, .send:active { transform: scale(0.94); }
+@media (hover: hover) and (pointer: fine) {
+  .icon-button:hover { color: var(--ink); background: var(--panel-2); }
+  .send:not(:disabled):hover { background: var(--ink-2); }
+}
+.send:disabled { opacity: 0.35; cursor: default; transform: none; }
+.send[data-busy] { opacity: 1; }
+.send[data-busy] svg { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.35; } }
+
+/* Attachment chips: in the composer before sending, in the user's message after. */
+.chips { list-style: none; margin: 0 0 0.5rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chips:empty { display: none; }
+.chip { display: inline-flex; align-items: center; gap: 0.5rem; max-width: 100%; padding: 0.375rem 0.375rem 0.375rem 0.625rem; background: var(--panel-2); border: 1px solid var(--edge); border-radius: 8px; font-size: 0.875rem; }
+.user-msg .chip { background: var(--panel); padding-right: 0.625rem; }
+.chip-kind { font: 600 0.6875rem/1 var(--mono); letter-spacing: 0.04em; color: var(--accent); }
+.chip-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-id { font: 0.75rem var(--mono); color: var(--ink-3); }
+.chip-remove { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; padding: 0; color: var(--ink-3); background: transparent; border: 0; border-radius: 6px; cursor: pointer; font-size: 1rem; line-height: 1; }
+@media (hover: hover) and (pointer: fine) {
+  .chip-remove:hover { color: var(--ink); background: var(--panel); }
+}
+
+.suggestions { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+body:not([data-empty]) .suggestions { display: none; }
+.suggestion { font: 0.875rem/1.3 var(--sans); padding: 0.5rem 0.875rem; color: var(--ink-2); background: transparent; border: 1px solid var(--edge-strong); border-radius: 999px; cursor: pointer; transition: color 150ms ease, border-color 150ms ease, transform 160ms var(--ease-out); }
+.suggestion:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) {
+  .suggestion:hover { color: var(--ink); border-color: var(--ink-3); }
+}
+
+.drop-overlay { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: color-mix(in srgb, var(--ground) 82%, transparent); pointer-events: none; }
+.drop-overlay[hidden] { display: none; }
+.drop-overlay p { margin: 0; padding: 1.5rem 2.5rem; font: 500 1.25rem/1.2 var(--serif); border: 1px dashed var(--accent); border-radius: 16px; background: var(--panel); }
 
 .section-label { display: block; margin: 0 0 0.5rem; font: 600 0.75rem/1.3 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
 
-.dropzone { padding: 1.125rem 1.25rem; border: 1px dashed var(--edge-strong); border-radius: 4px; background: var(--panel-2); cursor: pointer; transition: border-color 150ms ease, transform 160ms var(--ease-out); }
-.dropzone[data-dragging] { border-color: var(--accent); }
-.dropzone:active { transform: scale(0.99); }
+.figure, .notice { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; }
+
+/* --- activity: the working behind an answer, closed like a chat's thinking row -------- */
+
+.activity { font-size: 0.875rem; color: var(--ink-3); }
+.activity > summary { display: inline-flex; align-items: center; gap: 0.5rem; max-width: 100%; padding: 0.25rem 0; cursor: pointer; list-style: none; border-radius: 4px; transition: color 150ms ease; }
+.activity > summary::-webkit-details-marker { display: none; }
 @media (hover: hover) and (pointer: fine) {
-  .dropzone:hover { border-color: var(--accent); }
+  .activity > summary:hover { color: var(--ink); }
 }
-.dropzone[data-busy] { opacity: 0.55; pointer-events: none; }
-.dropzone-title { margin: 0; font-weight: 600; }
-.dropzone-hint { margin: 0.25rem 0 0; color: var(--ink-3); font-size: 0.875rem; }
+.activity-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-chevron { flex: none; width: 0.4rem; height: 0.4rem; margin-left: 0.125rem; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(-45deg); transition: transform 200ms var(--ease-out); }
+.activity[open] .activity-chevron { transform: rotate(45deg); }
 
-.docs { list-style: none; margin: 0.75rem 0 0; padding: 0; }
-.docs:empty { display: none; }
-.doc { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--edge); font-size: 0.9375rem; }
-.doc-id { font: 0.8125rem var(--mono); color: var(--ink-3); }
+/* The count of audit flags rides on the summary, so a failed audit is visible shut. */
+.activity-flags { flex: none; padding: 0.0625rem 0.5rem; color: var(--bad); background: var(--bad-wash); border: 1px solid color-mix(in srgb, var(--bad) 45%, transparent); border-radius: 999px; font-size: 0.75rem; line-height: 1.5; }
+.activity-flags[hidden] { display: none; }
 
-.ask { margin-top: 1.25rem; }
-textarea { width: 100%; font: inherit; font-size: 0.9375rem; color: var(--ink); background: var(--panel-2); border: 1px solid var(--edge); border-radius: 4px; padding: 0.625rem 0.75rem; resize: vertical; }
-textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
-.ask-row { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 0.875rem; }
-.ask-note { color: var(--ink-3); font-size: 0.875rem; }
-.button { font: 600 0.9375rem/1 var(--sans); padding: 0.75rem 1.25rem; background: var(--ink); color: var(--ground); border: 0; border-radius: 4px; cursor: pointer; }
-.button { transition: transform 160ms var(--ease-out), background-color 150ms ease; }
-.button:active { transform: scale(0.97); }
-@media (hover: hover) and (pointer: fine) {
-  .button:hover { background: var(--ink-2); }
-}
-.button:disabled { opacity: 0.5; cursor: default; transform: none; }
+/* While the agent works the label shimmers - constant motion, so linear. */
+.activity[data-running] .activity-label { background: linear-gradient(90deg, var(--ink-3) 0%, var(--ink-3) 40%, var(--ink) 50%, var(--ink-3) 60%, var(--ink-3) 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 1.6s linear infinite; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -150% 0; } }
 
-/* --- steps -------------------------------------------------------------------------- */
+.activity-body { margin: 0.375rem 0 0.25rem 0.3125rem; padding: 0.25rem 0 0.25rem 1rem; border-left: 1px solid var(--edge-strong); display: flex; flex-direction: column; gap: 0.75rem; }
+.activity[open] .activity-body { animation: fade 200ms var(--ease-out); }
+.activity-note { margin: 0; color: var(--ink-2); }
 
-.steps { list-style: none; margin: 0; padding: 0 0.25rem; font-size: 0.875rem; }
+.steps { list-style: none; margin: 0; padding: 0; }
 .steps:empty { display: none; }
-.step { display: grid; grid-template-columns: 1.25rem auto 1fr; gap: 0 0.625rem; padding: 0.4375rem 0; border-bottom: 1px solid var(--edge); }
+.step { display: grid; grid-template-columns: 1rem auto 1fr; gap: 0 0.5rem; padding: 0.25rem 0; }
 .step-mark { color: var(--ink-3); }
-.step[data-status="ok"] .step-mark { color: var(--ok); }
-.step[data-status="no_results"] .step-mark { color: var(--caveat); }
-.step[data-status="error"] .step-mark { color: var(--bad); }
-.step-tool { font: 0.8125rem var(--mono); }
+.step[data-status="ok"] .step-mark, .call[data-status="ok"] .step-mark { color: var(--ok); }
+.step[data-status="no_results"] .step-mark, .call[data-status="no_results"] .step-mark { color: var(--caveat); }
+.step[data-status="error"] .step-mark, .call[data-status="error"] .step-mark { color: var(--bad); }
+.step-tool { color: var(--ink-2); }
 .step-status { color: var(--ink-3); }
-.step-message { grid-column: 2 / -1; color: var(--ink-2); }
-.step[data-status="running"] .step-tool { font-family: var(--sans); color: var(--ink-3); }
-.step[data-status="running"] .step-status { display: none; }
+.step-message { grid-column: 2 / -1; color: var(--ink-3); }
+
+.flags { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.flag { display: grid; grid-template-columns: 1rem 1fr; gap: 0.5rem; color: var(--bad); }
+.flag strong { font-weight: 600; }
+.flag-mark { font-weight: 700; }
 
 /* --- the figure ------------------------------------------------------------------- */
 
@@ -168,54 +235,97 @@ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 .notice[data-kind="bad"] { background: var(--bad-wash); border-color: var(--bad); color: var(--bad); }
 .notice[data-kind="warn"] { border-color: var(--caveat); color: var(--caveat); }
 
-.reply { padding: 1.25rem 1.5rem; }
-.reply-text { margin: 0; white-space: pre-wrap; font: 1.0625rem/1.6 var(--serif); }
-.reply-note { margin: 0.5rem 0 0; color: var(--ink-3); font-size: 0.8125rem; }
+/* The reply is read as prose, not boxed as a panel: it is the answer to a question. */
+.reply { font: 1.0625rem/1.7 var(--serif); color: var(--ink); overflow-wrap: anywhere; }
+.reply > * { margin: 0; }
+.reply > * + * { margin-top: 0.875rem; }
+.reply h4 { font: 600 1rem/1.4 var(--sans); }
+.reply ul, .reply ol { padding-left: 1.375rem; }
+.reply li + li { margin-top: 0.375rem; }
+.reply li::marker { color: var(--ink-3); }
+.reply strong { font-weight: 600; }
+.reply code { font: 0.85em var(--mono); padding: 0.0625rem 0.3125rem; background: var(--panel-2); border-radius: 4px; }
+.reply-note { color: var(--ink-3); font: 0.8125rem/1.5 var(--sans); }
 
-.trail summary { padding: 0.875rem 1.25rem; cursor: pointer; font-weight: 600; font-size: 0.9375rem; }
-.trail-list { list-style: none; margin: 0; padding: 0 1.25rem 0.5rem; }
-.call { padding: 0.75rem 0; border-top: 1px solid var(--edge); }
-.call-head { display: flex; gap: 0.75rem; align-items: baseline; }
-.call-tool { font: 600 0.875rem var(--mono); }
-.call-status { font-size: 0.8125rem; color: var(--ink-3); }
+.trail-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.call-head { display: grid; grid-template-columns: 1rem auto 1fr; gap: 0.5rem; align-items: baseline; }
+.call-tool { color: var(--ink-2); }
+.call-status { color: var(--ink-3); }
 .call[data-status="no_results"] .call-status { color: var(--caveat); }
 .call[data-status="error"] .call-status { color: var(--bad); }
-.call-message { margin: 0.25rem 0 0; color: var(--ink-2); font-size: 0.875rem; }
-.call pre { margin: 0.5rem 0 0; padding: 0.625rem 0.75rem; background: var(--panel-2); border-radius: 4px; font: 0.75rem/1.5 var(--mono); overflow-x: auto; }
+.call-message { margin: 0.125rem 0 0 1.5rem; color: var(--ink-3); }
+.call-args { margin: 0.25rem 0 0 1.5rem; }
+.call-args summary { width: fit-content; cursor: pointer; font: 0.75rem var(--mono); color: var(--ink-3); transition: color 150ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .call-args summary:hover { color: var(--ink-2); }
+}
+.call pre { margin: 0.375rem 0 0; padding: 0.625rem 0.75rem; background: var(--panel-2); border-radius: 4px; font: 0.75rem/1.5 var(--mono); color: var(--ink-2); overflow-x: auto; }
 
-.colophon { max-width: 48rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; border-top: 1px solid var(--edge); color: var(--ink-3); font-size: 0.8125rem; }
-.colophon p { margin: 0; }
+.colophon { margin: 0.625rem 0 0; text-align: center; color: var(--ink-3); font-size: 0.75rem; }
 
 @media (max-width: 34rem) {
-  .masthead-copy { margin-top: 3rem; }
   .figure { padding-inline: 1.125rem; }
-}
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  body { background: var(--ground); }
+  .composer-hint { display: none; }
+  .composer-row { justify-content: space-between; }
 }
 /* --- motion --------------------------------------------------------------------------- */
 /* Tool steps arrive one at a time and the answer arrives at once; both enter rather than
    appear, briefly and plainly - this is a reporting tool. Transitions, not keyframes, so a
    step that lands while another is still entering never restarts it. The answer's
    sections follow each other by 40ms so the figure lands before its citations. */
-.step, .answer > * { transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+.step, .answer > *, .user-msg, .chip { transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
 @starting-style {
-  .step, .answer > * { opacity: 0; transform: translateY(6px); }
+  .step, .answer > *, .user-msg, .chip { opacity: 0; transform: translateY(6px); }
 }
 .answer > :nth-child(2) { transition-delay: 40ms; }
 .answer > :nth-child(3) { transition-delay: 80ms; }
 .answer > :nth-child(n + 4) { transition-delay: 120ms; }
 
+/* Arrival: the page rises out of the charcoal the landing page's dive ends in. The
+   greeting first, then the composer, 70ms apart - the landing page's own entrance. */
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+@keyframes fade { from { opacity: 0; } }
+.welcome, .composer, .suggestions { animation: rise 640ms var(--ease-out) both; }
+.composer { animation-delay: 70ms; }
+.suggestions { animation-delay: 140ms; }
+.colophon { animation: fade 640ms ease 210ms both; }
+
+/* The flight from the landing page. The island holds while it shrinks toward the mark and
+   hands over to it only near the end, so it reads as one object becoming the other; the
+   rest of the landing page fades first and this page fades in once the island is clear
+   of the headline. Both images are fitted whole into the box, never stretched, and the
+   island's frame is feathered to an oval so no edge of sea flies with it. */
+@keyframes vt-hold-out { 0%, 55% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes vt-late-in { 0%, 55% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes vt-out { to { opacity: 0; } }
+::view-transition-group(world), ::view-transition-group(brand) {
+  animation-duration: 900ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+::view-transition-old(world), ::view-transition-new(world) { height: 100%; object-fit: contain; }
+::view-transition-old(world) {
+  animation: vt-hold-out 900ms ease-in both;
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent);
+  mask-image: radial-gradient(closest-side, #000 55%, transparent);
+}
+::view-transition-new(world) { animation: vt-late-in 900ms ease-out both; }
+::view-transition-old(root) { animation: vt-out 300ms ease both; }
+::view-transition-new(root) { animation: fade 450ms ease 420ms both; }
+
 /* Reduced motion: the fades stay, the movement goes. */
 @media (prefers-reduced-motion: reduce) {
+  .welcome, .composer, .suggestions { animation-name: fade; animation-duration: 200ms; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation-duration: 200ms; animation-delay: 0s; }
   @starting-style {
-    .step, .answer > * { transform: none; }
+    .step, .answer > *, .user-msg, .chip { transform: none; }
   }
-  .button:active, .dropzone:active { transform: none; }
+  .icon-button:active, .send:active, .suggestion:active { transform: none; }
+  .send[data-busy] svg { animation: none; }
+  .activity[data-running] .activity-label { animation: none; background: none; color: var(--ink-3); }
+  .activity-chevron { transition: none; }
 }
 
 @media print {
   body { background: #fff; }
-  .masthead { color: #000; }
-  .masthead-copy, .intake, .steps, .trail { display: none; }
+  .topbar, .dock, .welcome, .activity { display: none; }
 }

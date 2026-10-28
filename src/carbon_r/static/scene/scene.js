@@ -4,10 +4,12 @@
  * prefers-reduced-motion it never runs: the world is simulated forward a few seconds in
  * fixed steps and rendered once, so the smoke is already there in the still.
  *
- * The camera is fixed: only the world moves. It is placed once per size so the whole
- * island fits the frame - turned a quarter so the island's long side runs up a portrait
- * screen - and fog the colour of the page fades the far sea into it, so the water has no
- * edge to see. No controls and no wheel handling, so scrolling the page never fights it.
+ * The camera orbits the island slowly, and a click-and-drag turns it by hand, with a
+ * little momentum that settles back into the slow orbit. Its distance is fitted once per
+ * size against every heading, so the whole island stays in frame all the way round
+ * without the view breathing in and out; fog the colour of the page fades the far sea
+ * into it, so the water has no edge to see. Only horizontal drags are taken, and no
+ * wheel: vertical swipes and scrolling still move the page.
  */
 
 import * as THREE from 'three';
@@ -37,6 +39,11 @@ const PREWARM = 8;             // s of simulation before the first frame
 const TARGET = new THREE.Vector3(0, 0.8, 0.6);
 const PAGE = 0x0e0f10;         // the page's ground colour, which the fog fades to
 const WATER_LEVEL = -0.45;
+const SPIN = (Math.PI * 2) / 90; // rad/s: one slow turn every 90 s
+const DRAG_TURN = Math.PI * 1.25; // rad per frame-width of drag
+const SETTLE = 1.6;              // 1/s: how fast a flick's momentum returns to SPIN
+const MAX_FLICK = 2.5;           // rad/s: the fastest a flick may leave it turning
+const HEADINGS = 16;             // headings the distance is fitted against
 
 // Points that must stay in frame: the coast all round, the quay's end, the tallest things.
 const FIT_POINTS = [
@@ -80,11 +87,22 @@ export function mountScene(container, { small = false, showStats = false } = {})
 
   const wind = { x: 0, z: 0 };
   let azimuth = AZIMUTH;
+  let windAzimuth = AZIMUTH; // the wind keeps to the opening view, not the turning camera
+  let spin = SPIN;
+  let drag = null; // { id, x, t } while a pointer is turning the view
+  let placed = false;
   let time = 0;
+  const view = { distance: 0, elevation: ELEVATION, fogNear: 0, fogFar: 0 }; // fit by resize(); fog as the dive began
+  let dive = null; // { start, ms, resolve } while the camera is diving in
 
   function advance(dt) {
     time += dt;
-    windAt(time, azimuth, wind);
+    windAt(time, windAzimuth, wind);
+    if (!drag && !dive) {
+      spin += (SPIN - spin) * (1 - Math.exp(-SETTLE * dt));
+      azimuth += spin * dt;
+      place();
+    }
     world.update(time, dt, wind);
     smoke.update(dt, wind);
   }
@@ -98,6 +116,32 @@ export function mountScene(container, { small = false, showStats = false } = {})
     );
     camera.lookAt(TARGET);
     camera.updateMatrixWorld();
+  }
+
+  /* The nearest distance at which every fit point lands inside the frame, at every heading
+     the orbit passes through. */
+  function fitAll(elevation) {
+    const keep = azimuth;
+    let distance = 0;
+    for (let i = 0; i < HEADINGS; i++) {
+      azimuth = (i / HEADINGS) * Math.PI * 2;
+      distance = Math.max(distance, fit(elevation));
+    }
+    azimuth = keep;
+    return distance;
+  }
+
+  /* Put the camera at the fitted distance on the current heading. Fog: clear out to the
+     island's farthest point, fully faded where the top edge of the frame meets the sea, so
+     the water dissolves into the page instead of ending. */
+  function place() {
+    aim(view.distance, view.elevation);
+    let farthest = 0;
+    for (const p of FIT_POINTS) farthest = Math.max(farthest, camera.position.distanceTo(p));
+    const below = view.elevation - THREE.MathUtils.degToRad(FOV) / 2; // the top edge's angle down
+    const horizon = below > 0.02 ? (camera.position.y - WATER_LEVEL) / Math.sin(below) : farthest * 2;
+    scene.fog.near = farthest * 1.02;
+    scene.fog.far = Math.max(horizon, farthest * 1.1);
   }
 
   /* The nearest distance at which every fit point lands inside the frame. */
@@ -121,23 +165,19 @@ export function mountScene(container, { small = false, showStats = false } = {})
 
   function resize() {
     const { width, height } = container.getBoundingClientRect();
-    if (!width || !height) return;
+    if (!width || !height || dive) return;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     const portrait = camera.aspect < 1;
-    azimuth = portrait ? AZIMUTH + Math.PI / 2 : AZIMUTH;
-    const elevation = portrait ? ELEVATION_PORTRAIT : ELEVATION;
-    const distance = fit(elevation);
-    aim(distance, elevation);
-    // Fog: clear out to the island's farthest point, fully faded where the top edge of the
-    // frame meets the sea, so the water dissolves into the page instead of ending.
-    let farthest = 0;
-    for (const p of FIT_POINTS) farthest = Math.max(farthest, camera.position.distanceTo(p));
-    const below = elevation - THREE.MathUtils.degToRad(FOV) / 2; // the top edge's angle down
-    const horizon = below > 0.02 ? (camera.position.y - WATER_LEVEL) / Math.sin(below) : farthest * 2;
-    scene.fog.near = farthest * 1.02;
-    scene.fog.far = Math.max(horizon, farthest * 1.1);
+    // The opening heading: turned a quarter on a portrait screen so the island's long side
+    // runs up it. Set once; after that a resize keeps wherever the orbit has got to.
+    windAzimuth = portrait ? AZIMUTH + Math.PI / 2 : AZIMUTH;
+    if (!placed) azimuth = windAzimuth;
+    placed = true;
+    view.elevation = portrait ? ELEVATION_PORTRAIT : ELEVATION;
+    view.distance = fitAll(view.elevation);
+    place();
     smoke.setViewport(renderer.getDrawingBufferSize(new THREE.Vector2()).y, FOV);
     if (!running) draw();
   }
@@ -203,8 +243,25 @@ export function mountScene(container, { small = false, showStats = false } = {})
     last = now;
     const begin = performance.now();
     advance(Math.min(ms / 1000, MAX_DT));
+    if (dive) stepDive(now);
     draw();
     record(ms, performance.now() - begin);
+  }
+
+  /* The way out: the camera falls toward the island and the fog closes in, so the last
+     frame is the page's own colour and the next page can rise out of it. Ease-in, because
+     it ends in a navigation rather than a resting state. */
+  function stepDive(now) {
+    const t = Math.min((now - dive.start) / dive.ms, 1);
+    const k = t * t * t;
+    const distance = view.distance * (1 - 0.65 * k);
+    aim(distance, view.elevation + (Math.PI / 2 - 0.15 - view.elevation) * 0.4 * k);
+    scene.fog.near = view.fogNear * (1 - k);
+    scene.fog.far = view.fogFar + (distance * 0.5 - view.fogFar) * k;
+    if (t === 1) {
+      dive.resolve();
+      dive = null;
+    }
   }
 
   const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -239,7 +296,7 @@ export function mountScene(container, { small = false, showStats = false } = {})
   function hideLabel() { delete label.dataset.show; }
 
   function onPointerMove(event) {
-    if (event.pointerType !== 'mouse' || !finePointer.matches || event.timeStamp - lastHover < 50) return;
+    if (drag || event.pointerType !== 'mouse' || !finePointer.matches || event.timeStamp - lastHover < 50) return;
     lastHover = event.timeStamp;
 
     const rect = canvas.getBoundingClientRect();
@@ -258,32 +315,94 @@ export function mountScene(container, { small = false, showStats = false } = {})
     label.dataset.show = '';
   }
 
+  /* --- pointer: drag to turn ------------------------------------------------------- */
+
+  function onPointerDown(event) {
+    if (event.button !== 0 || drag || dive) return;
+    drag = { id: event.pointerId, x: event.clientX, t: event.timeStamp };
+    spin = 0;
+    container.setPointerCapture(event.pointerId);
+    container.dataset.dragging = '';
+    hideLabel();
+  }
+
+  function onDragMove(event) {
+    if (!drag || event.pointerId !== drag.id) return;
+    const turn = ((event.clientX - drag.x) / container.clientWidth) * DRAG_TURN;
+    const dt = (event.timeStamp - drag.t) / 1000;
+    azimuth -= turn;
+    // The flick's speed, smoothed, so letting go carries on at the pace of the last moves.
+    if (dt > 0) spin = THREE.MathUtils.clamp(spin * 0.6 + (-turn / dt) * 0.4, -MAX_FLICK, MAX_FLICK);
+    drag.x = event.clientX;
+    drag.t = event.timeStamp;
+    place();
+    if (!running) draw(); // reduced motion: no loop, but a drag still turns the still
+  }
+
+  function endDrag(event) {
+    if (!drag || (event && event.pointerId !== drag.id)) return;
+    // A press held still before letting go keeps no momentum.
+    if (event && event.timeStamp - drag.t > 80) spin = 0;
+    if (container.hasPointerCapture(drag.id)) container.releasePointerCapture(drag.id);
+    drag = null;
+    delete container.dataset.dragging;
+  }
+
   /* --- start ------------------------------------------------------------------------ */
 
   // Size first (it places the camera, which sets the wind's heading), then simulate forward
   // in fixed steps so the first frame already has smoke in the air.
   resize();
   for (let t = 0; t < PREWARM; t += 1 / 30) advance(1 / 30);
+  azimuth = windAzimuth; // the prewarm turned the orbit too; open on the composed view
+  place();
   draw();
 
   document.addEventListener('visibilitychange', onVisibility);
   reduceQuery.addEventListener('change', onReduce);
   window.addEventListener('pointermove', onPointerMove, { passive: true });
   container.addEventListener('pointerleave', hideLabel);
+  container.addEventListener('pointerdown', onPointerDown);
+  container.addEventListener('pointermove', onDragMove);
+  container.addEventListener('pointerup', endDrag);
+  container.addEventListener('pointercancel', endDrag);
   io.observe(container);
   ro.observe(container);
   sync();
 
   return {
+    /* Resolves once the dive has played; the caller navigates. Runs the loop even if it
+       was paused, since the click means the scene is wanted for one last moment. */
+    dive(ms = 700) {
+      hideLabel();
+      endDrag();
+      view.fogNear = scene.fog.near;
+      view.fogFar = scene.fog.far;
+      return new Promise((resolve) => {
+        dive = { start: performance.now(), ms, resolve };
+        if (!running) {
+          running = true;
+          last = performance.now();
+          renderer.setAnimationLoop(tick);
+        }
+      });
+    },
     dispose() {
       renderer.setAnimationLoop(null);
       running = false;
+      dive?.resolve();
+      dive = null;
       io.disconnect();
       ro.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
       reduceQuery.removeEventListener('change', onReduce);
       window.removeEventListener('pointermove', onPointerMove);
       container.removeEventListener('pointerleave', hideLabel);
+      endDrag();
+      container.removeEventListener('pointerdown', onPointerDown);
+      container.removeEventListener('pointermove', onDragMove);
+      container.removeEventListener('pointerup', endDrag);
+      container.removeEventListener('pointercancel', endDrag);
       scene.traverse((object) => {
         object.geometry?.dispose();
         const materials = Array.isArray(object.material) ? object.material : [object.material];

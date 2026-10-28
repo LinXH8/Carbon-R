@@ -2,50 +2,58 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
 <title>Carbon R</title>
+<!-- The cross-document transition's opt-in is inline, not in the stylesheet: Chrome decides
+     at the new page's first frame, and a stylesheet that has not been applied by then reads
+     as "opt-in disabled" and the transition is dropped. -->
+<style>@view-transition { navigation: auto; }</style>
 <link rel="stylesheet" href="/static/app.css">
 </head>
-<body>
+<body data-empty>
 
-<!-- The page is set on a photograph; nothing that carries a figure, a source or a
-     caveat is set on it directly. Those sit on solid panels. -->
-<header class="masthead">
-  <div class="masthead-inner">
-    <a class="wordmark" href="/"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20.2 7.25v9.5L12 21.5l-8.2-4.75v-9.5Z"/><circle cx="12" cy="2.5" r="1.6"/><circle cx="20.2" cy="7.25" r="1.6"/><circle cx="20.2" cy="16.75" r="1.6"/><circle cx="12" cy="21.5" r="1.6"/><circle cx="3.8" cy="16.75" r="1.6"/><circle cx="3.8" cy="7.25" r="1.6"/></svg>Carbon R</a>
-    <div class="masthead-copy">
-      <h1>Every tonne, traced to its source.</h1>
-      <p>Greenhouse-gas figures from your bills and statements. Calculated in Python, never by the model, and shown with the factor, publisher, year and caveats they rest on.</p>
-    </div>
-  </div>
+<!-- A conversation: ask anything, attach a document when there is one. Nothing that
+     carries a figure, a source or a caveat is set on the ground directly; those sit on
+     solid panels inside each turn. -->
+<header class="topbar">
+  <a class="wordmark" href="/"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20.2 7.25v9.5L12 21.5l-8.2-4.75v-9.5Z"/><circle cx="12" cy="2.5" r="1.6"/><circle cx="20.2" cy="7.25" r="1.6"/><circle cx="20.2" cy="16.75" r="1.6"/><circle cx="12" cy="21.5" r="1.6"/><circle cx="3.8" cy="16.75" r="1.6"/><circle cx="3.8" cy="7.25" r="1.6"/></svg><span class="brand">Carbon R</span></a>
+  <button type="button" class="new-chat" id="new-chat" hidden>New conversation</button>
 </header>
 
-<main>
-  <section class="panel intake" aria-label="Document and question">
-    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose or drop a document">
-      <p class="dropzone-title">Choose or drop a document</p>
-      <p class="dropzone-hint">Electricity bill, LPG invoice or fuel-card statement · PDF, PNG or JPEG, up to 10 MB</p>
-      <input type="file" id="file" accept=".pdf,.png,.jpg,.jpeg" hidden>
-    </div>
-    <ul class="docs" id="docs" aria-label="Uploaded documents"></ul>
-
-    <div class="ask" id="ask-card" hidden>
-      <label class="section-label" for="question">Question</label>
-      <textarea id="question" rows="2" spellcheck="false">What are the emissions from this document? Show the factor you used and where it comes from.</textarea>
-      <div class="ask-row">
-        <button class="button" id="ask">Calculate</button>
-        <span class="ask-note" id="ask-note"></span>
-      </div>
-    </div>
+<main class="thread" id="thread" aria-label="Conversation">
+  <section class="welcome" id="welcome">
+    <h1>Every tonne, traced to its source.</h1>
+    <p>Ask about greenhouse-gas accounting, or attach a bill or statement for a figure. Figures are calculated in Python, never by the model, and shown with the factor, publisher, year and caveats they rest on.</p>
   </section>
-
-  <ol class="steps" id="steps" aria-live="polite" aria-label="Tool calls"></ol>
-  <div class="answer" id="answer"></div>
 </main>
 
-<footer class="colophon">
-  <p>The language model reads documents and chooses tools. It never does arithmetic. Estimates are not assured.</p>
-</footer>
+<div class="dock">
+  <form class="composer" id="composer" aria-label="Ask a question">
+    <ul class="attachments" id="attachments" aria-label="Attached documents"></ul>
+    <label class="visually-hidden" for="question">Question</label>
+    <textarea id="question" rows="1" spellcheck="true" placeholder="Ask about emissions, or attach a document…"></textarea>
+    <div class="composer-row">
+      <button type="button" class="icon-button" id="attach" aria-label="Attach a document" title="Attach a document">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.5 12.4 19.6a5 5 0 0 1-7.07-7.07l8.13-8.13a3.33 3.33 0 0 1 4.71 4.71l-8.14 8.13a1.67 1.67 0 0 1-2.35-2.36l7.42-7.41"/></svg>
+      </button>
+      <span class="composer-hint" id="composer-hint">Electricity bill, LPG invoice or fuel-card statement · PDF, PNG or JPEG, up to 10 MB</span>
+      <button type="submit" class="send" id="send" aria-label="Send" title="Send" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+      </button>
+    </div>
+    <input type="file" id="file" accept=".pdf,.png,.jpg,.jpeg" multiple hidden>
+  </form>
+
+  <ul class="suggestions" id="suggestions" aria-label="Suggestions">
+    <li><button type="button" class="suggestion" data-attach data-prompt="What are the emissions from this document? Show the factor you used and where it comes from.">Calculate emissions from a bill</button></li>
+    <li><button type="button" class="suggestion" data-prompt="What is the difference between location-based and market-based Scope 2 accounting?">Location-based vs market-based Scope 2</button></li>
+    <li><button type="button" class="suggestion" data-prompt="Which purchases count as Scope 3, and how does the GHG Protocol group them?">What counts as Scope 3?</button></li>
+  </ul>
+
+  <p class="colophon">The language model reads documents and chooses tools. It never does arithmetic. Estimates are not assured.</p>
+</div>
+
+<div class="drop-overlay" id="drop-overlay" hidden><p>Drop to attach</p></div>
 
 <script type="module" src="/static/app.js"></script>
 </body>

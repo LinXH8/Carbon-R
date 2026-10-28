@@ -54,20 +54,33 @@ app = FastAPI(
 
 STATIC_DIR = Path(__file__).parent / "static"
 
+# With no build step there are no hashed filenames, so the page and its assets must be
+# revalidated on every load: without this header a browser may reuse a stale app.css or
+# landing.js by heuristic and an edit never shows. The ETag keeps an unchanged file a 304.
+REVALIDATE = {"Cache-Control": "no-cache"}
+
+
+class RevalidatedStaticFiles(StaticFiles):
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers.update(REVALIDATE)
+        return response
+
+
 # Mounted at /static rather than at /, which would shadow every route declared after it.
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/static", RevalidatedStaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/", include_in_schema=False)
 def landing() -> FileResponse:
     """The landing page: what Carbon R does, and the way in. Decorative 3D, no figures."""
-    return FileResponse(STATIC_DIR / "landing.html")
+    return FileResponse(STATIC_DIR / "landing.html", headers=REVALIDATE)
 
 
 @app.get("/app", include_in_schema=False)
 def index() -> FileResponse:
     """The single-page UI. No build step: the files under static/ are served as written."""
-    return FileResponse(STATIC_DIR / "index.html")
+    return FileResponse(STATIC_DIR / "index.html", headers=REVALIDATE)
 
 
 class HealthResponse(BaseModel):

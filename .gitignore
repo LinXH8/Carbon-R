@@ -55,3 +55,7 @@ docs/notes/
 src/carbon_r/static/assets/*
 # David Jorre, Unsplash (Unsplash License: free to use, no attribution required).
 !src/carbon_r/static/assets/stone.jpg
+
+# Impeccable design hook: the shared config is committed; its cache and local overrides are not.
+.impeccable/hook.cache.json
+.impeccable/config.local.json

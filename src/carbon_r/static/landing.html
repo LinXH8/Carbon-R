@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Carbon R</title>
 <meta name="description" content="Estimates a small business's Scope 1 and Scope 2 emissions from its bills, with every figure cited.">
+<!-- The cross-document transition's opt-in is inline, not in the stylesheet: Chrome decides
+     at the new page's first frame, and a stylesheet that has not been applied by then reads
+     as "opt-in disabled" and the transition is dropped. -->
+<style>@view-transition { navigation: auto; }</style>
 <link rel="stylesheet" href="/static/landing.css">
 <!-- No build step: three is pinned to an exact version and loaded as an ES module. If the
      CDN cannot be reached, landing.js falls back to a flat ground and the page still works. -->
@@ -17,7 +21,7 @@
 
 <main class="landing">
   <header class="intro">
-    <h1><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20.2 7.25v9.5L12 21.5l-8.2-4.75v-9.5Z"/><circle cx="12" cy="2.5" r="1.6"/><circle cx="20.2" cy="7.25" r="1.6"/><circle cx="20.2" cy="16.75" r="1.6"/><circle cx="12" cy="21.5" r="1.6"/><circle cx="3.8" cy="16.75" r="1.6"/><circle cx="3.8" cy="7.25" r="1.6"/></svg>Carbon R</h1>
+    <h1><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20.2 7.25v9.5L12 21.5l-8.2-4.75v-9.5Z"/><circle cx="12" cy="2.5" r="1.6"/><circle cx="20.2" cy="7.25" r="1.6"/><circle cx="20.2" cy="16.75" r="1.6"/><circle cx="12" cy="21.5" r="1.6"/><circle cx="3.8" cy="16.75" r="1.6"/><circle cx="3.8" cy="7.25" r="1.6"/></svg><span class="brand">Carbon R</span></h1>
     <div class="intro-copy">
       <p class="lede">Estimates a small business's Scope 1 and Scope 2 emissions from its bills, with every figure cited.</p>
       <a class="start" href="/app">Start</a>

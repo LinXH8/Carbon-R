@@ -24,7 +24,6 @@ def test_the_page_assets_are_served():
         ("/static/app.css", "text/css"),
         ("/static/app.js", "javascript"),
         ("/static/render.js", "javascript"),
-        ("/static/assets/stone.jpg", "image/jpeg"),
     ):
         response = client.get(path)
         assert response.status_code == 200, path
@@ -77,3 +76,35 @@ def test_the_audit_line_states_what_the_audit_found():
     renderer = client.get("/static/render.js").text
     assert "Figure audit passed" in renderer
     assert "Figure audit failed" in renderer
+
+
+def test_the_page_and_its_assets_are_always_revalidated():
+    # No build step means no hashed filenames: without no-cache an edit can stay invisible.
+    for path in ("/", "/app", "/static/app.css", "/static/landing.js"):
+        assert client.get(path).headers["cache-control"] == "no-cache", path
+
+
+def test_a_question_does_not_need_a_document():
+    """The composer is always there; attaching a document is optional.
+
+    The page used to hide the question until a file was uploaded, though /chat has always
+    answered without one (methodology questions need none).
+    """
+    page = client.get("/app").text
+    assert 'id="question"' in page
+    assert 'id="attach"' in page
+    assert "hidden" not in page.split('id="composer"')[1].split(">")[0]
+
+
+def test_a_failed_audit_stays_visible_when_folded_away():
+    """The audit findings sit in a closed activity panel; their count must not.
+
+    Folding the red notices into the panel is a layout choice. Hiding that the audit failed
+    would not be: the closed summary carries the number of flags.
+    """
+    renderer = client.get("/static/render.js").text
+    script = client.get("/static/app.js").text
+    assert "unverified_figures" in renderer
+    assert "unverified_quotes" in renderer
+    assert "audit flag" in script
+    assert "activity-flags" in script

@@ -45,7 +45,33 @@ window.addEventListener('pagehide', () => {
   handle = null;
 });
 window.addEventListener('pageshow', (event) => {
+  delete document.documentElement.dataset.leaving;
   if (event.persisted) start();
+});
+
+/* Start. Where the browser does cross-document view transitions the link is left alone:
+   the CSS flies the island into the tool's logo. Elsewhere the words lift away and the
+   camera dives into the island before the tool loads. The link stays a real link - a
+   modified or middle click opens /app as usual - and the dive is capped, so a stalled
+   frame can never hold the way in. */
+const crossDocumentTransitions = 'PageRevealEvent' in window;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+document.querySelector('.start').addEventListener('click', async (event) => {
+  if (crossDocumentTransitions) return;
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  const { href } = event.currentTarget;
+  const root = document.documentElement;
+  if ('leaving' in root.dataset) return;
+  root.dataset.leaving = '';
+  if (handle && !reduceMotion.matches) {
+    await Promise.race([handle.dive(), wait(900)]);
+  } else {
+    await wait(150);
+  }
+  location.href = href;
 });
 
 start();

@@ -36,11 +36,21 @@ export function group(decimalString) {
 const MARKS = { ok: '✓', no_results: '○', error: '×', running: '·' };
 const STATUS_WORDS = { ok: 'ok', no_results: 'no results', error: 'error', running: 'working' };
 
+// What each tool is doing, in words: present tense while it runs, past tense once done.
+const TOOL_WORDS = {
+  extract_from_document: ['Reading the document', 'Read the document'],
+  lookup_emission_factor: ['Looking up the emission factor', 'Looked up the emission factor'],
+  calculate_emissions: ['Calculating', 'Calculated the emissions'],
+  search_methodology: ['Searching the GHG Protocol', 'Searched the GHG Protocol'],
+};
+const doing = (tool) => TOOL_WORDS[tool]?.[0] || 'Deciding what to do next';
+export const done = (tool) => TOOL_WORDS[tool]?.[1] || tool;
+
 export function stepNode({ tool, status, message }) {
   return h('li', { class: 'step', 'data-status': status }, [
     h('span', { class: 'step-mark', text: MARKS[status] || '•', 'aria-hidden': true }),
-    h('span', { class: 'step-tool', text: tool || 'Deciding what to do next' }),
-    h('span', { class: 'step-status', text: STATUS_WORDS[status] || status }),
+    h('span', { class: 'step-tool', text: status === 'running' ? doing(tool) : done(tool) }),
+    status === 'running' ? null : h('span', { class: 'step-status', text: STATUS_WORDS[status] || status }),
     message ? h('span', { class: 'step-message', text: message }) : null,
   ]);
 }
@@ -54,9 +64,29 @@ export function notice(kind, title, detail) {
 
 /* --- the answer ----------------------------------------------------------------------- */
 
+/* The figure audit, as one list of findings. Each is stated in full in the activity
+   panel; the panel's summary carries their count, so a failed audit is never out of
+   sight even while the panel is closed. */
+function auditFlags(final) {
+  const flags = [];
+  const figures = final.unverified_figures || [];
+  const quotes = final.unverified_quotes || [];
+  if (figures.length) {
+    flags.push(['The reply contains figures no tool produced',
+      `Do not use these numbers: ${figures.join(', ')}. They were not returned by any tool in this session.`]);
+  }
+  if (quotes.length) {
+    flags.push(['The reply quotes words no source contains',
+      `These quotations were not found in any passage a tool returned: ${quotes.map((q) => `"${q}"`).join('; ')}. Do not rely on them.`]);
+  }
+  return flags;
+}
+
+/* What the reader reads: a stopped run, the figures, and the reply. */
 export function renderAnswer(final) {
   const parts = [];
 
+  // A run that produced no answer says so in the open; there is nothing else to read.
   if (final.stopped_reason === 'max_turns') {
     parts.push(notice('warn', 'The agent ran out of steps',
       `It used ${final.turns_used} turns and stopped rather than assembling an answer. `
@@ -66,40 +96,76 @@ export function renderAnswer(final) {
       'No answer was produced. Nothing below is a figure.'));
   }
 
-  const flaggedFigures = final.unverified_figures || [];
-  const flaggedQuotes = final.unverified_quotes || [];
-  if (flaggedFigures.length) {
-    parts.push(notice('bad', 'The reply contains figures no tool produced',
-      `Do not use these numbers: ${flaggedFigures.join(', ')}. `
-      + 'They were not returned by any tool in this session.'));
-  }
-  if (flaggedQuotes.length) {
-    parts.push(notice('bad', 'The reply quotes words no source contains',
-      'These quotations were not found in any passage a tool returned: '
-      + `${flaggedQuotes.map((q) => `"${q}"`).join('; ')}. Do not rely on them.`));
-  }
-
   // The audit sentence on a figure states what the audit found. app.js printed the pass
   // sentence unconditionally, under a red notice saying the opposite.
-  const audit = flaggedFigures.length || flaggedQuotes.length ? 'fail' : 'pass';
+  const audit = auditFlags(final).length ? 'fail' : 'pass';
   for (const figure of final.figures || []) parts.push(statementFigure(figure, audit));
 
-  if (!final.figures?.length && final.stopped_reason === 'completed') {
-    parts.push(notice('plain', 'No figure was calculated',
-      'The agent answered without producing a number. That is the expected behaviour when '
-      + 'it cannot do something, or when a document or factor is missing.'));
-  }
-
   if (final.reply?.trim()) {
-    parts.push(h('section', { class: 'reply', 'aria-label': "The agent's wording" }, [
-      h('h3', { class: 'section-label', text: "The agent's wording" }),
-      h('p', { class: 'reply-text', text: final.reply }),
-      h('p', { class: 'reply-note', text: 'Prose from the model. The figures above are the record; nothing is taken from this text.' }),
+    parts.push(h('section', { class: 'reply', 'aria-label': "The agent's reply" }, [
+      ...prose(final.reply),
+      final.figures?.length
+        ? h('p', { class: 'reply-note', text: 'Prose from the model. The figures above are the record; nothing is taken from this text.' })
+        : null,
     ]));
   }
-
-  if (final.tool_calls?.length) parts.push(auditTrail(final.tool_calls));
   return parts;
+}
+
+/* The working behind the answer: the audit findings, whether a figure was produced, and
+   every tool call with its arguments. `flags` is the count the summary shows. */
+export function renderActivity(final) {
+  const flags = auditFlags(final);
+  const calls = final.tool_calls || [];
+  const nodes = [];
+
+  if (flags.length) {
+    nodes.push(h('ul', { class: 'flags', role: 'alert' }, flags.map(([title, detail]) => h('li', { class: 'flag' }, [
+      h('span', { class: 'flag-mark', text: '×', 'aria-hidden': true }),
+      h('span', {}, [h('strong', { text: title }), document.createTextNode(` ${detail}`)]),
+    ]))));
+  }
+  if (!final.figures?.length && final.stopped_reason === 'completed') {
+    nodes.push(h('p', { class: 'activity-note', text: 'No figure was calculated. The agent answered without producing a number, which is expected when a question needs none, or when a document or factor is missing.' }));
+  }
+  if (calls.length) nodes.push(auditTrail(calls));
+
+  const label = calls.length
+    ? [...new Set(calls.map((call) => done(call.tool)))].join(', ')
+    : 'Answered without tools';
+  return { nodes, flags: flags.length, label };
+}
+
+/* --- the reply's prose ------------------------------------------------------------------ */
+/* A small, safe subset of Markdown - paragraphs, headings, lists, **bold**, `code` - built
+   with textContent like everything else. Words are styled; no number is touched. */
+
+function inline(text) {
+  return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/).filter(Boolean).map((piece) => {
+    if (piece.startsWith('**') && piece.endsWith('**')) return h('strong', { text: piece.slice(2, -2) });
+    if (piece.startsWith('`') && piece.endsWith('`')) return h('code', { text: piece.slice(1, -1) });
+    return document.createTextNode(piece);
+  });
+}
+
+function prose(text) {
+  const blocks = [];
+  let list = null;
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    const item = line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/);
+    if (item) {
+      const tag = /^\d/.test(line) ? 'ol' : 'ul';
+      if (!list || list.tagName.toLowerCase() !== tag) blocks.push(list = h(tag));
+      list.append(h('li', {}, inline(item[1])));
+      continue;
+    }
+    list = null;
+    if (!line) continue;
+    const heading = line.match(/^#{1,6}\s+(.*)$/);
+    blocks.push(heading ? h('h4', {}, inline(heading[1])) : h('p', {}, inline(line)));
+  }
+  return blocks;
 }
 
 /* Every caveat for a figure, in one list: the server's disclosure sentences first, then
@@ -219,20 +285,21 @@ function statementFigure(figure, audit) {
   ]);
 }
 
-/* --- audit trail: inline and keyboard-reachable, not a sheet behind a gesture -------- */
+/* --- audit trail: every call, its result and its arguments ---------------------------- */
 
 function auditTrail(calls) {
-  return h('details', { class: 'trail' }, [
-    h('summary', { text: `Audit trail · ${calls.length} tool calls` }),
-    h('ol', { class: 'trail-list' }, calls.map((call) => h('li', { class: 'call', 'data-status': call.status }, [
-      h('div', { class: 'call-head' }, [
-        h('span', { class: 'call-tool', text: call.tool }),
-        h('span', { class: 'call-status', text: call.status }),
-      ]),
-      h('p', { class: 'call-message', text: call.message }),
+  return h('ol', { class: 'trail-list', 'aria-label': `Audit trail · ${calls.length} tool calls` }, calls.map((call) => h('li', { class: 'call', 'data-status': call.status }, [
+    h('div', { class: 'call-head' }, [
+      h('span', { class: 'step-mark', text: MARKS[call.status] || '•', 'aria-hidden': true }),
+      h('span', { class: 'call-tool', text: done(call.tool) }),
+      h('span', { class: 'call-status', text: STATUS_WORDS[call.status] || call.status }),
+    ]),
+    h('p', { class: 'call-message', text: call.message }),
+    h('details', { class: 'call-args' }, [
+      h('summary', { text: call.tool }),
       h('pre', { text: prettyArguments(call.arguments) }),
-    ]))),
-  ]);
+    ]),
+  ])));
 }
 
 function prettyArguments(raw) {

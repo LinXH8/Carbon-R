@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "src/carbon_r/static/index.html"
+        ],
+        "createdAt": "2026-10-28T07:13:10.258Z",
+        "reason": "Claude verified: html and body set background var(--ground) #0e0f10; detector measured text against #ffffff; rendered screenshots show the dark ground"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/carbon_r/static/index.html"
+        ],
+        "createdAt": "2026-10-28T09:47:58.408Z",
+        "reason": "Claude: the only gradient text is the transient shimmer on the running activity label (a loading state, user asked for Claude-web-style thinking row); it is removed when the run ends and under reduced motion"
+      }
+    ]
+  }
+}

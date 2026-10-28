@@ -19,7 +19,7 @@ def test_the_landing_page_is_served_at_the_root():
     response = client.get("/")
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
-    assert re.search(r"<h1>.*Carbon R</h1>", response.text)
+    assert re.search(r"<h1>.*Carbon R</span></h1>", response.text)
     assert '<a class="start" href="/app">Start</a>' in response.text
 
 
@@ -27,7 +27,7 @@ def test_the_tool_is_served_at_app():
     response = client.get("/app")
     assert response.status_code == 200
     assert "<title>Carbon R</title>" in response.text
-    assert 'id="dropzone"' in response.text
+    assert 'id="composer"' in response.text
 
 
 def test_the_landing_assets_are_served():
@@ -81,3 +81,20 @@ def test_the_hover_labels_keep_their_exact_wording():
 def test_moving_the_tool_did_not_shadow_the_api():
     assert client.get("/health").status_code == 200
     assert client.post("/chat", json={}).status_code == 422  # validated, not 404
+
+
+def test_start_flies_the_island_into_the_tools_logo():
+    # Both pages opt in to the cross-document transition and give the island and the mark
+    # one name; the scene keeps its dive for browsers without it; no photograph remains.
+    # The opt-in must be inline: from a stylesheet, Chrome can reach the new page's first
+    # frame before applying it and drop the transition as "opt-in disabled".
+    opt_in = "<style>@view-transition { navigation: auto; }</style>"
+    for path in ("/", "/app"):
+        assert opt_in in client.get(path).text, path
+    assert ".scene { view-transition-name: world; }" in client.get("/static/landing.css").text
+    assert ".wordmark .mark { view-transition-name: world; }" in client.get("/static/app.css").text
+    assert "dive(ms = 700)" in client.get("/static/scene/scene.js").text
+    assert "handle.dive()" in client.get("/static/landing.js").text
+    app_css = client.get("/static/app.css").text
+    assert "url(" not in app_css
+    assert client.get("/static/assets/stone.jpg").status_code == 404

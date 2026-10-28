@@ -1,8 +1,8 @@
 /* Carbon R - the landing page.
  *
  * The same world as the tool (app.css, "Anthracite"): dark only, the serif for display,
- * the platform sans for text, one pale accent. Here the page is flat charcoal rather than
- * the stone photograph, because the diorama below is the picture. Text never sits on the
+ * the platform sans for text, one pale accent. Both pages are flat charcoal, and the scene's
+ * fog is that colour, so Start can dive into the island and land on the tool unbroken. Text never sits on the
  * scene, so its contrast does not depend on what the camera happens to be looking at.
  */
 
@@ -21,6 +21,13 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --gutter: clamp(1rem, 4vw, 3rem);
 }
+
+/* Start is a cross-document view transition (opted into inline in each page's head;
+   app.css holds its timing): the island is
+   named "world" here and the hexagon mark is "world" there, so the browser flies the
+   scene down into the logo, and the name shrinks into the wordmark the same way. */
+.scene { view-transition-name: world; }
+.intro .brand { view-transition-name: brand; }
 
 * { box-sizing: border-box; }
 html { background: var(--ground); }
@@ -91,6 +98,10 @@ body {
 /* --- the scene ---------------------------------------------------------------------- */
 
 .scene { position: relative; min-height: max(26rem, 72svh); overflow: hidden; }
+/* Drag sideways to turn the island; vertical swipes still scroll the page. */
+.scene { cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.scene[data-dragging] { cursor: grabbing; }
+.no-webgl .scene { cursor: auto; }
 .scene canvas {
   position: absolute;
   inset: 0;
@@ -138,8 +149,17 @@ body {
 .lede { animation-delay: 70ms; }
 .start { animation-delay: 140ms; }
 
+/* --- exit: on Start the words lift away while the camera dives (landing.js) --------- */
+
+[data-leaving] .intro {
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .intro h1, .lede, .start { animation: fade 200ms ease both; }
+  [data-leaving] .intro { transform: none; transition: opacity 150ms ease; }
   .start:active { transform: none; }
   .scene canvas { transition-duration: 200ms; }
 }
