@@ -22,7 +22,7 @@ Assignment rules (Tier 2 Block 2 plan, Step 4):
   end - numbered after everything else - changes no existing document's dress.
 - **How many:** moderate alternates 1, 2; hard takes 4 on electricity and every one of the
   kind's 3 on LPG and fuel (which have only 3 injected quirks - a confound recorded in
-  TIER2_BLOCK2.md).
+  docs/blocks/TIER2_BLOCK2.md).
 
 Nothing here is random except the cycle day of a standalone period, drawn from the
 document's own labelled stream so it cannot disturb any other draw.

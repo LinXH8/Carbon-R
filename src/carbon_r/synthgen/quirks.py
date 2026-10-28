@@ -19,7 +19,7 @@ adding a quirk type never moves another quirk's draw.
 What a credit is, in every kind: a credit for something on a PRIOR document. Half of them
 print a quantity - kWh, kg or litres - and that quantity is a decoy: this period's activity
 is unchanged, and subtracting it double-counts. Restating the prior period is not modelled
-(a known limit, TIER2_BLOCK2.md).
+(a known limit, docs/blocks/TIER2_BLOCK2.md).
 """
 
 import calendar

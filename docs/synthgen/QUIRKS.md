@@ -11,9 +11,9 @@ first are `quirks`, `difficulty_tier`, `layout_id`, `is_holdout_layout` and `deg
 Where this guide and a key disagree, the key wins, and this guide has a bug.
 
 Related documents: [SYNTHGEN_SPEC.md](SYNTHGEN_SPEC.md) holds the rules every generator
-follows. [TIER2_BLOCK2.md](TIER2_BLOCK2.md) explains why v1 is built the way it is. The
+follows. [TIER2_BLOCK2.md](../blocks/TIER2_BLOCK2.md) explains why v1 is built the way it is. The
 catalogue the code enforces is `QUIRKS` in
-[src/carbon_r/models/quirks.py](src/carbon_r/models/quirks.py).
+[src/carbon_r/models/quirks.py](../../src/carbon_r/models/quirks.py).
 
 ---
 

@@ -6,8 +6,8 @@
 > before changing the generator or trusting a number that came out of it.
 >
 > **Companions.** [SYNTHGEN_SPEC.md](SYNTHGEN_SPEC.md) is the rulebook for all document kinds
-> (this implementation conforms to it). [CLAUDE.md](CLAUDE.md) holds the project-wide rules.
-> [SOURCES.md](SOURCES.md) records what is verified and what is not.
+> (this implementation conforms to it). [CLAUDE.md](../../CLAUDE.md) holds the project-wide rules.
+> [SOURCES.md](../SOURCES.md) records what is verified and what is not.
 > Decisions and their dates live in the author's local build log, which is not committed.
 
 ---
@@ -84,14 +84,14 @@ document date disagree about the year — see §7.
 
 | File | Lines | Role |
 |---|---|---|
-| [`src/carbon_r/money.py`](src/carbon_r/money.py) | 25 | `round2()` and `CENT`. The **only** definition of "round to cents" in the project |
-| [`src/carbon_r/models/electricity_bill.py`](src/carbon_r/models/electricity_bill.py) | 149 | `ElectricityBill` — the answer-key schema *and* its self-check |
-| [`src/carbon_r/synthgen/profiles.py`](src/carbon_r/synthgen/profiles.py) | 248 | The cast: one retailer, three tariff plans, six businesses |
-| [`src/carbon_r/synthgen/rng.py`](src/carbon_r/synthgen/rng.py) | 44 | Seeded, label-keyed random streams and the injectable `draw()` |
-| [`src/carbon_r/synthgen/electricity.py`](src/carbon_r/synthgen/electricity.py) | 241 | Consumption model and all money arithmetic |
-| [`src/carbon_r/synthgen/render.py`](src/carbon_r/synthgen/render.py) | 113 | Jinja2 environment, pre-formatting, HTML → PDF |
-| [`.../templates/electricity_bill_a.html.j2`](src/carbon_r/synthgen/templates/electricity_bill_a.html.j2) | 141 | Layout `elec_a`, the only v0 layout |
-| [`scripts/generate_docs.py`](scripts/generate_docs.py) | 184 | CLI; writes the pairs and the manifest |
+| [`src/carbon_r/money.py`](../../src/carbon_r/money.py) | 25 | `round2()` and `CENT`. The **only** definition of "round to cents" in the project |
+| [`src/carbon_r/models/electricity_bill.py`](../../src/carbon_r/models/electricity_bill.py) | 149 | `ElectricityBill` — the answer-key schema *and* its self-check |
+| [`src/carbon_r/synthgen/profiles.py`](../../src/carbon_r/synthgen/profiles.py) | 248 | The cast: one retailer, three tariff plans, six businesses |
+| [`src/carbon_r/synthgen/rng.py`](../../src/carbon_r/synthgen/rng.py) | 44 | Seeded, label-keyed random streams and the injectable `draw()` |
+| [`src/carbon_r/synthgen/electricity.py`](../../src/carbon_r/synthgen/electricity.py) | 241 | Consumption model and all money arithmetic |
+| [`src/carbon_r/synthgen/render.py`](../../src/carbon_r/synthgen/render.py) | 113 | Jinja2 environment, pre-formatting, HTML → PDF |
+| [`.../templates/electricity_bill_a.html.j2`](../../src/carbon_r/synthgen/templates/electricity_bill_a.html.j2) | 141 | Layout `elec_a`, the only v0 layout |
+| [`scripts/generate_docs.py`](../../scripts/generate_docs.py) | 184 | CLI; writes the pairs and the manifest |
 
 Nothing here touches the database, an API key or a model provider. `make docs` runs offline.
 
@@ -146,7 +146,7 @@ literals and Faker supplies digits only, within two constraints: a coffee shop, 
 store, print works or workshop gets a **ground-floor unit** (`#01-xx`), and the postal code
 carries the **sector matching its area**. Both constraints exist because unconstrained Faker
 produced a seventh-floor car workshop and a Kranji address with a Toa Payoh postcode.
-*The sector-to-area mapping is from secondary sources only — [SOURCES.md](SOURCES.md) #8.*
+*The sector-to-area mapping is from secondary sources only — [SOURCES.md](../SOURCES.md) #8.*
 
 ### 4.2 Randomness — `rng.py`
 
@@ -269,7 +269,7 @@ Five rules, each load-bearing:
    up. One shared helper, `carbon_r.money.round2`, is used by the generator, the validator and
    (from Block 3) the extraction sanity check, so the three cannot diverge.
 5. **`gst_rate` comes from `get_settings()`**, not a literal, and is written into every answer
-   key so the key stays self-describing. 9% is verified from primary ([SOURCES.md](SOURCES.md) #4).
+   key so the key stays self-describing. 9% is verified from primary ([SOURCES.md](../SOURCES.md) #4).
 
 ### 4.7 Validation — the key checks itself
 
@@ -507,7 +507,7 @@ Tier 2 Block 2.
 
 **Unverified claims about the real world** are logged rather than assumed. In particular the
 Singapore tariff *structure* (flat rate per tension category), the LT/HT supply threshold, and
-the postal-sector mapping are all `secondary only` in [SOURCES.md](SOURCES.md) #6–8. Every
+the postal-sector mapping are all `secondary only` in [SOURCES.md](../SOURCES.md) #6–8. Every
 rate, charge, plan name, vendor and UEN in the generator is fictional, and **no LT/HT threshold
 value appears anywhere** in the code or docs — Kranji is sized to be unambiguously a large
 consumer rather than to sit near any particular boundary.

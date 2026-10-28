@@ -1,7 +1,7 @@
 """Seeded randomness for synthetic documents, and the injectable draw helpers.
 
-One rule governs this module (SYNTHGEN_SPEC.md 1.4): a document's random stream is keyed
-by **which document it is**, never by its position in a loop. Adding a profile or a
+One rule governs this module (docs/synthgen/SYNTHGEN_SPEC.md 1.4): a document's random
+stream is keyed by **which document it is**, never by its position in a loop. Adding a profile or a
 document kind must leave every existing document bit-identical, because an accuracy figure
 recorded against a set ("16 of 18") is worthless if the set silently changes underneath it.
 

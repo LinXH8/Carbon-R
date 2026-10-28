@@ -4,7 +4,7 @@ Written for someone who was not there: the design decisions and their reasons, t
 found and what caught them, and the evidence behind every number. Environment details and
 career notes live in the local build log, not here.
 
-**Status:** built at `a77f601`; documented at `719b840` (`QUIRKS.md`); **baseline measured
+**Status:** built at `a77f601`; documented at `719b840` (`docs/synthgen/QUIRKS.md`); **baseline measured
 at `719b840`**, a clean tree, on 20 Oct 2026. The baseline is recorded below exactly as run,
 with nothing fixed in between, together with one defect the run exposed in the eval itself.
 

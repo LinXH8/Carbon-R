@@ -14,8 +14,9 @@ What makes this document kind different from an electricity bill:
 
 The page says "4 x 50 kg". The key holds `lpg_kg = 200`, derived from the cylinder lines,
 and the extraction pipeline has to perform the same multiplication in Python. That is the
-`lpg_cylinders` trap from SYNTHGEN_SPEC.md 5.1, and it is here in the base document rather
-than as an injected quirk because pricing per cylinder is simply how this invoice works.
+`lpg_cylinders` trap from docs/synthgen/SYNTHGEN_SPEC.md 5.1, and it is here in the base
+document rather than as an injected quirk because pricing per cylinder is simply how this
+invoice works.
 
 Three money decoys are deliberate and are **not fuel**:
 

@@ -31,7 +31,7 @@ MIGRATIONS_DIR = PROJECT_ROOT / "db" / "migrations"
 #    of net electricity generation in the system by all grid-connected power units."
 #
 # Transcribed as literals rather than parsed from the workbook at runtime: the workbook is
-# git-ignored, and a fresh clone must still be able to seed. See SOURCES.md for why the
+# git-ignored, and a fresh clone must still be able to seed. See docs/SOURCES.md for why the
 # data.gov.sg "Average Operating Margin" series is NOT used as a source here.
 EMA_GRID_EMISSION_FACTOR = {
     2005: "0.526",

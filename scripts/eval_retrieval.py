@@ -20,7 +20,7 @@ The threshold
 `--split dev` prints the nearest-passage similarity of every question, grouped by whether
 it is answerable, and a sweep of candidate thresholds with how many answerable and
 unanswerable questions each would refuse. Choosing the value is a judgement made from that
-table and recorded in TIER2_BLOCK4.md; it is then frozen as RETRIEVAL_THRESHOLD in
+table and recorded in docs/blocks/TIER2_BLOCK4.md; it is then frozen as RETRIEVAL_THRESHOLD in
 tools/methodology.py. `--split test` refuses to run while that constant is still the
 uncalibrated 0.0, so the test split cannot be used to choose it.
 

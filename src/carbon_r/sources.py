@@ -6,7 +6,7 @@ able to register its sources. The sha256 is what was measured from the local cop
 was registered; an ingest that finds different bytes refuses to read them.
 
 Each licence below was read from the document itself or the publisher's own page - see
-SOURCES.md for the verbatim wording. `None` means not yet read, which is not the same as
+docs/SOURCES.md for the verbatim wording. `None` means not yet read, which is not the same as
 "no restriction".
 
 The GHG Protocol entries matter most here. ghgprotocol.org's Terms of Use ("Last Updated:

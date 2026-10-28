@@ -243,7 +243,7 @@ the gram as the Block 2 baseline.
 ### What a scenario is
 
 A scenario is one fictional business's documents for one reporting year, built from the
-v1 builders, templates and quirk injectors, plus a `scenario.json` (QUIRKS.md has a
+v1 builders, templates and quirk injectors, plus a `scenario.json` (docs/synthgen/QUIRKS.md has a
 section on what the pages show). There are 21 scenarios and 676 documents, seed `20261020`:
 
 - **Makan Mates 2025, the base:** 12 electricity bills, 12 LPG invoices and 12 diesel

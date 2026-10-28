@@ -21,7 +21,8 @@ reason a true quote fails to match:
   "STANDARD" and "GUIDANCE" tabs in its margin, which reading order emits one letter per
   line. The first version dropped every one-character line, and a test caught it deleting
   a real line; counted across the three standards, the other one-character lines are digits
-  and markers from tables and footnotes, so they are kept. Counts are in TIER2_BLOCK4.md;
+  and markers from tables and footnotes, so they are kept. Counts are in
+  docs/blocks/TIER2_BLOCK4.md;
 - a word hyphenated across a line break is re-joined ("compa-" + "nies");
 - whitespace is collapsed to single spaces.
 
@@ -61,9 +62,10 @@ CHUNKER_REVISION = "1"
 # a citation shows and every quote is verified against - is never changed. Part of
 # CHUNKER_VERSION: a different embedding input is a different vector for the same row.
 #
-# OFF. Tried in Tier 2 Block 4 and measured on dev as a negative result (TIER2_BLOCK4.md):
-# hit@5 fell from 12 to 10 of 18, because the title pulled in passages from the wrong
-# standard. False reproduces the original chunker version, 20927f94c1b4.
+# OFF. Tried in Tier 2 Block 4 and measured on dev as a negative result
+# (docs/blocks/TIER2_BLOCK4.md): hit@5 fell from 12 to 10 of 18, because the title pulled
+# in passages from the wrong standard. False reproduces the original chunker version,
+# 20927f94c1b4.
 EMBED_TITLE = False
 
 # A footer page number, in the shapes the three standards use: a bare number, or a number

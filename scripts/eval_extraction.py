@@ -1,6 +1,6 @@
 """The extraction eval: does the pipeline recover the answer key, per document kind?
 
-Four numbers, because they fail for different reasons (SYNTHGEN_SPEC.md 4.1, 6.1):
+Four numbers, because they fail for different reasons (docs/synthgen/SYNTHGEN_SPEC.md 4.1, 6.1):
 
     classification  which kind did it decide this was?     - did it ROUTE the page?
     extraction      per field, vs the generator's key      - did it READ the page?
@@ -877,8 +877,9 @@ def evaluate(
 
 
 # Below this many documents a cell is reported, but marked: the quirk x kind cells of v1
-# sit at or near the floor of 15 (TIER2_BLOCK2.md, "Known limits"), and several moderate
-# cells hold 4 to 7. A count that small is a description of those documents, not a rate.
+# sit at or near the floor of 15 (docs/blocks/TIER2_BLOCK2.md, "Known limits"), and
+# several moderate cells hold 4 to 7. A count that small is a description of those
+# documents, not a rate.
 SMALL_N = 15
 
 MEASURES = ("every_field", "activity", "pipeline")

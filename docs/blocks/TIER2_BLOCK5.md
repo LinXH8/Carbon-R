@@ -24,7 +24,7 @@ CI, and a `docker-compose.yml` with a database service that had never been run.
 | `search_methodology` | Counts the corpus, under the search's own filter, before embedding anything; an empty corpus is `no_results` with `refusal_level: "not_ingested"` and no API call |
 | `run_id` | On every `/chat` response and on one log line per tool call |
 | `.github/workflows/ci.yml` | Lint, the offline suite and an image build. No secrets: the evals stay local, as the README says |
-| `DATA.md`, `docs/architecture.md`, ADR 0001, ADR 0002 | Datasets with licences and refresh procedures, the data dictionary and ER diagram; the architecture; exact SQL for factors; Postgres + pgvector with no approximate index yet |
+| `docs/DATA.md`, `docs/architecture.md`, ADR 0001, ADR 0002 | Datasets with licences and refresh procedures, the data dictionary and ER diagram; the architecture; exact SQL for factors; Postgres + pgvector with no approximate index yet |
 
 ### Decisions and why
 

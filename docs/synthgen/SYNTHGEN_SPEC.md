@@ -12,7 +12,7 @@
 > pass the review checklist in Part 9 before any code is written.
 >
 > Anything marked **⚠️ VERIFY** must be checked against a primary source before it is stated in
-> code comments, `SOURCES.md`, the README or the resume. Plausible-but-fictional numbers are
+> code comments, `docs/SOURCES.md`, the README or the resume. Plausible-but-fictional numbers are
 > fine in documents labelled synthetic; claims about how real Singapore documents work are not.
 
 ---
@@ -366,7 +366,7 @@ Each quirk is **controlled** (injected at a chosen rate) and **recorded** (named
 Start with `estimated_reading`, `cross_month_period`, `unit_mwh`, `lpg_cylinders`. Add the rest
 once the eval harness reports per-quirk accuracy.
 
-> **Tier 2 Block 2 deviations from this table** (reasons in TIER2_BLOCK2.md):
+> **Tier 2 Block 2 deviations from this table** (reasons in docs/blocks/TIER2_BLOCK2.md):
 > - **Structural vs injected.** `lpg_cylinders` and `mixed_fuel` describe what a document
 >   is, so they are recorded in every tier, including clean. Only injected quirks set the
 >   tier (clean 0, moderate 1-2, hard 3+). For LPG and fuel every injected quirk is a money
@@ -509,7 +509,7 @@ All tests pass with no `.env`, no database and no API key.
 4. **Hand check 3 documents** with a calculator, spanning different profiles, years and layouts.
    Record the actual figures in the local build log, not "checked".
 5. Open a few PDFs/images and look: is anything implausible (addresses, scale, dates)?
-6. Update `SOURCES.md` (new VERIFY items) and the local build log (decisions, traps,
+6. Update `docs/SOURCES.md` (new VERIFY items) and the local build log (decisions, traps,
    realism limits); commit.
 
 ### 9.2 Plan review checklist (Aaron, before approving)
@@ -529,13 +529,13 @@ All tests pass with no `.env`, no database and no API key.
 
 ## Part 10: Open VERIFY items for synthetic documents
 
-- [ ] Singapore non-residential electricity tariff structure (flat rate per tension category?) *(SOURCES.md #6)*
-- [ ] LT/HT supply threshold (state none until verified) *(SOURCES.md #7; none stated anywhere)*
+- [ ] Singapore non-residential electricity tariff structure (flat rate per tension category?) *(docs/SOURCES.md #6)*
+- [ ] LT/HT supply threshold (state none until verified) *(docs/SOURCES.md #7; none stated anywhere)*
 - [ ] Network/transmission charge structure on retailer bills
 - [ ] Common LPG cylinder sizes and how LPG invoices price them (per cylinder vs per kg)
 - [ ] Whether piped town gas (billed in kWh) is more common than LPG for SME F&B
 - [ ] GST treatment of pump prices and fuel-card statements
-- [ ] Postal-code prefix ↔ area mapping used to constrain Faker *(in use from secondary sources; SOURCES.md #8)*
+- [ ] Postal-code prefix ↔ area mapping used to constrain Faker *(in use from secondary sources; docs/SOURCES.md #8)*
 - [ ] Identifier formats (UEN, vehicle plate) that are guaranteed invalid *(ACRA UEN page returns 403; v0 sidesteps it with the self-evidently synthetic `SYN-0000-0001`)*
 - [ ] US EPA supply-chain category names matching the loaded factor file
 - [ ] Current GST rate (verified 9% from IRAS e-Tax Guide, 17th ed., 30 Jan 2026; re-check before release)

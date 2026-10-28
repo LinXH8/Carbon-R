@@ -4,7 +4,7 @@ A bill read 15 Dec 2023 to 14 Jan 2024 measures one quantity over two years, and
 years take different grid factors (EMA publishes one per year). The quantity has to be
 divided before a factor is applied, and the division is Python's (CLAUDE.md rule 1).
 
-The rule, from SYNTHGEN_SPEC.md 5.2:
+The rule, from docs/synthgen/SYNTHGEN_SPEC.md 5.2:
 
 - each year's share is proportional to the days of the period that fall in it;
 - every share but the last is rounded to a whole unit, half up;

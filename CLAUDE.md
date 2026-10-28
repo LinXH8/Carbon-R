@@ -48,7 +48,7 @@ rates, reporting timelines — enters code, `README.md` or a resume until it has
 from the publisher's own document. Secondary sources (blogs, aggregators, another model's
 recollection) are leads, not citations.
 
-`SOURCES.md` records, per dataset, whether it is `verified from primary` or
+`docs/SOURCES.md` records, per dataset, whether it is `verified from primary` or
 `secondary only`. Values still `secondary only` must not be presented as established.
 
 ### 6. Never cut: the answer keys, the accuracy check, the deterministic calculation
@@ -79,7 +79,7 @@ uncertainty, and says that estimates are not assured.
   (`create table if not exists`, `on conflict ... do update`). Running a loader twice must
   never duplicate a row.
 - **No third-party source document is ever committed.** `data/raw/` is git-ignored.
-  Provenance goes in `SOURCES.md`; the bytes stay local. Likewise no API keys, no real
+  Provenance goes in `docs/SOURCES.md`; the bytes stay local. Likewise no API keys, no real
   customer bills, no third-party logos.
 - **Claims are measured.** Any accuracy or cost figure in `README.md` comes with a count
   ("37 of 50"), from a run that actually happened.
@@ -87,9 +87,9 @@ uncertainty, and says that estimates are not assured.
 ## Current state
 
 The build log and the dated plan are **local working notes, deliberately not committed**
-(see `.gitignore`). They hold the current tier/block, the environment facts worth not
-rediscovering, verification evidence, and the traps already hit. If they are present in
-the working directory, read the log before debugging anything environmental.
+(`docs/notes/`, git-ignored). They hold the current tier/block, the environment facts worth
+not rediscovering, verification evidence, and the traps already hit. If they are present,
+read the log before debugging anything environmental.
 
 **Keep the log current.** At the end of a working session, add an entry using the template
 at the bottom of it, and update its "Current state at a glance" table. Record actual
@@ -97,11 +97,11 @@ command output as evidence, counts rather than bare percentages, and any problem
 more than ten minutes — including corrections to earlier conclusions.
 
 What belongs in the repo instead: decisions that explain the *code* go in docstrings and
-in [SYNTHGEN_V0.md](SYNTHGEN_V0.md) and [TIER1_BLOCK3.md](TIER1_BLOCK3.md); provenance and
-verification status go in [SOURCES.md](SOURCES.md); measured results, with counts and with
+in [SYNTHGEN_V0.md](docs/synthgen/SYNTHGEN_V0.md) and [TIER1_BLOCK3.md](docs/blocks/TIER1_BLOCK3.md); provenance and
+verification status go in [SOURCES.md](docs/SOURCES.md); measured results, with counts and with
 the limits of what they cover, go in [README.md](README.md).
 
-Per-block technical records (`TIER1_BLOCK3.md` and successors) are committed and are
+Per-block technical records (`docs/blocks/`) are committed and are
 written for someone who was not there: the design decisions and their reasons, the defects
 found and what caught them, and the evidence behind every number. They carry no
 environment details and no career notes — those stay in the local log.

@@ -1,6 +1,6 @@
 -- 0003: sources - the registry of every document Carbon R reads
 --
--- SOURCES.md records provenance for a human reader. This table records the same facts for
+-- docs/SOURCES.md records provenance for a human reader. This table records the same facts for
 -- the code, so that a retrieved passage (0004) can cite its document by foreign key rather
 -- than by a free-text title that could drift, and so that an ingest can refuse a local file
 -- whose bytes are not the ones that were registered (sha256).

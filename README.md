@@ -37,7 +37,7 @@ Methodology questions need the GHG Protocol standards, which cannot be redistrib
 they are ingested, `search_methodology` says so instead of answering. See [Methodology
 corpus](#methodology-corpus).
 
-More: [architecture](docs/architecture.md) · [data and its licences](DATA.md) ·
+More: [architecture](docs/architecture.md) · [data and its licences](docs/DATA.md) ·
 [ADR 0001: exact SQL for factors](docs/adr/0001-exact-sql-for-factors.md) ·
 [ADR 0002: Postgres + pgvector, no ANN index yet](docs/adr/0002-postgres-pgvector.md)
 
@@ -50,23 +50,23 @@ number with no way to audit it; a model that is asked only to extract and to cho
 measured, and its mistakes show up in an eval instead of in a disclosure.
 
 [CLAUDE.md](CLAUDE.md) holds the full set of rules this repo holds itself to, and
-[SOURCES.md](SOURCES.md) every dataset's provenance and verification status.
+[SOURCES.md](docs/SOURCES.md) every dataset's provenance and verification status.
 
 The per-block records are written for someone who was not there — the decisions and their
 reasons, the defects and what caught them, and the evidence behind every number:
 
 | | |
 |---|---|
-| [TIER1_BLOCK3.md](TIER1_BLOCK3.md) | extraction, factor lookup, the deterministic calculation |
-| [TIER1_BLOCK4.md](TIER1_BLOCK4.md) | the agent loop and the API |
-| [TIER1_BLOCK5.md](TIER1_BLOCK5.md) | the page, streamed tool calls, Tier 1 sign-off |
-| [TIER2_BLOCK1.md](TIER2_BLOCK1.md) | Scope 1: two new document kinds, the DESNZ factors, and the four defects the first eval run found |
-| [TIER2_BLOCK2.md](TIER2_BLOCK2.md) | four layouts per kind, the quirk catalogue, difficulty tiers, and the first baseline on 166 documents |
-| [TIER2_BLOCK3.md](TIER2_BLOCK3.md) | the eval harness: per-tier and per-quirk tables, four normaliser fixes, the scoped retry, the company-year scenarios, and the holdout scored last |
-| [QUIRKS.md](QUIRKS.md) | what each quirk looks like on the page and what it tests, per generator version |
-| [SYNTHGEN_SPEC.md](SYNTHGEN_SPEC.md) | the generator's specification and its open VERIFY items |
+| [TIER1_BLOCK3.md](docs/blocks/TIER1_BLOCK3.md) | extraction, factor lookup, the deterministic calculation |
+| [TIER1_BLOCK4.md](docs/blocks/TIER1_BLOCK4.md) | the agent loop and the API |
+| [TIER1_BLOCK5.md](docs/blocks/TIER1_BLOCK5.md) | the page, streamed tool calls, Tier 1 sign-off |
+| [TIER2_BLOCK1.md](docs/blocks/TIER2_BLOCK1.md) | Scope 1: two new document kinds, the DESNZ factors, and the four defects the first eval run found |
+| [TIER2_BLOCK2.md](docs/blocks/TIER2_BLOCK2.md) | four layouts per kind, the quirk catalogue, difficulty tiers, and the first baseline on 166 documents |
+| [TIER2_BLOCK3.md](docs/blocks/TIER2_BLOCK3.md) | the eval harness: per-tier and per-quirk tables, four normaliser fixes, the scoped retry, the company-year scenarios, and the holdout scored last |
+| [QUIRKS.md](docs/synthgen/QUIRKS.md) | what each quirk looks like on the page and what it tests, per generator version |
+| [SYNTHGEN_SPEC.md](docs/synthgen/SYNTHGEN_SPEC.md) | the generator's specification and its open VERIFY items |
 
-[SYNTHGEN_V0.md](SYNTHGEN_V0.md) describes the **superseded v0** generator — 18 bills, one
+[SYNTHGEN_V0.md](docs/synthgen/SYNTHGEN_V0.md) describes the **superseded v0** generator — 18 bills, one
 layout — and is kept for the record rather than as a current description.
 
 ## What works today, and what it measures
@@ -131,7 +131,7 @@ structural rather than a matter of prompt wording:
 The loop is bounded at 8 turns. On `no_results`, on an error, or when the turns run out,
 it reports what is missing and asks — it never assembles a figure to look finished. Three
 refusal paths are exercised live and recorded in
-[TIER2_BLOCK1.md](TIER2_BLOCK1.md): a document whose kind cannot be established, a file
+[TIER2_BLOCK1.md](docs/blocks/TIER2_BLOCK1.md): a document whose kind cannot be established, a file
 holding two kinds at once, and an activity year for which no factor is published.
 
 `calculate_emissions` is also all-or-nothing: if any line of a multi-line calculation
@@ -165,7 +165,7 @@ asserted on the JSON keys and the HTML; PDF bytes carry a WeasyPrint timestamp a
 compared.
 
 What each quirk looks like on the page, and what it tests, is described per version in
-[QUIRKS.md](QUIRKS.md).
+[QUIRKS.md](docs/synthgen/QUIRKS.md).
 
 ### The synthgen v1 baseline
 
@@ -195,7 +195,7 @@ Of the 125 failing fields:
 The credit column needs a caveat. The eval itself had a defect: it compared against a field
 name the answer key does not use. The figures above re-score that column from the same
 recorded replies against the right field (165 of 166), with no new model calls; the run as
-printed, defect included, is kept in [TIER2_BLOCK2.md](TIER2_BLOCK2.md).
+printed, defect included, is kept in [TIER2_BLOCK2.md](docs/blocks/TIER2_BLOCK2.md).
 
 **What this did not measure.**
 - It is one run, so run-to-run variation is unmeasured.
@@ -205,7 +205,7 @@ printed, defect included, is kept in [TIER2_BLOCK2.md](TIER2_BLOCK2.md).
 
 ### After Tier 2 Block 3: the eval fixed, the normaliser fixed, the holdout scored
 
-Details, commits and evidence: [TIER2_BLOCK3.md](TIER2_BLOCK3.md). Every figure below is a
+Details, commits and evidence: [TIER2_BLOCK3.md](docs/blocks/TIER2_BLOCK3.md). Every figure below is a
 count from a recorded run.
 
 **The same 166 replies, re-scored after each fix** (0 model calls; commit `eb4b86a`):
@@ -310,7 +310,7 @@ standards' own words; `user`, as an SME finance or operations person would ask;
 Each label carries an anchor sentence that a test finds on the labelled page of the PDF.
 The key was checked against the documents once, after the first dev run, under one rule (a
 page counts only if it states the answer itself); every added and rejected page is listed
-in [TIER2_BLOCK4.md](TIER2_BLOCK4.md). A hit is the right **page** in the top 5 passages.
+in [TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md). A hit is the right **page** in the top 5 passages.
 
 Final setup, commit `b2fc2e4`; the test split was scored **once**, after everything was
 frozen:
@@ -487,7 +487,7 @@ make check        # ruff + the full test suite (663 tests, 1 skipped)
 
 No third-party source document is committed to this repo. Emission factors are transcribed
 from primary sources with their citation recorded alongside, and every dataset used is
-listed in [SOURCES.md](SOURCES.md) with its publisher, URL and retrieval date.
+listed in [SOURCES.md](docs/SOURCES.md) with its publisher, URL and retrieval date.
 
 | Factor | Publisher | Licence | Scope | Basis |
 |---|---|---|---|---|
@@ -497,7 +497,7 @@ listed in [SOURCES.md](SOURCES.md) with its publisher, URL and retrieval date.
 Methodology passages come from the GHG Protocol Corporate Standard (2004), Scope 2 Guidance
 (2015) and Scope 3 Standard (2011), WRI / WBCSD. They are used locally under
 ghgprotocol.org's Terms of Use, which prohibit public reproduction; their text is never
-committed or published. Licences and hashes are in [SOURCES.md](SOURCES.md) and the
+committed or published. Licences and hashes are in [SOURCES.md](docs/SOURCES.md) and the
 `sources` table.
 
 The DESNZ factors are **published for the UK, not Singapore**, and every result that uses
@@ -505,7 +505,7 @@ one says so. They are also CO₂e where EMA's is CO₂ only, so a figure combini
 carries a disclosure that the carbon-dioxide-only line excludes methane and nitrous oxide.
 The reasoning behind choosing the 100%-mineral diesel and petrol rows — and the fact that
 it rests on an **unverified assumption** about Singapore pump fuel — is recorded in
-[SOURCES.md](SOURCES.md) §9.
+[SOURCES.md](docs/SOURCES.md) §9.
 
 ## Limitations
 
@@ -527,7 +527,7 @@ Stated plainly, because they bound what any number here means:
   a figure that is CO2 only is not labelled as such.
 - **In synthgen v1, a hard LPG or fuel document is harder to read, not harder to
   interpret**: their injected quirks are all money decoys, and every hard one carries the
-  same three, so per-quirk results on them are confounded. See TIER2_BLOCK2.md.
+  same three, so per-quirk results on them are confounded. See docs/blocks/TIER2_BLOCK2.md.
 - **The evals have found defects that the tests did not.** In Block 1 four, in Block 2 a
   defect in the eval itself, in Block 3 a memoised database error and a retry that
   overwrote correct fields. Each is recorded in its block's write-up. A green suite is not

@@ -22,7 +22,7 @@ A reading that used the amount column instead of the litres column would be wron
 pump price, and a reading that let the discount reduce the litres would understate the
 emissions. The validator holds the discount to the money side.
 
-GST convention, which is a VERIFY item (SOURCES.md): amounts are GST-EXCLUSIVE, with GST
+GST convention, which is a VERIFY item (docs/SOURCES.md): amounts are GST-EXCLUSIVE, with GST
 added as its own line, matching the electricity bill and the LPG invoice. Whether
 Singapore pump prices are quoted inclusive of GST, and how fuel-card statements present
 it, has not been verified. Litres are unaffected by the choice either way, so it cannot

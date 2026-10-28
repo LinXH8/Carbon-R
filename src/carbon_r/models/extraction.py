@@ -25,8 +25,8 @@ types:
 
 The model transcribes; Python converts. A field the model could only produce by
 multiplying is never asked for, so there is no prompt that invites it to do arithmetic.
-This also mirrors the spec's `printed` vs `truth` split (SYNTHGEN_SPEC.md 4.1, 6.1): a bad
-read and a bad interpretation fail separately and are reported separately.
+This also mirrors the spec's `printed` vs `truth` split (docs/synthgen/SYNTHGEN_SPEC.md
+4.1, 6.1): a bad read and a bad interpretation fail separately and are reported separately.
 
 The parsing primitives live in `parsing.py`, shared with the LPG and fuel-card kinds.
 `normalise` keeps its two-value return - `(bill, problems)` - and the activity list is a

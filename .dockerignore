@@ -18,6 +18,5 @@ data/evals/local/
 .claude/
 
 # Personal notes and third-party reference material, as in .gitignore.
-PROGRESS.md
-Carbon R Project Checklist.md
+docs/notes/
 apple-design/

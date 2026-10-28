@@ -321,7 +321,7 @@ def test_every_page_declares_itself_synthetic_and_prints_its_own_figures():
         assert f"{bill.previous_reading_kwh:,}" in html
 
 
-# --- SYNTHGEN_SPEC.md Part 8: tests every document kind must have -------------------------
+# --- docs/synthgen/SYNTHGEN_SPEC.md Part 8: tests every document kind must have ---------
 
 
 def test_spec_common_fields_present_on_every_document():

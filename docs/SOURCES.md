@@ -1,7 +1,7 @@
 # Sources
 
 Every dataset and reference document Carbon R relies on, with its provenance and
-verification status. Per rule 5 in [CLAUDE.md](CLAUDE.md), a value is `secondary only`
+verification status. Per rule 5 in [CLAUDE.md](../CLAUDE.md), a value is `secondary only`
 until it has been read from the publisher's own document, and must not be presented as
 established until then.
 
@@ -127,7 +127,7 @@ be requested from GHG Protocol, and this section will record the request and the
 
 These are not numeric claims, so there is no VERIFY status to clear — the open item is
 Block 1's own checklist line, *"skim the contents pages,"* which only a human can do.
-[docs/ghg-protocol-skim-guide.md](docs/ghg-protocol-skim-guide.md) maps both tables of
+[docs/ghg-protocol-skim-guide.md](ghg-protocol-skim-guide.md) maps both tables of
 contents to what matters for Carbon R, so the skim is five minutes rather than twenty:
 Corporate Standard ch. 1, 4, 6 and Appendix A; Scope 2 Guidance §4 (location- vs
 market-based), §6.6 (matching factors — the fallback-year rule) and §6.10.
@@ -187,7 +187,7 @@ that becomes a **Tier 2 layout**, not a correction to v0.
 
 Used only to keep fictional addresses internally coherent: a Kranji street should not carry
 a Toa Payoh postal code. Unconstrained Faker produced exactly that, plus a 7th-floor car
-workshop — recorded as lesson 13 in `SYNTHGEN_SPEC.md`.
+workshop — recorded as lesson 13 in `docs/synthgen/SYNTHGEN_SPEC.md`.
 
 Sectors used in `src/carbon_r/synthgen/profiles.py`: **52** Tampines/Pasir Ris, **53**
 Serangoon Garden/Hougang/Ang Mo Kio, **55** Bishan/Serangoon, **61** Jurong, **72** Kranji.
@@ -198,7 +198,7 @@ on documents labelled synthetic, and nothing in the repo asserts the mapping is 
 but it must not be stated as fact, and must be verified before any claim that the generated
 addresses are realistic.
 
-Related: `SYNTHGEN_SPEC.md` 1.7 asks for identifiers that are *impossible* to collide with
+Related: `docs/synthgen/SYNTHGEN_SPEC.md` 1.7 asks for identifiers that are *impossible* to collide with
 real ones, and asks that the chosen format be verified as invalid. **ACRA's UEN format page
 returns HTTP 403**, so no such verification is available. The vendor UEN is therefore
 self-evidently synthetic (`SYN-0000-0001`) rather than realistic-but-assumed-invalid: no
@@ -354,4 +354,4 @@ emissions, do not depend on it — and there is no FX conversion anywhere in Tie
 rate is applied to anything. It must still be read from IRAS before any claim is made that
 the invoice layout is realistic.
 
-Described, with what the page shows, in [QUIRKS.md](QUIRKS.md) under `usd_invoice`.
+Described, with what the page shows, in [QUIRKS.md](synthgen/QUIRKS.md) under `usd_invoice`.

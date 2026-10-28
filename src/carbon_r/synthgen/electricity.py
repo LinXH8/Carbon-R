@@ -127,7 +127,7 @@ def standalone_opening_reading_kwh(profile: CustomerProfile, seed: int, start: d
 
     Wound back from the account's opening read by its base use per month, so a 2022 bill
     reads lower than the 2024 run on the same meter. Readings are NOT continuous between
-    an account's separate windows - recorded as a known limit in TIER2_BLOCK2.md.
+    an account's separate windows - recorded as a known limit in docs/blocks/TIER2_BLOCK2.md.
     """
     opening = opening_reading_kwh(profile, seed)
     months_before = (profile.start_year - start.year) * 12 + (profile.start_month - start.month)

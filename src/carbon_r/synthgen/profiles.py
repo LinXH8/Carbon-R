@@ -10,7 +10,7 @@ Tier 2 Block 1 added the LPG supplier and the fuel-card issuer. The pattern from
 electricity retailer is kept deliberately: **a price belongs to the vendor, not to the
 customer**, so two customers of one vendor pay the same rate and a test can assert that.
 
-See SOURCES.md: that this is the real shape of non-residential pricing is recorded as
+See docs/SOURCES.md: that this is the real shape of non-residential pricing is recorded as
 `secondary only - VERIFY`, as is where the low-tension/high-tension boundary falls. No
 threshold is stated anywhere in this code; Kranji Cold Store is sized to be unambiguously a
 large consumer rather than to sit near any particular line.
@@ -71,7 +71,7 @@ def _plan(family: str, year: int, cents: str, fixed: str) -> TariffPlan:
 #
 # The three 2024/2025 rows are the Block 1 values, unchanged, so the Block 1 bills are
 # bit-identical. The others are fictional, chosen to drift plausibly; no real retailer's
-# rates are reproduced (SOURCES.md rows 6-7).
+# rates are reproduced (docs/SOURCES.md rows 6-7).
 TARIFF_PLANS: dict[str, TariffPlan] = {
     plan.code: plan
     for plan in (
@@ -258,7 +258,7 @@ CUSTOMER_PROFILES: tuple[CustomerProfile, ...] = (
 # Postal sectors (the first two digits of a six-digit code) used to keep each fictional
 # address internally coherent - a Kranji street should not carry a Toa Payoh code.
 #
-# SECONDARY ONLY - VERIFY (SOURCES.md, spec Part 10). The sector-to-area mapping was taken
+# SECONDARY ONLY - VERIFY (docs/SOURCES.md, spec Part 10). The sector-to-area mapping was taken
 # from secondary sources, not from SingPost's own documentation, which could not be read
 # here. It costs nothing if wrong: these are fictional addresses on documents labelled
 # synthetic, and nothing in the repo claims the mapping is correct. It must not be stated
@@ -322,7 +322,7 @@ FUEL_VENDOR_SUPPORT = "fleet@straitsfleet.example"
 # Cylinder sizes. 12.7 kg and 50 kg are the two sizes used here: a small one for a kitchen
 # and a large one for a commercial burner.
 #
-# SECONDARY ONLY - VERIFY (SOURCES.md, spec Part 10). That these are the common commercial
+# SECONDARY ONLY - VERIFY (docs/SOURCES.md, spec Part 10). That these are the common commercial
 # sizes in Singapore has NOT been read from a supplier's own published range, and nothing
 # in the repo claims they are typical. They are plausible and internally consistent, which
 # is all the generated documents need; the assumption is recorded rather than asserted.
@@ -433,7 +433,7 @@ class Fleet:
 # checksum letter (e.g. SLA1234A). These use a leading "SYN" group, which no real plate
 # carries, for the same reason the UENs do: spec 1.7 asks for identifiers that cannot
 # collide with a real one, and ACRA's and LTA's own format documentation was not readable
-# here (SOURCES.md #8). A self-evidently synthetic plate needs no verification to be safe.
+# here (docs/SOURCES.md #8). A self-evidently synthetic plate needs no verification to be safe.
 #
 # VERIFY outstanding: that "SYN" is not an issuable prefix. Treated as an assumption.
 
@@ -449,7 +449,7 @@ class FuelPriceList:
     GST CONVENTION, and it is a VERIFY item: these are treated as GST-EXCLUSIVE, with GST
     added as its own line, matching the electricity bill and the LPG invoice. Whether
     Singapore pump prices are quoted inclusive of GST, and how fuel-card statements
-    present it, has NOT been verified (SOURCES.md). The convention is enforced by
+    present it, has NOT been verified (docs/SOURCES.md). The convention is enforced by
     `FuelCardStatement`'s validator so the documents are at least internally consistent.
 
     Worth stating plainly: litres are unaffected by this choice either way, so it cannot

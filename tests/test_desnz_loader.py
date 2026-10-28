@@ -216,7 +216,7 @@ def test_the_average_biofuel_blend_rows_exist_and_are_deliberately_not_loaded():
     """They are the rows DESNZ recommends for UK forecourt fuel. We load the mineral ones.
 
     Asserted rather than assumed: if a future publication dropped these rows, the reason
-    recorded in SOURCES.md for not using them would need revisiting.
+    recorded in docs/SOURCES.md for not using them would need revisiting.
     """
     path = WORKBOOK_DIR / PUBLICATIONS[2026]["workbook"]
     totals = read_fuel_totals(path)

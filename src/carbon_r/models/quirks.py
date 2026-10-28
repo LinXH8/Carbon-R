@@ -3,7 +3,7 @@
 A quirk is an irregularity a real document has and a clean synthetic one does not. Each is
 **controlled** (the generator decides where it goes) and **recorded** (named in the key's
 `quirks`, validated against this catalogue), so the eval can say not only "37 of 50" but
-which kinds of document defeat the pipeline (SYNTHGEN_SPEC.md Part 5).
+which kinds of document defeat the pipeline (docs/synthgen/SYNTHGEN_SPEC.md Part 5).
 
 Two classes, and the distinction matters for what a difficulty tier means:
 
@@ -20,7 +20,7 @@ a balance brought forward, GST shown inclusive), while the traps that change the
 are structural. A *hard* LPG or fuel document is harder to READ, not harder to INTERPRET.
 
 What each quirk looks like on a rendered page, per layout and per synthgen version, is in
-QUIRKS.md at the repo root. Change a quirk here, change its entry there.
+docs/synthgen/QUIRKS.md. Change a quirk here, change its entry there.
 
 The fields live in `QuirkFields`, a base every answer-key model inherits, so the three
 kinds cannot drift apart on what a credit or a balance forward is. Each model's own

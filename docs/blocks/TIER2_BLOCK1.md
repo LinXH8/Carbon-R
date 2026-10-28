@@ -330,7 +330,7 @@ green.
   invoice rather than as an injected quirk, because pricing per cylinder is simply how the
   invoice works.
 - Fuel-card GST treatment, LPG cylinder sizes and the Singapore biofuel question are all
-  **documented assumptions**, recorded in `SOURCES.md` rows 11–13 and not presented as
+  **documented assumptions**, recorded in `docs/SOURCES.md` rows 11–13 and not presented as
   established.
 - The classifier's confidence threshold is **0.7, chosen by eye**, with no labelled set of
   ambiguous documents behind it.

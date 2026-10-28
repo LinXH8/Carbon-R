@@ -27,7 +27,7 @@ combustion factor would let a lookup return the wrong one.
 forecourt purchasers to use the average blend - but that is advice about UK forecourt
 fuel, which carries a mandated biofuel content. No Singapore road-fuel blending mandate
 was found, and NEA has capped FAME content in pump petrol and diesel since 1 July 2019, so
-the mineral rows are the closer match for Singapore pump fuel. See SOURCES.md: this is a
+the mineral rows are the closer match for Singapore pump fuel. See docs/SOURCES.md: this is a
 documented assumption, NOT verified - NEA's own fuel specification has not been read.
 Choosing the blend would also pull in DESNZ's `Outside of scopes` requirement to report
 the biogenic portion separately, an obligation attached to a blend our documents do not

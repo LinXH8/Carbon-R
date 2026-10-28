@@ -107,7 +107,7 @@ def test_a_bill_dated_before_its_period_ends_is_rejected():
 
 
 def test_common_spec_fields_default_sensibly_for_a_clean_document():
-    """SYNTHGEN_SPEC.md 3.3/1.8: the fields every document kind must carry."""
+    """docs/synthgen/SYNTHGEN_SPEC.md 3.3/1.8: the fields every document kind must carry."""
     bill = ElectricityBill(**GOOD)
     assert bill.doc_kind == "electricity_bill"
     assert bill.difficulty_tier == "clean"

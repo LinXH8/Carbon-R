@@ -143,7 +143,7 @@ def test_new_profiles_are_appended_at_the_end_of_every_profile_tuple():
 def test_hard_lpg_and_fuel_documents_carry_all_three_injected_quirks():
     """LPG and fuel have only three injected quirks, and the hard tier takes 3, so every
     hard LPG or fuel document carries the same three. A hard-tier failure there cannot be
-    attributed to one quirk - recorded as a known limit in TIER2_BLOCK2.md."""
+    attributed to one quirk - recorded as a known limit in docs/blocks/TIER2_BLOCK2.md."""
     for document in (*LPG_SET, *FUEL_SET):
         if document.difficulty_tier == "hard":
             injected = [q for q in document.quirks if not QUIRKS[q].structural]

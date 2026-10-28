@@ -1,6 +1,6 @@
 """Generate the synthgen v1 document set with its answer keys. Deterministic for a seed.
 
-Layout (SYNTHGEN_SPEC.md 3.2, under a versioned root since Tier 2 Block 2):
+Layout (docs/synthgen/SYNTHGEN_SPEC.md 3.2, under a versioned root since Tier 2 Block 2):
 
     data/generated/synthgen_v1/<doc_kind>/<tier>/doc_XXX.json
                                                   doc_XXX.pdf          clean, or crisp moderate
@@ -66,7 +66,7 @@ TIERS = ("clean", "moderate", "hard")
 EXPECTED_REFUSALS = {"lpg_001"}
 
 # Citations the generated set depends on, recorded so the manifest is self-describing.
-# GST is verified from primary (SOURCES.md #4). The tariff *structure* is not - every rate
+# GST is verified from primary (docs/SOURCES.md #4). The tariff *structure* is not - every rate
 # and plan in profiles.py is fictional and nothing claims to model real SG pricing.
 CITATIONS = {
     "gst_rate": (

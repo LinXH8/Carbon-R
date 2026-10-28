@@ -15,7 +15,7 @@ dist/
 
 # Source documents: never committed.
 # EMA / GHG Protocol / DESNZ / EPA material is third-party and not ours to
-# redistribute. Provenance lives in SOURCES.md; the files stay local.
+# redistribute. Provenance lives in docs/SOURCES.md; the files stay local.
 # Excluding the *contents* rather than the directory itself, so that the .gitkeep
 # negations below can still apply: git does not descend into an excluded directory.
 data/raw/*
@@ -37,14 +37,13 @@ data/evals/local/
 
 # Third-party reference material: distilled from Apple's WWDC design talks, used as the
 # design brief for the Tier 1 Block 5 interface. Not ours to redistribute, same as the
-# source documents above. The reasoning it led to is recorded in TIER1_BLOCK5.md instead.
+# source documents above. The reasoning it led to is recorded in docs/blocks/TIER1_BLOCK5.md instead.
 apple-design/
 
 # Personal working notes: the build log and the dated plan. These track the author's
 # progress rather than the project, and carry career notes and environment details that
-# do not belong in a public repo. They stay on disk; they are never committed.
-PROGRESS.md
-Carbon R Project Checklist.md
+# do not belong in a public repo. They stay on disk in docs/notes/; they are never committed.
+docs/notes/
 
 # OS / editor
 .DS_Store
