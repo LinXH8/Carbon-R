@@ -41,6 +41,25 @@ primary document. **Never label from model output**, and never "fix" an answer k
 an eval pass. If an eval disagrees with a key, the key is checked against the document
 first — and if the key was right, the failure is real and stays recorded.
 
+**One exception: peer disclosures.** A language model may *draft* a `peer_disclosures` row
+from page images of a peer report. A draft is not data. A row counts for the agent, an eval
+or any figure shown to a user only after the author has checked it against the PDF page it
+cites and set `verified_by` / `verified_at`. Code reads peer figures only through
+`peer_disclosures_verified`. Every row carries the evidence the check needs: PDF page, and
+the row label and column header as printed. The drafted value is kept when a row is
+corrected, so draft accuracy stays measurable. The drafting model must differ from any model
+later scored against these rows. A recorded, seeded sample is checked blind (value hidden)
+before it is checked sighted. These rows are described as "LLM-drafted, verified by hand",
+never as hand-labelled.
+
+Verified peer figures are committed in exactly one file, `data/peer_disclosures_verified.json`
+(exported from `peer_disclosures_verified`, seeded back by `make seed-peer`). Its `draft`
+fields keep what the model read, labelled as such. A real peer figure anywhere else in a
+tracked file is a defect, and an unverified or garbled one (a draft never verified, a figure
+read from a PDF text layer) is a defect everywhere. Run `scripts/draft_peer_disclosures.py
+leak-check` before every commit that touches peer data; the author's verification
+worksheets (`data/generated/peer_verification/`) stay git-ignored.
+
 ### 5. Anything marked VERIFY is checked against the primary source before it is used
 
 No value with regulatory or numeric significance — emission factors, GST, carbon tax
@@ -79,7 +98,9 @@ uncertainty, and says that estimates are not assured.
   (`create table if not exists`, `on conflict ... do update`). Running a loader twice must
   never duplicate a row.
 - **No third-party source document is ever committed.** `data/raw/` is git-ignored.
-  Provenance goes in `docs/SOURCES.md`; the bytes stay local. Likewise no API keys, no real
+  Provenance goes in `docs/SOURCES.md`; the bytes stay local. Facts taken from a document
+  with a page citation are not the document: the verified peer figures (rule 4) are
+  committed, the reports are not. Likewise no API keys, no real
   customer bills, no third-party logos.
 - **Claims are measured.** Any accuracy or cost figure in `README.md` comes with a count
   ("37 of 50"), from a run that actually happened.

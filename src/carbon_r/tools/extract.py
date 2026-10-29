@@ -273,6 +273,44 @@ def rasterise(path: Path, dpi: int = DEFAULT_DPI, *, cache_dir: Path | None = No
     return pages[:MAX_PAGES]
 
 
+def rasterise_page(
+    path: Path, pdf_page: int, dpi: int = DEFAULT_DPI, *, cache_dir: Path | None = None
+) -> Path:
+    """One page of a PDF -> one PNG, cached by content, page and dpi.
+
+    For long documents (the peer reports run to 190 pages) where only a few pages are read:
+    `rasterise` renders every page and keeps the first `MAX_PAGES`, which is right for a bill
+    and wrong here. Same cache rule: the file's content is in the key, not just its name.
+    """
+    cache_dir = cache_dir or PAGE_CACHE
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    content = hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+    target = cache_dir / f"{path.stem}-{content}-p{pdf_page}-{dpi}dpi.png"
+    if target.exists():
+        return target
+    # -singlefile writes exactly <prefix>.png, with no page-number suffix to guess at.
+    subprocess.run(
+        [
+            "pdftoppm",
+            "-f",
+            str(pdf_page),
+            "-l",
+            str(pdf_page),
+            "-r",
+            str(dpi),
+            "-png",
+            "-singlefile",
+            str(path),
+            str(target.with_suffix("")),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    if not target.exists():
+        raise RuntimeError(f"pdftoppm produced no image for {path.name} page {pdf_page}")
+    return target
+
+
 def _image_content(page: Path, detail: str) -> dict:
     encoded = base64.b64encode(page.read_bytes()).decode()
     return {

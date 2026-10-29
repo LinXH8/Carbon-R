@@ -7,7 +7,9 @@ career notes live in the local build log, not here.
 **Status:** Part A (methodology RAG) is done: code at `51a221a`, answer key revised once
 (`fc73d26`), one retrieval change tried and reverted, threshold frozen at 0.30, test split
 scored once (results below). Part B, first pass (peer ingestion and
-`search_peer_disclosures`): done 28 Oct - see the Part B section at the end.
+`search_peer_disclosures`): done 28 Oct - see the Part B section. Part B pass 2a
+(`peer_disclosures`, drafting from page images, the rule-4 amendment, verification): done for
+3 reports, 58 rows verified - see the last section.
 
 ## What this block has to do
 
@@ -586,3 +588,164 @@ third de8c901f…, 4d11ebf2…, 720a3a02….
   excludes, in an answer about Scope 2. The judge passed it as an answer to the DBS search;
   also for the next pass's eval.
 - **No eval yet.** The demo and the adversarial runs are spot checks, not a hit rate.
+
+---
+
+# Part B, pass 2a — `peer_disclosures`, drafted from page images
+
+Scope: a table for peer emissions figures, a way to draft its rows, and the rule that makes
+drafting allowed. Two to three reports from different sectors are drafted, then the author
+reviews and verifies them. Not in it: agent access to the table, any eval. This record gives
+counts only. The verified figures themselves are committed in one file,
+`data/peer_disclosures_verified.json` (author's decision after verification, below); no
+draft that was not verified, and no figure read from a text layer, is committed anywhere.
+
+## Why page images, not the text layer
+
+The first pass showed the PDF text layer fusing footnote markers onto table figures and
+losing which column is which year (see "tables do not survive as figures" above). An earlier
+plan drafted labels from that same text; it was dropped before any code. The drafter here
+reads the rendered page (`extract.rasterise_page`, 200 dpi, `pdftoppm -f N -l N`) through
+the same `_parse` call as `extract_from_document`, into a validated `PeerTableReading`.
+
+Two departures from the extractor's request, both recorded on every draft:
+
+- **Detail `original`, not `high`.** `high` lets the provider scale the image down, and a
+  footnote superscript on a dense table is the detail that matters. DBS pages are wide
+  (1927 × 1077 pt).
+- **A different model**, `gpt-5.5-2026-04-23` (confirmed on the account by
+  `scripts/list_models.py`), because the extractor, `gpt-5.4-mini-2026-03-17`, is the model a
+  later eval would score against these rows. The script refuses the configured extractor.
+
+## The model transcribes; Python decides
+
+The model returns strings as printed - row label, column header (with any spanning heading,
+"Singapore > 2025"), figure without its footnote markers, the markers separately, unit - and
+two classifications with the printed words behind them: the scope, and location- or
+market-based where the page says so. It never supplies a page, a period or a number.
+
+`to_disclosures` (pure, tested) then:
+
+- keeps a cell only if its column header names exactly one year and it is the report's own
+  (`report_year_of_header`: "FY2025/26" is one year ending 2026; "2019-2025" and
+  "2025 vs 2024" are two and are dropped). Comparatives are dropped, not given an inferred
+  period;
+- takes the period from `data/peer_sources.json`, the page from the call, the printed page
+  from `PRINTED_PAGE_OFFSETS`;
+- parses the figure strictly (`parse_figure`: a plain number or nothing - "2,5113" is
+  None and flagged as a possible fused marker);
+- drops blank cells, intensity units and non-CO2e units, and counts every drop by reason.
+
+## The table and the rule
+
+`db/migrations/0006_peer_disclosures.sql`; columns in [DATA.md](../DATA.md). A draft has
+`verified_by` / `verified_at` null (a check keeps them set together); code reads
+`peer_disclosures_verified`. The loader's upsert never touches a verified row and leaves an
+unchanged draft alone. A Postgres-backed test covers both, and fails with the verified-row
+guard removed. CLAUDE.md rule 4 now carries the peer exception (`b20f9d3`), written before
+any row was drafted.
+
+The blind sample (20%, seed `20261029`) is drawn when a report is drafted, before anyone has
+seen a value. Its rows are masked in the review printout.
+
+## Pages drafted
+
+`peer_sources.TABLE_PAGES`, from each report's notes and a text-layer scan that only locates
+pages. Each page was confirmed by viewing its image.
+
+| Report | Pages | Where from |
+|---|---|---|
+| DBS (bank) | PDF 74, 79 | Notes. The scan finds 5 candidate pages; p.74 turned out to hold an intensity chart and no table (the model said so; confirmed by eye) |
+| CLAR ESG data pack (REIT) | PDF 7, 8, 20, 21 | Notes say "from p.7"; the scan finds 12. Table 1.1 for Singapore (7-8) and Total Portfolio (20-21); Australia, UK & EU and United States left for later; p.59 and p.66 are disclosure indexes |
+| Sembcorp (energy) | PDF 37, 39, 40 | Notes say "e.g. PDF p.37-40"; the scan finds 37, 39, 40; p.38 is an intensity chart |
+
+## Results so far
+
+| Report | Pages read | Cells read | Kept | Dropped | Footnote markers recorded | Malformed / unparsed | Tokens |
+|---|---|---|---|---|---|---|---|
+| DBS | 2 of 2 | 36 | 18 | 18 (comparative column) | 11 | 0 / 0 | 31,733 |
+| CLAR data pack | 4 of 4 | 76 | 30 | 46 (comparative column) | 10 | 0 / 0 | 31,320 |
+| Sembcorp | 3 of 3 | 22 | 10 | 12 (comparative column) | 3 | 0 / 0 | 36,088 |
+
+Pages with no table (CLAR p.21, Sembcorp p.37, p.39; DBS p.74) were said so by the model and
+confirmed by viewing each page: intensity, refrigerant, energy and target content only.
+
+The DBS run is the test of the decision above: the page whose text layer fused a marker onto
+the Scope 1 label and onto figures came back with markers in their own field on 11 of 18
+cells and no malformed figure. Whether the markers and figures were read *correctly* is what
+the author's verification will say. The rows are drafts, and none is verified.
+
+One discrepancy was seen before review, in a label rather than a figure: the draft gives the
+Scope 1 total's label the marker "19", which the page also prints on the employee-commuting
+row; the text layer reads that label as "scope 1" plus "9", which fits the notes' sequence
+(the next two rows carry 11 and 12). Left as drafted, for verification to settle; it is the
+kind of misread the evidence columns exist to expose.
+
+**Checked by the author against the PDF (29 Oct), DBS:** blind first - the 4 sampled rows,
+whose values the review printout masked - **4 of 4 matched the draft**. Then sighted: **17 of
+18 rows correct as drafted; 1 corrected** - the label marker above (it is 9; the draft's "19"
+had an extra 1). **Figures: 18 of 18 correct.** No row missing, none rejected. Recorded in a
+git-ignored worksheet and applied with `scripts/verify_peer_disclosures.py apply`: 18 updated
+(17 confirmed, 1 corrected), 18 in `peer_disclosures_verified`, 0 unverified; a second apply
+updated 0, and a re-load of the drafts inserted 0 (the corrected label did not come back).
+
+**CLAR and Sembcorp, checked the same way:** blind **6 of 6** and **2 of 2** matched;
+sighted **30 of 30** and **10 of 10** correct as drafted. Applied: 40 confirmed.
+
+**All three reports: 58 rows, 57 correct as drafted, 1 corrected (a label marker, not a
+figure); figures 58 of 58; blind 12 of 12; none missing, none rejected.** Every row is in
+`peer_disclosures_verified`. Limits of that result: 58 cells from 5 table pages of 3
+reports, all clean digital PDFs; one checker, who also chose the pages; the drafter
+transcribed figures, it did not decide which rows a report should have - a row it left out
+is caught only if the checker notices (Sembcorp's biogenic rows were left out by its reading
+of the instruction and accepted on review).
+
+**Row completeness is not measured yet.** Everything above measures whether a drafted cell
+matches the page. Whether the drafter skipped a cell the page prints has no number: the
+dropped-cell counts cover only cells it read, and the author's "none missing" is one sighted
+pass per page, not a measurement. A completeness check (for example, the author listing the
+page's rows before seeing the draft) is left for a later pass.
+
+Drafting first stopped on the provider (`insufficient_quota`) after CLAR's p.7 and p.8; the
+cached replies were reused, and the re-run resumed at p.20.
+
+Loaded twice: first 18 inserted, second 0 inserted, 0 updated, 18 untouched. After load:
+verified 0, drafts 18, orphans 0, duplicate keys 0, method on a row without Scope 2 0.
+
+## Defects found, and what caught them
+
+| Defect | Caught by |
+|---|---|
+| `method` was allowed on Scope 2 rows only; DBS prints a location-based and a market-based *total*, which would have lost the distinction. Now allowed on any row that includes Scope 2 (model, migration, field description; the description change re-read DBS) | The first DBS draft's two `problems` |
+| `rasterise` renders every page of a PDF and keeps 4 - fine for a bill, wrong for a 128-page report | Reading it before use; `rasterise_page` added |
+| A region heading spanning the year columns ("Singapore", "Total Portfolio") was not part of any cell, so CLAR's rows could not say which table they came from | Viewing CLAR p.7 before drafting; column headers now carry "Spanning heading > header" |
+| The leak check failed on every run: 3-digit figures coincide with page counts and lockfile hashes, and untracked never-committed folders were scanned | Its first run (13 hits, all in files untouched this session). Now fails only on a figure new since HEAD, in the index or in named paths, and lists the coincidences |
+| Correcting a row label would have broken re-loading: the loader matched rows by label, so the original misread would have come back as a new draft. The key now uses `drafted_row_label`, which is never corrected; a Postgres test re-loads after a correction and finds 1 row | Designing `verify`, before the first correction was applied |
+| A provider error ended the draft with a traceback | The quota error; now reported per page, exit 1, cache kept |
+
+## Committing the verified figures (author's decision, 30 Oct)
+
+After verification the author reversed the earlier "no real peer figures in the repo" rule
+for verified rows only:
+
+- `data/peer_disclosures_verified.json` holds every row of `peer_disclosures_verified` (58),
+  each with its citation, verification (who, when, confirmed / corrected), the draft values
+  labelled `draft`, and the blind entry. Rows in key order, sorted JSON keys: a second
+  export is byte-identical. `figure` must equal `parse_figure(figure_printed)` or the file
+  does not load.
+- `make seed-peer` (`scripts/peer_disclosures_file.py load`) inserts missing rows, leaves
+  identical ones, and stops with nothing written on a row that differs. Two loads on the
+  author's database: 0 inserted, 58 unchanged each time. A Postgres test exports, deletes,
+  loads and re-exports (identical), loads again (0 inserted), then changes a figure and
+  gets a conflict; an unverified draft is not exported.
+- CLAUDE.md: real peer figures only in that file; a draft never verified, or a text-layer
+  figure, nowhere. `leak-check` now excludes that file from the search, fails on any peer
+  figure new since HEAD elsewhere, and fails if the file's verified figure is a draft value
+  that was never verified. Shown to fail (exit 1) on a scratch file holding one verified
+  figure.
+- The worksheets (`data/generated/peer_verification/`) stay git-ignored; the author backs
+  them up.
+- README and DATA.md state the figures are as self-reported by each company, checked by the
+  author against the cited page on the stated date, not independently assured, and that they
+  are facts with page citations from reports that are not redistributed.
+

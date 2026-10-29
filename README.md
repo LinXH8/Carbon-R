@@ -58,6 +58,8 @@ reasons, the defects and what caught them, and the evidence behind every number:
 
 | | |
 |---|---|
+| [TIER1_BLOCK1.md](docs/blocks/TIER1_BLOCK1.md) | foundations: the factor schema, the EMA series verified from primary, the rules |
+| [TIER1_BLOCK2.md](docs/blocks/TIER1_BLOCK2.md) | synthgen v0: 18 bills whose answer keys exist before the documents do |
 | [TIER1_BLOCK3.md](docs/blocks/TIER1_BLOCK3.md) | extraction, factor lookup, the deterministic calculation |
 | [TIER1_BLOCK4.md](docs/blocks/TIER1_BLOCK4.md) | the agent loop and the API |
 | [TIER1_BLOCK5.md](docs/blocks/TIER1_BLOCK5.md) | the page, streamed tool calls, Tier 1 sign-off |
@@ -428,6 +430,34 @@ pages' footers; otherwise its citations give the PDF page and say so. `report_ye
 calendar year in which a report's period ends, so the April-to-March trusts (MPACT, MLT)
 are 2026.
 
+#### Verified peer figures
+
+[`data/peer_disclosures_verified.json`](data/peer_disclosures_verified.json) holds **58
+emissions figures from 3 reports** (DBS, CapitaLand Ascendas REIT's ESG data pack,
+Sembcorp), one per table cell, for each report's own period. Each was drafted by a vision
+model (`gpt-5.5-2026-04-23`) from an image of the cited page, then **checked by the author
+against that page** on the date the row gives. They are figures **as self-reported by each
+company**, under its own boundary and period: **not independently assured**, by Carbon R or
+by anyone it can vouch for, and not comparable like-for-like across companies.
+
+Every row carries its citation (report, PDF page, printed page where known, the row label and
+column header as printed), who checked it and when, and what the model originally read,
+labelled `draft`. Of the 58, **57 were correct as drafted and 1 was corrected** (a footnote
+marker in a row label; every figure was read correctly); in a seeded blind sample the
+author's own readings, made before seeing the draft, matched it **12 of 12**. That measures
+transcription, not coverage: whether the drafter skipped a row a page prints is checked only
+by the author's eye, not measured. Details in
+[TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
+
+```bash
+make seed-peer   # load the 58 rows into peer_disclosures (idempotent; no reports needed)
+```
+
+Drafting and checking more pages needs the reports locally:
+`scripts/draft_peer_disclosures.py` (scan, draft, load, review, leak-check) and
+`scripts/verify_peer_disclosures.py` (worksheet, apply). The agent does not read this table
+yet.
+
 ### The page
 
 `http://localhost:8000` is a single page with no build step: drop a bill on it, ask a
@@ -502,7 +532,7 @@ make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forwar
 make ingest-methodology  # chunk + embed the local GHG Protocol PDFs (idempotent; local only)
 make eval-retrieval      # score search_methodology on the dev split (model calls)
 make ingest-peer         # chunk + embed the local peer reports (idempotent; local only)
-make check        # ruff + the full test suite (761 pass, 1 skipped, with everything local)
+make check        # ruff + the full test suite (826 pass, 1 skipped, with everything local)
 ```
 
 ## Data provenance
@@ -524,7 +554,11 @@ committed or published. Licences and hashes are in [SOURCES.md](docs/SOURCES.md)
 
 Peer passages come from 12 companies' own sustainability reports (copyright of each
 issuer), used locally; only their provenance is committed (`data/peer_sources.json`). A
-public deployment would cite them, not display them.
+public deployment would cite them, not display them. The verified peer figures
+(`data/peer_disclosures_verified.json`) are facts taken from those reports, each with its
+page citation; the reports themselves are not redistributed. The figures are as
+self-reported by each company, checked by the author against the cited page on the stated
+date, and not independently assured.
 
 The DESNZ factors are **published for the UK, not Singapore**, and every result that uses
 one says so. They are also CO₂e where EMA's is CO₂ only, so a figure combining the two
@@ -539,8 +573,11 @@ Stated plainly, because they bound what any number here means:
 
 - All documents processed so far are **synthetic**. None are real customer documents.
 - Emission estimates produced here are **not assured** by any third party.
-- **Peer search returns prose, not figures.** No peer emissions figure has been verified
-  yet; the reports' text layers misread tables. Its judge can accept quotes that are real
+- **Peer search returns prose, not figures.** The reports' text layers misread tables, so
+  search never states a number. 58 figures from 3 reports have been verified separately
+  (see [Verified peer figures](#verified-peer-figures)), as self-reported and not assured;
+  the agent does not use them yet, and nothing has measured whether drafting misses rows.
+  Search's judge can accept quotes that are real
   but do not answer (seen once in the demo questions), and there is no peer retrieval eval
   yet — the checks so far are 8 demo questions and 3 adversarial agent runs, recorded in
   [TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
@@ -616,12 +653,13 @@ db/migrations/ schema, applied in filename order
 scripts/       factor loading, document and scenario generation, the extraction,
                scenario and retrieval evals, methodology and peer ingest, peer intake, the flow
                checks, the container entrypoint
-tests/         in a clean copy (no .env, data or database; what CI runs): 741 pass, 21 skip - the ones needing a
+tests/         in a clean copy (no .env, data or database; what CI runs): 804 pass, 23 skip - the ones needing a
                database, the workbooks, the corpus or the peer reports. With all of
-               those present locally: 761 pass, 1 skip
+               those present locally: 826 pass, 1 skip
 docs/          architecture diagram, ADRs, the GHG Protocol skim guide
 data/evals/    the retrieval key (hashes, no GHG Protocol text) and committed eval runs
 data/peer_sources.json  provenance of the peer reports (the reports are local)
+data/peer_disclosures_verified.json  the verified peer figures, with citations and draft values
 data/uploads/  documents uploaded at runtime — git-ignored, never committed
 data/raw/      source documents and publishers' workbooks — git-ignored, never committed
 data/generated/ synthetic documents, answer keys, eval runs — git-ignored

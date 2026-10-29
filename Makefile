@@ -7,7 +7,7 @@ export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 # the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
 export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
 
-.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout ingest-methodology eval-retrieval ingest-peer
+.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout ingest-methodology eval-retrieval ingest-peer seed-peer
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
@@ -36,6 +36,9 @@ seed:     ## Load emission factors into DATABASE_URL (idempotent)
 
 seed-desnz:  ## Load UK DESNZ fuel factors into DATABASE_URL (idempotent)
 	uv run python scripts/load_desnz_factors.py
+
+seed-peer:  ## Load the verified peer figures (data/peer_disclosures_verified.json) (idempotent)
+	uv run python scripts/peer_disclosures_file.py load
 
 verify-desnz:  ## Re-read the DESNZ workbooks and diff them against the loader's literals
 	uv run python scripts/load_desnz_factors.py --verify

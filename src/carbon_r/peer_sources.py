@@ -147,11 +147,31 @@ PRINTED_PAGE_OFFSETS: dict[str, int] = {
     "peer_seatrium_2025": 2,  # 110/111
 }
 
+# The PDF pages whose emissions tables are drafted into `peer_disclosures` (Part B, 2a), as
+# page images (`scripts/draft_peer_disclosures.py`). Set by hand: from each entry's `notes` in
+# data/peer_sources.json and the script's `scan`, which uses the text layer only to find
+# pages, never to read a figure. A report not listed has not been drafted.
+TABLE_PAGES: dict[str, list[int]] = {
+    # notes: "Operational GHG pages include PDF p.74, 79". p.74 holds an intensity chart and no
+    # table of absolute figures (the model said so; confirmed by viewing the page). Kept so the
+    # record shows the page was read.
+    "peer_dbs_2025": [74, 79],
+    # Data pack Table 1.1, Singapore (p.7-8) and Total Portfolio (p.20-21), each split over two
+    # pages. The scan's other hits: Australia (11-12), UK & EU (14-15), United States (17-18),
+    # left for later; p.59 (IFRS S2 index) and p.66 (SGX core metrics index) are not tables of
+    # figures.
+    "peer_clar_2025_datapack": [7, 8, 20, 21],
+    # notes: "GHG figures appear in the AR (e.g. PDF p.37-40)". The scan finds 37, 39, 40; p.38
+    # (two-up, printed 72-73) is a chart of intensity trajectories, no absolute figures.
+    "peer_sembcorp_2025": [37, 39, 40],
+}
+
 
 __all__ = [
     "COMPANY_SLUGS",
     "PEER_SOURCES",
     "PRINTED_PAGE_OFFSETS",
+    "TABLE_PAGES",
     "DocumentKind",
     "PeerSource",
     "PeerSources",

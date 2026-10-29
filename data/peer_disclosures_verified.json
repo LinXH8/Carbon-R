@@ -1,0 +1,1978 @@
+{
+  "note": "Peer emissions figures as self-reported by each company in its own report, drafted by a vision model from the cited page and checked by hand against that page on the date in `verification.verified_at`. Not independently assured. Each company reports under its own boundary, consolidation approach and period; figures are not comparable like-for-like. `draft` holds what the model read, kept for measurement; it is not a verified value. The reports themselves are not redistributed.",
+  "rows": [
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:34+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "28,660",
+        "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
+        "row_label": "Category 1: Purchased Goods and Services"
+      },
+      "figure": "28660",
+      "figure_printed": "28,660",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 7,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 1: Purchased Goods and Services",
+      "scope": "3",
+      "scope3_category": 1,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:34+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "9,479",
+        "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
+        "row_label": "Category 2:Capital Goods"
+      },
+      "figure": "9479",
+      "figure_printed": "9,479",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 7,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 2:Capital Goods",
+      "scope": "3",
+      "scope3_category": 2,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:34+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10,362",
+        "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
+        "row_label": "Category 3: Fuel- and energy-related activities"
+      },
+      "figure": "10362",
+      "figure_printed": "10,362",
+      "method": null,
+      "notes": null,
+      "pdf_page": 7,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 3: Fuel- and energy-related activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:34+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10",
+        "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
+        "row_label": "Category 4: Upstream Transportation and Distribution"
+      },
+      "figure": "10",
+      "figure_printed": "10",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 7,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 4: Upstream Transportation and Distribution",
+      "scope": "3",
+      "scope3_category": 4,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:34+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "338",
+        "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
+        "row_label": "Scope 1"
+      },
+      "figure": "338",
+      "figure_printed": "338",
+      "method": null,
+      "notes": null,
+      "pdf_page": 7,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 1",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:34+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "36,521",
+        "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
+        "row_label": "Scope 2 (Location-based)"
+      },
+      "figure": "36521",
+      "figure_printed": "36,521",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 (Location-based)'",
+      "pdf_page": 7,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 (Location-based)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:34+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "30,710",
+        "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
+        "row_label": "Scope 2 (Market-based)"
+      },
+      "figure": "30710",
+      "figure_printed": "30,710",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 (Market-based)'",
+      "pdf_page": 7,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 (Market-based)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "156,183",
+        "in_sample": true
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:34+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "156,183",
+        "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
+        "row_label": "Scope 3 comprising of the following:"
+      },
+      "figure": "156183",
+      "figure_printed": "156,183",
+      "method": null,
+      "notes": null,
+      "pdf_page": 7,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 3 comprising of the following:",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:54+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "552",
+        "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
+        "row_label": "Category 13: Electric Vehicle"
+      },
+      "figure": "552",
+      "figure_printed": "552",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 8,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 13: Electric Vehicle",
+      "scope": "3",
+      "scope3_category": 13,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:54+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "102,099",
+        "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
+        "row_label": "Category 13: Tenants’ energy consumption"
+      },
+      "figure": "102099",
+      "figure_printed": "102,099",
+      "method": null,
+      "notes": null,
+      "pdf_page": 8,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 13: Tenants’ energy consumption",
+      "scope": "3",
+      "scope3_category": 13,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:54+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,314",
+        "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
+        "row_label": "Category 15: Investment"
+      },
+      "figure": "1314",
+      "figure_printed": "1,314",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 8,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 15: Investment",
+      "scope": "3",
+      "scope3_category": 15,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "3,667",
+        "in_sample": true
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:54+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "3,667",
+        "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
+        "row_label": "Category 5: Waste generated in own operations"
+      },
+      "figure": "3667",
+      "figure_printed": "3,667",
+      "method": null,
+      "notes": null,
+      "pdf_page": 8,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 5: Waste generated in own operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:54+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "40",
+        "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
+        "row_label": "Category 6: Corporate air travel and land travel"
+      },
+      "figure": "40",
+      "figure_printed": "40",
+      "method": null,
+      "notes": null,
+      "pdf_page": 8,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 6: Corporate air travel and land travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:54+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "36,859",
+        "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
+        "row_label": "Total Carbon Emission (Scope 1 and 2) Location-based"
+      },
+      "figure": "36859",
+      "figure_printed": "36,859",
+      "method": "location",
+      "notes": "method stated as: 'Location-based'",
+      "pdf_page": 8,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Total Carbon Emission (Scope 1 and 2) Location-based",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "31,048",
+        "in_sample": true
+      },
+      "column_header": "Singapore > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:54+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "31,048",
+        "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
+        "row_label": "Total Carbon Emission (Scope 1 and 2) Market-based"
+      },
+      "figure": "31048",
+      "figure_printed": "31,048",
+      "method": "market",
+      "notes": "method stated as: 'Market-based'",
+      "pdf_page": 8,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Total Carbon Emission (Scope 1 and 2) Market-based",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,464",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 13: Electric Vehicle"
+      },
+      "figure": "1464",
+      "figure_printed": "1,464",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 13: Electric Vehicle",
+      "scope": "3",
+      "scope3_category": 13,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "141,808",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 13: Tenants’ energy consumption"
+      },
+      "figure": "141808",
+      "figure_printed": "141,808",
+      "method": null,
+      "notes": null,
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 13: Tenants’ energy consumption",
+      "scope": "3",
+      "scope3_category": 13,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "1,314",
+        "in_sample": true
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,314",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 15: Investment"
+      },
+      "figure": "1314",
+      "figure_printed": "1,314",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 15: Investment",
+      "scope": "3",
+      "scope3_category": 15,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "28,660",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 1: Purchased Goods and Services"
+      },
+      "figure": "28660",
+      "figure_printed": "28,660",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 1: Purchased Goods and Services",
+      "scope": "3",
+      "scope3_category": 1,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "9,479",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 2:Capital Goods"
+      },
+      "figure": "9479",
+      "figure_printed": "9,479",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 2:Capital Goods",
+      "scope": "3",
+      "scope3_category": 2,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "14,291",
+        "in_sample": true
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "14,291",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 3: Fuel- and energy-related activities"
+      },
+      "figure": "14291",
+      "figure_printed": "14,291",
+      "method": null,
+      "notes": null,
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 3: Fuel- and energy-related activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 4: Upstream Transportation and Distribution"
+      },
+      "figure": "10",
+      "figure_printed": "10",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'iii, iv'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 4: Upstream Transportation and Distribution",
+      "scope": "3",
+      "scope3_category": 4,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4,300",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 5: Waste generated in own operations"
+      },
+      "figure": "4300",
+      "figure_printed": "4,300",
+      "method": null,
+      "notes": null,
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 5: Waste generated in own operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "40",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Category 6: Corporate air travel and land travel"
+      },
+      "figure": "40",
+      "figure_printed": "40",
+      "method": null,
+      "notes": null,
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 6: Corporate air travel and land travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "3,108",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Scope 1"
+      },
+      "figure": "3108",
+      "figure_printed": "3,108",
+      "method": null,
+      "notes": null,
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 1",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "48,265",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Scope 2 (Location-based)"
+      },
+      "figure": "48265",
+      "figure_printed": "48,265",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 (Location-based)'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 (Location-based)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "39,757",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Scope 2 (Market-based)"
+      },
+      "figure": "39757",
+      "figure_printed": "39,757",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 (Market-based)'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 (Market-based)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "201,367",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Scope 3 comprising of the following:"
+      },
+      "figure": "201367",
+      "figure_printed": "201,367",
+      "method": null,
+      "notes": null,
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 3 comprising of the following:",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "51,373",
+        "in_sample": true
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "51,373",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Total Carbon Emission (Scope 1 and 2) Location-based"
+      },
+      "figure": "51373",
+      "figure_printed": "51,373",
+      "method": "location",
+      "notes": "method stated as: 'Total Carbon Emission (Scope 1 and 2) Location-based'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Total Carbon Emission (Scope 1 and 2) Location-based",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Total Portfolio > 2025",
+      "company": "CapitaLand Ascendas REIT",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:34:08+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "42,865",
+        "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
+        "row_label": "Total Carbon Emission (Scope 1 and 2) Market-based"
+      },
+      "figure": "42865",
+      "figure_printed": "42,865",
+      "method": "market",
+      "notes": "method stated as: 'Total Carbon Emission (Scope 1 and 2) Market-based'",
+      "pdf_page": 20,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Total Carbon Emission (Scope 1 and 2) Market-based",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_clar_2025_datapack",
+      "unit": "tonnes CO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:32.168882+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "75",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Backup generators"
+      },
+      "figure": "75",
+      "figure_printed": "75",
+      "method": null,
+      "notes": null,
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Backup generators",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "120",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Category 13: Downstream leased assets²¹"
+      },
+      "figure": "120",
+      "figure_printed": "120",
+      "method": null,
+      "notes": "footnote marker(s) printed: '21'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Category 13: Downstream leased assets²¹",
+      "scope": "3",
+      "scope3_category": 13,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "14,281",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Category 3: Fuel-and-energy-related activities¹⁵"
+      },
+      "figure": "14281",
+      "figure_printed": "14,281",
+      "method": null,
+      "notes": "footnote marker(s) printed: '15'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Category 3: Fuel-and-energy-related activities¹⁵",
+      "scope": "3",
+      "scope3_category": 3,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "943",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Category 4: Upstream transportation and distribution¹⁶"
+      },
+      "figure": "943",
+      "figure_printed": "943",
+      "method": null,
+      "notes": "footnote marker(s) printed: '16'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Category 4: Upstream transportation and distribution¹⁶",
+      "scope": "3",
+      "scope3_category": 4,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "187",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Category 5: Waste generated in operations¹⁷"
+      },
+      "figure": "187",
+      "figure_printed": "187",
+      "method": null,
+      "notes": "footnote marker(s) printed: '17'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Category 5: Waste generated in operations¹⁷",
+      "scope": "3",
+      "scope3_category": 5,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "13,209",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Category 6: Business travel¹⁸"
+      },
+      "figure": "13209",
+      "figure_printed": "13,209",
+      "method": null,
+      "notes": "footnote marker(s) printed: '18'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Category 6: Business travel¹⁸",
+      "scope": "3",
+      "scope3_category": 6,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,266",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Category 7: Employee commuting¹⁹"
+      },
+      "figure": "1266",
+      "figure_printed": "1,266",
+      "method": null,
+      "notes": "footnote marker(s) printed: '19'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Category 7: Employee commuting¹⁹",
+      "scope": "3",
+      "scope3_category": 7,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "21,981",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "21,981",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Category 8: Upstream leased assets²⁰"
+      },
+      "figure": "21981",
+      "figure_printed": "21,981",
+      "method": null,
+      "notes": "footnote marker(s) printed: '20'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Category 8: Upstream leased assets²⁰",
+      "scope": "3",
+      "scope3_category": 8,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Owned vehicle transport"
+      },
+      "figure": "4",
+      "figure_printed": "4",
+      "method": null,
+      "notes": null,
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Owned vehicle transport",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "5,555",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Purchased cooling"
+      },
+      "figure": "5555",
+      "figure_printed": "5,555",
+      "method": null,
+      "notes": null,
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Purchased cooling",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "44,536",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "44,536",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Purchased electricity¹³"
+      },
+      "figure": "44536",
+      "figure_printed": "44,536",
+      "method": null,
+      "notes": "footnote marker(s) printed: '13'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Purchased electricity¹³",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,069",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Refrigerants and fire retardants"
+      },
+      "figure": "1069",
+      "figure_printed": "1,069",
+      "method": null,
+      "notes": null,
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Refrigerants and fire retardants",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "103,226",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Total GHG emissions, location-based (tCO₂e) = a + b(i) + c"
+      },
+      "figure": "103226",
+      "figure_printed": "103,226",
+      "method": "location",
+      "notes": "method stated as: 'location-based'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Total GHG emissions, location-based (tCO₂e) = a + b(i) + c",
+      "scope": "1+2+3",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "76,706",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "Total GHG emissions, market-based (tCO₂e) = a + b(ii) + c"
+      },
+      "figure": "76706",
+      "figure_printed": "76,706",
+      "method": "market",
+      "notes": "method stated as: 'market-based'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "Total GHG emissions, market-based (tCO₂e) = a + b(ii) + c",
+      "scope": "1+2+3",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "1,148",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,148",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "a) Total scope 1¹⁹"
+      },
+      "figure": "1148",
+      "figure_printed": "1,148",
+      "method": null,
+      "notes": "footnote marker(s) printed: '19'; verified (corrected): footnote marker is 9, not 19 (extra 1)",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "a) Total scope 1⁹",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "corrected",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "50,091",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "b(i) Total scope 2 (location-based)¹¹"
+      },
+      "figure": "50091",
+      "figure_printed": "50,091",
+      "method": "location",
+      "notes": "method stated as: 'location-based'; footnote marker(s) printed: '11'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "b(i) Total scope 2 (location-based)¹¹",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "23,571",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "b(ii) Total scope 2 (market-based)¹²"
+      },
+      "figure": "23571",
+      "figure_printed": "23,571",
+      "method": "market",
+      "notes": "method stated as: 'market-based'; footnote marker(s) printed: '12'",
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "b(ii) Total scope 2 (market-based)¹²",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "51,987",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "DBS",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T08:02:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "51,987",
+        "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
+        "row_label": "c) Total operational scope 3"
+      },
+      "figure": "51987",
+      "figure_printed": "51,987",
+      "method": null,
+      "notes": null,
+      "pdf_page": 79,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 79,
+      "row_label": "c) Total operational scope 3",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_dbs_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2,596.3",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Category 11 – Use of sold products"
+      },
+      "figure": "2596.3",
+      "figure_printed": "2,596.3",
+      "method": null,
+      "notes": null,
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 11 – Use of sold products",
+      "scope": "3",
+      "scope3_category": 11,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "9,867.8",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Category 15 – Investments"
+      },
+      "figure": "9867.8",
+      "figure_printed": "9,867.8",
+      "method": null,
+      "notes": null,
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 15 – Investments",
+      "scope": "3",
+      "scope3_category": 15,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2,876.1",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Category 3 – Fuel- and energy-related activities"
+      },
+      "figure": "2876.1",
+      "figure_printed": "2,876.1",
+      "method": null,
+      "notes": null,
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 3 – Fuel- and energy-related activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "7,425.4",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Scope 1 emissions"
+      },
+      "figure": "7425.4",
+      "figure_printed": "7,425.4",
+      "method": null,
+      "notes": "footnote marker(s) printed: '2'",
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 1 emissions",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "3,080.0",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Scope 1 emissions > Joint ventures & associates"
+      },
+      "figure": "3080.0",
+      "figure_printed": "3,080.0",
+      "method": null,
+      "notes": null,
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 1 emissions > Joint ventures & associates",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4,345.4",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Scope 1 emissions > Subsidiaries"
+      },
+      "figure": "4345.4",
+      "figure_printed": "4,345.4",
+      "method": null,
+      "notes": null,
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 1 emissions > Subsidiaries",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "282.9",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Scope 2 emissions"
+      },
+      "figure": "282.9",
+      "figure_printed": "282.9",
+      "method": "location",
+      "notes": "method stated as: 'location-based data'; footnote marker(s) printed: '3'",
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 emissions",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "89.2",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "89.2",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Scope 2 emissions > Joint ventures & associates"
+      },
+      "figure": "89.2",
+      "figure_printed": "89.2",
+      "method": "location",
+      "notes": "method stated as: 'location-based data'",
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 emissions > Joint ventures & associates",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "193.7",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "193.7",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Scope 2 emissions > Subsidiaries"
+      },
+      "figure": "193.7",
+      "figure_printed": "193.7",
+      "method": "location",
+      "notes": "method stated as: 'location-based data'",
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 emissions > Subsidiaries",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Sembcorp",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-29T09:35:26+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "15,340.2",
+        "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
+        "row_label": "Scope 3 emissions"
+      },
+      "figure": "15340.2",
+      "figure_printed": "15,340.2",
+      "method": null,
+      "notes": "footnote marker(s) printed: '4'",
+      "pdf_page": 40,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 3 emissions",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_sembcorp_2025",
+      "unit": "ktCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    }
+  ],
+  "version": 1
+}
