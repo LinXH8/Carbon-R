@@ -7,7 +7,7 @@ import hashlib
 
 import pytest
 
-from carbon_r.agent.audit import audit_figures
+from carbon_r.agent.audit import audit_figures, audit_quotes
 from carbon_r.agent.tools import Toolkit
 from carbon_r.agent.toolspec import PEER_COMPANIES, SearchPeerDisclosuresArgs, schema_for
 from carbon_r.config import get_settings
@@ -307,6 +307,17 @@ def test_a_table_row_quoted_from_the_passage_text_gets_no_exemption():
     payload = {"tool": "search_peer_disclosures", **result.model_dump()}
     flagged = audit_figures(f'The table reads "{TABLE_ROW}".', [payload])
     assert flagged == ["9,870", "9,120", "611", "580", "47", "52"]
+
+
+def test_a_fused_marker_quote_quoted_verbatim_gets_no_exemption():
+    # Table-like by the malformed-group and impossible-scope checks alone: one figure in five
+    # tokens passes the count and share rules, so this pins the path those rules miss.
+    text = f"Scope 1 (tCO2e). {FIGURE_QUOTE} Fleet follows."
+    result = _resolve("q", PeerFilter(), passages(row(text=text)), judged(True, FIGURE_QUOTE))
+    payload = {"tool": "search_peer_disclosures", **result.model_dump()}
+    reply = f'The report says "{FIGURE_QUOTE}" (p. 79).'
+    assert audit_quotes(reply, [payload]) == []  # verbatim in the passage text
+    assert audit_figures(reply, [payload]) == ["2,5113"]
 
 
 def test_a_short_quoted_number_gets_no_exemption():

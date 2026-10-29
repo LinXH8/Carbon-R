@@ -567,7 +567,9 @@ third de8c901f…, 4d11ebf2…, 720a3a02….
   relevant categories and committing to report them - not a reduction target. The
   verbatim check proves the words exist, not that they answer. To be measured by the
   next pass's peer retrieval eval; no tuning now.
-- **One fused figure can pass the table rule** (see the audit section).
+- **A fusion with no comma is undetectable** by the table rule: "500" with note 1 reads
+  "5001", which looks like any other number (see the audit section). Fusions that leave a
+  malformed thousands group or an impossible scope label are withheld.
 - **Two-up layouts and data books cite PDF pages only** (MPACT, Sembcorp, CICT, both data
   books).
 - **Overlapping chunks can return the same quote twice** (OCBC demo).
