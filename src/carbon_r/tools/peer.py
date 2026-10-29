@@ -51,13 +51,14 @@ from psycopg.rows import dict_row
 from carbon_r.agent.audit import is_table_like
 from carbon_r.db import DatabaseNotConfiguredError, connect
 from carbon_r.peer_sources import PeerSource
-from carbon_r.rag.chunking import CHUNKER_VERSION
+from carbon_r.rag.chunking import CHUNKER_VERSION, normalise
 from carbon_r.rag.embed import EmbeddingNotConfiguredError, configured_model, to_pgvector
 from carbon_r.sources import PEERS
 from carbon_r.tools.base import ToolResult, error, no_results, ok
 from carbon_r.tools.methodology import (
     AnswerabilityJudgement,
     Judge,
+    JudgedCitation,
     Passage,
     openai_judge,
     verified_citations,
@@ -319,17 +320,39 @@ def _resolve(
             context | {"refusal_level": "generation"},
         )
 
+    unique = _first_of_each_quote(kept)
     by_id = {p.chunk_id: p for p in passages}
-    quotes = [_quote_data(c.quote, by_id[c.chunk_id]) for c in kept]
+    quotes = [_quote_data(c.quote, by_id[c.chunk_id]) for c in unique]
     withheld = sum(1 for q in quotes if q["withheld"])
     sources = "; ".join(dict.fromkeys(q["citation"] for q in quotes))
-    return ok(
-        context | {"refusal_level": None, "quotes": quotes, "quotes_withheld": withheld},
-        f"Answered by {len(quotes)} verified quote(s) from: {sources}"
-        + (f", of which {withheld} table-like, withheld: cite their page only" if withheld else "")
-        + ". Quote the others exactly and cite company, report and page; do not add to them "
-        "from memory. " + DISCLOSURE,
+    instruction = (
+        f", of which {withheld} table-like, withheld: cite their page only. Quote the others"
+        if withheld
+        else ". Quote them"
     )
+    return ok(
+        context
+        | {
+            "refusal_level": None,
+            "quotes": quotes,
+            "quotes_withheld": withheld,
+            "quotes_repeated": len(kept) - len(unique),
+        },
+        f"Answered by {len(quotes)} verified quote(s) from: {sources}{instruction} exactly "
+        "and cite company, report and page; do not add to them from memory. " + DISCLOSURE,
+    )
+
+
+def _first_of_each_quote(citations: Sequence[JudgedCitation]) -> list[JudgedCitation]:
+    """Overlapping chunks can yield the same sentence twice; keep its first citation."""
+    seen: set[str] = set()
+    unique = []
+    for c in citations:
+        key = normalise(c.quote).casefold()
+        if key not in seen:
+            seen.add(key)
+            unique.append(c)
+    return unique
 
 
 def _quote_data(quote: str, passage: PeerPassage) -> dict[str, Any]:

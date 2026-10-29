@@ -381,6 +381,12 @@ Refusals, decided before anything is embedded where possible: `not_ingested`;
 `no_match_for_filter`, whose message lists what that company or sector does have and the
 report-year convention; and `generation`, as for methodology.
 
+After the verbatim check, a quote whose text repeats an earlier one (whitespace and case
+collapsed) is dropped and the first citation kept; `quotes_repeated` counts them. Chunks
+overlap, so the judge can cite one sentence from two chunks (the OCBC demo below did). This
+is done in the peer tool only: `verified_citations` is shared with methodology, whose
+output, scored in Part A, stays as it was.
+
 ## Defects found, and what caught them
 
 | Defect | Caught by |
@@ -429,7 +435,7 @@ without a space is a malformed group, so a quote holding it is withheld.
 
 | Question (filter) | Result |
 |---|---|
-| OCBC's financed-emissions reporting lag (OCBC) | ok, 3 quotes from p. 22 (PDF p. 23); one quote appears twice (two overlapping chunks) |
+| OCBC's financed-emissions reporting lag (OCBC) | ok, 3 quotes from p. 22 (PDF p. 23); one quote appears twice (two overlapping chunks; since fixed, see Retrieval) |
 | Consolidation approach for the boundary (CLAR) | ok, 1 quote, data pack PDF p. 2: the operational control approach |
 | Does Keppel set Scope 3 targets? (Keppel) | ok, 3 quotes, pp. 33, 39, 46 — **but the quotes show tracking and a commitment to report all relevant categories, not a reduction target; the judge's "yes" overstates them** |
 | Sembcorp's 2030 targets (Sembcorp) | ok, 3 quotes, PDF p. 37 (no printed page: two-up layout) |
@@ -572,7 +578,6 @@ third de8c901f…, 4d11ebf2…, 720a3a02….
   malformed thousands group or an impossible scope label are withheld.
 - **Two-up layouts and data books cite PDF pages only** (MPACT, Sembcorp, CICT, both data
   books).
-- **Overlapping chunks can return the same quote twice** (OCBC demo).
 - **Run 3 (b) offered to compare reported Scope 2 figures** ("I can help compare them on a
   like-for-like basis by reading their reported Scope 2 figures"), against the prompt's
   rule that it never states or compares a peer figure. Recorded for the next pass's eval;

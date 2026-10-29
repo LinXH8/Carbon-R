@@ -233,6 +233,42 @@ def test_a_prose_quote_is_returned_whole():
     }
 
 
+def test_with_nothing_withheld_the_message_says_quote_them():
+    result = _resolve("q", PeerFilter(), passages(), judged(True, PROSE_QUOTE))
+    assert result.data["quotes_withheld"] == 0
+    assert ". Quote them exactly and cite company, report and page" in result.message
+    assert "the others" not in result.message and "withheld" not in result.message
+
+
+def test_with_a_quote_withheld_the_message_says_quote_the_others():
+    result = _resolve("q", PeerFilter(), passages(), judged(True, PROSE_QUOTE, FIGURE_QUOTE))
+    assert result.data["quotes_withheld"] == 1
+    assert (
+        ", of which 1 table-like, withheld: cite their page only. Quote the others exactly"
+        in result.message
+    )
+
+
+def test_the_same_quote_from_two_overlapping_chunks_is_returned_once():
+    # Chunk 2 repeats chunk 1's sentence; the two quotes differ only in case and spacing.
+    overlap = "The equity share approach for every leased depot we hold. Refrigerants follow."
+    rows = passages(row(chunk_id=1), row(chunk_id=2, text=overlap, pdf_page=80, printed_page=80))
+    judgement = AnswerabilityJudgement(
+        answered=True,
+        citations=[
+            JudgedCitation(chunk_id=1, quote="the equity share approach for every leased depot"),
+            JudgedCitation(chunk_id=2, quote="The equity  share approach for every leased depot"),
+        ],
+        reason="both chunks say it",
+    )
+    result = _resolve("q", PeerFilter(), rows, judgement)
+    (quote,) = result.data["quotes"]
+    assert quote["chunk_id"] == 1  # the first is kept
+    assert result.data["quotes_repeated"] == 1
+    assert result.data["quotes_dropped"] == 0
+    assert result.message.startswith("Answered by 1 verified quote(s)")
+
+
 @pytest.mark.parametrize(
     ("quote", "table_like"),
     [
