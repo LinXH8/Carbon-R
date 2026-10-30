@@ -65,6 +65,27 @@ def test_scope_and_tier_labels_are_not_figures():
     assert audit("These are Scope 2 emissions, Scope 1 is not covered.") == []
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Emissions fall under Scope 1, 2, and 3.",  # Interlude D: flagged 2 and 3
+        "Emissions fall under Scope 1, 2 and 3.",
+        "Scopes 1 and 2 are covered.",
+        "Scopes 1–3 are covered.",
+        "Scope 1/2 emissions.",
+        "Scope 1 or 2, depending on control.",
+    ],
+)
+def test_a_list_of_scopes_is_a_label_not_figures(text):
+    assert audit(text) == []
+
+
+def test_a_figure_after_a_scope_list_is_still_checked():
+    assert audit("Scope 1, 2,500 tCO2e.") == ["2,500"]
+    assert audit("Scope 2, 3,000 tCO2e.") == ["3,000"]
+    assert audit("Scope 1 and 2 totalled 4 tonnes.") == ["4"]
+
+
 def test_a_number_inside_a_word_is_not_scanned():
     assert audit("Reported as kg CO2e in document elec_001.pdf.") == []
 

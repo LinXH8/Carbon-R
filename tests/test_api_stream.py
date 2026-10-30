@@ -5,20 +5,23 @@ work happened, and **every run ends with exactly one `final`** - including a run
 provider broke. One terminal shape means the client has one parse path and no branch in
 which it waits forever for an event that is never coming.
 
-Offline: `run_agent` is replaced with a recorder that emits the events a real run would.
+Offline: `run_agent` is replaced with a recorder that emits the events a real run would,
+except in the last test, which runs the real loop against the scripted fake provider.
 """
 
 import io
 import json
 from dataclasses import replace
+from functools import partial
 
 import pytest
 from fastapi.testclient import TestClient
 
 from carbon_r import main
-from carbon_r.agent.loop import AgentRun, ToolCallRecord
-from carbon_r.agent.session import reset_sessions
+from carbon_r.agent.loop import AgentRun, ToolCallRecord, run_agent
+from carbon_r.agent.session import get_session, reset_sessions
 from carbon_r.api import stream as stream_module
+from conftest import fake_client
 
 client = TestClient(main.app)
 
@@ -187,3 +190,18 @@ def test_the_stream_is_not_buffered_by_a_proxy(configured, monkeypatch):
 
     assert response.headers["x-accel-buffering"] == "no"
     assert response.headers["cache-control"] == "no-cache"
+
+
+def test_only_the_typed_text_is_recorded_as_the_users_words(configured, monkeypatch):
+    """Through the real loop: the server's document note reaches the model, but a reply
+    quoting it gets no pass as the user's words, while a quote of the user does."""
+    reply = 'You asked "Scope 2 for this bill?" but "No documents have been uploaded".'
+    monkeypatch.setattr(
+        stream_module, "run_agent", partial(run_agent, client=fake_client(reply), model="m")
+    )
+    final = events_from(ask())[-1]
+
+    session = get_session(final["session_id"])
+    assert session.user_messages == ["Scope 2 for this bill?"]
+    assert "No documents have been uploaded" in session.history[0]["content"]
+    assert final["unverified_quotes"] == ["No documents have been uploaded"]

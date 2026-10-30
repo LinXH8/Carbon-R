@@ -46,12 +46,12 @@ def _frame(event: dict) -> str:
     return f"data: {json.dumps(event)}\n\n"
 
 
-def stream_chat(session: Session, message: str) -> Iterator[str]:
+def stream_chat(session: Session, message: str, context: str = "") -> Iterator[str]:
     """Run one agent turn, framing its progress and then its result as SSE."""
     events: queue.Queue = queue.Queue()
 
     with ThreadPoolExecutor(max_workers=1) as pool:
-        future = pool.submit(run_agent, session, message, on_event=events.put)
+        future = pool.submit(run_agent, session, message, context=context, on_event=events.put)
         future.add_done_callback(lambda _: events.put(_DONE))
 
         while True:

@@ -58,6 +58,10 @@ class Session:
     # Provider conversation items, so a follow-up question keeps its context.
     history: list[dict] = field(default_factory=list)
 
+    # What the user typed, turn by turn, without the document context the server appends.
+    # The quote audit accepts a reply quoting these words; it must not accept the server's.
+    user_messages: list[str] = field(default_factory=list)
+
     _counters: dict[str, int] = field(default_factory=dict)
 
     def add_document(self, document: StoredDocument) -> None:

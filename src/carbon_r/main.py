@@ -137,8 +137,8 @@ async def upload(
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
     """One turn of the agent loop."""
-    session, message = _prepare_turn(request)
-    return ChatResponse.from_run(run_agent(session, message))
+    session, message, context = _prepare_turn(request)
+    return ChatResponse.from_run(run_agent(session, message, context=context))
 
 
 @app.post("/chat/stream", include_in_schema=False)
@@ -148,15 +148,15 @@ def chat_stream(request: ChatRequest) -> StreamingResponse:
     Not in the schema because the body and the terminal event are `/chat`'s contract; this
     endpoint only changes when the client learns about them. Scripts and tests use /chat.
     """
-    session, message = _prepare_turn(request)
+    session, message, context = _prepare_turn(request)
     return StreamingResponse(
-        stream_chat(session, message),
+        stream_chat(session, message, context),
         media_type=SSE_MEDIA_TYPE,
         headers=SSE_HEADERS,
     )
 
 
-def _prepare_turn(request: ChatRequest) -> tuple[Session, str]:
+def _prepare_turn(request: ChatRequest) -> tuple[Session, str, str]:
     """Everything both chat routes must do before the agent runs.
 
     Shared so the streaming route cannot drift into accepting a request the plain route
@@ -184,7 +184,7 @@ def _prepare_turn(request: ChatRequest) -> tuple[Session, str]:
         )
 
     document_ids = request.document_ids or list(session.documents)
-    return session, _with_document_context(request.message, session, document_ids)
+    return session, request.message, _document_context(session, document_ids)
 
 
 def _require_session(session_id: str) -> Session:
@@ -199,18 +199,19 @@ def _require_session(session_id: str) -> Session:
     return session
 
 
-def _with_document_context(message: str, session: Session, document_ids: list[str]) -> str:
+def _document_context(session: Session, document_ids: list[str]) -> str:
     """Tell the agent which documents it may read. It cannot discover them otherwise.
 
     Appended to the user's message rather than baked into the system prompt, because the
     set changes with every upload while the prompt is constant - and a constant prompt is
-    what keeps a provider-side cache useful.
+    what keeps a provider-side cache useful. Returned separately, not joined to the
+    message here, so the quote audit can tell the user's words from the server's.
     """
     if not document_ids:
         # The second sentence exists because the first, alone, was read as "nothing can be
         # searched": in Part B's first agent runs, all three peer questions were answered
         # "no peer documents are loaded" without calling search_peer_disclosures.
-        return message + (
+        return (
             "\n\n[No documents have been uploaded in this session. The GHG Protocol "
             "standards and the peer companies' reports are not uploads: search_methodology "
             "and search_peer_disclosures search them without one.]"
@@ -219,4 +220,4 @@ def _with_document_context(message: str, session: Session, document_ids: list[st
         f"- {document_id} ({session.documents[document_id].filename})"
         for document_id in document_ids
     )
-    return f"{message}\n\n[Documents available in this session:\n{listed}\n]"
+    return f"\n\n[Documents available in this session:\n{listed}\n]"

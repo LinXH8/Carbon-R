@@ -21,7 +21,11 @@ Three equivalences are allowed, and they are allowed deliberately rather than by
 
 Everything else - a sum, a difference, a per-month average, an invented total - is
 flagged. A number buried in a word (`CO2e`, `Scope2`) is not a figure and is not scanned;
-the literal phrases `Scope 1/2/3` are removed before scanning for the same reason.
+scope labels are removed before scanning for the same reason, including a list of them
+("Scope 1, 2, and 3", "Scopes 1–3"). A list continues only with single digits 1-3, so
+"Scope 1, 2,500 t" still audits 2,500. Known limit: a small number (1-3) written straight
+after a scope list and a separator is read as part of the list and is not audited - "Scope 2
+and 3 tonnes", "Scope 1 and 2 vans".
 
 One tool's text is not a source of numbers: `search_peer_disclosures` (Part B). Its passages
 are PDF text layers in which footnote markers fuse onto figures (a total of 240,576
@@ -46,11 +50,23 @@ flagged in `unverified_quotes`. No attempt is made to decide which quotes are "a
 methodology": any quoted span is a claim that those words exist somewhere, and the check is
 the same for all of them. An ellipsis inside a quote marks an omission, so each piece either
 side of it is checked separately.
+
+Two things are not quotations of a source, and since Interlude D they are not flagged. The
+first is the user's own words quoted back (a refusal that names the question it cannot answer): the
+user's messages in the session are quote haystacks. The second is a span that is only a scope
+label ("Scope 1, 2, and 3"). Neither loosens the figure check: user text is a quote source
+only, never a source of numbers, so a quote of the user exempts none of its figures. Only
+what the user typed counts, not the document list the server appends to it.
+
+Known limit: the check is that the words exist, not who said them. A quote that matches the
+user's own text passes even when the reply attributes it to a source ("the GHG Protocol
+says \"…\"" where the words are the user's).
 """
 
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from decimal import Decimal, InvalidOperation
 
 # A standalone number: not joined to letters, so `CO2e`, `PM2.5` and `elec_001` contribute
@@ -61,8 +77,18 @@ _NUMBER = re.compile(
     r"(?<![A-Za-z0-9_.])(?<![A-Za-z]-)[-+]?\d[\d,]*(?:\.\d+)?(?![A-Za-z0-9_])(?!-[A-Za-z])"
 )
 
-# Not quantities. `Scope 2` is a classification, and so is a tier.
-_NON_QUANTITIES = re.compile(r"\b(?:scope|tier)\s*[-–]?\s*\d+\b", re.IGNORECASE)
+# Not quantities. `Scope 2` is a classification, and so is a tier. A list of scopes is one
+# label too - "Scope 1, 2, and 3", "Scopes 1 and 2", "Scopes 1–3", "Scope 1/2" - so after the
+# first number the pattern takes further single digits 1-3 joined by a comma, "and", "or",
+# "to", "/", "&" or a dash. A digit followed by more digits ("Scope 1, 2,500 t") is a figure
+# and ends the list. Added in Interlude D, when "Scope 1, 2, and 3" was flagged as 2 and 3.
+_SCOPE_LABEL = (
+    r"scopes?\s*[-–]?\s*\d+"
+    r"(?:\s*(?:,\s*(?:and|or)?|/|&|and|or|to|-|–)\s*[1-3](?![.,]?\d))*"
+)
+_NON_QUANTITIES = re.compile(rf"\b(?:{_SCOPE_LABEL}|tier\s*[-–]?\s*\d+)\b", re.IGNORECASE)
+_SCOPE_LABELS = re.compile(rf"\b{_SCOPE_LABEL}\b", re.IGNORECASE)
+_CONJUNCTIONS_AND_PUNCTUATION = re.compile(r"\b(?:and|or)\b|[\W_]", re.IGNORECASE)
 
 # A numbered-list marker: one or two digits at the start of a line, then "." or ")" and a
 # space ("1. Download…", "2) Ingest…"). Not a quantity. Only the marker is removed, so a
@@ -244,12 +270,23 @@ def _is_verified(span: str, haystacks: list[str]) -> bool:
     return bool(pieces) and all(any(p in h for h in haystacks) for p in pieces)
 
 
-def audit_quotes(reply: str, tool_payloads: list[dict]) -> list[str]:
-    """Quoted spans in `reply` that appear in no tool payload, as written, in order."""
-    haystacks = _haystacks(tool_payloads)
+def _is_label(span: str) -> bool:
+    """A quoted span that is only a scope label ("Scope 2", "Scope 1, 2, and 3") names a
+    classification; it presents nobody's words."""
+    if not _SCOPE_LABELS.search(span):
+        return False
+    return not _CONJUNCTIONS_AND_PUNCTUATION.sub("", _SCOPE_LABELS.sub("", span))
+
+
+def audit_quotes(
+    reply: str, tool_payloads: list[dict], user_messages: Sequence[str] = ()
+) -> list[str]:
+    """Quoted spans in `reply` found in no tool payload and no user message, as written, in
+    order. A span that is only a scope label is not a quotation and is skipped."""
+    haystacks = _haystacks(tool_payloads) + [_normalise(m) for m in user_messages]
     unverified: list[str] = []
     for match in _QUOTED.finditer(reply):
         span = match.group(1) or match.group(2)
-        if not _is_verified(span, haystacks):
+        if not _is_label(span) and not _is_verified(span, haystacks):
             unverified.append(span)
     return unverified

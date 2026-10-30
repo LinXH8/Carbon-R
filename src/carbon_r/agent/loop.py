@@ -111,6 +111,7 @@ def run_agent(
     session: Session,
     message: str,
     *,
+    context: str = "",
     client: SupportsResponses | None = None,
     model: str | None = None,
     toolkit: Toolkit | None = None,
@@ -123,6 +124,9 @@ def run_agent(
     call and `{"type": "tool", ...}` after each tool result - so a streaming caller can
     show the audit trail being built instead of inventing progress while it waits. It is
     optional and defaults to doing nothing, which is what every non-streaming caller wants.
+
+    `context` is the server's note on which documents exist. The model reads it appended to
+    `message`, but only `message` is recorded as the user's words for the quote audit.
     """
     emit = on_event or (lambda event: None)
     run_id = uuid.uuid4().hex
@@ -133,7 +137,8 @@ def run_agent(
         client = OpenAI(api_key=settings.openai_api_key)
     toolkit = toolkit or Toolkit(session)
 
-    conversation: list[dict] = [*session.history, {"role": "user", "content": message}]
+    session.user_messages.append(message)
+    conversation: list[dict] = [*session.history, {"role": "user", "content": message + context}]
     calls: list[ToolCallRecord] = []
     schemas = tool_schemas()
     figures: list[dict] = []
@@ -210,6 +215,6 @@ def run_agent(
         turns_used=turns,
         stopped_reason=stopped,
         unverified_figures=audit_figures(reply, session.tool_payloads),
-        unverified_quotes=audit_quotes(reply, session.tool_payloads),
+        unverified_quotes=audit_quotes(reply, session.tool_payloads, session.user_messages),
         figures=figures,
     )

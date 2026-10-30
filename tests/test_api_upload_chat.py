@@ -41,8 +41,8 @@ def captured_runs(monkeypatch):
     """Replace the agent with a recorder, so /chat is tested without a provider."""
     seen = []
 
-    def fake_run_agent(session, message, **kwargs):
-        seen.append((session, message))
+    def fake_run_agent(session, message, *, context="", **kwargs):
+        seen.append((session, message, context))
         return AgentRun(
             session_id=session.session_id,
             reply="56,119.2 kg CO2e (EMA 2024, location-based). Not assured.",
@@ -133,14 +133,17 @@ def test_chat_tells_the_agent_which_documents_exist(
     monkeypatch.setattr("carbon_r.api.uploads.UPLOAD_DIR", tmp_path)
     uploaded = upload().json()
     client.post("/chat", json={"message": "Scope 2?", "session_id": uploaded["session_id"]})
-    _, message = captured_runs[-1]
-    assert uploaded["document_id"] in message
-    assert "elec_001.pdf" in message
+    _, message, context = captured_runs[-1]
+    assert message == "Scope 2?"  # the user's words alone; the list travels beside them
+    assert uploaded["document_id"] in context
+    assert "elec_001.pdf" in context
 
 
 def test_chat_says_so_when_nothing_has_been_uploaded(configured, captured_runs):
     client.post("/chat", json={"message": "Scope 2?"})
-    assert "No documents have been uploaded" in captured_runs[-1][1]
+    _, message, context = captured_runs[-1]
+    assert message == "Scope 2?"
+    assert "No documents have been uploaded" in context
 
 
 def test_chat_rejects_an_unknown_document_id(tmp_path, monkeypatch, configured, captured_runs):

@@ -84,6 +84,26 @@ def test_a_second_turn_keeps_the_conversation(session, toolkit):
     assert session.history[0]["content"] == "first"
 
 
+def test_quoting_the_users_question_back_is_not_flagged(session, toolkit):
+    """The user's messages in this session, earlier turns included, are a quote source."""
+    asked = "Where is the best Hainanese chicken rice?"
+    run_agent(session, asked, client=fake_client("I cannot say."), model="m", toolkit=toolkit)
+    reply = 'I cannot rank "best Hainanese chicken rice" or say "which stall is cheapest".'
+    run = run_agent(session, "Why not?", client=fake_client(reply), model="m", toolkit=toolkit)
+    assert run.unverified_quotes == ["which stall is cheapest"]
+
+
+def test_the_servers_document_context_is_not_the_users_words(session, toolkit):
+    """The model reads the context; a reply quoting it gets no pass as the user's text."""
+    context = "\n\n[No documents have been uploaded in this session.]"
+    reply = 'You said "No documents have been uploaded in this session."'
+    client = fake_client(reply)
+    run = run_agent(session, "Scope 2?", context=context, client=client, model="m", toolkit=toolkit)
+    assert session.history[0]["content"] == "Scope 2?" + context  # what the model was sent
+    assert session.user_messages == ["Scope 2?"]
+    assert run.unverified_quotes == ["No documents have been uploaded in this session."]
+
+
 # --- the guards -------------------------------------------------------------------
 
 
