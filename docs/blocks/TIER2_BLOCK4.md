@@ -65,9 +65,9 @@ is therefore accepted. This was a deliberate widening of "from that turn", accep
 review: the figure audit already works that way, and quoting an earlier result is
 reporting, not invention.
 
-Two false positives were found once plain questions reached `/app` (Interlude D). Both were
-fixed in the audit itself; the fix is **uncommitted**, last reproduced at `b471af5`, with the
-working tree based on `228e176`. First, a reply naming `"Scope 1, 2, and 3"` was flagged as an
+Two false positives were found once plain questions reached `/app` (Interlude D), last
+reproduced at `b471af5`. The fix is commit `9394e02`; the second half is only partly fixed
+(see the end of this section). First, a reply naming `"Scope 1, 2, and 3"` was flagged as an
 unsourced quotation, and also as figures 2 and 3. A scope list is now one label for the figure
 audit, and a quoted span that is only a scope label is not checked as a quotation. Second, a
 refusal that quoted the user's own question back ("best Hainanese chicken rice.", run 2c below)
@@ -79,6 +79,14 @@ number (1-3) straight after a scope list is read as part of it ("Scope 1 and 2 v
 quote that matches the user's text passes even if the reply attributes it to a source.
 Tests: `test_quote_audit.py`, `test_figure_audit.py` (the scope-list cases), two loop tests
 and the two `/chat` context tests.
+
+**Still open after `9394e02`.** A live check on 30 Oct asked "Where can I find the best
+Hainanese chicken rice?" and the reply's quote of it was still flagged:
+`['the best Hainanese chicken rice.']`. The model puts sentence punctuation inside the
+quotation marks where the user wrote "?", so the span is not verbatim in the user's text.
+Run 2c below has the same shape. The unit test passed because its user message also ended in
+".". The scope-list half was not seen live: "What are Scope 1, 2 and 3?", asked three times,
+never produced a scope list in the reply (no flags in any of the three).
 
 ## Defects found, and what caught them
 
@@ -530,8 +538,8 @@ Replies as given, except that sentences quoted from the reports are replaced by
   off-topic question without searching is a pass, because a search that cannot be relevant
   only adds a model call and a list of irrelevant citations. The question was replaced by a
   peer-shaped one the reports could plausibly answer (run 3, c). The quote flag is the
-  known false positive on a user's own phrase (Interlude D), since fixed: the user's
-  messages are now quote sources (see "The audit of quotes").
+  known false positive on a user's own phrase (Interlude D). It is not fixed by `9394e02`:
+  the quote ends in "." where the question ended in "?" (see "The audit of quotes").
 
   > I can’t answer that from the available sources.
   >
