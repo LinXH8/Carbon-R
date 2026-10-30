@@ -132,6 +132,36 @@ class SearchPeerDisclosuresArgs(BaseModel):
     )
 
 
+class LookupPeerDisclosureArgs(BaseModel):
+    """Arguments for `lookup_peer_disclosure`. Selectors against the verified table, exact."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    company: Literal[PEER_COMPANIES] = Field(  # type: ignore[valid-type]
+        description="The company whose report printed the figure. One company per call; for "
+        "two companies, call once for each."
+    )
+    scope: Literal["1", "2", "3", "1+2", "1+2+3"] = Field(
+        description="The scope as the report prints it: '1', '2' or '3', or a combined total "
+        "('1+2', '1+2+3') only when asking for a total the report itself prints."
+    )
+    method: Literal["location", "market"] | None = Field(
+        default=None,
+        description="Scope 2 method, for a row that includes Scope 2. Null returns every "
+        "method the report prints, each as its own row.",
+    )
+    scope3_category: int | None = Field(
+        default=None,
+        description="Scope 3 category number (1-15), for scope '3' only. Null returns every "
+        "Scope 3 row, including the Scope 3 total where the report prints one.",
+    )
+    report_year: int | None = Field(
+        default=None,
+        description="The calendar year in which the report's period ENDS (a 1 April 2025 to "
+        "31 March 2026 report is 2026). Null returns every year held.",
+    )
+
+
 TOOL_DESCRIPTIONS: dict[str, str] = {
     "extract_from_document": (
         "Establish what kind of document an uploaded file is, then read it with a vision "
@@ -175,6 +205,16 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
         "passages, never figures: numbers in report text are not reliable, so cite the page "
         "instead of stating one. Never an input to a calculation."
     ),
+    "lookup_peer_disclosure": (
+        "Fetch the emissions figures a peer company's report prints for one scope, by exact "
+        "match on company and scope (plus Scope 2 method, Scope 3 category and report year "
+        "when given). Returns only figures verified by hand against the report page, each "
+        "as printed with its unit, row label, column header, period and page. Several rows "
+        "can match (parts and a total, or one table per region); each is a separate row. "
+        "Returns no_results when no verified figure is held, which does not mean the company "
+        "did not disclose one. Never sums, converts or ranks; never an input to a "
+        "calculation."
+    ),
 }
 
 ARG_MODELS: dict[str, type[BaseModel]] = {
@@ -183,6 +223,7 @@ ARG_MODELS: dict[str, type[BaseModel]] = {
     "calculate_emissions": CalculateArgs,
     "search_methodology": SearchMethodologyArgs,
     "search_peer_disclosures": SearchPeerDisclosuresArgs,
+    "lookup_peer_disclosure": LookupPeerDisclosureArgs,
 }
 
 # Schema keywords the provider's strict mode does not accept. Stripped rather than
@@ -239,6 +280,7 @@ __all__ = [
     "CalculatePair",
     "ExtractArgs",
     "LookupFactorArgs",
+    "LookupPeerDisclosureArgs",
     "SearchMethodologyArgs",
     "SearchPeerDisclosuresArgs",
     "schema_for",

@@ -98,11 +98,17 @@ def _non_calendar() -> str:
     return "; ".join(years)
 
 
-DISCLOSURE = (
+# What holds for anything taken from a peer report, passage or verified figure alike.
+# `lookup_peer_disclosure` (tools/peer_figures.py) states this too.
+PEER_CAVEAT = (
     "Peer disclosures are self-reported by each company, under its own boundary, "
     "consolidation approach and reporting period, and are not assured by Carbon R; they "
     "are not comparable like-for-like. Non-calendar financial years: "
-    f"{_non_calendar()}. Numbers inside these passages come from PDF text extraction, which "
+    f"{_non_calendar()}."
+)
+
+DISCLOSURE = (
+    f"{PEER_CAVEAT} Numbers inside these passages come from PDF text extraction, which "
     "fuses footnote markers onto figures and loses table columns: state no figure from a "
     "passage - cite the company, report and page instead."
 )
@@ -236,11 +242,15 @@ def fuse(
 # --- the decision (pure) -------------------------------------------------------------------
 
 
-def _period(p: PeerSource) -> str:
-    text = f"{p.period_start.day} {p.period_start:%b %Y} to {p.period_end.day} {p.period_end:%b %Y}"
-    if (p.period_end.month, p.period_end.day) != (12, 31):
-        text += f", a financial year ending {p.period_end.day} {p.period_end:%B}"
+def period_text(start: date, end: date) -> str:
+    text = f"{start.day} {start:%b %Y} to {end.day} {end:%b %Y}"
+    if (end.month, end.day) != (12, 31):
+        text += f", a financial year ending {end.day} {end:%B}"
     return text
+
+
+def _period(p: PeerSource) -> str:
+    return period_text(p.period_start, p.period_end)
 
 
 def no_match_message(f: PeerFilter, peers: Sequence[PeerSource] | None = None) -> str:
@@ -517,11 +527,13 @@ if __name__ == "__main__":  # pragma: no cover
 
 __all__ = [
     "DISCLOSURE",
+    "PEER_CAVEAT",
     "PeerFilter",
     "PeerPassage",
     "fuse",
     "is_table_like",
     "no_match_message",
+    "period_text",
     "retrieve",
     "search_peer_disclosures",
 ]

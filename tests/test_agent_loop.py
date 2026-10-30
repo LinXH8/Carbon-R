@@ -63,6 +63,7 @@ def test_the_system_prompt_is_sent_every_turn(session, toolkit):
             "calculate_emissions",
             "search_methodology",
             "search_peer_disclosures",
+            "lookup_peer_disclosure",
         }
 
 

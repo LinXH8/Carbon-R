@@ -36,6 +36,7 @@ COPY scripts ./scripts
 COPY db ./db
 COPY data/evals ./data/evals
 COPY data/peer_sources.json ./data/peer_sources.json
+COPY data/peer_disclosures_verified.json ./data/peer_disclosures_verified.json
 RUN uv sync --locked --no-dev
 
 # Non-root. The uploads directory is created here, owned by that user, so a named volume

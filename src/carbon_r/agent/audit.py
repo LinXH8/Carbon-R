@@ -36,6 +36,11 @@ Those three fields are dropped before numbers are collected (`_figure_view`); th
 structured fields - page, report year, period - still count. A reply that states a peer
 figure in its own words is therefore flagged.
 
+A peer figure returned by `lookup_peer_disclosure` is different, and counts like any other
+tool's: it was read from an image of the page and verified by hand against it, and only
+verified rows reach that tool. So the same number passes when that tool returned it and is
+flagged when only a passage holds it.
+
 What is NOT flagged is a number inside a verified quote of at least five words: a quoted
 span that `audit_quotes` would accept is the source's sentence, and its numbers are
 reported, not computed (`_without_verified_quotes`). That holds for every tool. The peer

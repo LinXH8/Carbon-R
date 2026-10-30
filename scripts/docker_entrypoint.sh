@@ -1,9 +1,10 @@
 #!/bin/sh
-# Container start: wait for Postgres, seed the factors, serve.
+# Container start: wait for Postgres, seed the factors and the verified peer figures, serve.
 #
-# Both loaders apply every migration and upsert from literals, so they need no workbook and
-# change nothing on the second start. That is what lets `docker compose up` be the whole
-# setup on a fresh clone, every time.
+# Every loader applies every migration and upserts from committed data (literals, or
+# data/peer_disclosures_verified.json), so it needs no workbook and changes nothing on the
+# second start. That is what lets `docker compose up` be the whole setup on a fresh clone,
+# every time. The peer load is `make seed-peer` without uv.
 set -eu
 
 python - <<'PY'
@@ -25,5 +26,6 @@ PY
 
 python scripts/seed_factors.py
 python scripts/load_desnz_factors.py
+python scripts/peer_disclosures_file.py load
 
 exec uvicorn carbon_r.main:app --host 0.0.0.0 --port 8000
