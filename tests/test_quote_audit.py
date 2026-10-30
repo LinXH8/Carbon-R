@@ -84,3 +84,38 @@ def test_the_users_words_never_clear_a_figure():
     asked = ["I think our diesel use was 4,200 litres last year; what are the emissions?"]
     assert audit_quotes(reply, [], asked) == []
     assert audit_figures(reply, []) == ["4,200"]
+
+
+def test_a_full_stop_inside_the_quote_of_the_users_question_passes():
+    # Live check after 9394e02: the user's "?" came back as "." inside the quotation marks.
+    reply = "I can’t recommend food places like “the best Hainanese chicken rice.”"
+    asked = ["Where can I find the best Hainanese chicken rice?"]
+    assert audit_quotes(reply, [], asked) == []
+
+
+def test_a_full_stop_added_to_a_tool_quote_passes():
+    reply = 'The standard says it "reports the fuel it burns as a direct emission."'
+    assert audit_quotes(reply, PAYLOADS) == []
+
+
+def test_a_quote_never_ends_partway_through_a_number():
+    # "2." occurs in "2.5" as text, so plain substring matching accepted this before.
+    source = [{"text": "Scope 1 emissions were 2.5 t."}]
+    reply = 'The report says "emissions were 2."'
+    assert audit_quotes(reply, source) == ["emissions were 2."]
+    # Not a quote check: the figure audit accepts 2 as 2.5 rounded to 0 places, by design.
+    assert audit_figures(reply, source) == []
+
+
+def test_a_quote_cut_short_of_a_number_exempts_none_of_its_figures():
+    # Five words or more, so a quote that matched would exempt its figures; this one must not.
+    source = [{"tool": "search_methodology", "text": "Total emissions for the year were 2.7 t."}]
+    reply = 'The report says "Total emissions for the year were 2."'
+    assert audit_quotes(reply, source) == ["Total emissions for the year were 2."]
+    assert audit_figures(reply, source) == ["2"]
+
+
+def test_a_quote_in_no_source_is_still_flagged_with_its_full_stop():
+    reply = 'It says "leased vans are always Scope 1."'
+    asked = ["Are leased vans Scope 1?"]
+    assert audit_quotes(reply, PAYLOADS, asked) == ["leased vans are always Scope 1."]

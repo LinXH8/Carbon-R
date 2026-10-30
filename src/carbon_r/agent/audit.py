@@ -49,7 +49,9 @@ so it must appear verbatim (whitespace-normalised) in some string a tool returne
 flagged in `unverified_quotes`. No attempt is made to decide which quotes are "attributed to
 methodology": any quoted span is a claim that those words exist somewhere, and the check is
 the same for all of them. An ellipsis inside a quote marks an omission, so each piece either
-side of it is checked separately.
+side of it is checked separately. Sentence punctuation just inside the closing mark
+(`.,;:!?`) is not part of the quoted words and is ignored, but a match may not stop partway
+through a word or a number in the source: "were 2." is not a quote of "were 2.5 t".
 
 Two things are not quotations of a source, and since Interlude D they are not flagged. The
 first is the user's own words quoted back (a refusal that names the question it cannot answer): the
@@ -263,11 +265,26 @@ def _haystacks(tool_payloads: list[dict]) -> list[str]:
     return [_normalise(s) for payload in tool_payloads for s in strings_in(payload)]
 
 
+# Sentence punctuation a reply puts inside the closing quotation mark ("…chicken rice."
+# for a question that ended "…chicken rice?"). Not part of the quoted words, so it is
+# dropped before matching. Added after the Interlude D live check, where it kept the
+# user-echo false positive alive.
+_TRAILING_PUNCTUATION = re.compile(r"[.,;:!?]+$")
+
+
+def _found(piece: str, haystacks: list[str]) -> bool:
+    """`piece`, less trailing punctuation, appears in a haystack and does not stop partway
+    through a word or a number there: "emissions were 2." is not a quote of "were 2.5 t"."""
+    words = _TRAILING_PUNCTUATION.sub("", piece).rstrip() or piece
+    pattern = re.compile(re.escape(words) + r"(?![A-Za-z0-9_]|[.,]\d)")
+    return any(pattern.search(h) for h in haystacks)
+
+
 def _is_verified(span: str, haystacks: list[str]) -> bool:
     """Every piece of the span (split at an ellipsis) appears verbatim in some payload."""
     pieces = [_normalise(p) for p in _ELLIPSIS.split(span)]
     pieces = [p for p in pieces if p]
-    return bool(pieces) and all(any(p in h for h in haystacks) for p in pieces)
+    return bool(pieces) and all(_found(p, haystacks) for p in pieces)
 
 
 def _is_label(span: str) -> bool:
