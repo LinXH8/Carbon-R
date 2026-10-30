@@ -454,7 +454,8 @@ make seed-peer   # load the 58 rows into peer_disclosures (idempotent; no report
 ```
 
 Drafting and checking more pages needs the reports locally:
-`scripts/draft_peer_disclosures.py` (scan, draft, load, review, leak-check) and
+`scripts/draft_peer_disclosures.py` (scan, draft, load, review, and `leak-check`, which
+compares every commit not yet on `origin/main`) and
 `scripts/verify_peer_disclosures.py` (worksheet, apply). The agent does not read this table
 yet.
 
@@ -532,7 +533,7 @@ make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forwar
 make ingest-methodology  # chunk + embed the local GHG Protocol PDFs (idempotent; local only)
 make eval-retrieval      # score search_methodology on the dev split (model calls)
 make ingest-peer         # chunk + embed the local peer reports (idempotent; local only)
-make check        # ruff + the full test suite (826 pass, 1 skipped, with everything local)
+make check        # ruff + the full test suite (835 pass, 1 skipped, with everything local)
 ```
 
 ## Data provenance
@@ -635,6 +636,7 @@ src/carbon_r/
   config.py    settings from the environment
   db.py        connection helper and the migration runner
   sources.py   the source registry: every document read, with licence and sha256
+  leak_check.py  where real peer figures may be committed (one file), checked per commit
   peer_sources.py  the peer reports' committed list, and their page offsets
   rag/         retrieval: chunking, embedding, ingestion, the methodology eval key
   main.py      FastAPI app: the page, /health, /upload, /chat, /chat/stream
@@ -653,9 +655,9 @@ db/migrations/ schema, applied in filename order
 scripts/       factor loading, document and scenario generation, the extraction,
                scenario and retrieval evals, methodology and peer ingest, peer intake, the flow
                checks, the container entrypoint
-tests/         in a clean copy (no .env, data or database; what CI runs): 804 pass, 23 skip - the ones needing a
+tests/         in a clean copy (no .env, data or database; what CI runs): 813 pass, 23 skip - the ones needing a
                database, the workbooks, the corpus or the peer reports. With all of
-               those present locally: 826 pass, 1 skip
+               those present locally: 835 pass, 1 skip
 docs/          architecture diagram, ADRs, the GHG Protocol skim guide
 data/evals/    the retrieval key (hashes, no GHG Protocol text) and committed eval runs
 data/peer_sources.json  provenance of the peer reports (the reports are local)

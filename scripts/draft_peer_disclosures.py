@@ -4,7 +4,7 @@
     uv run python scripts/draft_peer_disclosures.py draft SOURCE_ID --model MODEL_ID
     uv run python scripts/draft_peer_disclosures.py load                 upsert every draft
     uv run python scripts/draft_peer_disclosures.py review [SOURCE_ID]   blind rows masked
-    uv run python scripts/draft_peer_disclosures.py leak-check [PATH...] before any commit
+    uv run python scripts/draft_peer_disclosures.py leak-check [PATH...] [--base REF]
 
 `scan` lists the pages whose text layer names a scope and a CO2e unit. The text layer is
 used only to FIND pages - never to read a figure, which is the thing it gets wrong. The pages
@@ -47,6 +47,7 @@ from openai import OpenAI, OpenAIError
 
 from carbon_r.config import PROJECT_ROOT, get_settings
 from carbon_r.db import DatabaseNotConfiguredError, apply_migrations, connect
+from carbon_r.leak_check import find_leaks, significant
 from carbon_r.models.peer_disclosure import (
     BLIND_SEED,
     BLIND_SHARE,
@@ -340,34 +341,22 @@ def review(source_id: str | None) -> int:
 # --- leak check ---------------------------------------------------------------------------
 
 
-def _git(*args: str) -> str:
-    return subprocess.run(
-        ["git", *args], cwd=PROJECT_ROOT, capture_output=True, check=False
-    ).stdout.decode(errors="ignore")
-
-
-def _significant(figure: str) -> bool:
-    return len(re.sub(r"\D", "", figure)) >= 3
-
-
-def leak_check(paths: list[str]) -> int:
+def leak_check(paths: list[str], base: str) -> int:
     """Real peer figures may appear in ONE tracked file, `data/peer_disclosures_verified.json`,
     and only as verified values (or as that file's labelled `draft` fields). Fails on:
 
-    - any drafted or verified figure NEW since HEAD in any other file about to be committed:
-      the index (tracked and staged files), or the PATHS given (new files not yet staged);
+    - any drafted or verified figure introduced since BASE (default origin/main) outside that
+      file: in any commit of BASE..HEAD, or in the working tree (the index, or PATHS);
     - a verified-file row whose figure is a draft value that was never verified.
 
     Figures come from the local drafts (`data/generated/peer_drafts/`) and the verified file.
-    A figure already at HEAD in another file is listed, not failed: a short number such as a
-    page count or a hash fragment turns up by coincidence. Read that list by eye all the same.
+    See `carbon_r.leak_check`.
     """
     drafted = {r["figure_printed"] for d in _drafts() for r in d["rows"]}
     verified_rows = read_file().rows if VERIFIED_FILE.exists() else []
     verified = {row.figure_printed for row in verified_rows}
     drafted |= {row.draft.figure_printed for row in verified_rows}
     never_verified = drafted - verified
-    figures = {f for f in drafted | verified if _significant(f)}
     allowed = str(VERIFIED_FILE.relative_to(PROJECT_ROOT))
 
     bad_in_file = [
@@ -375,38 +364,38 @@ def leak_check(paths: list[str]) -> int:
         for row in verified_rows
         if row.figure_printed in never_verified
     ]
-
-    names = set(paths) or set(filter(None, _git("ls-files", "-z").split("\0")))
-    names.discard(allowed)
-    patterns = {f: re.compile(rf"(?<![\d,.]){re.escape(f)}(?![\d,]|\.\d)") for f in figures}
-    new: list[tuple[str, str]] = []
-    at_head: list[tuple[str, str]] = []
-    for name in sorted(names):
-        path = PROJECT_ROOT / name
-        if not path.is_file():
-            continue
-        text = path.read_text(errors="ignore")
-        found = [f for f, pattern in patterns.items() if pattern.search(text)]
-        if not found:
-            continue
-        head = _git("show", f"HEAD:{name}")
-        for figure in found:
-            (at_head if patterns[figure].search(head) else new).append((name, figure))
+    try:
+        leaks = find_leaks(
+            PROJECT_ROOT, drafted | verified, base=base, allowed={allowed}, paths=paths or None
+        )
+    except subprocess.CalledProcessError:
+        print(f"Unknown base {base!r}; fetch it, or pass --base REF.")
+        return 1
+    commits = _git_lines("rev-list", f"{base}..HEAD")
+    figures = {f for f in drafted | verified if significant(f)}
     print(
         f"{len(figures)} peer figures of 3+ digits ({len(verified)} verified, "
-        f"{len(never_verified)} never verified); {len(names)} files checked besides {allowed}"
+        f"{len(never_verified)} never verified); base {base}, {len(commits)} commit(s) to "
+        f"push, plus the working tree; {allowed} not searched"
     )
-    for name, figure in at_head:
-        print(f"  already at HEAD (coincidence?) {name}: {figure}")
-    for name, figure in new:
-        print(f"  NEW {name}: {figure}")
+    new = [leak for leak in leaks if not leak.at_base]
+    for leak in leaks:
+        if leak.at_base:
+            print(f"  already at base (coincidence?) {leak.where} {leak.path}: {leak.figure}")
+    for leak in new:
+        print(f"  NEW {leak.where} {leak.path}: {leak.figure}")
     for where in bad_in_file:
         print(f"  UNVERIFIED VALUE in {allowed}: {where}")
     print(
-        f"new since HEAD: {len(new)}; already at HEAD: {len(at_head)}; "
+        f"new since {base}: {len(new)}; already at base: {len(leaks) - len(new)}; "
         f"unverified values in {allowed}: {len(bad_in_file)}"
     )
     return 1 if new or bad_in_file else 0
+
+
+def _git_lines(*args: str) -> list[str]:
+    result = subprocess.run(["git", *args], cwd=PROJECT_ROOT, capture_output=True, check=False)
+    return result.stdout.decode(errors="ignore").split()
 
 
 def main() -> int:
@@ -418,7 +407,9 @@ def main() -> int:
     d.add_argument("--model", required=True)
     sub.add_parser("load")
     sub.add_parser("review").add_argument("source_id", nargs="?")
-    sub.add_parser("leak-check").add_argument("paths", nargs="*")
+    leak = sub.add_parser("leak-check")
+    leak.add_argument("paths", nargs="*")
+    leak.add_argument("--base", default="origin/main", help="what is already public")
     args = parser.parse_args()
     if args.command == "scan":
         return scan(args.source_id)
@@ -428,7 +419,7 @@ def main() -> int:
         return load()
     if args.command == "review":
         return review(args.source_id)
-    return leak_check(args.paths)
+    return leak_check(args.paths, args.base)
 
 
 if __name__ == "__main__":

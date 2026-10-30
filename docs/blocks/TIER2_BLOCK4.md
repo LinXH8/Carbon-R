@@ -743,6 +743,12 @@ for verified rows only:
   figure new since HEAD elsewhere, and fails if the file's verified figure is a draft value
   that was never verified. Shown to fail (exit 1) on a scratch file holding one verified
   figure.
+- **Defect, found after committing:** comparing with HEAD stops working once a leak is
+  committed - the figure is then "already at HEAD". The check was re-run by hand against the
+  parent commit (0 new), then fixed (`carbon_r.leak_check`, `--base`, default
+  `origin/main`): every commit in `base..HEAD` is scanned file by file against base, so a
+  figure added and later removed is still caught, and so is the working tree. Tested in a
+  throwaway repository (9 tests); with the commit scan disabled, the two commit tests fail.
 - The worksheets (`data/generated/peer_verification/`) stay git-ignored; the author backs
   them up.
 - README and DATA.md state the figures are as self-reported by each company, checked by the

@@ -431,11 +431,15 @@ def test_printed_values_round_trip_through_the_pdf_text_layer():
     import subprocess
     import tempfile
 
-    pytest.importorskip("weasyprint")
+    # One import, both failures: `importorskip` catches ImportError only, and a missing pango
+    # raises OSError from inside WeasyPrint's import - which failed this test, not skipped it.
     try:
         from weasyprint import HTML  # noqa: F401
-    except OSError:
-        pytest.skip("WeasyPrint native libraries not loadable in this shell")
+    except (ImportError, OSError) as exc:
+        pytest.skip(
+            "WeasyPrint cannot load its native libraries (pango); on macOS export "
+            f"DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib, as `make check` does ({exc})"
+        )
     if not shutil.which("pdftotext"):
         pytest.skip("pdftotext not installed")
 

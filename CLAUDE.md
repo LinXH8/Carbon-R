@@ -57,7 +57,8 @@ Verified peer figures are committed in exactly one file, `data/peer_disclosures_
 fields keep what the model read, labelled as such. A real peer figure anywhere else in a
 tracked file is a defect, and an unverified or garbled one (a draft never verified, a figure
 read from a PDF text layer) is a defect everywhere. Run `scripts/draft_peer_disclosures.py
-leak-check` before every commit that touches peer data; the author's verification
+leak-check` (it checks every commit since `origin/main`, and the working tree) before every
+push that touches peer data; the author's verification
 worksheets (`data/generated/peer_verification/`) stay git-ignored.
 
 ### 5. Anything marked VERIFY is checked against the primary source before it is used
@@ -118,7 +119,7 @@ command output as evidence, counts rather than bare percentages, and any problem
 more than ten minutes — including corrections to earlier conclusions.
 
 What belongs in the repo instead: decisions that explain the *code* go in docstrings and
-in [SYNTHGEN_V0.md](docs/synthgen/SYNTHGEN_V0.md) and [TIER1_BLOCK3.md](docs/blocks/TIER1_BLOCK3.md); provenance and
+in [SYNTHGEN_V0.md](docs/synthgen/SYNTHGEN_V0.md) and the per-block records in [docs/blocks/](docs/blocks/); provenance and
 verification status go in [SOURCES.md](docs/SOURCES.md); measured results, with counts and with
 the limits of what they cover, go in [README.md](README.md).
 
