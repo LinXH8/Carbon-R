@@ -533,7 +533,7 @@ make flow-block2  # v1: a bill across 31 Dec 2023, an MWh bill, a balance forwar
 make ingest-methodology  # chunk + embed the local GHG Protocol PDFs (idempotent; local only)
 make eval-retrieval      # score search_methodology on the dev split (model calls)
 make ingest-peer         # chunk + embed the local peer reports (idempotent; local only)
-make check        # ruff + the full test suite (835 pass, 1 skipped, with everything local)
+make check        # ruff + the full test suite (850 pass, 1 skipped, with everything local)
 ```
 
 ## Data provenance
@@ -655,9 +655,9 @@ db/migrations/ schema, applied in filename order
 scripts/       factor loading, document and scenario generation, the extraction,
                scenario and retrieval evals, methodology and peer ingest, peer intake, the flow
                checks, the container entrypoint
-tests/         in a clean copy (no .env, data or database; what CI runs): 813 pass, 23 skip - the ones needing a
+tests/         in a clean copy (no .env, data or database; what CI runs): 828 pass, 23 skip - the ones needing a
                database, the workbooks, the corpus or the peer reports. With all of
-               those present locally: 835 pass, 1 skip
+               those present locally: 850 pass, 1 skip
 docs/          architecture diagram, ADRs, the GHG Protocol skim guide
 data/evals/    the retrieval key (hashes, no GHG Protocol text) and committed eval runs
 data/peer_sources.json  provenance of the peer reports (the reports are local)
