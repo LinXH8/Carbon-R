@@ -15,6 +15,10 @@ from carbon_r.config import PROJECT_ROOT, get_settings
 
 MIGRATIONS_DIR = PROJECT_ROOT / "db" / "migrations"
 
+# libpq waits for a connection with no limit by default, so a stalled network held a test or a
+# request until the OS gave up. Ten seconds is well past the ~1 s a Tokyo round trip takes.
+CONNECT_TIMEOUT_S = 10
+
 
 class DatabaseNotConfiguredError(RuntimeError):
     """DATABASE_URL is absent or still holds the .env placeholder."""
@@ -29,7 +33,7 @@ def connect() -> Iterator[psycopg.Connection]:
             "DATABASE_URL is not set (or still contains <PASSWORD>). "
             "See .env.example for where to get it."
         )
-    with psycopg.connect(settings.database_url) as conn:
+    with psycopg.connect(settings.database_url, connect_timeout=CONNECT_TIMEOUT_S) as conn:
         yield conn
 
 

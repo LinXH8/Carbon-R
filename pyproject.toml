@@ -23,6 +23,7 @@ dev = [
     "pytest>=8.3",
     "ruff>=0.7",
     "httpx>=0.27",
+    "pytest-timeout>=2.4.0",
 ]
 
 [build-system]
@@ -47,3 +48,6 @@ testpaths = ["tests"]
 # They are entry points rather than library code, but their row-building and parsing is
 # exactly the part worth testing without a database.
 pythonpath = ["src", "scripts"]
+# A test that waits on the network fails here instead of hanging the run (a full run stalled
+# for 10 minutes on 30 Oct). The slowest test takes about 6 s, against the live database.
+timeout = 60

@@ -10,9 +10,10 @@ there.
 
 import sys
 
-from openai import OpenAI, OpenAIError
+from openai import OpenAIError
 
 from carbon_r.config import get_settings
+from carbon_r.llm import openai_client
 
 
 def main() -> int:
@@ -22,7 +23,7 @@ def main() -> int:
         return 1
 
     try:
-        models = OpenAI(api_key=settings.openai_api_key).models.list()
+        models = openai_client().models.list()
     except OpenAIError as exc:
         print(f"Could not list models: {exc}", file=sys.stderr)
         return 1

@@ -270,10 +270,10 @@ def _db_count(source_id: str | None) -> int:
 
 
 def openai_judge(usage: list[dict] | None = None, corpus: str = METHODOLOGY_CORPUS) -> Judge:
-    from openai import OpenAI
+    from carbon_r.llm import openai_client
 
     settings = get_settings()
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = openai_client()
 
     def judge(question: str, passages: Sequence[Passage]) -> AnswerabilityJudgement:
         listing = "\n\n".join(f"[chunk_id {p.chunk_id}] {p.citation}\n{p.text}" for p in passages)

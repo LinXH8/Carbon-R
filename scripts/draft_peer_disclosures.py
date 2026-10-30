@@ -39,6 +39,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
@@ -48,6 +49,7 @@ from openai import OpenAI, OpenAIError
 from carbon_r.config import PROJECT_ROOT, get_settings
 from carbon_r.db import DatabaseNotConfiguredError, apply_migrations, connect
 from carbon_r.leak_check import find_leaks, significant
+from carbon_r.llm import openai_client
 from carbon_r.models.peer_disclosure import (
     BLIND_SEED,
     BLIND_SHARE,
@@ -71,6 +73,11 @@ DPI = 200
 # "original", not the extractor's "high": "high" lets the provider scale a page down to fit,
 # and a footnote superscript on a dense table is exactly the detail that would be lost.
 DETAIL = "original"
+# Per attempt, not llm.OPENAI_TIMEOUT_S (120 s): one reasoning model reading a full-resolution
+# table page is the slowest call in the project, and a timeout followed by a retry pays for
+# the page twice. 2a recorded no durations; each page's `elapsed_s` is kept from 2b on, so
+# this can be checked against what drafting actually takes.
+DRAFT_TIMEOUT_S = 300.0
 REQUEST_HASH = request_hash(DRAFT_INSTRUCTION, PeerTableReading)
 
 _SCOPE = re.compile(r"\bscope\s*[123]\b", re.IGNORECASE)
@@ -104,8 +111,9 @@ def scan(source_id: str) -> int:
 
 def _read_page(
     client: OpenAI, model: str, source_id: str, image: Path, pdf_page: int
-) -> tuple[PeerTableReading, dict, str, bool]:
-    """The reading for one page: from the reply cache, or one model call."""
+) -> tuple[PeerTableReading, dict, str, bool, float | None]:
+    """The reading for one page: from the reply cache, or one model call, and how long that call
+    took (None for replies cached before 2b, which did not record it)."""
     REPLY_CACHE.mkdir(parents=True, exist_ok=True)
     cached = REPLY_CACHE / f"{source_id}-p{pdf_page}-{model}-{DPI}dpi-{DETAIL}-{REQUEST_HASH}.json"
     if cached.exists():
@@ -115,18 +123,22 @@ def _read_page(
             entry["usage"],
             entry["read_at"],
             True,
+            entry.get("elapsed_s"),
         )
     usage: list[dict] = []
+    started = time.monotonic()
     reading = _parse(client, model, [image], DRAFT_INSTRUCTION, PeerTableReading, DETAIL, usage)
+    elapsed = round(time.monotonic() - started, 1)
     read_at = datetime.now(UTC).isoformat(timespec="seconds")
     entry = {
         "reading": reading.model_dump(),
         "usage": usage[0] if usage else {},
         "read_at": read_at,
+        "elapsed_s": elapsed,
         "image_sha256": _sha256(image),
     }
     cached.write_text(json.dumps(entry, indent=2))
-    return reading, entry["usage"], read_at, False  # type: ignore[return-value]
+    return reading, entry["usage"], read_at, False, elapsed  # type: ignore[return-value]
 
 
 def draft(source_id: str, model: str) -> int:
@@ -146,7 +158,7 @@ def draft(source_id: str, model: str) -> int:
         return 1
 
     record, peer = BY_ID[source_id], PEERS[source_id]
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = openai_client(timeout_s=DRAFT_TIMEOUT_S)
     pages, rows, calls = [], [], 0
     dropped: Counter[str] = Counter()
     tokens: Counter[str] = Counter()
@@ -154,7 +166,7 @@ def draft(source_id: str, model: str) -> int:
     for pdf_page in TABLE_PAGES[source_id]:
         image = rasterise_page(record.path, pdf_page, DPI)
         try:
-            reading, usage, read_at, from_cache = _read_page(
+            reading, usage, read_at, from_cache, elapsed = _read_page(
                 client, model, source_id, image, pdf_page
             )
         except OpenAIError as exc:
@@ -174,6 +186,7 @@ def draft(source_id: str, model: str) -> int:
                 "image_sha256": _sha256(image),
                 "read_at": read_at,
                 "from_cache": from_cache,
+                "elapsed_s": elapsed,
                 "reading": reading.model_dump(),
                 "cells_read": len(reading.cells),
                 "kept": len(page_draft.rows),
@@ -221,7 +234,8 @@ def draft(source_id: str, model: str) -> int:
         print(
             f"   PDF p.{page['pdf_page']:<4} table={page['reading']['page_has_ghg_table']!s:5} "
             f"cells read {page['cells_read']:>3}, kept {page['kept']:>3}, "
-            f"dropped {page['dropped'] or {}}{'  (cache)' if page['from_cache'] else ''}"
+            f"dropped {page['dropped'] or {}}, {page['elapsed_s'] or '-'} s"
+            f"{'  (cache)' if page['from_cache'] else ''}"
         )
     markers = sum(1 for row in out_rows if "footnote marker" in (row["notes"] or ""))
     fused = sum(1 for row in out_rows if "malformed thousands" in (row["notes"] or ""))

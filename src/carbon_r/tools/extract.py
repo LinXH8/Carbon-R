@@ -52,6 +52,7 @@ from openai import OpenAI, OpenAIError
 from pydantic import BaseModel
 
 from carbon_r.config import PROJECT_ROOT, get_settings
+from carbon_r.llm import openai_client
 from carbon_r.models.doc_kind import (
     READABLE_KINDS,
     REFUSAL_KINDS,
@@ -365,7 +366,7 @@ def classify_page(
     """One small model call: what kind of document is this? Raises on provider failure."""
     settings = get_settings()
     model = model or settings.openai_model
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = openai_client()
     result = _parse(
         client,
         model,
@@ -396,7 +397,7 @@ def read_page(
     spec = EXTRACTORS[kind]
     settings = get_settings()
     model = model or settings.openai_model
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = openai_client()
     return _parse(
         client,
         model,
@@ -597,7 +598,7 @@ def reread_page(
     spec = EXTRACTORS[kind]
     settings = get_settings()
     model = model or settings.openai_model
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = openai_client()
     return _parse(
         client,
         model,

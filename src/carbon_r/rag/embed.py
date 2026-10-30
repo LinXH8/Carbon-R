@@ -10,9 +10,8 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 
-from openai import OpenAI
-
 from carbon_r.config import get_settings
+from carbon_r.llm import openai_client
 
 # The width of `document_chunks.embedding`. A model returning anything else is refused
 # rather than truncated or padded.
@@ -44,7 +43,7 @@ def openai_embedder(model: str | None = None, usage: list[dict] | None = None) -
     if not settings.openai_api_key:
         raise EmbeddingNotConfiguredError("OPENAI_API_KEY is not set.")
     model = model or configured_model()
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = openai_client()
 
     def embed(texts: Sequence[str]) -> list[list[float]]:
         vectors: list[list[float]] = []

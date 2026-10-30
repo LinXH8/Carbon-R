@@ -28,7 +28,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
-from openai import OpenAI, OpenAIError
+from openai import OpenAIError
 
 from carbon_r.agent.audit import audit_figures, audit_quotes
 from carbon_r.agent.prompt import MAX_TURNS, SYSTEM_PROMPT
@@ -36,6 +36,7 @@ from carbon_r.agent.session import Session
 from carbon_r.agent.tools import Toolkit
 from carbon_r.agent.toolspec import tool_schemas
 from carbon_r.config import get_settings
+from carbon_r.llm import openai_client
 
 # One line per tool call, keyed by the run, so a reply on screen can be matched to the calls
 # that produced it in the server log. The same id is the trace id if tracing is enabled.
@@ -134,7 +135,7 @@ def run_agent(
     settings = get_settings()
     model = model or settings.openai_model
     if client is None:
-        client = OpenAI(api_key=settings.openai_api_key)
+        client = openai_client()
     toolkit = toolkit or Toolkit(session)
 
     session.user_messages.append(message)
