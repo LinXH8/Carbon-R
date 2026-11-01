@@ -18,8 +18,8 @@ Each row keeps what was checked and how:
 
 Figures are as self-reported by each company, checked against the cited page on the stated
 date, and not independently assured. Rows are ordered by (source, PDF page, drafted row
-label, column header), and the JSON is written with sorted keys, so a diff shows only what
-changed.
+label, column header, drafted method), and the JSON is written with sorted keys, so a diff
+shows only what changed.
 
 `load` is idempotent and conservative: a row not in the table is inserted; an identical row
 is left alone; a row that exists but DIFFERS is a conflict, reported, and nothing is written.
@@ -67,6 +67,7 @@ class Draft(BaseModel):
 
     figure_printed: str
     row_label: str
+    method: Method | None
     drafted_by: str
     drafted_at: str
     draft_request_hash: str
@@ -118,8 +119,15 @@ class VerifiedRow(BaseModel):
         return self
 
     @property
-    def key(self) -> tuple[str, int, str, str]:
-        return (self.source_id, self.pdf_page, self.draft.row_label, self.column_header)
+    def key(self) -> tuple[str, int, str, str, str]:
+        """The table's cell key (migration 0007): the drafted method, "" for none."""
+        return (
+            self.source_id,
+            self.pdf_page,
+            self.draft.row_label,
+            self.column_header,
+            self.draft.method or "",
+        )
 
 
 class VerifiedFile(BaseModel):
@@ -133,7 +141,9 @@ class VerifiedFile(BaseModel):
     def _ordered_and_unique(self) -> VerifiedFile:
         keys = [row.key for row in self.rows]
         if keys != sorted(keys):
-            raise ValueError("rows are not in (source, page, drafted label, column) order")
+            raise ValueError(
+                "rows are not in (source, page, drafted label, column, drafted method) order"
+            )
         if len(set(keys)) != len(keys):
             raise ValueError("a row appears twice")
         return self
@@ -145,7 +155,7 @@ _SELECT = """
 select source_id, company, period_start, period_end, scope, scope3_category, figure_printed,
        figure, unit, method, pdf_page, printed_page, row_label, column_header, notes,
        verified_by, verified_at, verification, drafted_figure_printed, drafted_row_label,
-       drafted_by, drafted_at, draft_request_hash, page_image_sha256, blind_sample,
+       drafted_method, drafted_by, drafted_at, draft_request_hash, page_image_sha256, blind_sample,
        blind_figure_printed
 from peer_disclosures_verified
 """
@@ -162,8 +172,8 @@ def export_rows(conn: psycopg.Connection, source_ids: list[str] | None = None) -
     rows = []
     for r in conn.execute(sql, {"ids": source_ids}).fetchall():
         (sid, company, start, end, scope, cat, fig_p, fig, unit, method, page, printed, label,
-         header, notes, by, at, outcome, d_fig, d_label, d_by, d_at, d_hash, d_img, in_blind,
-         blind_value) = r  # fmt: skip
+         header, notes, by, at, outcome, d_fig, d_label, d_method, d_by, d_at, d_hash, d_img,
+         in_blind, blind_value) = r  # fmt: skip
         rows.append(
             VerifiedRow(
                 source_id=sid,
@@ -185,6 +195,7 @@ def export_rows(conn: psycopg.Connection, source_ids: list[str] | None = None) -
                 draft=Draft(
                     figure_printed=d_fig,
                     row_label=d_label,
+                    method=d_method,
                     drafted_by=d_by,
                     drafted_at=_iso(d_at),
                     draft_request_hash=d_hash,
@@ -228,6 +239,7 @@ def _db_row(row: VerifiedRow) -> dict:
         "printed_page": row.printed_page,
         "row_label": row.row_label,
         "drafted_row_label": row.draft.row_label,
+        "drafted_method": row.draft.method,
         "column_header": row.column_header,
         "notes": row.notes,
         "drafted_by": row.draft.drafted_by,
@@ -245,7 +257,8 @@ def _db_row(row: VerifiedRow) -> dict:
 _COLUMNS = [
     "source_id", "company", "period_start", "period_end", "scope", "scope3_category",
     "figure_printed", "figure", "drafted_figure_printed", "unit", "method", "pdf_page",
-    "printed_page", "row_label", "drafted_row_label", "column_header", "notes", "drafted_by",
+    "printed_page", "row_label", "drafted_row_label", "drafted_method", "column_header", "notes",
+    "drafted_by",
     "drafted_at", "draft_request_hash", "page_image_sha256", "blind_sample",
     "blind_figure_printed", "verified_by", "verified_at", "verification",
 ]  # fmt: skip
@@ -254,6 +267,7 @@ _FIND = f"""
 select {", ".join(_COLUMNS)} from peer_disclosures
 where source_id = %(source_id)s and pdf_page = %(pdf_page)s
   and drafted_row_label = %(drafted_row_label)s and column_header = %(column_header)s
+  and drafted_method is not distinct from %(drafted_method)s
 """
 _INSERT = f"""
 insert into peer_disclosures ({", ".join(_COLUMNS)})

@@ -13,6 +13,13 @@ committed: the figure is then "already at HEAD". Two checks:
 A figure already present at BASE in the same file is reported separately, not failed: short
 numbers (a page count, a hash fragment) coincide. The allowed file is never searched.
 
+A new coincidence - a number in the code that happens to equal a peer figure, like the
+OpenAI timeout in seconds - is exempted only by an entry the author has reviewed, in
+`data/leak_check_coincidences.json`: one path and one figure, with the reason, the reviewer
+and the date (`split_reviewed`). The same figure in any other file still fails, every
+exemption is printed on every run, and an entry that matches nothing is reported so the
+list cannot outlive its reason.
+
 Matching is on the figure as printed, with no digit, comma or decimal part on either side,
 so "1,234" does not match inside "21,234" or "1,234.5".
 """
@@ -21,9 +28,10 @@ from __future__ import annotations
 
 import re
 import subprocess
+from datetime import date
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Leak(BaseModel):
@@ -33,6 +41,42 @@ class Leak(BaseModel):
     path: str
     figure: str
     at_base: bool  # present in this file at BASE already: listed, not failed
+
+
+class Coincidence(BaseModel):
+    """One reviewed exemption: this figure in this file is not a peer figure."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    path: str = Field(min_length=1)
+    figure: str = Field(min_length=1)
+    reason: str = Field(min_length=1)
+    reviewed_by: str = Field(min_length=1)
+    reviewed_on: date
+
+
+class Coincidences(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    note: str
+    entries: list[Coincidence]
+
+
+def read_coincidences(path: Path) -> list[Coincidence]:
+    return Coincidences.model_validate_json(path.read_text()).entries if path.exists() else []
+
+
+def split_reviewed(
+    leaks: list[Leak], entries: list[Coincidence]
+) -> tuple[list[Leak], list[Leak], list[Coincidence]]:
+    """(reviewed, failing, unused): a leak is reviewed only if an entry names its exact path
+    and figure. Pure."""
+    exempt = {(e.path, e.figure) for e in entries}
+    reviewed = [leak for leak in leaks if (leak.path, leak.figure) in exempt]
+    failing = [leak for leak in leaks if (leak.path, leak.figure) not in exempt]
+    hit = {(leak.path, leak.figure) for leak in reviewed}
+    unused = [e for e in entries if (e.path, e.figure) not in hit]
+    return reviewed, failing, unused
 
 
 def significant(figure: str) -> bool:
@@ -92,4 +136,12 @@ def find_leaks(
     return leaks
 
 
-__all__ = ["Leak", "find_leaks", "significant"]
+__all__ = [
+    "Coincidence",
+    "Coincidences",
+    "Leak",
+    "find_leaks",
+    "read_coincidences",
+    "significant",
+    "split_reviewed",
+]

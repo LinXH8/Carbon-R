@@ -46,6 +46,7 @@ def _row(**overrides) -> dict:
         "draft": {
             "figure_printed": "1,234",
             "row_label": "Scope 1",
+            "method": None,
             "drafted_by": "zz-model",
             "drafted_at": "2026-10-29T00:00:00+00:00",
             "draft_request_hash": "zz",
@@ -128,10 +129,11 @@ def test_export_then_load_round_trips_and_a_second_load_changes_nothing():
         "row_label": "Scope 2¹", "drafted_row_label": "Scope 2¹", "column_header": "2025",
         "notes": None, "drafted_by": "zz-model", "drafted_at": "2026-10-29T01:02:03.456+00:00",
         "draft_request_hash": "zz", "page_image_sha256": "0" * 64, "blind_sample": True,
+        "drafted_method": "market",
     }  # fmt: skip
     with connect() as conn:
         try:
-            for name in ("0006_peer_disclosures.sql",):
+            for name in ("0006_peer_disclosures.sql", "0007_peer_cell_key_method.sql"):
                 conn.execute((MIGRATIONS_DIR / name).read_text())
             conn.execute(
                 "insert into sources (id, title, publisher, year, url, retrieved_at, sha256, "
@@ -143,7 +145,7 @@ def test_export_then_load_round_trips_and_a_second_load_changes_nothing():
             conn.execute(
                 "update peer_disclosures set verified_by = 'author', "
                 "verified_at = '2026-10-29T04:05:06.789+00:00', verification = 'corrected', "
-                "row_label = 'Scope 2', blind_figure_printed = '1,234' "
+                "row_label = 'Scope 2', method = null, blind_figure_printed = '1,234' "
                 "where source_id = 'zz_test_source' and drafted_row_label = 'Scope 2¹'"
             )
             first = export_rows(conn, ["zz_test_source"])
@@ -166,6 +168,7 @@ def test_export_then_load_round_trips_and_a_second_load_changes_nothing():
 
     assert len(first.rows) == 1  # the unverified draft is not exported
     (row,) = first.rows
+    assert row.method is None and row.draft.method == "market"  # a corrected method
     assert (row.row_label, row.draft.row_label, row.blind.author_value) == (
         "Scope 2",
         "Scope 2¹",

@@ -13,6 +13,7 @@
         "drafted_at": "2026-10-29T08:02:34+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "28,660",
+        "method": null,
         "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
         "row_label": "Category 1: Purchased Goods and Services"
       },
@@ -47,6 +48,7 @@
         "drafted_at": "2026-10-29T08:02:34+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "9,479",
+        "method": null,
         "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
         "row_label": "Category 2:Capital Goods"
       },
@@ -81,6 +83,7 @@
         "drafted_at": "2026-10-29T08:02:34+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "10,362",
+        "method": null,
         "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
         "row_label": "Category 3: Fuel- and energy-related activities"
       },
@@ -115,6 +118,7 @@
         "drafted_at": "2026-10-29T08:02:34+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "10",
+        "method": null,
         "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
         "row_label": "Category 4: Upstream Transportation and Distribution"
       },
@@ -149,6 +153,7 @@
         "drafted_at": "2026-10-29T08:02:34+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "338",
+        "method": null,
         "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
         "row_label": "Scope 1"
       },
@@ -183,6 +188,7 @@
         "drafted_at": "2026-10-29T08:02:34+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "36,521",
+        "method": "location",
         "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
         "row_label": "Scope 2 (Location-based)"
       },
@@ -217,6 +223,7 @@
         "drafted_at": "2026-10-29T08:02:34+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "30,710",
+        "method": "market",
         "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
         "row_label": "Scope 2 (Market-based)"
       },
@@ -251,6 +258,7 @@
         "drafted_at": "2026-10-29T08:02:34+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "156,183",
+        "method": null,
         "page_image_sha256": "c60928d5f0bf7a7917d301c99245b6d9d68b7ee67a53ac837f3e7ac89c289b1c",
         "row_label": "Scope 3 comprising of the following:"
       },
@@ -285,6 +293,7 @@
         "drafted_at": "2026-10-29T08:02:54+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "552",
+        "method": null,
         "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
         "row_label": "Category 13: Electric Vehicle"
       },
@@ -319,6 +328,7 @@
         "drafted_at": "2026-10-29T08:02:54+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "102,099",
+        "method": null,
         "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
         "row_label": "Category 13: Tenants’ energy consumption"
       },
@@ -353,6 +363,7 @@
         "drafted_at": "2026-10-29T08:02:54+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "1,314",
+        "method": null,
         "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
         "row_label": "Category 15: Investment"
       },
@@ -387,6 +398,7 @@
         "drafted_at": "2026-10-29T08:02:54+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "3,667",
+        "method": null,
         "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
         "row_label": "Category 5: Waste generated in own operations"
       },
@@ -421,6 +433,7 @@
         "drafted_at": "2026-10-29T08:02:54+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "40",
+        "method": null,
         "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
         "row_label": "Category 6: Corporate air travel and land travel"
       },
@@ -455,6 +468,7 @@
         "drafted_at": "2026-10-29T08:02:54+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "36,859",
+        "method": "location",
         "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
         "row_label": "Total Carbon Emission (Scope 1 and 2) Location-based"
       },
@@ -489,6 +503,7 @@
         "drafted_at": "2026-10-29T08:02:54+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "31,048",
+        "method": "market",
         "page_image_sha256": "c86e989137e5a31b98fdac9a4aff48ee9cb957bd06b53d1ebd39e2303b2d6846",
         "row_label": "Total Carbon Emission (Scope 1 and 2) Market-based"
       },
@@ -523,6 +538,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "1,464",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 13: Electric Vehicle"
       },
@@ -557,6 +573,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "141,808",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 13: Tenants’ energy consumption"
       },
@@ -591,6 +608,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "1,314",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 15: Investment"
       },
@@ -625,6 +643,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "28,660",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 1: Purchased Goods and Services"
       },
@@ -659,6 +678,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "9,479",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 2:Capital Goods"
       },
@@ -693,6 +713,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "14,291",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 3: Fuel- and energy-related activities"
       },
@@ -727,6 +748,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "10",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 4: Upstream Transportation and Distribution"
       },
@@ -761,6 +783,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "4,300",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 5: Waste generated in own operations"
       },
@@ -795,6 +818,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "40",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Category 6: Corporate air travel and land travel"
       },
@@ -829,6 +853,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "3,108",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Scope 1"
       },
@@ -863,6 +888,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "48,265",
+        "method": "location",
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Scope 2 (Location-based)"
       },
@@ -897,6 +923,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "39,757",
+        "method": "market",
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Scope 2 (Market-based)"
       },
@@ -931,6 +958,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "201,367",
+        "method": null,
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Scope 3 comprising of the following:"
       },
@@ -965,6 +993,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "51,373",
+        "method": "location",
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Total Carbon Emission (Scope 1 and 2) Location-based"
       },
@@ -999,6 +1028,7 @@
         "drafted_at": "2026-10-29T09:34:08+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "42,865",
+        "method": "market",
         "page_image_sha256": "71062ee6ab75207121920518a2d7e6707b2167232cd35d85c1e6d4b7b258d1d6",
         "row_label": "Total Carbon Emission (Scope 1 and 2) Market-based"
       },
@@ -1033,6 +1063,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "75",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Backup generators"
       },
@@ -1067,6 +1098,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "120",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Category 13: Downstream leased assets²¹"
       },
@@ -1101,6 +1133,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "14,281",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Category 3: Fuel-and-energy-related activities¹⁵"
       },
@@ -1135,6 +1168,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "943",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Category 4: Upstream transportation and distribution¹⁶"
       },
@@ -1169,6 +1203,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "187",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Category 5: Waste generated in operations¹⁷"
       },
@@ -1203,6 +1238,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "13,209",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Category 6: Business travel¹⁸"
       },
@@ -1237,6 +1273,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "1,266",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Category 7: Employee commuting¹⁹"
       },
@@ -1271,6 +1308,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "21,981",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Category 8: Upstream leased assets²⁰"
       },
@@ -1305,6 +1343,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "4",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Owned vehicle transport"
       },
@@ -1339,6 +1378,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "5,555",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Purchased cooling"
       },
@@ -1373,6 +1413,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "44,536",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Purchased electricity¹³"
       },
@@ -1407,6 +1448,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "1,069",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Refrigerants and fire retardants"
       },
@@ -1441,6 +1483,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "103,226",
+        "method": "location",
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Total GHG emissions, location-based (tCO₂e) = a + b(i) + c"
       },
@@ -1475,6 +1518,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "76,706",
+        "method": "market",
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "Total GHG emissions, market-based (tCO₂e) = a + b(ii) + c"
       },
@@ -1509,6 +1553,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "1,148",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "a) Total scope 1¹⁹"
       },
@@ -1543,6 +1588,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "50,091",
+        "method": "location",
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "b(i) Total scope 2 (location-based)¹¹"
       },
@@ -1577,6 +1623,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "23,571",
+        "method": "market",
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "b(ii) Total scope 2 (market-based)¹²"
       },
@@ -1611,6 +1658,7 @@
         "drafted_at": "2026-10-29T08:02:10+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "51,987",
+        "method": null,
         "page_image_sha256": "23ecd3a2c0c5e7f6fc2f1a3a09b1848d220195c73130ff26ba3466b1f9dbea69",
         "row_label": "c) Total operational scope 3"
       },
@@ -1639,12 +1687,188 @@
         "in_sample": false
       },
       "column_header": "2025",
+      "company": "OCBC",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:01+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2,001",
+        "method": null,
+        "page_image_sha256": "a6335f881fb8c6f13d5620dfee3fe08d30a363684494edd721f264ea89941c98",
+        "row_label": "Scope 1 (tCO₂e)"
+      },
+      "figure": "2001",
+      "figure_printed": "2,001",
+      "method": null,
+      "notes": "footnote marker(s) printed: '34'",
+      "pdf_page": 58,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 57,
+      "row_label": "Scope 1 (tCO₂e)",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_ocbc_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:49.750610+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "OCBC",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:01+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "78,650",
+        "method": "location",
+        "page_image_sha256": "a6335f881fb8c6f13d5620dfee3fe08d30a363684494edd721f264ea89941c98",
+        "row_label": "Scope 2 (location-based) (tCO₂e)"
+      },
+      "figure": "78650",
+      "figure_printed": "78,650",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 (location-based)'; footnote marker(s) printed: '35'",
+      "pdf_page": 58,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 57,
+      "row_label": "Scope 2 (location-based) (tCO₂e)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_ocbc_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:49.750610+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "OCBC",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:01+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "30,551",
+        "method": "market",
+        "page_image_sha256": "a6335f881fb8c6f13d5620dfee3fe08d30a363684494edd721f264ea89941c98",
+        "row_label": "Scope 2 (market-based) (tCO₂e)"
+      },
+      "figure": "30551",
+      "figure_printed": "30,551",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 (market-based)'; footnote marker(s) printed: '36'",
+      "pdf_page": 58,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 57,
+      "row_label": "Scope 2 (market-based) (tCO₂e)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_ocbc_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:49.750610+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "OCBC",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:01+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "3,657",
+        "method": null,
+        "page_image_sha256": "a6335f881fb8c6f13d5620dfee3fe08d30a363684494edd721f264ea89941c98",
+        "row_label": "Scope 3 (tCO₂e)"
+      },
+      "figure": "3657",
+      "figure_printed": "3,657",
+      "method": null,
+      "notes": "footnote marker(s) printed: '37'",
+      "pdf_page": 58,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 57,
+      "row_label": "Scope 3 (tCO₂e)",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_ocbc_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:49.750610+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "36,209",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "OCBC",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:01+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "36,209",
+        "method": "market",
+        "page_image_sha256": "a6335f881fb8c6f13d5620dfee3fe08d30a363684494edd721f264ea89941c98",
+        "row_label": "Total emissions (tCO₂e)"
+      },
+      "figure": "36209",
+      "figure_printed": "36,209",
+      "method": null,
+      "notes": "method stated as: 'Scope 2 (market-based)'; footnote marker(s) printed: '33'; method corrected: drafted 'market', verified as not stated; verified (corrected): Label states no method; the printed Scope 1, Scope 2 market-based and Scope 3 rows sum to this total.",
+      "pdf_page": 58,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 57,
+      "row_label": "Total emissions (tCO₂e)",
+      "scope": "1+2+3",
+      "scope3_category": null,
+      "source_id": "peer_ocbc_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "corrected",
+        "verified_at": "2026-11-01T17:28:49.750610+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
       "company": "Sembcorp",
       "draft": {
         "draft_request_hash": "fb134cb6",
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "2,596.3",
+        "method": null,
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Category 11 – Use of sold products"
       },
@@ -1679,6 +1903,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "9,867.8",
+        "method": null,
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Category 15 – Investments"
       },
@@ -1713,6 +1938,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "2,876.1",
+        "method": null,
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Category 3 – Fuel- and energy-related activities"
       },
@@ -1747,6 +1973,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "7,425.4",
+        "method": null,
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Scope 1 emissions"
       },
@@ -1781,6 +2008,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "3,080.0",
+        "method": null,
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Scope 1 emissions > Joint ventures & associates"
       },
@@ -1815,6 +2043,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "4,345.4",
+        "method": null,
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Scope 1 emissions > Subsidiaries"
       },
@@ -1849,6 +2078,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "282.9",
+        "method": "location",
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Scope 2 emissions"
       },
@@ -1883,6 +2113,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "89.2",
+        "method": "location",
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Scope 2 emissions > Joint ventures & associates"
       },
@@ -1917,6 +2148,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "193.7",
+        "method": "location",
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Scope 2 emissions > Subsidiaries"
       },
@@ -1951,6 +2183,7 @@
         "drafted_at": "2026-10-29T09:35:26+00:00",
         "drafted_by": "gpt-5.5-2026-04-23",
         "figure_printed": "15,340.2",
+        "method": null,
         "page_image_sha256": "1f5af7a04b0210929d11ab2c53c58c7a1f752e366fc8478e4e6b1a8100b2facc",
         "row_label": "Scope 3 emissions"
       },
@@ -1970,6 +2203,846 @@
       "verification": {
         "outcome": "confirmed",
         "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:20+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "0.2",
+        "method": null,
+        "page_image_sha256": "e2e5ba9de143c537faa6198cb1e22a8b1930c06fba43e6e67a81b3a3247a6b00",
+        "row_label": "Scope 1 > Fuel combustion"
+      },
+      "figure": "0.2",
+      "figure_printed": "0.2",
+      "method": null,
+      "notes": "footnote marker(s) printed: '40'",
+      "pdf_page": 135,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 134,
+      "row_label": "Scope 1 > Fuel combustion",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:20+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2.1",
+        "method": null,
+        "page_image_sha256": "e2e5ba9de143c537faa6198cb1e22a8b1930c06fba43e6e67a81b3a3247a6b00",
+        "row_label": "Scope 1 > Owned/leased vehicles"
+      },
+      "figure": "2.1",
+      "figure_printed": "2.1",
+      "method": null,
+      "notes": "footnote marker(s) printed: '40'",
+      "pdf_page": 135,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 134,
+      "row_label": "Scope 1 > Owned/leased vehicles",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:20+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1.9",
+        "method": null,
+        "page_image_sha256": "e2e5ba9de143c537faa6198cb1e22a8b1930c06fba43e6e67a81b3a3247a6b00",
+        "row_label": "Scope 1 > Refrigerants"
+      },
+      "figure": "1.9",
+      "figure_printed": "1.9",
+      "method": null,
+      "notes": "footnote marker(s) printed: '40'",
+      "pdf_page": 135,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 134,
+      "row_label": "Scope 1 > Refrigerants",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:17:20+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4.2",
+        "method": null,
+        "page_image_sha256": "e2e5ba9de143c537faa6198cb1e22a8b1930c06fba43e6e67a81b3a3247a6b00",
+        "row_label": "Scope 1 > Total"
+      },
+      "figure": "4.2",
+      "figure_printed": "4.2",
+      "method": null,
+      "notes": "footnote marker(s) printed: '40'",
+      "pdf_page": 135,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 134,
+      "row_label": "Scope 1 > Total",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2.4",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > Greater China"
+      },
+      "figure": "2.4",
+      "figure_printed": "2.4",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > Greater China",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "16.3",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > Indonesia"
+      },
+      "figure": "16.3",
+      "figure_printed": "16.3",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > Indonesia",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "13.3",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > Malaysia"
+      },
+      "figure": "13.3",
+      "figure_printed": "13.3",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > Malaysia",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "2.3",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2.3",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > Overseas branches and other subsidiaries"
+      },
+      "figure": "2.3",
+      "figure_printed": "2.3",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35, 36'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > Overseas branches and other subsidiaries",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "24.5",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > Singapore"
+      },
+      "figure": "24.5",
+      "figure_printed": "24.5",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > Singapore",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10.6",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > Thailand"
+      },
+      "figure": "10.6",
+      "figure_printed": "10.6",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > Thailand",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "70.2",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > Total"
+      },
+      "figure": "70.2",
+      "figure_printed": "70.2",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > Total",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "0.2",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "0.2",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > UOI"
+      },
+      "figure": "0.2",
+      "figure_printed": "0.2",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35'; verified (confirmed): Printed below Total. The country rows sum to Total without UOI, consistent with p.2: Group excludes United Overseas Insurance.",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > UOI",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "0.9",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 location-based > Vietnam"
+      },
+      "figure": "0.9",
+      "figure_printed": "0.9",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 location-based'; footnote marker(s) printed: '35'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 location-based > Vietnam",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2.3",
+        "method": "market",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 2 market-based > Total"
+      },
+      "figure": "2.3",
+      "figure_printed": "2.3",
+      "method": "market",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Scope 2 market-based'; footnote marker(s) printed: '41'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 2 market-based > Total",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "4.0",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4.0",
+        "method": null,
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 3 non-financed > Business travel"
+      },
+      "figure": "4.0",
+      "figure_printed": "4.0",
+      "method": null,
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; footnote marker(s) printed: '43'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 3 non-financed > Business travel",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "0.5",
+        "method": null,
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Scope 3 non-financed > Waste generated in operations"
+      },
+      "figure": "0.5",
+      "figure_printed": "0.5",
+      "method": null,
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; footnote marker(s) printed: '42'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Scope 3 non-financed > Waste generated in operations",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "78.9",
+        "method": "location",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Total operational emissions > Total Scope 1, Scope 2 location-based and Scope 3"
+      },
+      "figure": "78.9",
+      "figure_printed": "78.9",
+      "method": "location",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Total Scope 1, Scope 2 location-based and Scope 3'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Total operational emissions > Total Scope 1, Scope 2 location-based and Scope 3",
+      "scope": "1+2+3",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "10.6",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-10-31T11:18:10+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10.6",
+        "method": "market",
+        "page_image_sha256": "25d4860a45d686a24d59a1816f70013fb538a105f7725fc624de5bd725bf6ed3",
+        "row_label": "Total operational emissions > Total Scope 1, Scope 2 market-based and Scope 3"
+      },
+      "figure": "10.6",
+      "figure_printed": "10.6",
+      "method": "market",
+      "notes": "unit 'thousand tCO2e' printed on PDF p.135, not on this page: carried because the author declared that the table continues from that page; method stated as: 'Total Scope 1, Scope 2 market-based and Scope 3'",
+      "pdf_page": 136,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 135,
+      "row_label": "Total operational emissions > Total Scope 1, Scope 2 market-based and Scope 3",
+      "scope": "1+2+3",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Coverage",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-01T16:10:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4.2",
+        "method": null,
+        "page_image_sha256": "f40c40cc14c3a58ec2eea3272eedb7ef9a59c6268eb1d339c374051abf8cb250",
+        "row_label": "Direct (Scope 1) GHG emissions"
+      },
+      "figure": "4.2",
+      "figure_printed": "4.2",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page; footnote marker(s) printed: '1'",
+      "pdf_page": 189,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 188,
+      "row_label": "Direct (Scope 1) GHG emissions",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Coverage",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-01T16:10:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "70.2",
+        "method": "location",
+        "page_image_sha256": "f40c40cc14c3a58ec2eea3272eedb7ef9a59c6268eb1d339c374051abf8cb250",
+        "row_label": "Energy indirect (Scope 2) GHG emissions"
+      },
+      "figure": "70.2",
+      "figure_printed": "70.2",
+      "method": "location",
+      "notes": "no year column printed: year 2025 declared by the author for this page; method stated as: 'Generation of Scope 2 emissions (location-based)'",
+      "pdf_page": 189,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 188,
+      "row_label": "Energy indirect (Scope 2) GHG emissions",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "2.3",
+        "in_sample": true
+      },
+      "column_header": "Coverage",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-01T16:10:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2.3",
+        "method": "market",
+        "page_image_sha256": "f40c40cc14c3a58ec2eea3272eedb7ef9a59c6268eb1d339c374051abf8cb250",
+        "row_label": "Energy indirect (Scope 2) GHG emissions"
+      },
+      "figure": "2.3",
+      "figure_printed": "2.3",
+      "method": "market",
+      "notes": "no year column printed: year 2025 declared by the author for this page; method stated as: 'Generation of Scope 2 emissions (market-based)'; footnote marker(s) printed: '4'",
+      "pdf_page": 189,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 188,
+      "row_label": "Energy indirect (Scope 2) GHG emissions",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Coverage",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-01T16:10:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4.0",
+        "method": null,
+        "page_image_sha256": "f40c40cc14c3a58ec2eea3272eedb7ef9a59c6268eb1d339c374051abf8cb250",
+        "row_label": "Other indirect (Scope 3) emissions"
+      },
+      "figure": "4.0",
+      "figure_printed": "4.0",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page; footnote marker(s) printed: '5'",
+      "pdf_page": 189,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 188,
+      "row_label": "Other indirect (Scope 3) emissions",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Coverage",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-01T16:10:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "78.9",
+        "method": "location",
+        "page_image_sha256": "f40c40cc14c3a58ec2eea3272eedb7ef9a59c6268eb1d339c374051abf8cb250",
+        "row_label": "Total GHG emissions"
+      },
+      "figure": "78.9",
+      "figure_printed": "78.9",
+      "method": "location",
+      "notes": "no year column printed: year 2025 declared by the author for this page; method stated as: 'Total Scope 1, Scope 2 (location-based), Scope 3 emissions'",
+      "pdf_page": 189,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 188,
+      "row_label": "Total GHG emissions",
+      "scope": "1+2+3",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Coverage",
+      "company": "UOB",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-01T16:10:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10.6",
+        "method": "market",
+        "page_image_sha256": "f40c40cc14c3a58ec2eea3272eedb7ef9a59c6268eb1d339c374051abf8cb250",
+        "row_label": "Total GHG emissions"
+      },
+      "figure": "10.6",
+      "figure_printed": "10.6",
+      "method": "market",
+      "notes": "no year column printed: year 2025 declared by the author for this page; method stated as: 'Total Scope 1, Scope 2 (market-based), Scope 3 emissions'",
+      "pdf_page": 189,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 188,
+      "row_label": "Total GHG emissions",
+      "scope": "1+2+3",
+      "scope3_category": null,
+      "source_id": "peer_uob_2025",
+      "unit": "thousand tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-01T17:28:52.402057+00:00",
         "verified_by": "Lin Xiang Hong"
       }
     }

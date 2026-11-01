@@ -10,10 +10,13 @@ from carbon_r.config import get_settings
 from carbon_r.db import MIGRATIONS_DIR
 from carbon_r.models.peer_disclosure import (
     UPSERT_DISCLOSURE,
+    CarriedUnit,
     DraftedCell,
     PeerDisclosure,
     PeerTableReading,
     blind_sample,
+    cell_year,
+    continued_unit,
     parse_figure,
     report_year_of_header,
     to_disclosures,
@@ -274,7 +277,7 @@ def test_the_blind_sample_takes_at_least_one():
 
 @pytest.mark.skipif(not get_settings().database_configured, reason="DATABASE_URL not configured")
 def test_the_table_keeps_drafts_out_of_the_verified_view_and_never_overwrites_a_verified_row():
-    """Applies 0006 and runs the loader's upsert inside a transaction that is rolled back."""
+    """Applies 0006-0007 and runs the loader's upsert in a transaction that is rolled back."""
     import psycopg
 
     from carbon_r.db import connect
@@ -288,7 +291,8 @@ def test_the_table_keeps_drafts_out_of_the_verified_view_and_never_overwrites_a_
     }
     with connect() as conn:
         try:
-            conn.execute((MIGRATIONS_DIR / "0006_peer_disclosures.sql").read_text())
+            for name in ("0006_peer_disclosures.sql", "0007_peer_cell_key_method.sql"):
+                conn.execute((MIGRATIONS_DIR / name).read_text())
             conn.execute(
                 "insert into sources (id, title, publisher, year, url, retrieved_at, sha256, "
                 "kind, verification_status) values ('zz_test_source', 't', 'p', 1999, 'u', "
@@ -355,3 +359,213 @@ def test_the_table_keeps_drafts_out_of_the_verified_view_and_never_overwrites_a_
     assert redraft is None and kept == "1,234"
     assert reload is None and count == 1
     assert rejected_in_view == 0
+
+
+# --- a unit printed on the page before (2b: UOB's table runs over PDF p.135-136) ------------
+
+
+def _titled(title: str | None, *cells: DraftedCell) -> PeerTableReading:
+    return PeerTableReading(
+        page_has_ghg_table=True, table_title_printed=title, cells=list(cells), notes=None
+    )
+
+
+START = _titled("Sustainability in Numbers", _cell(unit_printed="thousand tCO2e"))
+CONTINUED = _titled("Sustainability in Numbers", _cell(row_label_printed="Total", unit_printed=""))
+
+
+def test_a_blank_unit_is_carried_from_the_page_before_when_the_table_continues():
+    carried = continued_unit(CONTINUED, 136, (135, START))
+    assert carried == CarriedUnit(unit="thousand tCO2e", from_pdf_page=135, basis="same_title")
+    page = to_disclosures(CONTINUED, _source(), pdf_page=136, carried_unit=carried)
+    (row,) = page.rows
+    assert row.unit == "thousand tCO2e"
+    assert "unit 'thousand tCO2e' printed on PDF p.135, not on this page" in row.notes
+    assert page.outcomes == ["kept"]
+
+
+def test_without_a_carried_unit_the_blank_unit_is_still_dropped():
+    page = to_disclosures(CONTINUED, _source(), pdf_page=136)
+    assert page.rows == [] and page.dropped == {"unit_not_ghg": 1}
+    assert page.outcomes == ["unit_not_ghg"]
+
+
+@pytest.mark.parametrize(
+    ("reading", "pdf_page", "previous"),
+    [
+        (CONTINUED, 137, (135, START)),  # not the page right before
+        (_titled("Other table", _cell(unit_printed="")), 136, (135, START)),  # another table
+        (_titled(None, _cell(unit_printed="")), 136, (135, _titled(None, _cell()))),  # no title
+        (CONTINUED, 136, None),  # the first page drafted
+        (
+            CONTINUED,
+            136,
+            (
+                135,
+                _titled(
+                    "Sustainability in Numbers",
+                    _cell(unit_printed="tCO2e"),
+                    _cell(row_label_printed="x", unit_printed="ktCO2e"),
+                ),
+            ),
+        ),  # two units before: which one is not Python's to guess  # fmt: skip
+        (_titled("Sustainability in Numbers", _cell()), 136, (135, START)),  # nothing blank
+    ],
+)
+def test_no_unit_is_carried_unless_every_condition_holds(reading, pdf_page, previous):
+    assert continued_unit(reading, pdf_page, previous) is None
+
+
+def test_a_carried_unit_never_replaces_a_printed_one():
+    reading = _titled("Sustainability in Numbers", _cell(unit_printed="MWh"))
+    carried = CarriedUnit(unit="thousand tCO2e", from_pdf_page=135, basis="same_title")
+    page = to_disclosures(reading, _source(), pdf_page=136, carried_unit=carried)
+    assert page.rows == [] and page.outcomes == ["unit_not_ghg"]
+
+
+def test_every_cell_has_an_outcome_in_order():
+    reading = _reading(
+        _cell(),
+        _cell(row_label_printed="Scope 2", column_header_printed="2024"),
+        _cell(row_label_printed="Scope 3", figure_printed="-"),
+    )
+    assert to_disclosures(reading, _source(), pdf_page=3).outcomes == [
+        "kept", "column_not_report_year", "no_figure",
+    ]  # fmt: skip
+
+
+# The model titled UOB p.135 by its table heading and p.136 by the running page header, so the
+# same-title condition failed on the real pages. The author declares that continuation instead.
+
+HEADER_TITLED = _titled("Page header", _cell(row_label_printed="Total", unit_printed=""))
+
+
+def test_a_declared_continuation_carries_the_unit_across_different_titles():
+    assert continued_unit(HEADER_TITLED, 136, (135, START)) is None
+    carried = continued_unit(HEADER_TITLED, 136, (135, START), declared=True)
+    assert carried == CarriedUnit(unit="thousand tCO2e", from_pdf_page=135, basis="declared")
+    (row,) = to_disclosures(HEADER_TITLED, _source(), pdf_page=136, carried_unit=carried).rows
+    assert "the author declared that the table continues from that page" in row.notes
+
+
+def test_a_declaration_does_not_lift_the_other_conditions():
+    two_units = _titled("T", _cell(unit_printed="tCO2e"),
+                        _cell(row_label_printed="x", unit_printed="ktCO2e"))  # fmt: skip
+    assert continued_unit(HEADER_TITLED, 137, (135, START), declared=True) is None
+    assert continued_unit(HEADER_TITLED, 136, (135, two_units), declared=True) is None
+    printed = _titled("Page header", _cell(unit_printed="tCO2e"))
+    assert continued_unit(printed, 136, (135, START), declared=True) is None
+
+
+# --- a page with no year column, its year declared by the author (UOB p.189) ---------------
+
+INLINE = _reading(
+    _cell(row_label_printed="Generation of Scope 1 emissions", column_header_printed=""),
+    _cell(row_label_printed="Scope 1", column_header_printed="2024"),
+    _cell(row_label_printed="Change", column_header_printed="2025 vs 2024"),
+)
+
+
+def test_without_a_declaration_a_cell_with_no_year_column_is_dropped():
+    page = to_disclosures(INLINE, _source(), pdf_page=189)
+    assert page.rows == []
+    assert page.outcomes == ["column_not_report_year"] * 3
+
+
+def test_a_declared_year_applies_only_to_a_header_that_names_no_year():
+    page = to_disclosures(INLINE, _source(), pdf_page=189, declared_year=2025)
+    assert page.outcomes == ["kept", "column_not_report_year", "column_not_report_year"]
+    (row,) = page.rows
+    assert row.row_label == "Generation of Scope 1 emissions"
+    assert "no year column printed: year 2025 declared by the author for this page" in row.notes
+
+
+def test_a_declared_year_other_than_the_reports_keeps_nothing():
+    page = to_disclosures(INLINE, _source(), pdf_page=189, declared_year=2024)
+    assert page.rows == []
+
+
+@pytest.mark.parametrize(
+    ("header", "declared", "year"),
+    [("", 2025, 2025), ("tCO2e", 2025, 2025), ("2024", 2025, 2024),
+     ("2025 vs 2024", 2025, None), ("", None, None), ("2025", None, 2025)],
+)  # fmt: skip
+def test_cell_year(header, declared, year):
+    assert cell_year(header, declared) == year
+
+
+# --- method is part of what makes a cell distinct (2b: UOB p.189) ---------------------------
+#
+# p.189 prints the location- and market-based figures under one row label and one column.
+
+
+def _scope2(method: str, **kw) -> DraftedCell:
+    return _cell(row_label_printed="Energy indirect (Scope 2) GHG emissions", scope="2",
+                 method=method, method_evidence_printed=f"({method}-based)", **kw)  # fmt: skip
+
+
+def test_two_cells_told_apart_only_by_method_are_both_kept():
+    page = to_disclosures(_reading(_scope2("location"), _scope2("market")), _source(), pdf_page=9)
+    assert page.outcomes == ["kept", "kept"]
+    assert [r.method for r in page.rows] == ["location", "market"]
+    assert page.rows[0].key != page.rows[1].key
+    assert [r.drafted_method for r in page.rows] == ["location", "market"]
+
+
+def test_two_cells_with_the_same_label_column_and_method_are_still_a_duplicate():
+    page = to_disclosures(_reading(_scope2("market"), _scope2("market")), _source(), pdf_page=9)
+    assert page.outcomes == ["kept", "duplicate_cell_key"]
+
+
+def test_a_method_not_kept_does_not_make_a_cell_distinct():
+    # A method on a Scope 1 row is not kept, so it cannot separate two Scope 1 cells.
+    page = to_disclosures(_reading(_cell(), _cell(method="market")), _source(), pdf_page=9)
+    assert page.outcomes == ["kept", "duplicate_cell_key"]
+
+
+@pytest.mark.skipif(not get_settings().database_configured, reason="DATABASE_URL not configured")
+def test_the_table_key_includes_the_method_and_treats_no_method_as_one_value():
+    """Applies 0006-0007 and the loader's upsert in a transaction that is rolled back."""
+    from carbon_r.db import connect
+
+    extra = {
+        "source_id": "zz_test_source",
+        "drafted_by": "zz-test-model",
+        "drafted_at": "2026-10-29T00:00:00+00:00",
+        "draft_request_hash": "zz",
+        "page_image_sha256": "0" * 64,
+    }
+    pair = to_disclosures(_reading(_scope2("location"), _scope2("market")), _source(), pdf_page=9)
+    scope1 = to_disclosures(_reading(_cell()), _source(), pdf_page=9).rows[0]
+    rows = [r.model_dump() | extra for r in [*pair.rows, scope1]]
+    with connect() as conn:
+        try:
+            for name in ("0006_peer_disclosures.sql", "0007_peer_cell_key_method.sql"):
+                conn.execute((MIGRATIONS_DIR / name).read_text())
+            conn.execute(
+                "insert into sources (id, title, publisher, year, url, retrieved_at, sha256, "
+                "kind, verification_status) values ('zz_test_source', 't', 'p', 1999, 'u', "
+                "'2026-10-29', repeat('0', 64), 'peer_report', 'secondary only')"
+            )
+            first = [conn.execute(UPSERT_DISCLOSURE, r).fetchone() for r in rows]
+            again = [conn.execute(UPSERT_DISCLOSURE, r).fetchone() for r in rows]
+            (count,) = conn.execute(
+                "select count(*) from peer_disclosures where source_id = 'zz_test_source'"
+            ).fetchone()
+            # The author corrects the market row's method to "not stated". Its key keeps the
+            # drafted method, so re-loading the original draft finds it and changes nothing.
+            conn.execute(
+                "update peer_disclosures set method = null, verification = 'corrected', "
+                "verified_by = 'author', verified_at = now() "
+                "where source_id = 'zz_test_source' and method = 'market'"
+            )
+            reload = conn.execute(UPSERT_DISCLOSURE, rows[1]).fetchone()
+            (after,) = conn.execute(
+                "select count(*) from peer_disclosures where source_id = 'zz_test_source'"
+            ).fetchone()
+        finally:
+            conn.rollback()
+    assert first == [(True,), (True,), (True,)]
+    assert again == [None, None, None]  # the no-method row too: no duplicate on a re-load
+    assert count == 3
+    assert reload is None and after == 3  # the misread is not re-inserted

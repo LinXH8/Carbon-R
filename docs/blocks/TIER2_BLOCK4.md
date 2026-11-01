@@ -789,3 +789,178 @@ for verified rows only:
   author against the cited page on the stated date, not independently assured, and that they
   are facts with page citations from reports that are not redistributed.
 
+
+---
+
+# Part B, pass 2b — agent access, completeness, OCBC and UOB (in progress: Steps 1-2 done)
+
+Recorded as it happens; counts are final only where marked.
+
+## The completeness measure: the first run was wrong
+
+Pass 2a measured whether each drafted cell matches its page, not whether the drafter
+skipped cells the page prints. For OCBC and UOB the author listed every report-year cell on
+each table page **before** the pages were drafted (the inventory). Then
+`verify_peer_disclosures.py completeness` paired that list with the draft. The inventory was
+drafted by Claude from the author's screenshots and then checked by the author against every
+page and row. So it is not an independent list: a cell that both Claude and the drafter
+miss cannot show up in this measure.
+
+**The first completeness run (31 Oct) reported wrong numbers**: OCBC "skipped 1 of 5", UOB
+"skipped 18 of 18". The drafter had in fact read every listed cell. Three defects in the
+measure caused this, and all three were fixed before any completeness number was recorded:
+
+1. **It compared the list with the rows Python kept, not with the cells the drafter read.**
+   UOB's 14 cells on p.136 were read and then dropped by the unit rule (see below), so they
+   were counted as skipped. The measure now reads every report-year cell the drafter read,
+   with what `to_disclosures` did to it (`report_year_cells`). Cells a rule dropped are
+   counted separately, by reason.
+2. **Labels under a group heading did not match.** The drafter writes a row under a heading
+   as "Scope 1 > Refrigerants"; the inventory has "Refrigerants". A drafted label now also
+   matches on its last ">" segment, taken whole. This is a fixed rule about the drafter's own
+   format, not fuzzy matching.
+3. **A method disagreement counted as a skipped cell plus an extra one.** OCBC's
+   "Total emissions" was listed with no method and drafted as market-based. After exact
+   matching, a second pass pairs cells that differ only in method. They are reported as
+   "method differs" and never counted as clean matches.
+
+Each fix was written test first. Each was then shown to matter by switching it off: with
+the fix removed, its own test fails (1, 2, 1 and 1 failures, the last for the unit carry
+below).
+
+Corrected run, same draft, same inventory, 0 model calls:
+
+| Report | Listed | Exact match | Method differs | Skipped | Read, not listed | Read, dropped by a rule |
+|---|---|---|---|---|---|---|
+| OCBC | 5 | 4 | 1 | 0 | 0 | 0 |
+| UOB | 18 | 18 | 0 | 0 | 0 | 14 (`unit_not_ghg`) |
+
+## A unit printed on the page before (UOB p.135-136)
+
+UOB's "Sustainability in Numbers" table runs over PDF p.135-136. Its unit heading,
+"Greenhouse gas (GHG) emissions (thousand tCO2e)", is printed on p.135 only. Reading p.136 on
+its own, the drafter left the unit blank and said so in its notes. Python drops a cell with
+no CO2e unit, so all 14 report-year cells on p.136 were dropped.
+
+The model is still not asked to carry anything. Python now carries a unit
+(`continued_unit`) only when all of these hold:
+
+- the cell's unit is blank;
+- the page before is the one drafted immediately before (pdf_page - 1);
+- the page before printed exactly one CO2e unit that is not an intensity;
+- the two pages are one table.
+
+The first version decided "one table" by the transcribed table title. On these very pages
+that test failed: the model titled p.135 with the table heading and p.136 with the running
+page header. The author then declared the continuation instead
+(`peer_sources.TABLE_CONTINUES`, p.136 continues p.135). A declaration replaces only the title
+test. Every carried row notes where its unit was printed and why it was carried, and the
+author checks both pages at verification. With the declaration ignored, its test fails.
+
+Re-drafted from the cached replies, 0 model calls: UOB 18 rows (p.135: 4, p.136: 14, unit
+carried from p.135). UOB's figures are in thousand tCO2e and are stored as printed, never
+converted.
+
+## UOB p.189: a page with no year column, and two figures under one label
+
+UOB's assurance statement (PDF p.189) prints the 2025 Scope 1, Scope 2 (location- and
+market-based), Scope 3 and two totals in thousand tCO2e. They sit inline in a "Coverage"
+column, not under a year header. Three changes were needed to draft it. Each was written
+test first and shown to matter by switching it off.
+
+**Its year is declared, not read.** `to_disclosures` keeps a cell only if its column header
+names the report's year, so every cell on this page would be dropped. The author read the
+year from the page and declared it (`peer_sources.PAGE_YEARS`, p.189 is 2025). A declared
+year dates only a cell whose header names no year at all. A header naming another year, or
+two years ("2025 vs 2024"), is still dropped. Each such row's notes say that the year was
+declared by the author. The page was first left out by Claude when the author had asked for
+it to be kept. It was restored before any figure was recorded.
+
+**Method is part of what makes a cell distinct (migration 0007).** On p.189 the location-
+and market-based figures share one row label and one column, told apart only by the words in
+the cell. Keyed on (source, page, label, column), the second of each pair was dropped as a
+duplicate, losing the market-based Scope 2 and the market-based total. The table's unique
+key, the drafter's duplicate check, the worksheet key and the verified file's key now include
+the method. The constraint is `unique nulls not distinct`: with nulls distinct, two rows with
+no method would never conflict, and a second load would duplicate them. A method is part of
+the key only where it is kept (a row that includes Scope 2). The order of the 58 verified
+rows is unchanged, and so is the blind draw for every report drafted before, since no two of
+their rows shared the old four-part key. `export` after the change is byte-identical to the
+committed file.
+
+**A hand pairing is reported as its own outcome.** The author listed the phrases in the
+Coverage cells ("Generation of Scope 1 emissions"); the drafter used the table's row labels
+("Direct (Scope 1) GHG emissions"). Both are printed. The author paired the six cells in
+`paired_draft_label`. `match_cells` reports these as "paired by hand", never as exact
+matches and never as skips.
+
+The six p.189 cells were listed by the author on 31 Oct, before p.189 was drafted, and added
+to the inventory before its one model call (28,299 tokens). p.135-136 were drafted before
+those six lines were added; their own lines did not change.
+
+Completeness, same drafts, 0 further model calls:
+
+| Report | Listed | Exact match | Paired by hand | Method differs | Skipped | Read, not listed | Read, dropped by a rule |
+|---|---|---|---|---|---|---|---|
+| OCBC | 5 | 4 | 0 | 1 | 0 | 0 | 0 |
+| UOB | 24 | 18 | 6 | 0 | 0 | 0 | 0 |
+
+The OCBC "method differs" cell is p.58 "Total emissions (tCO2e)": listed with no method,
+drafted as market-based. It is settled at verification.
+
+## Correcting a method at verification
+
+OCBC p.58 "Total emissions (tCO2e)" was drafted as market-based. Its label states no method.
+The worksheet could correct only a figure or a row label, and the author did not want the row
+rejected. A `correct_method` column now takes location, market or none. A correction is
+recorded in the row's notes ("method corrected: drafted 'market', verified as not stated").
+
+Since migration 0007 keys a cell on its method, correcting `method` in place would change the
+key, and a re-load of the original draft would insert the misread again. So the table keeps
+the drafted method in `drafted_method`, as `drafted_row_label` keeps the drafted label, and
+keys on that. The verified file carries it as `draft.method`. Each part was written test
+first; with the correction ignored, or with the key on the corrected method, a test fails.
+
+The row's drafted note "method stated as: 'Scope 2 (market-based)'" is kept, as all drafted
+notes are; the correction note after it supersedes it.
+
+## Verification of OCBC and UOB (2 Nov)
+
+The author entered the blind sample from the pages first, then checked every row sighted.
+Verified by Lin Xiang Hong.
+
+| Report | Rows | Confirmed | Corrected | Rejected | Blind matched |
+|---|---|---|---|---|---|
+| OCBC | 5 | 4 | 1 (method, p.58 total) | 0 | 1 of 1 |
+| UOB | 24 | 24 | 0 | 0 | 5 of 5 |
+
+Every drafted figure was read correctly. The author also confirmed the two values Python
+supplied rather than read from the cell: the p.136 unit (thousand tCO2e, carried from the
+p.135 table heading) and the p.189 year (2025, declared, no year column). The UOI row
+(p.136) is kept with a note: it is printed below Total, and the country rows sum to Total
+without it, consistent with p.2, where the Group excludes United Overseas Insurance.
+
+Across the five reports: 87 rows, 85 correct as drafted, 2 corrected (1 label, 1 method),
+blind 18 of 18. `apply` run twice: the second updated 0. `export` run twice: byte-identical.
+Loading the file back: 0 inserted, 87 unchanged.
+
+## The leak check and reviewed coincidences
+
+After drafting, the leak check failed on `120`, the OpenAI timeout in seconds (commit
+`91c263b`), because a peer figure is printed as the same number. Text matching cannot tell
+the two apart. Changing the timeout to pass the check was rejected: it would bend a
+measured setting to fit a test. Instead the author reviews each coincidence, and
+`data/leak_check_coincidences.json` exempts that one figure in that one file, with the
+reason, the reviewer and the date. The same figure anywhere else still fails. Every
+exemption is printed on every run, and an entry that matches nothing is reported. Three
+entries, all `120`: `llm.py`, `tests/test_llm.py`, and a comment in the drafter.
+
+## Known limits (OCBC and UOB)
+
+- Footnotes on OCBC and UOB figures were not reviewed; boundary, period or method caveats in
+  footnotes are not captured in notes.
+- The completeness inventory was drafted by Claude from the author's screenshots, then
+  checked by the author: a cell both missed would not show.
+- UOB p.189 is the assurance statement's selected GHG information. Its year is declared by
+  the author, not printed in a column.
+

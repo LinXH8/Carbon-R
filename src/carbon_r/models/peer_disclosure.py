@@ -146,6 +146,21 @@ def _full_year(digits: str) -> int:
 def report_year_of_header(header: str) -> int | None:
     """The single year a column header names (the END year of a split year), or None when it
     names none or more than one."""
+    years = _years_named(header)
+    return years[0] if len(years) == 1 else None
+
+
+def cell_year(header: str, declared_year: int | None = None) -> int | None:
+    """The year a cell is for: the one its header names, or - only when the header names no
+    year at all - the year the author declared for the page (`peer_sources.PAGE_YEARS`). A
+    header naming two years ("2025 vs 2024") stays None either way."""
+    years = _years_named(header)
+    if not years:
+        return declared_year
+    return years[0] if len(years) == 1 else None
+
+
+def _years_named(header: str) -> list[int]:
     years: list[int] = []
     rest = header
     for pattern in (_FY, _SPAN):
@@ -159,7 +174,7 @@ def report_year_of_header(header: str) -> int | None:
                 years += [_full_year(start), _full_year(end)]
         rest = pattern.sub(" ", rest)
     years += [int(y) for y in _YEAR.findall(rest)]
-    return years[0] if len(years) == 1 else None
+    return years
 
 
 # --- the figure ---------------------------------------------------------------------------
@@ -220,6 +235,8 @@ class PeerDisclosure(BaseModel):
     drafted_row_label: str
     column_header: str
     notes: str | None
+    # The method as drafted; `method` may be corrected at verification (migration 0007).
+    drafted_method: Method | None = None
     blind_sample: bool = False
 
     @model_validator(mode="after")
@@ -231,8 +248,15 @@ class PeerDisclosure(BaseModel):
         return self
 
     @property
-    def key(self) -> tuple[str, int, str, str]:
-        return (self.source_id, self.pdf_page, self.drafted_row_label, self.column_header)
+    def key(self) -> tuple[str, int, str, str, str]:
+        """What makes a cell distinct (migration 0007): the drafted method too, "" when none."""
+        return (
+            self.source_id,
+            self.pdf_page,
+            self.drafted_row_label,
+            self.column_header,
+            self.drafted_method or "",
+        )
 
 
 _COLUMNS = [
@@ -253,13 +277,14 @@ _COLUMNS = [
     "drafted_row_label",
     "column_header",
     "notes",
+    "drafted_method",
     "drafted_by",
     "drafted_at",
     "draft_request_hash",
     "page_image_sha256",
     "blind_sample",
 ]
-_KEY = ("source_id", "pdf_page", "drafted_row_label", "column_header")
+_KEY = ("source_id", "pdf_page", "drafted_row_label", "column_header", "drafted_method")
 _UPDATABLE = [c for c in _COLUMNS if c not in _KEY]
 
 # The loader's upsert. A verified row is never touched; an unchanged draft is not
@@ -278,57 +303,158 @@ returning (xmax = 0) as inserted
 
 
 class PageDraft(BaseModel):
-    """The rows kept from one page, and every cell that was not, counted by reason."""
+    """The rows kept from one page, every cell that was not counted by reason, and each cell's
+    outcome in reading order ("kept" or its drop reason), which completeness reads."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     rows: list[PeerDisclosure]
     dropped: dict[str, int]
     problems: list[str]
+    outcomes: list[str] = []
 
 
-def to_disclosures(reading: PeerTableReading, source: PeerSource, *, pdf_page: int) -> PageDraft:
+# --- a unit printed on the page before ------------------------------------------------------
+#
+# Added in 2b for UOB, whose "Sustainability in Numbers" table runs over PDF p.135-136 and
+# prints its unit heading ("... (thousand tCO2e)") only on p.135. The drafter, reading p.136
+# alone, rightly left the unit blank, and every cell there was dropped for having none.
+#
+# The model is not asked to carry anything. Python carries a unit only when all of these hold:
+# the cell's unit is blank (a printed unit is never replaced); the page before is the one
+# drafted immediately before it (pdf_page - 1); the two pages are one table; and the page
+# before printed exactly one CO2e unit that is not an intensity. Every carried row says so in
+# its notes, and the author checks it against both pages at verification.
+#
+# "One table" is either the same transcribed table title, or the author's declaration in
+# `peer_sources.TABLE_CONTINUES`. The declaration exists because the title test failed on the
+# very pages it was written for: the model titled UOB p.135 by its table heading and p.136 by
+# the running page header. A declaration replaces only the title test.
+
+
+class CarriedUnit(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    unit: str
+    from_pdf_page: int
+    # Why the two pages count as one table: the same transcribed title, or the author said so.
+    basis: Literal["same_title", "declared"]
+
+
+def _title(reading: PeerTableReading) -> str:
+    return " ".join((reading.table_title_printed or "").split()).casefold()
+
+
+def continued_unit(
+    reading: PeerTableReading,
+    pdf_page: int,
+    previous: tuple[int, PeerTableReading] | None,
+    *,
+    declared: bool = False,
+) -> CarriedUnit | None:
+    """The unit to carry onto this page's blank-unit cells, or None. Pure. `declared` is the
+    author's statement that this page continues the table on the page before."""
+    if previous is None:
+        return None
+    previous_page, before = previous
+    if previous_page != pdf_page - 1:
+        return None
+    same_title = bool(_title(reading)) and _title(reading) == _title(before)
+    if not (same_title or declared):
+        return None
+    if not any(not cell.unit_printed.strip() for cell in reading.cells):
+        return None
+    units = {
+        cell.unit_printed.strip()
+        for cell in before.cells
+        if _is_ghg_unit(cell.unit_printed) and not _is_intensity(cell.unit_printed)
+    }
+    if len(units) != 1:
+        return None
+    return CarriedUnit(
+        unit=units.pop(),
+        from_pdf_page=previous_page,
+        basis="same_title" if same_title else "declared",
+    )
+
+
+def to_disclosures(
+    reading: PeerTableReading,
+    source: PeerSource,
+    *,
+    pdf_page: int,
+    carried_unit: CarriedUnit | None = None,
+    declared_year: int | None = None,
+) -> PageDraft:
     """Pure: one page's reading -> draft rows. Page, period and printed page come from the
-    arguments and the registry; the figure is parsed here; the header decides the year."""
+    arguments and the registry; the figure is parsed here; the header decides the year.
+    `carried_unit` (see `continued_unit`) fills a blank unit and never replaces a printed one.
+    `declared_year` (see `cell_year`) dates only a cell whose header names no year."""
     offset = PRINTED_PAGE_OFFSETS.get(source.source_id)
     printed_page = pdf_page - offset if offset is not None else None
     dropped: Counter[str] = Counter()
     problems: list[str] = []
     rows: list[PeerDisclosure] = []
-    seen: set[tuple[str, str]] = set()
+    outcomes: list[str] = []
+    seen: set[tuple[str, str, str | None]] = set()
+
+    def drop(reason: str) -> None:
+        dropped[reason] += 1
+        outcomes.append(reason)
 
     for cell in reading.cells:
         figure_text = cell.figure_printed.strip()
+        unit = cell.unit_printed.strip()
+        carried = not unit and carried_unit is not None
+        if carried:
+            unit = carried_unit.unit  # type: ignore[union-attr]
         if figure_text.lower() in _BLANK:
-            dropped["no_figure"] += 1
+            drop("no_figure")
             continue
-        if report_year_of_header(cell.column_header_printed) != source.report_year:
-            dropped["column_not_report_year"] += 1
+        year_named = report_year_of_header(cell.column_header_printed)
+        if cell_year(cell.column_header_printed, declared_year) != source.report_year:
+            drop("column_not_report_year")
             continue
-        if not _is_ghg_unit(cell.unit_printed):
-            dropped["unit_not_ghg"] += 1
+        if not _is_ghg_unit(unit):
+            drop("unit_not_ghg")
             continue
-        if _is_intensity(cell.unit_printed):
-            dropped["intensity_unit"] += 1
+        if _is_intensity(unit):
+            drop("intensity_unit")
             continue
-        cell_key = (cell.row_label_printed, cell.column_header_printed)
+        # A method is kept only on a row that includes Scope 2, and only a kept method can
+        # tell two cells apart (UOB p.189 prints location and market under one label).
+        method = cell.method if includes_scope_2(cell.scope) else None
+        cell_key = (cell.row_label_printed, cell.column_header_printed, method)
         if cell_key in seen:
-            dropped["duplicate_cell_key"] += 1
+            drop("duplicate_cell_key")
             problems.append(
-                f"p.{pdf_page}: two cells share row {cell.row_label_printed!r} and column "
-                f"{cell.column_header_printed!r}; the second was dropped"
+                f"p.{pdf_page}: two cells share row {cell.row_label_printed!r}, column "
+                f"{cell.column_header_printed!r} and method {method}; the second was dropped"
             )
             continue
         seen.add(cell_key)
+        outcomes.append("kept")
 
         notes: list[str] = []
-        method = cell.method
-        if method is not None and not includes_scope_2(cell.scope):
+        if year_named is None:
+            notes.append(
+                f"no year column printed: year {declared_year} declared by the author for this page"
+            )
+        if carried:
+            reason = (
+                "the table continues under the same title"
+                if carried_unit.basis == "same_title"  # type: ignore[union-attr]
+                else "the author declared that the table continues from that page"
+            )
+            notes.append(
+                f"unit {unit!r} printed on PDF p.{carried_unit.from_pdf_page}, not on this "  # type: ignore[union-attr]
+                f"page: carried because {reason}"
+            )
+        if cell.method is not None and method is None:
             problems.append(
                 f"p.{pdf_page} {cell.row_label_printed!r}: method on scope {cell.scope}"
             )
-            notes.append(f"model gave method {method!r} on a scope {cell.scope} row; not kept")
-            method = None
+            notes.append(f"model gave method {cell.method!r} on a scope {cell.scope} row; not kept")
         if method is not None:
             notes.append(f"method stated as: {cell.method_evidence_printed!r}")
         category = cell.scope3_category
@@ -356,7 +482,7 @@ def to_disclosures(reading: PeerTableReading, source: PeerSource, *, pdf_page: i
                 figure_printed=figure_text,
                 figure=figure,
                 drafted_figure_printed=figure_text,
-                unit=cell.unit_printed.strip(),
+                unit=unit,
                 method=method,
                 pdf_page=pdf_page,
                 printed_page=printed_page,
@@ -364,9 +490,10 @@ def to_disclosures(reading: PeerTableReading, source: PeerSource, *, pdf_page: i
                 drafted_row_label=cell.row_label_printed.strip(),
                 column_header=cell.column_header_printed.strip(),
                 notes="; ".join(notes) or None,
+                drafted_method=method,
             )
         )
-    return PageDraft(rows=rows, dropped=dict(dropped), problems=problems)
+    return PageDraft(rows=rows, dropped=dict(dropped), problems=problems, outcomes=outcomes)
 
 
 # --- the blind sample (CLAUDE.md rule 4) --------------------------------------------------
@@ -380,8 +507,8 @@ BLIND_SEED = 20261029
 
 
 def blind_sample(
-    keys: list[tuple[str, int, str, str]], *, seed: int = BLIND_SEED, share: float = BLIND_SHARE
-) -> set[tuple[str, int, str, str]]:
+    keys: list[tuple], *, seed: int = BLIND_SEED, share: float = BLIND_SHARE
+) -> set[tuple]:
     if not keys:
         return set()
     ordered = sorted(set(keys))
@@ -393,13 +520,16 @@ __all__ = [
     "BLIND_SEED",
     "BLIND_SHARE",
     "DRAFT_INSTRUCTION",
+    "CarriedUnit",
     "DraftedCell",
     "PageDraft",
     "PeerDisclosure",
     "PeerTableReading",
     "UPSERT_DISCLOSURE",
     "blind_sample",
+    "continued_unit",
     "parse_figure",
+    "cell_year",
     "report_year_of_header",
     "to_disclosures",
 ]

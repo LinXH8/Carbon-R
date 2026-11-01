@@ -31,3 +31,22 @@ def test_an_assumed_start_is_never_labelled_stated():
 )
 def test_every_file_matches_its_recorded_bytes():
     assert check() == 0
+
+
+def test_every_declared_continuation_joins_two_consecutive_table_pages():
+    from carbon_r.peer_sources import TABLE_CONTINUES, TABLE_PAGES
+
+    for source_id, pages in TABLE_CONTINUES.items():
+        for page, before in pages.items():
+            assert before == page - 1, (source_id, page)
+            assert {page, before} <= set(TABLE_PAGES[source_id]), (source_id, page)
+
+
+def test_every_declared_page_year_is_a_table_page_of_the_reports_own_year():
+    from carbon_r.peer_sources import PAGE_YEARS, TABLE_PAGES
+    from carbon_r.sources import PEERS
+
+    for source_id, pages in PAGE_YEARS.items():
+        for page, year in pages.items():
+            assert page in TABLE_PAGES[source_id], (source_id, page)
+            assert year == PEERS[source_id].report_year, (source_id, page)

@@ -27,6 +27,8 @@ them (CLAUDE.md rule 4).
 
 `leak-check` enforces where real peer figures may be committed: verified ones in
 `data/peer_disclosures_verified.json` only, drafts and garbled readings nowhere (CLAUDE.md).
+A number that merely equals a peer figure passes only through an entry the author reviewed
+in `data/leak_check_coincidences.json` (see `carbon_r.leak_check`).
 
 Local only: the reports are git-ignored, so this never runs in CI.
 """
@@ -48,7 +50,7 @@ from openai import OpenAI, OpenAIError
 
 from carbon_r.config import PROJECT_ROOT, get_settings
 from carbon_r.db import DatabaseNotConfiguredError, apply_migrations, connect
-from carbon_r.leak_check import find_leaks, significant
+from carbon_r.leak_check import find_leaks, read_coincidences, significant, split_reviewed
 from carbon_r.llm import openai_client
 from carbon_r.models.peer_disclosure import (
     BLIND_SEED,
@@ -58,13 +60,16 @@ from carbon_r.models.peer_disclosure import (
     PeerDisclosure,
     PeerTableReading,
     blind_sample,
+    continued_unit,
     to_disclosures,
 )
+from carbon_r.models.peer_verification import inventory_digest
 from carbon_r.peer_disclosures_file import VERIFIED_FILE, read_file
-from carbon_r.peer_sources import TABLE_PAGES
+from carbon_r.peer_sources import PAGE_YEARS, TABLE_CONTINUES, TABLE_PAGES
 from carbon_r.rag.chunking import extract_pages
 from carbon_r.sources import BY_ID, PEERS, REGISTRY, UPSERT, check_local_files
 from carbon_r.tools.extract import _parse, rasterise_page, request_hash
+from verify_peer_disclosures import read_inventory
 
 DRAFT_DIR = PROJECT_ROOT / "data" / "generated" / "peer_drafts"
 REPLY_CACHE = PROJECT_ROOT / "data" / "generated" / ".cache" / "peer_drafts"
@@ -73,6 +78,8 @@ DPI = 200
 # "original", not the extractor's "high": "high" lets the provider scale a page down to fit,
 # and a footnote superscript on a dense table is exactly the detail that would be lost.
 DETAIL = "original"
+COINCIDENCES_FILE = PROJECT_ROOT / "data" / "leak_check_coincidences.json"
+
 # Per attempt, not llm.OPENAI_TIMEOUT_S (120 s): one reasoning model reading a full-resolution
 # table page is the slowest call in the project, and a timeout followed by a retry pays for
 # the page twice. 2a recorded no durations; each page's `elapsed_s` is kept from 2b on, so
@@ -157,12 +164,21 @@ def draft(source_id: str, model: str) -> int:
         print(f"Refusing: {model} is the configured extractor; the drafter must differ.")
         return 1
 
+    try:
+        listed = read_inventory(source_id)
+    except ValueError as exc:
+        print(f"Refusing to draft: the inventory does not read ({exc}).")
+        return 1
+    if listed is None:
+        print(f"No inventory for {source_id}: completeness will not be measurable for this draft.")
+
     record, peer = BY_ID[source_id], PEERS[source_id]
     client = openai_client(timeout_s=DRAFT_TIMEOUT_S)
     pages, rows, calls = [], [], 0
     dropped: Counter[str] = Counter()
     tokens: Counter[str] = Counter()
     all_problems: list[str] = []
+    previous: tuple[int, PeerTableReading] | None = None
     for pdf_page in TABLE_PAGES[source_id]:
         image = rasterise_page(record.path, pdf_page, DPI)
         try:
@@ -176,7 +192,13 @@ def draft(source_id: str, model: str) -> int:
         calls += not from_cache
         for key in ("input_tokens", "output_tokens", "total_tokens"):
             tokens[key] += usage.get(key, 0)
-        page_draft = to_disclosures(reading, peer, pdf_page=pdf_page)
+        declared = TABLE_CONTINUES.get(source_id, {}).get(pdf_page) is not None
+        carried = continued_unit(reading, pdf_page, previous, declared=declared)
+        previous = (pdf_page, reading)
+        declared_year = PAGE_YEARS.get(source_id, {}).get(pdf_page)
+        page_draft = to_disclosures(
+            reading, peer, pdf_page=pdf_page, carried_unit=carried, declared_year=declared_year
+        )
         dropped.update(page_draft.dropped)
         all_problems += page_draft.problems
         rows += [(row, read_at) for row in page_draft.rows]
@@ -191,6 +213,9 @@ def draft(source_id: str, model: str) -> int:
                 "cells_read": len(reading.cells),
                 "kept": len(page_draft.rows),
                 "dropped": page_draft.dropped,
+                "outcomes": page_draft.outcomes,
+                "carried_unit": carried.model_dump() if carried else None,
+                "declared_year": declared_year,
                 "problems": page_draft.problems,
             }
         )
@@ -218,6 +243,7 @@ def draft(source_id: str, model: str) -> int:
                 "dpi": DPI,
                 "detail": DETAIL,
                 "request_hash": REQUEST_HASH,
+                "inventory_sha256": inventory_digest(listed) if listed is not None else None,
                 "blind": {"seed": BLIND_SEED, "share": BLIND_SHARE, "size": len(blind)},
                 "tokens": dict(tokens),
                 "model_calls": calls,
@@ -231,10 +257,13 @@ def draft(source_id: str, model: str) -> int:
     # Counts only: values are for `review`, which masks the blind sample.
     print(f"== {source_id}  [{peer.company}, {peer.sector}]  model {model}, {DPI} dpi, {DETAIL}")
     for page in pages:
+        carried = page["carried_unit"]
         print(
             f"   PDF p.{page['pdf_page']:<4} table={page['reading']['page_has_ghg_table']!s:5} "
             f"cells read {page['cells_read']:>3}, kept {page['kept']:>3}, "
             f"dropped {page['dropped'] or {}}, {page['elapsed_s'] or '-'} s"
+            f"{f', unit carried from p.{carried["from_pdf_page"]}' if carried else ''}"
+            f"{f', year {page["declared_year"]} declared' if page['declared_year'] else ''}"
             f"{'  (cache)' if page['from_cache'] else ''}"
         )
     markers = sum(1 for row in out_rows if "footnote marker" in (row["notes"] or ""))
@@ -372,6 +401,7 @@ def leak_check(paths: list[str], base: str) -> int:
     drafted |= {row.draft.figure_printed for row in verified_rows}
     never_verified = drafted - verified
     allowed = str(VERIFIED_FILE.relative_to(PROJECT_ROOT))
+    reviewed_file = str(COINCIDENCES_FILE.relative_to(PROJECT_ROOT))
 
     bad_in_file = [
         f"{row.source_id} p.{row.pdf_page} {row.row_label!r}"
@@ -380,7 +410,11 @@ def leak_check(paths: list[str], base: str) -> int:
     ]
     try:
         leaks = find_leaks(
-            PROJECT_ROOT, drafted | verified, base=base, allowed={allowed}, paths=paths or None
+            PROJECT_ROOT,
+            drafted | verified,
+            base=base,
+            allowed={allowed, reviewed_file},
+            paths=paths or None,
         )
     except subprocess.CalledProcessError:
         print(f"Unknown base {base!r}; fetch it, or pass --base REF.")
@@ -392,17 +426,28 @@ def leak_check(paths: list[str], base: str) -> int:
         f"{len(never_verified)} never verified); base {base}, {len(commits)} commit(s) to "
         f"push, plus the working tree; {allowed} not searched"
     )
-    new = [leak for leak in leaks if not leak.at_base]
+    entries = read_coincidences(COINCIDENCES_FILE)
+    reviewed, new, unused = split_reviewed([leak for leak in leaks if not leak.at_base], entries)
     for leak in leaks:
         if leak.at_base:
             print(f"  already at base (coincidence?) {leak.where} {leak.path}: {leak.figure}")
+    why = {(e.path, e.figure): e for e in entries}
+    for leak in reviewed:
+        e = why[(leak.path, leak.figure)]
+        print(
+            f"  reviewed coincidence {leak.where} {leak.path}: {leak.figure} "
+            f"({e.reason}; {e.reviewed_by}, {e.reviewed_on})"
+        )
+    for e in unused:
+        print(f"  unused entry in {reviewed_file}: {e.path} {e.figure} (matches nothing now)")
     for leak in new:
         print(f"  NEW {leak.where} {leak.path}: {leak.figure}")
     for where in bad_in_file:
         print(f"  UNVERIFIED VALUE in {allowed}: {where}")
     print(
-        f"new since {base}: {len(new)}; already at base: {len(leaks) - len(new)}; "
-        f"unverified values in {allowed}: {len(bad_in_file)}"
+        f"new since {base}: {len(new)}; reviewed coincidences: {len(reviewed)}; already at "
+        f"base: {sum(leak.at_base for leak in leaks)}; unverified values in {allowed}: "
+        f"{len(bad_in_file)}"
     )
     return 1 if new or bad_in_file else 0
 

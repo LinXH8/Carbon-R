@@ -164,13 +164,46 @@ TABLE_PAGES: dict[str, list[int]] = {
     # notes: "GHG figures appear in the AR (e.g. PDF p.37-40)". The scan finds 37, 39, 40; p.38
     # (two-up, printed 72-73) is a chart of intensity trajectories, no absolute figures.
     "peer_sembcorp_2025": [37, 39, 40],
+    # Chosen by the author by viewing each page (2b, 31 Oct). p.58 is the operational table.
+    # p.23 (Net-Zero Progress) and p.28 (Oil & Gas) print absolute financed emissions for 2024
+    # only, so every cell is expected to drop as a comparative; kept so the record shows they
+    # were read. Dropped after viewing: p.24 (Power), p.33 (Steel), p.36 (Aviation), intensity
+    # only.
+    "peer_ocbc_2025": [23, 28, 58],
+    # Chosen by the author by viewing each page (2b, 31 Oct). p.135 Scope 1, p.136 Scope 2 by
+    # country, Scope 3 and totals. p.127 dropped: intensity and $ only. p.189 (the assurance
+    # statement's selected GHG information) prints Scope 1, 2, 3 and totals inline, with no
+    # year column: its year is declared in PAGE_YEARS.
+    "peer_uob_2025": [135, 136, 189],
+}
+
+# Table pages the author has checked continue the table on the page before, as
+# {source_id: {page: page_before}}. Python may then carry that page's single CO2e unit onto
+# cells printed without one (`peer_disclosure.continued_unit`); the title test it replaces
+# failed here because the model titled the two pages differently.
+TABLE_CONTINUES: dict[str, dict[int, int]] = {
+    # "Sustainability in Numbers" runs over both pages; its unit heading, "Greenhouse gas (GHG)
+    # emissions (thousand tCO2e)", is printed on p.135 only. Declared by the author, 1 Nov.
+    "peer_uob_2025": {136: 135},
+}
+
+
+# Table pages with no year column whose year the author has read from the page's text, as
+# {source_id: {page: year}}. `to_disclosures` gives that year only to a cell whose header names
+# no year at all (`peer_disclosure.cell_year`), and each such row says so in its notes.
+PAGE_YEARS: dict[str, dict[int, int]] = {
+    # The assurance statement's selected GHG information: 2025 Scope 1, 2, 3 and totals,
+    # inline. Declared by the author, 31 Oct.
+    "peer_uob_2025": {189: 2025},
 }
 
 
 __all__ = [
     "COMPANY_SLUGS",
+    "PAGE_YEARS",
     "PEER_SOURCES",
     "PRINTED_PAGE_OFFSETS",
+    "TABLE_CONTINUES",
     "TABLE_PAGES",
     "DocumentKind",
     "PeerSource",

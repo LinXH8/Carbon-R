@@ -1,0 +1,26 @@
+{
+  "note": "Numbers in tracked files that equal a peer figure but are not one. Each entry exempts one figure in one file, reviewed by the author; the same figure anywhere else still fails the leak check. See src/carbon_r/leak_check.py.",
+  "entries": [
+    {
+      "path": "src/carbon_r/llm.py",
+      "figure": "120",
+      "reason": "OPENAI_TIMEOUT_S, the OpenAI timeout in seconds (commit 91c263b)",
+      "reviewed_by": "Lin Xiang Hong",
+      "reviewed_on": "2026-11-02"
+    },
+    {
+      "path": "tests/test_llm.py",
+      "figure": "120",
+      "reason": "asserts OPENAI_TIMEOUT_S, the OpenAI timeout in seconds",
+      "reviewed_by": "Lin Xiang Hong",
+      "reviewed_on": "2026-11-02"
+    },
+    {
+      "path": "scripts/draft_peer_disclosures.py",
+      "figure": "120",
+      "reason": "a comment naming OPENAI_TIMEOUT_S, the OpenAI timeout in seconds",
+      "reviewed_by": "Lin Xiang Hong",
+      "reviewed_on": "2026-11-02"
+    }
+  ]
+}
