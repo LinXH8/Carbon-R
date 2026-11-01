@@ -15,13 +15,20 @@ def request(retry_count: str) -> httpx2.Request:
     )
 
 
-def test_the_client_does_not_take_the_sdk_defaults():
+def _placeholder_key(monkeypatch) -> None:
+    """Building a client needs a key, never a network call. CI has no key."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-offline-placeholder")
+
+
+def test_the_client_does_not_take_the_sdk_defaults(monkeypatch):
+    _placeholder_key(monkeypatch)
     client = openai_client()
     assert client.max_retries == OPENAI_MAX_RETRIES == 1
     assert client.timeout == OPENAI_TIMEOUT_S == 120.0
 
 
-def test_a_caller_can_set_its_own_timeout():
+def test_a_caller_can_set_its_own_timeout(monkeypatch):
+    _placeholder_key(monkeypatch)
     client = openai_client(timeout_s=300.0, max_retries=0)
     assert client.timeout == 300.0 and client.max_retries == 0
 
