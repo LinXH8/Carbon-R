@@ -1,9 +1,11 @@
 """`openai_client`: an explicit timeout and retry budget, and a log line per retry. Offline."""
 
 import logging
+from types import SimpleNamespace
 
 import httpx2
 
+from carbon_r import llm
 from carbon_r.llm import OPENAI_MAX_RETRIES, OPENAI_TIMEOUT_S, log_retry, openai_client
 
 
@@ -16,8 +18,10 @@ def request(retry_count: str) -> httpx2.Request:
 
 
 def _placeholder_key(monkeypatch) -> None:
-    """Building a client needs a key, never a network call. CI has no key."""
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-offline-placeholder")
+    """Building a client needs a key, never a network call. CI has no key: its settings hold
+    "", which the SDK takes as an explicit empty key, so an environment variable is no help."""
+    settings = SimpleNamespace(openai_api_key="sk-offline-placeholder")
+    monkeypatch.setattr(llm, "get_settings", lambda: settings)
 
 
 def test_the_client_does_not_take_the_sdk_defaults(monkeypatch):
