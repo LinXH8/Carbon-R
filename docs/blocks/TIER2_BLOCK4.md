@@ -1072,3 +1072,29 @@ instruction misses the cache; with the fingerprint left out of the key, that tes
 - `dbs_boundary` is a retrieval miss: the answer is a footnote under the DBS p.79 emissions
   table, likely in a chunk dominated by the table's numbers. No chunking change in this pass.
 
+## Eval 5b, retrieval: the test split, run once
+
+Run once on commit `69f661b` (clean tree; the judge fingerprint already in the cache key),
+after every dev decision: `peer_retrieval_test_20261104T095246Z`.
+
+| | Dev (run 2) | Test |
+|---|---|---|
+| hit@1 | 5 of 10 | 5 of 11 |
+| hit@5 | 9 of 10 | 8 of 11 |
+| MRR | 0.65 | 0.589 |
+| Unanswerable refused | 5 of 5 | 4 of 4 |
+| Answerable refused | 2 of 10 | 2 of 11 |
+| Answered from an expected page | 8 of 10 | 9 of 11 |
+| Judge false positives, unanswerable | 0 of 5 | 0 of 4 |
+| Judge false positives, answerable | 0 of 10 | 0 of 11 |
+
+Test agrees with dev: 0 judge false positives on both, and every unanswerable question
+refused. The Keppel probe (test only) was answered from PDF p.46, an expected page; the
+demo's tracking pages (pp.32, 38, 45) were retrieved too but not quoted.
+
+**The main measured weakness is retrieval:** 3 of 21 answerable questions had no expected
+page among the 8 passages: `dbs_boundary` (dev; DBS p.79), `dbs_facilitated` (test; DBS
+p.40) and `uob_icp` (test; UOB p.14). Each time the judge refused correctly. `mlt_icp`
+found its page only at rank 7. Per-style numbers (3 or 4 questions per style per split) are
+too small to compare styles.
+
