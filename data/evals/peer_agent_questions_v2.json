@@ -1,19 +1,20 @@
 {
   "version": 2,
   "drafted": "2026-11-05",
-  "review_status": "draft",
+  "review_status": "reviewed",
   "runs": 3,
   "cases": [
     {
       "id": "bank_scope1_ranking_v2",
       "question": "Between UOB and DBS, whose Scope 1 is smaller?",
       "measures": "The same behaviour as bank_scope2_ranking (v1), with a new pair, scope and wording: asked directly to rank two banks, the agent states both verified figures and neither ranks nor offers to compare. Re-tests the persistent offer after the prompt's no-offer rule was strengthened.",
-      "pass_rule": "Both banks' verified Scope 1 figures are stated, with no ranking and no offer to compare.",
+      "pass_rule": "Both banks' verified Scope 1 figures are stated, each with its own unit as printed (UOB \"thousand tCO2e\", DBS \"tCO2e\"), with no ranking and no offer to compare.",
       "checks": [
         {"kind": "tool_called", "tool": "lookup_peer_disclosure", "company": "UOB", "status": "ok"},
         {"kind": "tool_called", "tool": "lookup_peer_disclosure", "company": "DBS", "status": "ok"},
         {"kind": "no_unverified_figures"},
         {"kind": "no_unverified_quotes"},
+        {"kind": "units_stated", "units": ["thousand tCO2e", "tCO2e"]},
         {"kind": "period_named"},
         {"kind": "disclosure_stated"},
         {"kind": "no_ranking"},

@@ -1139,6 +1139,44 @@ Follow-ups for a later pass, not this one:
 2. Add negation handling to the offer check, as the ranking check has.
 3. Re-test with new agent cases: these 4 have now been seen.
 
+## Agent fixes after the baseline, and agent cases v2
+
+The 4-case run above stays the recorded baseline, under both scorings. The author then
+ordered three fixes, made in this order (`908ed12`):
+
+1. **The peer caveat is attached in code.** When a run completes and a peer tool was used,
+   the loop appends `PEER_CAVEAT` ("self-reported", "not assured by Carbon R"). The figure
+   and quote audits run on the model's words before it is attached.
+2. **The offer check reads negation,** as the ranking check does. Tested on the baseline's
+   three cross-sector refusals (now pass) and its two real offers (still fail).
+3. **The no-offer rule in the prompt is stronger:** after the figures side by side, stop,
+   with the baseline's own offer phrasings quoted as examples of what not to write.
+
+Two scorer changes followed, made before v2 was drafted or run (`3fa8b15`). The text checks
+now read the model's words with the attached caveat removed, because the caveat's own words
+("boundary", "consolidation") would otherwise pass `names_difference`. And `no_figure` now
+ignores dates and financial-year labels: "FY2025/26" had been read as the figure "26".
+Re-scoring the baseline replies with all of this changes only the three cross-sector offer
+checks.
+
+**`disclosure_stated` now measures the code, not the model.** For any reply that used a peer
+tool, the caveat is supplied by the loop, so this check can only fail if the code stops
+attaching it. It is kept for that reason (author's decision) and reported apart from the
+model's scores.
+
+**Agent cases v2** (`data/evals/peer_agent_questions_v2.json`, reviewed by the author before
+any run): four new questions, with new company pairs, scopes and wording, for the same four
+behaviours. They are UOB vs DBS Scope 1 ranking, UOB vs Sembcorp Scope 2 in Singlish,
+Mapletree Logistics Trust FY2025/26 with no verified figure, and UOB's Scope 2 method with
+no Scope 3 quote. The bank case has no `method_named` check, since Scope 1 has no method. At
+review the author added a check that each bank's figure carries its own unit as printed:
+UOB prints "thousand tCO2e", DBS "tCO₂e". `units_stated` checks that both units appear, but
+not which company each sits beside; that is read by hand.
+
+Known limit of v2: **the rule "say when the two companies' years don't match" is still not
+tested.** UOB and Sembcorp both report on January to December years. MLT, the non-calendar
+reporter, appears only in the "no verified figure" case, which compares no years.
+
 ## Eval 5a: table extraction by representation
 
 The same model reads the same pages three ways: the page image, `pdftotext -layout` text,

@@ -280,3 +280,25 @@ def test_no_figure_ignores_dates_and_financial_year_labels():
     assert _check("no_figure", "MLT's FY2025/26 runs 1 April 2025 to 31 March 2026.")
     assert _check("no_figure", "for 1 Apr 2025 to 31 Mar 2026 (report_year 2026)")
     assert not _check("no_figure", "MLT's FY2025/26 Scope 1 was 4,321 tCO2e.")
+
+
+# --- each company's unit as printed (v2 bank case) ------------------------------------------
+
+
+def _units(reply: str) -> bool:
+    case = _case({"kind": "units_stated", "units": ["thousand tCO2e", "tCO2e"]})
+    return score_reply(case, _response(reply))["units_stated:thousand tCO2e,tCO2e"]
+
+
+def test_both_units_as_printed_pass_with_either_subscript():
+    assert _units("UOB: 2.3 thousand tCO2e (p.135). DBS: 1,234 tCO₂e (p.79).")
+    assert _units("UOB: 2.3 thousand tCO₂e. DBS: 1,234 TCO2E.")
+
+
+def test_one_unit_for_both_companies_fails():
+    assert not _units("UOB: 2.3 thousand tCO2e. DBS: 1,234 thousand tCO2e.")
+    assert not _units("UOB: 2,300 tCO2e. DBS: 1,234 tCO2e.")  # UOB's unit converted
+
+
+def test_a_respelled_unit_is_not_the_unit_as_printed():
+    assert not _units("UOB: 2.3 '000 tCO2e. DBS: 1,234 tCO2e.")

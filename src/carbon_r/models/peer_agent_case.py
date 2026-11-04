@@ -27,6 +27,11 @@ How the text checks read a reply, fixed here so they are not tuned after a run:
 - `no_figure`: the audit's own `figures_in`, less four-digit years, finds nothing once
   dates and financial-year labels ("1 April 2025", "FY2025/26") are removed.
 - `quotes_exclude`: no quoted span in the reply contains any of the given terms.
+- `units_stated`: every given unit appears as printed, with a subscript "₂" read as "2" and
+  case and spacing ignored. Units are taken longest first and every occurrence of one is
+  removed before the next is looked for, so ["thousand tCO2e", "tCO2e"] needs a bare
+  "tCO2e" outside every "thousand tCO2e". Which company each unit sits beside is not
+  checked; that is read by hand.
 """
 
 from __future__ import annotations
@@ -94,7 +99,12 @@ class QuotesExclude(_Check):
     terms: list[str] = Field(min_length=1)
 
 
-Check = Annotated[ToolCalled | Plain | QuotesExclude, Field(discriminator="kind")]
+class UnitsStated(_Check):
+    kind: Literal["units_stated"]
+    units: list[str] = Field(min_length=1)
+
+
+Check = Annotated[ToolCalled | Plain | QuotesExclude | UnitsStated, Field(discriminator="kind")]
 
 
 class AgentCase(BaseModel):
@@ -184,12 +194,28 @@ def _tool_called(check: ToolCalled, calls: list[dict]) -> bool:
     return False
 
 
+def _unit_form(text: str) -> str:
+    return re.sub(r"\s+", " ", text.replace("\u2082", "2")).casefold()
+
+
+def _units_stated(units: list[str], reply: str) -> bool:
+    remaining = _unit_form(reply)
+    for unit in sorted((_unit_form(u) for u in units), key=len, reverse=True):
+        pattern = rf"(?<![\w']){re.escape(unit)}(?!\w)"
+        if re.search(pattern, remaining) is None:
+            return False
+        remaining = re.sub(pattern, " ", remaining)
+    return True
+
+
 def check_label(check: Check) -> str:
     if isinstance(check, ToolCalled):
         parts = [check.tool, check.company, check.status]
         return "tool_called:" + ":".join(p for p in parts if p)
     if isinstance(check, QuotesExclude):
         return "quotes_exclude:" + ",".join(check.terms)
+    if isinstance(check, UnitsStated):
+        return "units_stated:" + ",".join(check.units)
     return check.kind
 
 
@@ -228,6 +254,8 @@ def score_reply(case: AgentCase, response: dict) -> dict[str, bool]:
         elif isinstance(check, QuotesExclude):
             spans = [a or b for a, b in _QUOTED.findall(reply)]
             passed = not any(t.lower() in span.lower() for span in spans for t in check.terms)
+        elif isinstance(check, UnitsStated):
+            passed = _units_stated(check.units, reply)
         else:
             passed = plain[check.kind]
         results[check_label(check)] = passed
@@ -246,6 +274,7 @@ __all__ = [
     "Plain",
     "QuotesExclude",
     "ToolCalled",
+    "UnitsStated",
     "check_label",
     "load_agent_cases",
     "score_reply",
