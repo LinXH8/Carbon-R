@@ -36,19 +36,17 @@ Local only: needs the ingested corpus, a database and an API key. CI does not ru
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import statistics
-import subprocess
 import sys
 from collections import defaultdict
 from datetime import UTC, datetime
-from pathlib import Path
 
 from carbon_r.config import PROJECT_ROOT, get_settings
 from carbon_r.rag.chunking import CHUNKER_VERSION
 from carbon_r.rag.embed import configured_model, openai_embedder
 from carbon_r.rag.questions import Question, load_questions
+from carbon_r.rag.scoring import Cache, digest, first_hit_rank, git_state, hit_metrics, n_of
 from carbon_r.tools import methodology
 from carbon_r.tools.methodology import (
     TOP_K,
@@ -64,44 +62,6 @@ CACHE_DIR = PROJECT_ROOT / "data" / "generated" / "eval_cache" / "retrieval"
 STYLES = ("textbook", "user", "singlish")
 
 
-def git_state() -> dict:
-    """The commit measured, and whether anything other than this eval's own output is dirty.
-
-    `data/evals/runs/` is excluded: the eval writes its run file there, so counting it would
-    mark the second of two back-to-back runs dirty even though no code had changed.
-    """
-
-    def run(*args: str) -> str:
-        return subprocess.run(
-            ["git", *args], cwd=PROJECT_ROOT, capture_output=True, text=True, check=False
-        ).stdout.strip()
-
-    status = run("status", "--porcelain", "--", ".", ":(exclude)data/evals/runs")
-    return {"commit": run("rev-parse", "HEAD"), "dirty": bool(status)}
-
-
-def _digest(*parts: str) -> str:
-    return hashlib.sha256("\x1f".join(parts).encode()).hexdigest()[:24]
-
-
-class Cache:
-    """Question embeddings and judgements, keyed by everything that determines them."""
-
-    def __init__(self, root: Path, enabled: bool) -> None:
-        self.root, self.enabled = root, enabled
-
-    def get(self, kind: str, key: str):
-        path = self.root / kind / f"{key}.json"
-        if self.enabled and path.exists():
-            return json.loads(path.read_text())
-        return None
-
-    def put(self, kind: str, key: str, value) -> None:
-        path = self.root / kind / f"{key}.json"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(value))
-
-
 def score_question(
     q: Question,
     *,
@@ -113,7 +73,7 @@ def score_question(
     threshold: float,
     use_judge: bool,
 ) -> dict:
-    key = _digest(model, q.question)
+    key = digest(model, q.question)
     vector = cache.get("embedding", key)
     if vector is None:
         (vector,) = embed([q.question])
@@ -121,7 +81,7 @@ def score_question(
     passages: list[Passage] = retrieve(q.question, embed=lambda _: [vector])
 
     expected = {(e.source_id, e.pdf_page) for e in q.expected}
-    ranks = [i for i, p in enumerate(passages, 1) if (p.source_id, p.pdf_page) in expected]
+    first = first_hit_rank([(p.source_id, p.pdf_page) for p in passages], expected)
     best = passages[0].similarity if passages else None
     row = {
         "id": q.id,
@@ -132,14 +92,14 @@ def score_question(
         "document": q.document,
         "ranked": [[p.source_id, p.pdf_page, round(p.similarity, 4)] for p in passages],
         "best_similarity": None if best is None else round(best, 4),
-        "first_hit_rank": ranks[0] if ranks else None,
+        "first_hit_rank": first,
         "retrieval_refused": best is None or best < threshold,
         "judged": False,
     }
     if row["retrieval_refused"] or not use_judge:
         return row
 
-    jkey = _digest(judge_model, q.question, *(str(p.chunk_id) for p in passages))
+    jkey = digest(judge_model, q.question, *(str(p.chunk_id) for p in passages))
     cached = cache.get("judgement", jkey)
     if cached is None:
         judgement = judge(q.question, passages)
@@ -161,27 +121,15 @@ def score_question(
     return row
 
 
-def _n_of(n: int, total: int) -> str:
-    return f"{n} of {total}" if total else "-"
-
-
 def summarise(rows: list[dict]) -> dict:
     answerable = [r for r in rows if r["answerable"]]
     unanswerable = [r for r in rows if not r["answerable"]]
-    hit1 = sum(r["first_hit_rank"] == 1 for r in answerable)
-    hit5 = sum(r["first_hit_rank"] is not None for r in answerable)
-    mrr = (
-        sum(1 / r["first_hit_rank"] for r in answerable if r["first_hit_rank"]) / len(answerable)
-        if answerable
-        else None
-    )
+    hits = hit_metrics([r["first_hit_rank"] for r in answerable])
     judged = [r for r in rows if r["judged"]]
     out = {
         "answerable": len(answerable),
         "unanswerable": len(unanswerable),
-        "hit_at_1": hit1,
-        "hit_at_5": hit5,
-        "mrr": None if mrr is None else round(mrr, 3),
+        **hits,
         "retrieval_refused_unanswerable": sum(r["retrieval_refused"] for r in unanswerable),
         "retrieval_refused_answerable": sum(r["retrieval_refused"] for r in answerable),
         "judged": len(judged),
@@ -210,10 +158,10 @@ def summarise(rows: list[dict]) -> dict:
 def print_summary(label: str, s: dict) -> None:
     a, u = s["answerable"], s["unanswerable"]
     line = (
-        f"  {label:22} hit@1 {_n_of(s['hit_at_1'], a):9} hit@5 {_n_of(s['hit_at_5'], a):9} "
+        f"  {label:22} hit@1 {n_of(s['hit_at_1'], a):9} hit@5 {n_of(s['hit_at_5'], a):9} "
         f"MRR {s['mrr'] if s['mrr'] is not None else '-':5} | retrieval refused: "
-        f"unans {_n_of(s['retrieval_refused_unanswerable'], u):7} "
-        f"ans {_n_of(s['retrieval_refused_answerable'], a):8}"
+        f"unans {n_of(s['retrieval_refused_unanswerable'], u):7} "
+        f"ans {n_of(s['retrieval_refused_answerable'], a):8}"
     )
     if s["judged"]:
         line += (
