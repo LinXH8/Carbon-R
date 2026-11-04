@@ -792,7 +792,7 @@ for verified rows only:
 
 ---
 
-# Part B, pass 2b — agent access, completeness, OCBC and UOB (in progress: Steps 1-3 done)
+# Part B, pass 2b — agent access, completeness, OCBC and UOB (in progress: Steps 1-4 done)
 
 Recorded as it happens; counts are final only where marked.
 
@@ -1138,4 +1138,76 @@ Follow-ups for a later pass, not this one:
 1. Attach the peer disclosure to the reply in code, so the caveat never depends on the model.
 2. Add negation handling to the offer check, as the ranking check has.
 3. Re-test with new agent cases: these 4 have now been seen.
+
+## Eval 5a: table extraction by representation
+
+The same model reads the same pages three ways: the page image, `pdftotext -layout` text,
+and pdfplumber's `extract_tables()` as tab-separated rows. The model is the extractor,
+`gpt-5.4-mini-2026-03-17`, never the drafter; the script refuses to run if the scored model
+drafted any label. Held fixed: the `PeerTableReading` schema, the drafting instruction with
+only its first sentence changed to name the input, and the Python after the model
+(`continued_unit`, `PAGE_YEARS`, `to_disclosures`). Scored against the 87 verified rows on
+the 9 pages that hold them. Run `peer_extraction_20261104T154036Z` (commit `e57ded3`, clean
+tree), made from the replies saved by the one live run (27 calls, 146,464 tokens).
+
+**Scale:** 9 pages from 5 reports, one run.
+
+Two scorings. **Strict** (`match_cells`): a row is present when a report-year cell has its
+label and header. **By figure**: label and header wording ignored; a row is present when a
+report-year cell on its page has its figure exactly as printed. The second was added
+because the key's labels began as the image drafter's wording, which favours the image arm
+under strict matching. A row present only by figure is classed **substantive** when the
+reading no longer identifies it (a spanning or group heading lost, or one label and header
+read for two cells with the same method) and **cosmetic** otherwise (e.g. footnote letters
+flattened onto a label). One label read for two cells with different methods counts as
+cosmetic: the method still tells them apart.
+
+| Of 87 verified rows | Image | `pdftotext -layout` | pdfplumber |
+|---|---|---|---|
+| Present, strict | 78 (75 exact, 3 method differs) | 45 | 15 |
+| Present, by figure | 82 | 75 | 25 |
+| Present by figure only: cosmetic | 4 | 15 | 10 |
+| Present by figure only: substantive | 0 | 15 | 0 |
+| Identified (strict + cosmetic) | 82 | 60 | 25 |
+| Not present either way | 5 | 12 | 62 |
+| Of those, figure read only under another year | 0 | 0 | 5 |
+
+Of the rows present (strict), in every arm: **figure exactly as printed 100%** (78 of 78,
+45 of 45, 15 of 15), and **0 footnote markers fused onto a figure**. Unit: 71 of 78, 45 of
+45, 0 of 15. Method: 75 of 78, 45 of 45, 15 of 15. pdfplumber found no table on 1 of 9 pages.
+
+What the differences are:
+
+- **Image:** the 4 by-figure-only rows are DBS p.79's totals, read under the table's section
+  headings ("Scope 1 (tCO₂e)" for "a) Total scope 1"). The 5 not present are DBS p.79's
+  component rows (backup generators, vehicles, refrigerants, purchased electricity and
+  cooling), not read at all. The 7 wrong units are all on CLAR data pack p.8: the model
+  wrote the subscript in LaTeX notation, `tonnes CO$_2$e` for `tonnes CO₂e`, the same unit
+  in another notation that the exact comparison counts as wrong.
+- **Layout:** the 15 substantive rows are all CLAR data pack p.20, where the spanning
+  heading "Total Portfolio" was lost, so the figure no longer says which of the page's
+  tables it belongs to. The 15 cosmetic rows are footnote markers flattened onto labels
+  ("Capital Goodsiii, iv", "Scope 1 (tCO2e)(34)", "Scope 1 emissions2").
+- **pdfplumber:** usable tables on the CLAR data-pack pages only; nothing usable on DBS,
+  OCBC, Sembcorp or UOB. Units printed in a heading outside the extracted table never reach
+  the model (0 of 15).
+
+**Conclusion, from both scorings.** The page image identifies the most rows: 82 of 87,
+against 60 for `pdftotext -layout` and 25 for pdfplumber. Strict matching alone (78, 45, 15)
+overstates the gap to the layout text, which reads most figures (75 of 87) but loses table
+structure: a spanning heading on one page, and footnote markers on labels. No arm misread a
+figure it returned, and none fused a footnote marker onto one. So under this model the text
+layer's measured cost is structure, not digits; the fused-figure finding of Part B is about
+raw passage text (now said in `tools/peer.py`).
+
+**Bias.** The key's labels began as `gpt-5.5` image drafts; its figures were verified by hand
+against each page, with the blind samples matching 18 of 18. The strict scoring favours the
+image arm through the labels; the by-figure scoring removes that, and the image arm still
+leads.
+
+**A defect in this eval, found and fixed before recording.** The strict "missed, read under
+another year" diagnostic first reported 12 for layout. It counted a row whenever its label
+appeared in an earlier year's column, even when the same row was also read in its own year's
+column under a lost heading (CLAR p.20). It now requires both; a test fails under the old
+rule; the corrected count is 0, agreeing with the by-figure scoring.
 
