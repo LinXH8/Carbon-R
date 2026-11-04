@@ -1173,17 +1173,19 @@ cosmetic: the method still tells them apart.
 | Of those, figure read only under another year | 0 | 0 | 5 |
 
 Of the rows present (strict), in every arm: **figure exactly as printed 100%** (78 of 78,
-45 of 45, 15 of 15), and **0 footnote markers fused onto a figure**. Unit: 71 of 78, 45 of
-45, 0 of 15. Method: 75 of 78, 45 of 45, 15 of 15. pdfplumber found no table on 1 of 9 pages.
+45 of 45, 15 of 15), and **0 footnote markers fused onto a figure**. Unit, compared exactly:
+71 of 78, 45 of 45, 0 of 15; the image arm's 7 mismatches are notation only (below), so
+none of its units is wrong. Method: 75 of 78, 45 of 45, 15 of 15. pdfplumber found no table on 1 of 9 pages.
 
 What the differences are:
 
 - **Image:** the 4 by-figure-only rows are DBS p.79's totals, read under the table's section
   headings ("Scope 1 (tCO₂e)" for "a) Total scope 1"). The 5 not present are DBS p.79's
   component rows (backup generators, vehicles, refrigerants, purchased electricity and
-  cooling), not read at all. The 7 wrong units are all on CLAR data pack p.8: the model
-  wrote the subscript in LaTeX notation, `tonnes CO$_2$e` for `tonnes CO₂e`, the same unit
-  in another notation that the exact comparison counts as wrong.
+  cooling), not read at all. The 7 unit mismatches are notation only, not wrong
+  units: all on CLAR data pack p.8, where the model wrote the subscript in LaTeX notation,
+  `tonnes CO$_2$e`, for the printed `tonnes CO₂e`. The exact string comparison counts them
+  as mismatches.
 - **Layout:** the 15 substantive rows are all CLAR data pack p.20, where the spanning
   heading "Total Portfolio" was lost, so the figure no longer says which of the page's
   tables it belongs to. The 15 cosmetic rows are footnote markers flattened onto labels
