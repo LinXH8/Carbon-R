@@ -246,12 +246,14 @@ def score_page(
         forms = {label.casefold(), label.split(">")[-1].strip().casefold()}
         return cell.scope == e.scope and e.row_label.casefold() in forms
 
+    # Only when the row is read under another year AND under no report-year header: a row
+    # read in its own year's column under a lost heading is a header problem, not a year one.
+    def year_of(cell: DraftedCell) -> int | None:
+        return cell_year(cell.column_header_printed, declared_year)
+
     wrong_year = sum(
-        any(
-            same_row(e, c)
-            and cell_year(c.column_header_printed, declared_year) not in (None, report_year)
-            for c in cells
-        )  # fmt: skip
+        any(same_row(e, c) and year_of(c) not in (None, report_year) for c in cells)
+        and not any(same_row(e, c) and year_of(c) == report_year for c in cells)
         for e in result.skipped
     )
     return {

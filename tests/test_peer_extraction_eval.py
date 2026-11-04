@@ -105,3 +105,10 @@ def test_a_figure_only_under_another_year_is_a_wrong_year_read_not_present():
 def test_a_strict_match_is_not_counted_as_by_figure_only():
     s = _by_figure([_verified()], [_cell()])
     assert (s["by_figure_present"], s["by_figure_only"]) == (1, 0)
+
+
+def test_a_row_read_in_its_year_under_a_lost_heading_is_not_a_wrong_year_read():
+    # CLAR p.20 under pdftotext: "Total Portfolio > 2025" read as "2025", and 2024 alongside.
+    v = _verified(header="Total Portfolio > 2025")
+    s = _score([v], [_cell(header="2025"), _cell(header="2024", figure="999")])
+    assert s["missed"] == 1 and s["missed_read_under_another_year"] == 0
