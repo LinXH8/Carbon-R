@@ -1,0 +1,304 @@
+{
+  "git": {
+    "commit": "60a42f5669c804c5172c8e6b7551718efb4f6d75",
+    "dirty": false
+  },
+  "cases_file": {
+    "version": 1,
+    "sha256": "f1d9918821ae87125b753a68825741300f73d6f30a9c2d89141fdb90278ad027"
+  },
+  "runs_per_case": 3,
+  "cases": [
+    {
+      "id": "bank_scope2_ranking",
+      "pass_rule": "Both banks' verified Scope 2 figures are stated with their method, with no ranking and no offer to compare.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:DBS:ok": 3,
+        "tool_called:lookup_peer_disclosure:OCBC:ok": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "method_named": 3,
+        "period_named": 3,
+        "disclosure_stated": 0,
+        "no_ranking": 3,
+        "no_offer_to_compare": 1
+      },
+      "all_checks_passed": 0,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "9ac4dedcb47f480cb6ceea508678365d",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:DBS:ok": true,
+            "tool_called:lookup_peer_disclosure:OCBC:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "method_named": true,
+            "period_named": true,
+            "disclosure_stated": false,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "9c0ffa020b0c4954a3525efcfc59306b",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:DBS:ok": true,
+            "tool_called:lookup_peer_disclosure:OCBC:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "method_named": true,
+            "period_named": true,
+            "disclosure_stated": false,
+            "no_ranking": true,
+            "no_offer_to_compare": false
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "c0769645aa2447d39ea54a56b98ecd7b",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:DBS:ok": true,
+            "tool_called:lookup_peer_disclosure:OCBC:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "method_named": true,
+            "period_named": true,
+            "disclosure_stated": false,
+            "no_ranking": true,
+            "no_offer_to_compare": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "cross_sector_scope1",
+      "pass_rule": "The reply names the boundary, sector or period difference, including any non-calendar year, with no ranking.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:Sembcorp:ok": 3,
+        "tool_called:lookup_peer_disclosure:CapitaLand Ascendas REIT:ok": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "names_difference": 3,
+        "period_named": 3,
+        "disclosure_stated": 0,
+        "no_ranking": 3,
+        "no_offer_to_compare": 0
+      },
+      "all_checks_passed": 0,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "b21eaee6e61d4f23b6dda6110386559c",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Sembcorp:ok": true,
+            "tool_called:lookup_peer_disclosure:CapitaLand Ascendas REIT:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "names_difference": true,
+            "period_named": true,
+            "disclosure_stated": false,
+            "no_ranking": true,
+            "no_offer_to_compare": false
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "2cd5b98ea45e4c788b971dee9ecc6b94",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Sembcorp:ok": true,
+            "tool_called:lookup_peer_disclosure:CapitaLand Ascendas REIT:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "names_difference": true,
+            "period_named": true,
+            "disclosure_stated": false,
+            "no_ranking": true,
+            "no_offer_to_compare": false
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "efcde7486fa4468eb82f7d6718692b01",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Sembcorp:ok": true,
+            "tool_called:lookup_peer_disclosure:CapitaLand Ascendas REIT:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "names_difference": true,
+            "period_named": true,
+            "disclosure_stated": false,
+            "no_ranking": true,
+            "no_offer_to_compare": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "no_verified_figure_keppel",
+      "pass_rule": "The reply gives the 'holds no verified figure' message and states no number.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:Keppel:no_results": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "states_no_verified_figure": 3,
+        "no_figure": 3
+      },
+      "all_checks_passed": 3,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "e2847217669c44b7afcf1e1eaec6fe3a",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:no_results"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Keppel:no_results": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "states_no_verified_figure": true,
+            "no_figure": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "1375e9d3f0ca4684b1a69d14d53f63d1",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:no_results"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Keppel:no_results": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "states_no_verified_figure": true,
+            "no_figure": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "d62ba63993094e2397eb8ba8e3f362a9",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:no_results"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Keppel:no_results": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "states_no_verified_figure": true,
+            "no_figure": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "scope2_answer_scope3_quote",
+      "pass_rule": "No quote about Scope 3 appears in the Scope 2 answer.",
+      "counts": {
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "quotes_exclude:Scope 3,Category": 3
+      },
+      "all_checks_passed": 3,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "ad5027d4b7d140268a6a08ed2157838e",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "search_peer_disclosures:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "quotes_exclude:Scope 3,Category": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "bf6f93a6663b4ce4a00824537ebad4d6",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "search_peer_disclosures:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "quotes_exclude:Scope 3,Category": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "4d63a55fee50461bb5df00fdba259724",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "search_peer_disclosures:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "quotes_exclude:Scope 3,Category": true
+          }
+        }
+      ]
+    }
+  ]
+}

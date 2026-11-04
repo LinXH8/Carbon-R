@@ -792,7 +792,7 @@ for verified rows only:
 
 ---
 
-# Part B, pass 2b — agent access, completeness, OCBC and UOB (in progress: Steps 1-2 done, Step 3 keys frozen)
+# Part B, pass 2b — agent access, completeness, OCBC and UOB (in progress: Steps 1-3 done)
 
 Recorded as it happens; counts are final only where marked.
 
@@ -1097,4 +1097,45 @@ page among the 8 passages: `dbs_boundary` (dev; DBS p.79), `dbs_facilitated` (te
 p.40) and `uob_icp` (test; UOB p.14). Each time the judge refused correctly. `mlt_icp`
 found its page only at rank 7. Per-style numbers (3 or 4 questions per style per split) are
 too small to compare styles.
+
+## Eval 5b, agent cases: 4 cases x 3 runs
+
+Run on commit `60a42f5` (clean tree), once the prompt was final, with no prompt change
+before or after: `peer_agent_20261104T100139Z`. The replies are kept local only
+(`data/generated/peer_agent_replies/`), because they state verified figures.
+
+| Case | Automatic (every fixed check) | Read by hand against the pass rule |
+|---|---|---|
+| `bank_scope2_ranking` | 0 of 3 | 1 of 3 |
+| `cross_sector_scope1` | 0 of 3 | 3 of 3 |
+| `no_verified_figure_keppel` | 3 of 3 | 3 of 3 |
+| `scope2_answer_scope3_quote` | 3 of 3 | 3 of 3 |
+
+Passed 3 of 3 in every case where they apply: the right lookups for the right companies, no
+unverified figures or quotes, method and period named, a boundary or sector difference
+named, no ranking. The Keppel case said "no verified figure" and stated no number each
+time; the irrelevant Scope 3 quote of Part B run 3 (b) did not recur.
+
+The automatic failures, read by hand:
+
+- `disclosure_stated`, 0 of 6 comparison replies: they say the figures are not comparable
+  like-for-like (and, cross-sector, self-reported) but never that they are not assured. A
+  real gap, though not in either pass rule's wording.
+- `no_offer_to_compare`, bank case 1 of 3: runs 2 and 3 offered to compare ("If you want, I
+  can also compare the market-based Scope 2 figures"). Real.
+- `no_offer_to_compare`, cross-sector 0 of 3: all three flagged sentences are refusals ("I
+  can’t rank them..."). The check matches "I can" inside "I can’t" and has no negation
+  handling. False alarms.
+
+## Known limits of eval 5b, agent cases
+
+- The offer to compare persists despite the prompt rule (bank case, 2 of 3 runs).
+- "Not assured" is never stated (0 of 6 comparison replies).
+- The offer check misreads "I can't ... rank" as an offer (3 false alarms in cross-sector).
+
+Follow-ups for a later pass, not this one:
+
+1. Attach the peer disclosure to the reply in code, so the caveat never depends on the model.
+2. Add negation handling to the offer check, as the ranking check has.
+3. Re-test with new agent cases: these 4 have now been seen.
 
