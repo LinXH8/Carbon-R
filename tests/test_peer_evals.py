@@ -258,3 +258,25 @@ def test_the_baseline_offers_still_fail():
         "If you want, I can also compare the **market-based** Scope 2 figures:",
     ):
         assert not _check("no_offer_to_compare", sentence), sentence
+
+
+# --- the scorer reads the model's words; the code-attached caveat counts only as disclosure --
+
+
+def test_the_attached_caveat_satisfies_only_the_disclosure_check():
+    from carbon_r.tools.peer import PEER_CAVEAT
+
+    case = _case({"kind": "names_difference"}, {"kind": "no_figure"},
+                 {"kind": "disclosure_stated"})  # fmt: skip
+    reply = f"Carbon R holds no verified figure for that company.\n\n{PEER_CAVEAT}"
+    assert score_reply(case, _response(reply)) == {
+        "names_difference": False,  # the caveat's "boundary" is the code's word, not the model's
+        "no_figure": True,  # nor are its dates ("1 Apr to 31 Mar")
+        "disclosure_stated": True,
+    }
+
+
+def test_no_figure_ignores_dates_and_financial_year_labels():
+    assert _check("no_figure", "MLT's FY2025/26 runs 1 April 2025 to 31 March 2026.")
+    assert _check("no_figure", "for 1 Apr 2025 to 31 Mar 2026 (report_year 2026)")
+    assert not _check("no_figure", "MLT's FY2025/26 Scope 1 was 4,321 tCO2e.")

@@ -24,7 +24,8 @@ How the text checks read a reply, fixed here so they are not tuned after a run:
 - `period_named`: a period written as the tools write it, "1 Jan 2025 to 31 Dec 2025".
 - `disclosure_stated`: "self-reported" and "not assured" (or "not independently assured").
 - `names_difference`: a boundary, sector or period difference is named (`DIFFERENCE_TERMS`).
-- `no_figure`: the audit's own `figures_in`, less four-digit years, finds nothing.
+- `no_figure`: the audit's own `figures_in`, less four-digit years, finds nothing once
+  dates and financial-year labels ("1 April 2025", "FY2025/26") are removed.
 - `quotes_exclude`: no quoted span in the reply contains any of the given terms.
 """
 
@@ -41,6 +42,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from carbon_r.agent.audit import figures_in
 from carbon_r.config import PROJECT_ROOT
 from carbon_r.sources import PEERS
+from carbon_r.tools.peer import PEER_CAVEAT
 
 AGENT_CASES_PATH = PROJECT_ROOT / "data" / "evals" / "peer_agent_questions.json"
 
@@ -143,6 +145,12 @@ _METHOD = re.compile(r"\b(?:location|market)[- ]based\b|\bmethod not stated\b", 
 _PERIOD = re.compile(r"\b\d{1,2} [A-Z][a-z]{2,8} \d{4} to \d{1,2} [A-Z][a-z]{2,8} \d{4}\b")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _QUOTED = re.compile(r'"([^"\n]+)"|\u201c([^\u201d\n]+)\u201d')
+_MONTH = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*"
+# Dates and financial-year labels name a period, not a figure: "1 April 2025", "1 Apr",
+# "FY2025/26". Removed before `no_figure` reads the reply.
+_DATE_OR_FY = re.compile(
+    rf"\b\d{{1,2}} {_MONTH}(?: \d{{4}})?\b|\bFY\s?'?\d{{2,4}}(?:\s?[/\-\u2013]\s?\d{{2,4}})?\b"
+)
 
 
 def _sentences(reply: str) -> list[str]:
@@ -186,8 +194,13 @@ def check_label(check: Check) -> str:
 
 
 def score_reply(case: AgentCase, response: dict) -> dict[str, bool]:
-    """Every check of `case` against one `/chat` response (its JSON). Pure."""
-    reply = response["reply"]
+    """Every check of `case` against one `/chat` response (its JSON). Pure.
+
+    Since 2b the loop attaches PEER_CAVEAT to any reply that used a peer tool. The checks
+    read the MODEL's words, with that caveat removed; only `disclosure_stated` reads the
+    whole reply, and so measures the code wherever a peer tool was used."""
+    full = response["reply"]
+    reply = full.removesuffix(f"\n\n{PEER_CAVEAT}")
     lowered = reply.lower()
     sentences = _sentences(reply)
     plain = {
@@ -200,10 +213,12 @@ def score_reply(case: AgentCase, response: dict) -> dict[str, bool]:
         ),
         "method_named": bool(_METHOD.search(reply)),
         "period_named": bool(_PERIOD.search(reply)),
-        "disclosure_stated": ("self-reported" in lowered or "self reported" in lowered)
-        and ("not assured" in lowered or "not independently assured" in lowered),
+        "disclosure_stated": ("self-reported" in full.lower() or "self reported" in full.lower())
+        and ("not assured" in full.lower() or "not independently assured" in full.lower()),
         "names_difference": any(term in lowered for term in DIFFERENCE_TERMS),
-        "no_figure": not [t for t in figures_in(reply) if not _YEAR.fullmatch(t)],
+        "no_figure": not [
+            t for t in figures_in(_DATE_OR_FY.sub(" ", reply)) if not _YEAR.fullmatch(t)
+        ],
         "states_no_verified_figure": "no verified figure" in lowered,
     }
     results: dict[str, bool] = {}

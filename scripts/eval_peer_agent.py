@@ -1,6 +1,7 @@
 """Eval 5b, agent cases: peer questions put to the whole agent, each run several times.
 
-    uv run python scripts/eval_peer_agent.py
+    uv run python scripts/eval_peer_agent.py                    the v1 cases (the 2b baseline)
+    uv run python scripts/eval_peer_agent.py --cases data/evals/peer_agent_questions_v2.json
 
 The cases and their checks are in data/evals/peer_agent_questions.json, frozen before the
 first run (its sha256 is recorded). They are TEST ONLY - there is no dev split - so, by the
@@ -28,6 +29,7 @@ import argparse
 import json
 import sys
 from datetime import UTC, datetime
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -43,16 +45,18 @@ REPLIES_DIR = PROJECT_ROOT / "data" / "generated" / "peer_agent_replies"
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--case", action="append", help="run only these case ids")
+    parser.add_argument("--cases", type=Path, default=AGENT_CASES_PATH, help="the cases file")
     args = parser.parse_args(argv)
 
-    cases = load_agent_cases()
+    cases_path = args.cases.resolve()
+    cases = load_agent_cases(cases_path)
     if cases.review_status != "reviewed":
         print("The agent cases are still a draft. They are reviewed before the first run.")
         return 1
     selected = [c for c in cases.cases if not args.case or c.id in args.case]
 
     git = git_state()
-    key_sha = file_sha256(AGENT_CASES_PATH)
+    key_sha = file_sha256(cases_path)
     dirty = " (DIRTY TREE - not a clean measurement)" if git["dirty"] else ""
     print(
         f"peer agent cases: {len(selected)} case(s) x {cases.runs} runs; commit "
@@ -101,7 +105,11 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(
             {
                 "git": git,
-                "cases_file": {"version": cases.version, "sha256": key_sha},
+                "cases_file": {
+                    "path": str(cases_path.relative_to(PROJECT_ROOT)),
+                    "version": cases.version,
+                    "sha256": key_sha,
+                },
                 "runs_per_case": cases.runs,
                 "cases": record_cases,
             },

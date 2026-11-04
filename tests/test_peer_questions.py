@@ -136,3 +136,12 @@ def test_an_agent_case_cannot_name_a_check_the_scorer_lacks():
         AgentCaseSet.model_validate(
             {"version": 1, "drafted": "d", "review_status": "draft", "runs": 3, "cases": [case]}
         )
+
+
+def test_the_v2_agent_cases_load_with_four_new_cases():
+    from carbon_r.config import PROJECT_ROOT
+
+    v1 = load_agent_cases()
+    v2 = load_agent_cases(PROJECT_ROOT / "data" / "evals" / "peer_agent_questions_v2.json")
+    assert v2.runs == 3 and len(v2.cases) == 4
+    assert not {c.question for c in v1.cases} & {c.question for c in v2.cases}
