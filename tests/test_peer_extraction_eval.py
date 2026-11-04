@@ -2,7 +2,7 @@
 the page scorer counts presence and fields. Invented rows; no model call."""
 
 from carbon_r.models.peer_disclosure import DRAFT_INSTRUCTION, DraftedCell
-from eval_peer_extraction import ARMS, instruction, score_page
+from eval_peer_extraction import ARMS, instruction, score_by_figure, score_page
 
 
 def test_each_arm_changes_only_the_first_sentence():
@@ -63,3 +63,45 @@ def test_a_carried_unit_counts_and_a_declared_year_page_ignores_the_header():
 def test_an_unverified_report_year_cell_is_extra():
     s = _score([_verified()], [_cell(), _cell(label="Scope 3")])
     assert s["extra_kept"] == 1
+
+
+# --- by figure: label and header ignored ----------------------------------------------------
+
+
+def _by_figure(verified, cells):
+    strict = _score(verified, cells)
+    return score_by_figure(verified, cells, strict["missed_rows"], report_year=2025,
+                           declared_year=None)  # fmt: skip
+
+
+def test_footnote_letters_on_a_label_are_cosmetic():
+    v = _verified(label="Category 2: Capital Goods", header="Singapore > 2025")
+    s = _by_figure(
+        [v], [_cell(label="Category 2: Capital Goodsiii, iv", header="Singapore > 2025")]
+    )
+    assert (s["by_figure_present"], s["by_figure_only_cosmetic"]) == (1, 1)
+
+
+def test_a_lost_spanning_heading_is_substantive():
+    v = _verified(header="Total Portfolio > 2025")
+    s = _by_figure([v], [_cell(header="2025")])
+    assert (s["by_figure_present"], s["by_figure_only_substantive"]) == (1, 1)
+
+
+def test_one_label_read_for_two_rows_is_substantive():
+    a = _verified(label="b(i) Total scope 2 (location-based)", figure="1,000", scope="2")
+    b = _verified(label="b(ii) Total scope 2 (market-based)", figure="900", scope="2")
+    cells = [_cell(label="Scope 2", figure="1,000", scope="2"),
+             _cell(label="Scope 2", figure="900", scope="2")]  # fmt: skip
+    s = _by_figure([a, b], cells)
+    assert (s["by_figure_present"], s["by_figure_only_substantive"]) == (2, 2)
+
+
+def test_a_figure_only_under_another_year_is_a_wrong_year_read_not_present():
+    s = _by_figure([_verified()], [_cell(header="2024")])
+    assert (s["by_figure_present"], s["by_figure_missed_wrong_year"]) == (0, 1)
+
+
+def test_a_strict_match_is_not_counted_as_by_figure_only():
+    s = _by_figure([_verified()], [_cell()])
+    assert (s["by_figure_present"], s["by_figure_only"]) == (1, 0)

@@ -10,6 +10,10 @@ both pdftotext modes, footnote markers fuse onto the numbers - a six-digit total
 its footnote number attached, the Scope 1 label likewise (invented examples of the
 shape: "240,5763", "Total scope 17") - and reading order loses which column is which
 year. A number read out of a passage is therefore not a number the report states.
+That claim is about the raw passage text. A model reading the same text layer is another
+matter: in eval 5a (Part B, 2b), `gpt-5.4-mini` reading `pdftotext -layout` fused no
+footnote marker onto any figure it returned, though it lost labels, spanning headings and
+year columns. Passages are raw text, so the rule below stands.
 The agent cites the page instead, and the figure audit (`agent/audit.py`) refuses any number
 that only a peer passage could have supplied. Verified figures belong to a later
 `peer_disclosures` table, checked by hand against the page.

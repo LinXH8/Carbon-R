@@ -18,14 +18,23 @@ drafting instruction with only its first sentence changed to name the input (`in
 and the same Python after the model - `continued_unit` with the declared continuations,
 `PAGE_YEARS`, and `to_disclosures`.
 
-Scored against `peer_disclosures_verified` only, on every page that holds a verified row:
+Scored against `peer_disclosures_verified` only, on every page that holds a verified row,
+two ways:
 
-    row presence    `match_cells`, as the completeness measure uses it: matched exactly,
-                    matched with a different method, missed, and report-year cells read
-                    that no verified row accounts for (extra). A missed row is also checked
-                    for a reading under another year's column.
-    fields          of the rows present: figure exactly as printed; figure with a footnote
-                    marker fused on (the verified digits, then more); unit; method.
+    strict          `match_cells`, as the completeness measure uses it: a row is present when
+                    a report-year cell has its label and header. Matched exactly, matched
+                    with a different method, missed (and whether read under another year's
+                    column instead), and report-year cells no verified row accounts for.
+    by figure       label and header ignored: a row is present when a report-year cell on its
+                    page has its figure exactly as printed (`score_by_figure`). Added because
+                    the key's labels began as the image drafter's wording, which favours the
+                    image arm under strict matching. A row present only this way is classed
+                    by how its label or header differs: `substantive` when the reading no
+                    longer identifies the row (a spanning heading or a row's group heading
+                    lost, or the same label and header read for another cell on the page),
+                    else `cosmetic` (e.g. footnote letters stuck on a label).
+    fields          of the rows present (strict): figure exactly as printed; figure with a
+                    footnote marker fused on (the verified digits, then more); unit; method.
 
 The bias, stated: the labels began as the vision drafter's readings (gpt-5.5), verified by
 hand. A different model reading the same image may share that drafter's misreadings where
@@ -68,6 +77,7 @@ from carbon_r.models.peer_verification import (
     DraftedCellRef,
     InventoryEntry,
     match_cells,
+    normalise_label,
 )
 from carbon_r.peer_sources import PAGE_YEARS, TABLE_CONTINUES
 from carbon_r.rag.scoring import git_state, n_of
@@ -262,10 +272,65 @@ def score_page(
     }
 
 
+def _spanning(header: str) -> str:
+    return header.split(">")[0].strip().casefold() if ">" in header else ""
+
+
+def score_by_figure(
+    verified: list[dict], cells: list[DraftedCell], strict_missed: list[str], *,
+    report_year: int, declared_year: int | None,
+) -> dict:  # fmt: skip
+    """Rows present by figure alone, one cell per row, and how each row strict matching
+    missed differs. Pure; counts and labels only. A row present neither way is checked for
+    its figure under another year's column (a wrong-year read)."""
+    in_year = [c for c in cells if cell_year(c.column_header_printed, declared_year) == report_year]
+    other_year = [c for c in cells if cell_year(c.column_header_printed, declared_year)
+                  not in (None, report_year)]  # fmt: skip
+    seen = Counter(
+        (normalise_label(c.row_label_printed), normalise_label(c.column_header_printed), c.method)
+        for c in in_year
+    )
+    unused = list(in_year)
+    present = wrong_year = cosmetic = substantive = 0
+    examples: list[dict] = []
+    for v in verified:
+        cell = next((c for c in unused if c.figure_printed.strip() == v["figure_printed"]), None)
+        if cell is None:
+            wrong_year += any(c.figure_printed.strip() == v["figure_printed"] for c in other_year)
+            continue
+        unused.remove(cell)
+        present += 1
+        last = v["row_label"].split(">")[-1].strip()
+        if last not in strict_missed:
+            continue
+        label, header = cell.row_label_printed.strip(), cell.column_header_printed.strip()
+        lost_span = bool(_spanning(v["column_header"])) and (
+            _spanning(v["column_header"]) not in header.casefold()
+        )
+        lost_group = ">" in v["row_label"] and (
+            normalise_label(v["row_label"].split(">")[0]) not in normalise_label(label)
+        )
+        shared = seen[(normalise_label(label), normalise_label(header), cell.method)] > 1
+        kind = "substantive" if lost_span or lost_group or shared else "cosmetic"
+        cosmetic += kind == "cosmetic"
+        substantive += kind == "substantive"
+        examples.append({"verified": [v["row_label"], v["column_header"]],
+                         "read": [label, header], "kind": kind})  # fmt: skip
+    return {
+        "by_figure_present": present,
+        "by_figure_only": cosmetic + substantive,
+        "by_figure_only_cosmetic": cosmetic,
+        "by_figure_only_substantive": substantive,
+        "by_figure_missed_wrong_year": wrong_year,
+        "by_figure_examples": examples,
+    }
+
+
 FIELDS = (
     "verified", "matched_exactly", "method_differs", "missed", "missed_read_under_another_year",
     "extra_kept", "extra_dropped", "present", "figure_exact", "figure_fused_marker",
-    "unit_exact", "method_exact",
+    "unit_exact", "method_exact", "by_figure_present", "by_figure_only",
+    "by_figure_only_cosmetic", "by_figure_only_substantive", "by_figure_missed_wrong_year",
 )  # fmt: skip
 
 
@@ -344,6 +409,10 @@ def main(argv: list[str] | None = None) -> int:
                 report_year=peer.report_year, declared_year=declared_year,
                 carried_unit=carried.unit if carried else None,
             )  # fmt: skip
+            scored |= score_by_figure(
+                rows_here, reading.cells, scored["missed_rows"],
+                report_year=peer.report_year, declared_year=declared_year,
+            )  # fmt: skip
             pages.append({"source_id": sid, "pdf_page": pdf_page, **facts, **scored})
         t = total(pages)
         record_arms[arm] = {"total": t, "pages_no_table_found": no_table, "pages": pages}
@@ -355,6 +424,10 @@ def main(argv: list[str] | None = None) -> int:
               f"{t['missed_read_under_another_year']})")  # fmt: skip
         print(f"    extra cells            kept {t['extra_kept']}, dropped by a rule "
               f"{t['extra_dropped']}")  # fmt: skip
+        print(f"    by figure              {n_of(t['by_figure_present'], v)}  (only by figure "
+              f"{t['by_figure_only']}: cosmetic {t['by_figure_only_cosmetic']}, substantive "
+              f"{t['by_figure_only_substantive']}; figure only under another year "
+              f"{t['by_figure_missed_wrong_year']})")  # fmt: skip
         p = t["present"]
         print(f"    figure exact           {n_of(t['figure_exact'], p)}  "
               f"(marker fused on: {t['figure_fused_marker']})")  # fmt: skip
