@@ -401,11 +401,13 @@ def test_the_toolkit_passes_the_filter_through_and_creates_no_handle(session):
 
 
 def test_the_methodology_judge_instruction_is_unchanged():
-    # sha256 of Part A's instruction, formatted with question "Q" and passages "P", taken
-    # from the commit before the {corpus} parameter was added. The eval was scored with it.
+    # sha256 of the instruction, formatted with question "Q" and passages "P". Part A's eval
+    # was scored with 59cf3ca7...dc86. Changed deliberately in Part B 2b (the reason-first
+    # rule, decided on peer dev run 1), after which the methodology dev split was re-run. A
+    # change here means re-running both retrieval evals.
     text = JUDGE_INSTRUCTION.format(corpus=METHODOLOGY_CORPUS, question="Q", passages="P")
     assert hashlib.sha256(text.encode()).hexdigest() == (
-        "59cf3ca77567729b4c2470e32c49a6c768677e387da02a1ea9d9bf3ed4e1dc86"
+        "d3e016b0c42229c4268e6ba43c7fbaaeeb4eef393e8a0d8bf7ffe849babfb2e4"
     )
 
 

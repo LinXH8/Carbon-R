@@ -123,15 +123,20 @@ class JudgedCitation(BaseModel):
 
 
 class AnswerabilityJudgement(BaseModel):
-    """What the judging model returns. Its `answered` is checked, not believed."""
+    """What the judging model returns. Its `answered` is checked, not believed.
+
+    Field order is the order the model writes them in: `reason` first, then `citations`,
+    then `answered`. With `answered` first (Part B, 2b dev run 1), the verdict was generated
+    before the reasoning, and one judgement said yes while its own reason said the passages
+    did not state the answer (u_seatrium_scope3_target)."""
 
     model_config = ConfigDict(extra="forbid")
 
-    answered: bool = Field(description="True only if the passages state the answer")
+    reason: str = Field(description="One sentence: why the passages do or do not answer it")
     citations: list[JudgedCitation] = Field(
         description="The exact sentences that answer the question; empty if not answered"
     )
-    reason: str = Field(description="One sentence: why the passages do or do not answer it")
+    answered: bool = Field(description="True only if the passages state the answer")
 
 
 # `{corpus}` names what the passages are. The methodology judge fills it with
@@ -150,6 +155,8 @@ Rules:
   they appear in that passage: copy, never paraphrase, never join sentences from two places.
   A quote should be a full sentence or clause, not a few words.
 - If no passage answers, answered = false and citations is empty.
+- Reason before deciding: write the reason first, then the citations, and only then set
+  answered, which must agree with the reason.
 
 Question: {question}
 
