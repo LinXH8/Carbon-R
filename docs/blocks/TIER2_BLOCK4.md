@@ -1240,6 +1240,40 @@ Follow-ups for a later pass, not this one:
 3. When search returns `no_results`, the reply must say the question was not answered.
 4. Make the "no verified figure" check accept wording such as "no verified Scope 1 figure".
 
+## The four follow-ups, done (5 Nov)
+
+Made on the author's instruction before Tier 3. No prompt change; no new model run.
+
+1. **A flagged reply is shown with a warning, and logged.** `audit_warnings` turns every
+   finding into a fixed sentence (`warnings` on the response). The page shows them in a red
+   notice directly above the reply, and the server logs the run at WARNING with its `run_id`
+   and the count of each finding. The reply itself is neither blocked nor rewritten.
+2. **"Verified by hand" is checked in code** (`unsupported_hand_verification`). A sentence
+   that says it and states a number must state a figure `lookup_peer_disclosure` returned
+   ok in the same turn; one that states no number is flagged only if no lookup was made in
+   the turn. Only this turn's tool results count, not the session's.
+3. **A search that ended in `no_results` must be said** (`no_results_unstated`): when the
+   last call of either search tool in the turn returned `no_results`, the reply must say
+   the question was not answered ("do not answer", "not answered", "can't answer", ...).
+4. **The agent-case check** now accepts up to three words between "no verified" and
+   "figure".
+
+**First version of check 2 was wrong, caught before commit.** Replayed over the 12 saved v2
+replies (tool results rebuilt from the saved call statuses and the verified file; no model
+calls), it flagged all 3 MLT replies. Their sentence "only figures checked by hand are held"
+repeats the lookup's own `no_results` explanation and claims nothing about a figure. The
+check now reads only "verified by hand" / "hand-verified", and a sentence with no number
+passes once a lookup was made. Replayed again, the two checks flag exactly one reply, v2
+Scope 2 run 2: its 2 "verified by hand" sentences about passage quotes, and the peer
+search's unstated `no_results`. Those are the defects recorded above for that run.
+
+Each check was broken on purpose (7 mutations: no warnings, each check off, the session's
+results instead of the turn's, any `no_results` call instead of the last, the old literal
+phrase, the page without the notice); a test failed for each.
+
+Re-scored with check 4, the v2 MLT case passes automatically 3 of 3 (recorded: 2 of 3). The
+recorded run is left as it was.
+
 ## Eval 5a: table extraction by representation
 
 The same model reads the same pages three ways: the page image, `pdftotext -layout` text,

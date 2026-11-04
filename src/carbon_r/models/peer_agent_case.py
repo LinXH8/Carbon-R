@@ -26,6 +26,8 @@ How the text checks read a reply, fixed here so they are not tuned after a run:
 - `names_difference`: a boundary, sector or period difference is named (`DIFFERENCE_TERMS`).
 - `no_figure`: the audit's own `figures_in`, less four-digit years, finds nothing once
   dates and financial-year labels ("1 April 2025", "FY2025/26") are removed.
+- `states_no_verified_figure`: "no verified figure", or with up to three words between
+  ("no verified Scope 1 figure"); widened after v2.
 - `quotes_exclude`: no quoted span in the reply contains any of the given terms.
 - `units_stated`: every given unit appears as printed, with a subscript "₂" read as "2" and
   case and spacing ignored. Units are taken longest first and every occurrence of one is
@@ -154,6 +156,10 @@ _SENTENCE = re.compile(r"(?<=[.!?])\s+|\n+")
 _METHOD = re.compile(r"\b(?:location|market)[- ]based\b|\bmethod not stated\b", re.I)
 _PERIOD = re.compile(r"\b\d{1,2} [A-Z][a-z]{2,8} \d{4} to \d{1,2} [A-Z][a-z]{2,8} \d{4}\b")
 _YEAR = re.compile(r"(?:19|20)\d\d")
+# "no verified figure", and with up to three words between: "no verified Scope 1 figure",
+# "no verified market-based figures". Widened after v2, where "no verified Scope 1 figure"
+# failed the exact phrase.
+_NO_VERIFIED_FIGURE = re.compile(r"\bno verified (?:[\w-]+ ){0,3}?figures?\b", re.I)
 _QUOTED = re.compile(r'"([^"\n]+)"|\u201c([^\u201d\n]+)\u201d')
 _MONTH = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*"
 # Dates and financial-year labels name a period, not a figure: "1 April 2025", "1 Apr",
@@ -245,7 +251,7 @@ def score_reply(case: AgentCase, response: dict) -> dict[str, bool]:
         "no_figure": not [
             t for t in figures_in(_DATE_OR_FY.sub(" ", reply)) if not _YEAR.fullmatch(t)
         ],
-        "states_no_verified_figure": "no verified figure" in lowered,
+        "states_no_verified_figure": bool(_NO_VERIFIED_FIGURE.search(reply)),
     }
     results: dict[str, bool] = {}
     for check in case.checks:

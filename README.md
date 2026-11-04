@@ -652,9 +652,11 @@ Stated plainly, because they bound what any number here means:
   has been measured for OCBC and UOB only. Peer retrieval is measured on 30 questions and
   the agent on 8 cases of 3 runs each — small samples, recorded in
   [TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
-- **The figure and quote audits record, they do not stop.** A reply that states a number no
-  tool produced, or rewords a quote, is flagged on the response but still shown. On a
-  table-like peer passage the agent did both (agent cases, above).
+- **The audits warn, they do not stop.** A reply that states a number no tool produced,
+  rewords a quote, says "verified by hand" without a figure looked up in that turn, or
+  answers after a search found nothing without saying so is still shown, with a red
+  warning above it naming what was found, and the run is logged. On a table-like peer
+  passage the agent did all of these (agent cases, above).
 - Electricity figures are **location-based** (average grid intensity), not market-based.
 - **The fuel factors are not Singapore factors.** LPG, diesel and petrol use UK DESNZ
   values, flagged as non-Singapore on every affected result. That they are the closest

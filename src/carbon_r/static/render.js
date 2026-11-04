@@ -80,6 +80,14 @@ function auditFlags(final) {
     flags.push(['The reply quotes words no source contains',
       `These quotations were not found in any passage a tool returned: ${quotes.map((q) => `"${q}"`).join('; ')}. Do not rely on them.`]);
   }
+  if ((final.unsupported_hand_verification || []).length) {
+    flags.push(['The reply claims hand verification it does not have',
+      'It says "verified by hand" where no hand-verified figure was looked up in this turn.']);
+  }
+  if ((final.no_results_unstated || []).length) {
+    flags.push(['A search found no answer, and the reply does not say so',
+      `No answer was found by: ${final.no_results_unstated.join(', ')}. Treat the question as not answered.`]);
+  }
   return flags;
 }
 
@@ -101,6 +109,16 @@ export function renderAnswer(final) {
   // sentence unconditionally, under a red notice saying the opposite.
   const audit = auditFlags(final).length ? 'fail' : 'pass';
   for (const figure of final.figures || []) parts.push(statementFigure(figure, audit));
+
+  // A flagged reply is shown, but never without its warning directly above it: the activity
+  // panel's count alone was easy to miss (Part B 2b follow-up 1).
+  const warnings = final.warnings || [];
+  if (final.reply?.trim() && warnings.length) {
+    parts.push(h('div', { class: 'notice', 'data-kind': 'bad', role: 'alert' }, [
+      h('strong', { text: 'Check this reply before relying on it' }),
+      ...warnings.map((w) => h('span', { text: w })),
+    ]));
+  }
 
   if (final.reply?.trim()) {
     parts.push(h('section', { class: 'reply', 'aria-label': "The agent's reply" }, [

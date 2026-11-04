@@ -236,3 +236,83 @@ def test_the_audit_reads_the_models_words_not_the_attached_caveat(session):
 def test_an_answer_with_no_peer_tool_carries_no_peer_caveat(session, toolkit):
     run = run_agent(session, "q", client=fake_client(*FULL_SEQUENCE), model="m", toolkit=toolkit)
     assert "self-reported" not in run.reply and run.reply == ANSWER
+
+
+# --- a flagged reply is shown with its warning, and logged (Part B 2b follow-ups) ----------
+
+
+def test_a_flagged_reply_carries_a_warning_and_is_logged(session, toolkit, caplog):
+    invented = "Your annual emissions will be about 673,430 kg CO2e."
+    with caplog.at_level("WARNING", logger="carbon_r.agent"):
+        run = run_agent(
+            session, "q", client=fake_client(*FULL_SEQUENCE[:3], invented), model="m",
+            toolkit=toolkit,
+        )  # fmt: skip
+    assert run.reply == invented  # shown as written, not blocked or rewritten
+    assert len(run.warnings) == 1 and "673,430" in run.warnings[0]
+    assert f"run_id={run.run_id} audit=flagged figures=1" in caplog.text
+
+
+def test_a_clean_reply_has_no_warning_and_logs_none(session, toolkit, caplog):
+    with caplog.at_level("WARNING", logger="carbon_r.agent"):
+        run = run_agent(session, "q", client=fake_client(*FULL_SEQUENCE), model="m",
+                        toolkit=toolkit)  # fmt: skip
+    assert run.warnings == [] and "audit=flagged" not in caplog.text
+
+
+def test_verified_by_hand_needs_this_turns_lookup(session):
+    from carbon_r.agent.tools import Toolkit
+    from carbon_r.tools.base import ok
+
+    def lookup(*_, **__):
+        return ok(
+            {"figures": [{"figure_printed": "4.2", "printed_page": 134}]}, "1 verified figure."
+        )
+
+    claim = "UOB's Scope 1 is 4.2 thousand tCO2e, on p. 134, verified by hand against that page."
+    kit = Toolkit(session, lookup_peers=lookup)
+    first = run_agent(
+        session,
+        "q",
+        client=fake_client(call("lookup_peer_disclosure", company="UOB", scope="1"), claim),
+        model="m",
+        toolkit=kit,
+    )
+    assert first.unsupported_hand_verification == [] and first.warnings == []
+    # The next turn makes the same claim with no lookup of its own: the session still holds
+    # the earlier result, but the claim is read against this turn's tools only.
+    second = run_agent(session, "again?", client=fake_client(claim), model="m", toolkit=kit)
+    assert second.unsupported_hand_verification == [claim]
+    assert any("verified by hand" in w for w in second.warnings)
+
+
+def test_an_answer_after_a_failed_search_must_say_so(session):
+    from carbon_r.agent.tools import Toolkit
+    from carbon_r.tools.base import no_results
+
+    def search(*_, **__):
+        return no_results("The passages found do not answer this.", {"refusal_level": "generation"})
+
+    kit = Toolkit(session, search_peers=search)
+    silent = run_agent(
+        session,
+        "q",
+        client=fake_client(
+            call("search_peer_disclosures", question="q", company="UOB"),
+            "UOB reports Scope 2 on both bases.",
+        ),
+        model="m",
+        toolkit=kit,
+    )
+    assert silent.no_results_unstated == ["search_peer_disclosures"]
+    said = run_agent(
+        session,
+        "q",
+        client=fake_client(
+            call("search_peer_disclosures", question="q", company="UOB"),
+            "The UOB passages found do not answer the question.",
+        ),
+        model="m",
+        toolkit=kit,
+    )
+    assert said.no_results_unstated == [] and said.warnings == []

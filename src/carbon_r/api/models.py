@@ -234,6 +234,21 @@ class ChatResponse(BaseModel):
         description="Quoted spans in the reply that no tool returned verbatim. Must be "
         "empty; a non-empty list means the model put words in a source's mouth.",
     )
+    unsupported_hand_verification: list[str] = Field(
+        default_factory=list,
+        description="Sentences claiming 'verified by hand' without a figure the verified "
+        "peer lookup returned in this turn. Must be empty.",
+    )
+    no_results_unstated: list[str] = Field(
+        default_factory=list,
+        description="Search tools that ended this turn in no_results when the reply does "
+        "not say the question was not answered. Must be empty.",
+    )
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="The audit findings in words, rendered server-side. A client that shows "
+        "the reply shows these with it.",
+    )
     figures: list[FigureOut] = Field(
         default_factory=list,
         description="Every figure `calculate_emissions` produced in this turn, with the "
@@ -251,5 +266,8 @@ class ChatResponse(BaseModel):
             stopped_reason=run.stopped_reason,
             unverified_figures=run.unverified_figures,
             unverified_quotes=run.unverified_quotes,
+            unsupported_hand_verification=run.unsupported_hand_verification,
+            no_results_unstated=run.no_results_unstated,
+            warnings=run.warnings,
             figures=[FigureOut.from_payload(payload) for payload in run.figures],
         )

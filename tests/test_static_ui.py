@@ -108,3 +108,12 @@ def test_a_failed_audit_stays_visible_when_folded_away():
     assert "unverified_quotes" in renderer
     assert "audit flag" in script
     assert "activity-flags" in script
+
+
+def test_a_flagged_reply_is_shown_with_its_warning_above_it():
+    """Follow-up 1 (Part B 2b): the warning is not only a count in a closed panel."""
+    renderer = client.get("/static/render.js").text
+    answer = renderer.split("export function renderAnswer")[1].split("export function")[0]
+    assert "final.warnings" in answer
+    assert answer.index("final.warnings") < answer.index("class: 'reply'")
+    assert "unsupported_hand_verification" in renderer and "no_results_unstated" in renderer

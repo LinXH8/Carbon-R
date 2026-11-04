@@ -1,7 +1,7 @@
 # Architecture
 
 One FastAPI process, one Postgres database, one model provider. The model chooses tools and
-transcribes; Python does every calculation; two audits check the reply before it is shown.
+transcribes; Python does every calculation; audits check the reply and warn above it when it fails.
 
 ```mermaid
 flowchart LR
@@ -29,8 +29,8 @@ flowchart LR
     extract -.->|act_N handles| calc
     lookup -.->|factor_N handles| calc
 
-    loop --> audit{Audits on the reply<br/>unverified_figures<br/>unverified_quotes}
-    audit -->|peer tool used:<br/>caveat attached| api
+    loop --> audit{Audits on the reply<br/>figures, quotes,<br/>hand-verified claims, no_results}
+    audit -->|warnings above the reply;<br/>peer tool used: caveat attached| api
 ```
 
 What the diagram encodes:
@@ -49,9 +49,10 @@ What the diagram encodes:
 - **The peer caveat is code, not prose.** When a turn used a peer tool, the loop appends
   the fixed self-reported / not-assured sentence after the audits have read the model's
   words.
-- **Both audits run on every reply.** A number no tool produced, or a quoted span no tool
-  returned, is listed on the response and shown on the page. They record; they do not
-  block, so a flagged reply is still shown.
+- **The audits run on every reply.** A number no tool produced, a quoted span no tool
+  returned, "verified by hand" without a figure looked up in that turn, and a search's
+  `no_results` the reply does not admit are listed on the response, put into words as
+  `warnings` shown above the reply, and logged. They warn; they do not block.
 
 Deployment shape (`docker compose up`): an `app` container (this process, plus the loaders
 that seed the factors on start) and a `db` container (`pgvector/pgvector:pg17`).

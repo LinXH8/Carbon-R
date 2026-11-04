@@ -302,3 +302,11 @@ def test_one_unit_for_both_companies_fails():
 
 def test_a_respelled_unit_is_not_the_unit_as_printed():
     assert not _units("UOB: 2.3 '000 tCO2e. DBS: 1,234 tCO2e.")
+
+
+def test_no_verified_figure_accepts_words_between():
+    assert _check("states_no_verified_figure", "Carbon R holds no verified figure for MLT.")
+    mlt = "Carbon R holds no verified Scope 1 figure for Mapletree Logistics Trust."
+    assert _check("states_no_verified_figure", mlt)  # v2 run 3's wording
+    assert _check("states_no_verified_figure", "There are no verified market-based figures.")
+    assert not _check("states_no_verified_figure", "MLT has no verified data on file.")

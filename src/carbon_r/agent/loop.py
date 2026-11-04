@@ -13,8 +13,10 @@ model, which gets the remaining turns to correct itself. The only exception the 
 catches at the top level is the provider's own.
 
 **The answer is audited.** Before the reply is returned, every number in it is checked
-against the numbers the tools produced (`audit.py`). The result travels with the reply
-rather than being logged away, so a caller can see it.
+against the numbers the tools produced, every quote against the text they returned, and
+two claims about sources against this turn's tool results (`audit.py`). The findings travel
+with the reply, put into words as `warnings` that the page shows above it, and a flagged
+run is logged at WARNING under its run_id. The reply is not blocked or rewritten.
 
 The provider client is injected, so the whole loop is testable offline with a fake that
 scripts a sequence of tool calls - see `tests/test_agent_loop.py`.
@@ -30,7 +32,13 @@ from typing import Any, Protocol
 
 from openai import OpenAIError
 
-from carbon_r.agent.audit import audit_figures, audit_quotes
+from carbon_r.agent.audit import (
+    audit_figures,
+    audit_quotes,
+    audit_warnings,
+    no_results_unstated,
+    unsupported_hand_verification,
+)
 from carbon_r.agent.prompt import MAX_TURNS, SYSTEM_PROMPT
 from carbon_r.agent.session import Session
 from carbon_r.agent.tools import Toolkit
@@ -78,6 +86,9 @@ class AgentRun:
     stopped_reason: str = "completed"  # completed | max_turns | provider_error
     unverified_figures: list[str] = field(default_factory=list)
     unverified_quotes: list[str] = field(default_factory=list)
+    unsupported_hand_verification: list[str] = field(default_factory=list)
+    no_results_unstated: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     # The `calculate_emissions` payloads produced by THIS run, in order. Collected here
     # rather than read from `session.calculations` because that dict accumulates across
@@ -145,6 +156,7 @@ def run_agent(
     toolkit = toolkit or Toolkit(session)
 
     session.user_messages.append(message)
+    first_payload = len(session.tool_payloads)
     conversation: list[dict] = [*session.history, {"role": "user", "content": message + context}]
     calls: list[ToolCallRecord] = []
     schemas = tool_schemas()
@@ -216,6 +228,21 @@ def run_agent(
     log.info("run_id=%s stopped=%s turns=%d", run_id, stopped, turns)
     unverified_figures = audit_figures(reply, session.tool_payloads)
     unverified_quotes = audit_quotes(reply, session.tool_payloads, session.user_messages)
+    # The two source claims are read against this turn's results only, and only on an
+    # answer the model wrote: a stopped run's reply is the loop's own.
+    turn_payloads = session.tool_payloads[first_payload:]
+    hand = unsupported_hand_verification(reply, turn_payloads) if stopped == "completed" else []
+    unstated = no_results_unstated(reply, turn_payloads) if stopped == "completed" else []
+    warnings = audit_warnings(unverified_figures, unverified_quotes, hand, unstated)
+    if warnings:
+        log.warning(
+            "run_id=%s audit=flagged figures=%d quotes=%d hand_verified=%d no_results_unstated=%s",
+            run_id,
+            len(unverified_figures),
+            len(unverified_quotes),
+            len(hand),
+            ",".join(unstated) or "-",
+        )
     if stopped == "completed" and any(c.tool in PEER_TOOLS for c in calls):
         reply = f"{reply}\n\n{PEER_CAVEAT}"
     return AgentRun(
@@ -227,5 +254,8 @@ def run_agent(
         stopped_reason=stopped,
         unverified_figures=unverified_figures,
         unverified_quotes=unverified_quotes,
+        unsupported_hand_verification=hand,
+        no_results_unstated=unstated,
+        warnings=warnings,
         figures=figures,
     )

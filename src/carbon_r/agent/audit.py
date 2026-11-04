@@ -68,6 +68,30 @@ what the user typed counts, not the document list the server appends to it.
 Known limit: the check is that the words exist, not who said them. A quote that matches the
 user's own text passes even when the reply attributes it to a source ("the GHG Protocol
 says \"…\"" where the words are the user's).
+
+Two claims a reply makes about its own sources are checked too (Part B 2b follow-ups, after
+eval 5b's v2 agent cases), against the tool results of the same turn only:
+
+- **"Verified by hand"** (or "hand-verified") belongs to figures `lookup_peer_disclosure`
+  returned. A sentence that says it and states a number must state at least one figure that
+  tool returned ok in this turn. A sentence that says it and states no number - a summary
+  line, or an explanation after a lookup found nothing ("only figures verified by hand are
+  held") - is flagged only if no lookup was made in this turn at all
+  (`unsupported_hand_verification`). A v2 reply had said it about passage quotes when no
+  lookup had been made. Known limits: the claim is tied to a number in its own sentence, so
+  "4.2 thousand tCO2e (p. 134). Verified by hand." is flagged; and a summary line after a
+  lookup that found nothing passes. "Checked by hand" is not read: the lookup's own
+  no_results message uses it to explain what is held, and replies repeat it (all 3 v2 MLT
+  replies).
+- **A search that ended in `no_results`** - the last call of `search_methodology` or
+  `search_peer_disclosures` in the turn - must be followed by a reply that says the question
+  was not answered (`no_results_unstated`). A v2 reply had answered after such a search
+  without saying so. Known limit: the check reads for the statement anywhere in the reply,
+  not for which question it is about.
+
+All four findings are put into words for the reader by `audit_warnings`; the loop shows
+them with the reply and logs them. Nothing is blocked or rewritten: the reply is shown as
+the model wrote it, with the warning above it.
 """
 
 from __future__ import annotations
@@ -312,3 +336,95 @@ def audit_quotes(
         if not _is_label(span) and not _is_verified(span, haystacks):
             unverified.append(span)
     return unverified
+
+
+# --- claims about sources, and the warnings shown with a flagged reply ---------------------
+
+_HAND_VERIFIED = re.compile(r"\bverified\s+by\s+hand\b|\bhand[- ]verified\b", re.I)
+# A sentence ends at a line break, or at . ! ? followed by space and something that does not
+# begin with a lower-case letter or a digit - so "p. 134" and "e.g. a bank" stay whole.
+_SENTENCE_END = re.compile(r"\n+|(?<=[.!?])\s+(?=[^a-z0-9\s])")
+SEARCH_TOOLS = ("search_methodology", "search_peer_disclosures")
+# "do not answer", "is not answered", "can't answer", "doesn't directly answer", "no answer",
+# "unanswered". Curly apostrophes are straightened first.
+_NOT_ANSWERED = re.compile(
+    r"(?:\bnot|\bcannot|\bnever|n't)\s+(?:\w+\s+){0,3}?answer(?:ed|s)?\b"
+    r"|\bno answer\b|\bunanswered\b",
+    re.IGNORECASE,
+)
+
+
+def _decimals(text: str) -> set[Decimal]:
+    return {d for d in (_to_decimal(t) for t in figures_in(text)) if d is not None}
+
+
+def unsupported_hand_verification(reply: str, turn_payloads: list[dict]) -> list[str]:
+    """Sentences of `reply` that claim hand verification without a figure that
+    `lookup_peer_disclosure` returned in this turn. `turn_payloads` is this turn's only."""
+    returned: set[Decimal] = set()
+    looked_up = False
+    for payload in turn_payloads:
+        if payload.get("tool") != "lookup_peer_disclosure":
+            continue
+        looked_up = True
+        if payload.get("status") != "ok":
+            continue
+        for figure in (payload.get("data") or {}).get("figures", []):
+            returned |= _decimals(str(figure.get("figure_printed", "")))
+    flagged = []
+    for sentence in _SENTENCE_END.split(reply):
+        if not _HAND_VERIFIED.search(sentence):
+            continue
+        stated = _decimals(sentence)
+        supported = bool(stated & returned) if stated else looked_up
+        if not supported:
+            flagged.append(sentence.strip())
+    return flagged
+
+
+def no_results_unstated(reply: str, turn_payloads: list[dict]) -> list[str]:
+    """The search tools whose last call this turn returned no_results, when the reply does
+    not say the question was not answered. Empty when it does."""
+    last: dict[str, str] = {}
+    for payload in turn_payloads:
+        if payload.get("tool") in SEARCH_TOOLS:
+            last[payload["tool"]] = payload.get("status", "")
+    unanswered = [tool for tool, status in last.items() if status == "no_results"]
+    if not unanswered or _NOT_ANSWERED.search(reply.replace("\u2019", "'")):
+        return []
+    return unanswered
+
+
+def audit_warnings(
+    unverified_figures: Sequence[str],
+    unverified_quotes: Sequence[str],
+    hand_verification: Sequence[str],
+    unstated_no_results: Sequence[str],
+) -> list[str]:
+    """The sentences shown to the reader with a flagged reply, one per kind of finding, in
+    a fixed order. Written here, not by the model, so the wording cannot drift."""
+    warnings = []
+    if unverified_figures:
+        warnings.append(
+            "This reply states numbers that no tool produced in this session: "
+            f"{', '.join(unverified_figures)}. Do not use them."
+        )
+    if unverified_quotes:
+        quoted = "; ".join(f'"{q}"' for q in unverified_quotes)
+        warnings.append(
+            "This reply quotes words that no source returned by a tool contains, at least not "
+            f"exactly: {quoted}. Do not rely on them as quotations."
+        )
+    if hand_verification:
+        warnings.append(
+            'This reply says "verified by hand" where no hand-verified figure was looked up in '
+            "this turn. Only figures returned by the verified peer lookup have been checked "
+            f"by hand. Flagged: {' | '.join(hand_verification)}"
+        )
+    if unstated_no_results:
+        warnings.append(
+            f"A search in this turn ({', '.join(unstated_no_results)}) found nothing that "
+            "answers the question, and the reply does not say so. Treat the question as not "
+            "answered."
+        )
+    return warnings
