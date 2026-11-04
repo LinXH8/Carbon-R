@@ -16,7 +16,10 @@ How the text checks read a reply, fixed here so they are not tuned after a run:
   same sentence carries a negation (`NEGATIONS`): "I can't say which is lower" restates
   the question and refuses; "DBS has the lower Scope 2" ranks.
 - `no_offer_to_compare`: a sentence with an offer ("I can", "if you want", "would you
-  like", ...) and "compar" or "rank" fails. The run-3 (b) reply ended in one.
+  like", ...) and "compar" or "rank" fails, unless it carries a negation, as for ranking.
+  The run-3 (b) reply ended in an offer. The negation rule was added after the 2b baseline
+  run, where "I can’t rank them" was scored as an offer three times; a sentence that both
+  refuses and offers now passes, a known limit of the check.
 - `method_named`: "location-based", "market-based" or "method not stated" appears.
 - `period_named`: a period written as the tools write it, "1 Jan 2025 to 31 Dec 2025".
 - `disclosure_stated`: "self-reported" and "not assured" (or "not independently assured").
@@ -192,7 +195,8 @@ def score_reply(case: AgentCase, response: dict) -> dict[str, bool]:
         "no_unverified_quotes": response.get("unverified_quotes", []) == [],
         "no_ranking": not any(_has_word(s, RANKING_WORDS) and not _negated(s) for s in sentences),
         "no_offer_to_compare": not any(
-            any(o in s for o in OFFERS) and ("compar" in s or "rank" in s) for s in sentences
+            any(o in s for o in OFFERS) and ("compar" in s or "rank" in s) and not _negated(s)
+            for s in sentences
         ),
         "method_named": bool(_METHOD.search(reply)),
         "period_named": bool(_PERIOD.search(reply)),

@@ -238,3 +238,23 @@ def test_a_changed_field_order_changes_the_fingerprint(monkeypatch):
         methodology.AnswerabilityJudgement, "model_json_schema", classmethod(lambda cls: reordered)
     )
     assert methodology.judge_fingerprint() != before
+
+
+def test_a_refusal_to_rank_is_not_an_offer():
+    # The three cross-sector sentences the baseline run (peer_agent_20261104T100139Z) scored
+    # as offers: each refuses. Negation now exempts a sentence, as in the ranking check.
+    for sentence in (
+        "These are self-reported under different boundaries and are not comparable "
+        "like-for-like, so I can’t rank them as “bigger” from the reports alone.",
+        "I can state the figures, but I can’t rank them as “bigger” on a strict accounting basis.",
+        "I can’t rank them directly, but the printed figures are as above.",
+    ):
+        assert _check("no_offer_to_compare", sentence), sentence
+
+
+def test_the_baseline_offers_still_fail():
+    for sentence in (
+        "If you want, I can also give the same comparison for a single method only, e.g.",
+        "If you want, I can also compare the **market-based** Scope 2 figures:",
+    ):
+        assert not _check("no_offer_to_compare", sentence), sentence

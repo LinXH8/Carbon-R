@@ -185,3 +185,54 @@ def test_every_run_has_its_own_run_id(session, toolkit):
     first = run_agent(session, "q", client=fake_client(*FULL_SEQUENCE), model="m", toolkit=toolkit)
     second = run_agent(session, "q", client=fake_client(*FULL_SEQUENCE), model="m", toolkit=toolkit)
     assert len(first.run_id) == 32 and first.run_id != second.run_id
+
+
+# --- the peer caveat, attached in code (Part B 2b) ----------------------------------------
+
+
+def _peer_toolkit(session):
+    from carbon_r.agent.tools import Toolkit
+    from carbon_r.tools.base import no_results
+
+    def fake_lookup_peers(*_, **__):
+        return no_results("Carbon R holds no verified figure for Keppel.", {})
+
+    return Toolkit(session, lookup_peers=fake_lookup_peers)
+
+
+def test_a_peer_answer_carries_the_caveat_whatever_the_model_wrote(session):
+    from carbon_r.tools.peer import PEER_CAVEAT
+
+    run = run_agent(
+        session,
+        "What were Keppel's Scope 1 emissions?",
+        client=fake_client(
+            call("lookup_peer_disclosure", company="Keppel", scope="1"),
+            "Carbon R holds no verified figure for Keppel's Scope 1.",
+        ),
+        model="m",
+        toolkit=_peer_toolkit(session),
+    )
+    assert run.reply.startswith("Carbon R holds no verified figure for Keppel's Scope 1.")
+    assert run.reply.endswith(PEER_CAVEAT)
+    assert "self-reported" in run.reply and "not assured" in run.reply
+
+
+def test_the_audit_reads_the_models_words_not_the_attached_caveat(session):
+    run = run_agent(
+        session,
+        "q",
+        client=fake_client(
+            call("lookup_peer_disclosure", company="Keppel", scope="1"),
+            "No verified figure is held.",
+        ),
+        model="m",
+        toolkit=_peer_toolkit(session),
+    )
+    # The caveat's dates ("1 Apr to 31 Mar") are code's words, not the model's.
+    assert run.unverified_figures == [] and run.unverified_quotes == []
+
+
+def test_an_answer_with_no_peer_tool_carries_no_peer_caveat(session, toolkit):
+    run = run_agent(session, "q", client=fake_client(*FULL_SEQUENCE), model="m", toolkit=toolkit)
+    assert "self-reported" not in run.reply and run.reply == ANSWER

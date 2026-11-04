@@ -37,10 +37,16 @@ from carbon_r.agent.tools import Toolkit
 from carbon_r.agent.toolspec import tool_schemas
 from carbon_r.config import get_settings
 from carbon_r.llm import openai_client
+from carbon_r.tools.peer import PEER_CAVEAT
 
 # One line per tool call, keyed by the run, so a reply on screen can be matched to the calls
 # that produced it in the server log. The same id is the trace id if tracing is enabled.
 log = logging.getLogger("carbon_r.agent")
+
+# Any turn that used a peer tool ends with PEER_CAVEAT, attached here rather than left to the
+# model: in eval 5b's agent cases (Part B 2b) no comparison reply said "not assured", though
+# the prompt asks for it. The audits read the model's words only; the caveat is the code's.
+PEER_TOOLS = frozenset({"search_peer_disclosures", "lookup_peer_disclosure"})
 
 
 class SupportsResponses(Protocol):  # pragma: no cover - a shape, not behaviour
@@ -208,6 +214,10 @@ def run_agent(
 
     session.history = conversation
     log.info("run_id=%s stopped=%s turns=%d", run_id, stopped, turns)
+    unverified_figures = audit_figures(reply, session.tool_payloads)
+    unverified_quotes = audit_quotes(reply, session.tool_payloads, session.user_messages)
+    if stopped == "completed" and any(c.tool in PEER_TOOLS for c in calls):
+        reply = f"{reply}\n\n{PEER_CAVEAT}"
     return AgentRun(
         session_id=session.session_id,
         reply=reply,
@@ -215,7 +225,7 @@ def run_agent(
         tool_calls=calls,
         turns_used=turns,
         stopped_reason=stopped,
-        unverified_figures=audit_figures(reply, session.tool_payloads),
-        unverified_quotes=audit_quotes(reply, session.tool_payloads, session.user_messages),
+        unverified_figures=unverified_figures,
+        unverified_quotes=unverified_quotes,
         figures=figures,
     )
