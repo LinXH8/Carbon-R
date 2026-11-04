@@ -530,6 +530,12 @@ compares every commit not yet on `origin/main`) and
 `scripts/verify_peer_disclosures.py` (worksheet, apply). The agent reads these rows only
 through `lookup_peer_disclosure`, which queries the verified view and nothing else.
 
+Real peer figures may be committed in that one file only. The leak check enforces it: a
+pre-push hook (`make hooks`, also run by `make install`) blocks any push that adds a
+verified figure anywhere else, short decimals included, and CI fails the build on the same
+check. A number that only happens to equal a peer figure is allowed by a reviewed entry in
+`data/leak_check_coincidences.json`.
+
 ### The page
 
 `http://localhost:8000` is a single page with no build step: drop a bill on it, ask a

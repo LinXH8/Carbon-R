@@ -7,13 +7,20 @@ export UV_PROJECT_ENVIRONMENT := .venv-carbon-r
 # the code, so `make docs` works in a fresh shell. Harmless on Linux/Docker.
 export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
 
-.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout ingest-methodology eval-retrieval ingest-peer seed-peer
+.PHONY: help install run test lint fmt seed seed-desnz verify-desnz docs docs-plan models db-up db-down check eval eval-block1 agent-smoke flow-10 flow-scope1 flow-block2 eval-scenarios scenarios eval-scenarios-e2e eval-holdout ingest-methodology eval-retrieval ingest-peer seed-peer hooks leak-check
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | expand -t20
 
-install:  ## Create .venv-carbon-r and install all dependencies
+install:  ## Create .venv-carbon-r and install all dependencies, and the git hooks
 	uv sync
+	git config core.hooksPath .githooks
+
+hooks:    ## Point git at .githooks: the pre-push leak check blocks a push that leaks a peer figure
+	git config core.hooksPath .githooks
+
+leak-check:  ## Real peer figures only in the verified file: commits since origin/main + working tree
+	uv run python scripts/draft_peer_disclosures.py leak-check
 
 run:      ## Serve the API on :8000 with reload
 	uv run uvicorn carbon_r.main:app --reload

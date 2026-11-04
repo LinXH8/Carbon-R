@@ -50,7 +50,13 @@ from openai import OpenAI, OpenAIError
 
 from carbon_r.config import PROJECT_ROOT, get_settings
 from carbon_r.db import DatabaseNotConfiguredError, apply_migrations, connect
-from carbon_r.leak_check import find_leaks, read_coincidences, significant, split_reviewed
+from carbon_r.leak_check import (
+    context_pattern,
+    find_leaks,
+    reach,
+    read_coincidences,
+    split_reviewed,
+)
 from carbon_r.llm import openai_client
 from carbon_r.models.peer_disclosure import (
     BLIND_SEED,
@@ -383,13 +389,18 @@ def review(source_id: str | None) -> int:
 
 # --- leak check ---------------------------------------------------------------------------
 
+# Names a line may use for a peer instead of its full company name: a short whole-number
+# figure is searched only on a line that names a peer (or a tonnes-CO2e unit).
+SHORT_NAMES = {"CapitaLand", "Mapletree", "Frasers", "CLAR", "CICT", "MPACT", "MLT", "FLCT", "STE"}
 
-def leak_check(paths: list[str], base: str) -> int:
+
+def leak_check(paths: list[str], base: str, head: str = "HEAD", verbose: bool = False) -> int:
     """Real peer figures may appear in ONE tracked file, `data/peer_disclosures_verified.json`,
     and only as verified values (or as that file's labelled `draft` fields). Fails on:
 
     - any drafted or verified figure introduced since BASE (default origin/main) outside that
-      file: in any commit of BASE..HEAD, or in the working tree (the index, or PATHS);
+      file: in any commit of BASE..HEAD, or in the working tree (the index, or PATHS). Short
+      figures count too; see `carbon_r.leak_check.reach`;
     - a verified-file row whose figure is a draft value that was never verified.
 
     Figures come from the local drafts (`data/generated/peer_drafts/`) and the verified file.
@@ -415,21 +426,25 @@ def leak_check(paths: list[str], base: str) -> int:
             base=base,
             allowed={allowed, reviewed_file},
             paths=paths or None,
+            head=head,
+            context=context_pattern(sorted({p.company for p in PEERS.values()} | SHORT_NAMES)),
         )
     except subprocess.CalledProcessError:
-        print(f"Unknown base {base!r}; fetch it, or pass --base REF.")
+        print(f"Unknown base {base!r} or head {head!r}; fetch it, or pass --base REF.")
         return 1
-    commits = _git_lines("rev-list", f"{base}..HEAD")
-    figures = {f for f in drafted | verified if significant(f)}
+    commits = _git_lines("rev-list", f"{base}..{head}")
+    figures = drafted | verified
+    in_context = sorted(f for f in figures if reach(f) == "context")
     print(
-        f"{len(figures)} peer figures of 3+ digits ({len(verified)} verified, "
-        f"{len(never_verified)} never verified); base {base}, {len(commits)} commit(s) to "
-        f"push, plus the working tree; {allowed} not searched"
+        f"{len(figures)} peer figures ({len(verified)} verified, {len(never_verified)} never "
+        f"verified), of which {len(in_context)} searched only beside a company or unit "
+        f"({', '.join(in_context)}); base {base}, {len(commits)} commit(s) to {head}, plus the "
+        f"working tree; {allowed} not searched"
     )
     entries = read_coincidences(COINCIDENCES_FILE)
-    reviewed, new, unused = split_reviewed([leak for leak in leaks if not leak.at_base], entries)
+    reviewed, new, unused = split_reviewed(leaks, entries)
     for leak in leaks:
-        if leak.at_base:
+        if leak.at_base and verbose:
             print(f"  already at base (coincidence?) {leak.where} {leak.path}: {leak.figure}")
     why = {(e.path, e.figure): e for e in entries}
     for leak in reviewed:
@@ -469,6 +484,8 @@ def main() -> int:
     leak = sub.add_parser("leak-check")
     leak.add_argument("paths", nargs="*")
     leak.add_argument("--base", default="origin/main", help="what is already public")
+    leak.add_argument("--head", default="HEAD", help="the last commit being pushed")
+    leak.add_argument("--verbose", action="store_true", help="list matches already at base")
     args = parser.parse_args()
     if args.command == "scan":
         return scan(args.source_id)
@@ -478,7 +495,7 @@ def main() -> int:
         return load()
     if args.command == "review":
         return review(args.source_id)
-    return leak_check(args.paths, args.base)
+    return leak_check(args.paths, args.base, args.head, args.verbose)
 
 
 if __name__ == "__main__":

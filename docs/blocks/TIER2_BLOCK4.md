@@ -968,7 +968,46 @@ commit reached `origin/main`. Fixed forward in `8e7d5fe` with invented figures (
 against the verified set) and invented wording for a report sentence; the earlier commits
 still hold the values in history. The check only scans figures of 3 or more digits, so the
 2-digit ones were found by a separate scan of every tracked file for the verified decimal
-figures. Known limit: the leak check does not see short figures such as "4.2".
+figures. That known limit (no figure under 3 digits was searched) is closed: see
+"The leak check, widened and enforced" below.
+
+## The leak check, widened and enforced (5 Nov)
+
+After the leak above, on the author's instruction, so that it cannot recur by the same route:
+
+- **Every verified figure is searched.** Before, only figures of 3 or more digits were;
+  now a figure with a decimal point is searched everywhere however short, and the four
+  one- or two-digit whole numbers among the 73 distinct values are searched on any line
+  that also names a peer company or a tonnes-CO2e unit (a bare short number is on nearly
+  every line of code). Known limit: such a number on a line with neither is not seen.
+- **Counted against base, not merely present.** A match was "already at base" if the figure
+  appeared anywhere in the file at base, so once a file held one occurrence every later one
+  passed. A match is now new when the file holds more occurrences than at base.
+- **It blocks the push itself.** `.githooks/pre-push` (installed by `make hooks` or `make
+  install`) runs the check on exactly the commits being pushed - `remote..local`, or since
+  the merge base for a new branch - and refuses the push when it fails. CI runs the same
+  check on the pushed range (or a pull request's) before the tests, with full history, and
+  fails the build. The hook can be skipped (`--no-verify`) or not installed; CI cannot.
+- Reviewed coincidences work as before; an entry now counts as used while its figure is
+  still in its file, so the list no longer reports every entry as unused after a push.
+
+**Checked against the real leak.** Fed the exact push that leaked (`9637b91..13b9fa4`), the
+real hook found all four figures (6 occurrences; the old check found 2) and blocked the
+push; the CI command, run with no keys, exited 1 on the same range. On the current history
+the hook passes. Widening it caught three more of Claude's own: one short figure in the
+note above (in `fbb443e`, pushed), and one each in the first drafts of this change's
+docstring and tests (never committed). The note was reworded; history keeps the pushed one.
+The 100 matches that predate the change (EMA's Table 2.4, the OpenAI timeout, section
+numbers, counts, dates, CSS values) were read by hand: none is a peer figure.
+
+Tests: the wider search, the context rule, the count rule, the pushed range and the
+coincidence list in `tests/test_leak_check.py` and `tests/test_leak_coincidences.py`; the
+hook through a real `git push` to a throwaway remote, with the check stubbed, in
+`tests/test_pre_push_hook.py` (blocked on failure with the remote unchanged; let through on
+success with the exact range passed); the CI step's place and full-history checkout read
+from `ci.yml`. Eight deliberate breaks (the old 3-digit floor, context ignored, presence
+instead of count, the head ignored, the unused-entry rule, the hook ignoring the exit code,
+the hook's base, the CI step removed) each failed a test.
 
 ## Known limits (OCBC and UOB)
 

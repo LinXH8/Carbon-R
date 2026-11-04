@@ -31,3 +31,9 @@ def test_an_entry_needs_a_reason_and_a_reviewer():
         Coincidence(path="a", figure="4,321", reason="", reviewed_by="x", reviewed_on="2026-11-02")
     with pytest.raises(ValidationError):
         Coincidence(path="a", figure="4,321", reason="r", reviewed_by="", reviewed_on="2026-11-02")
+
+
+def test_an_entry_still_in_use_at_base_is_not_reported_unused():
+    at_base = Leak(where="working tree", path="src/x.py", figure="4,321", at_base=True)
+    reviewed, failing, unused = split_reviewed([at_base], [_entry()])
+    assert (reviewed, failing, unused) == ([], [], [])

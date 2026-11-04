@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the leak check reads every commit in the pushed range
 
       # The same system libraries as the Dockerfile: pdftoppm, and WeasyPrint's renderer.
       - name: System packages
@@ -36,6 +38,19 @@ jobs:
         run: |
           uv run ruff check .
           uv run ruff format --check .
+
+      # Real peer figures may be committed in one file only (CLAUDE.md rule 4). The same check
+      # as the pre-push hook, on the commits this push or pull request adds: a leak fails
+      # the build even if the hook was not installed or was skipped.
+      - name: Leak check (peer figures)
+        env:
+          BEFORE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+              || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            BEFORE=$(git merge-base HEAD origin/main)
+          fi
+          uv run python scripts/draft_peer_disclosures.py leak-check --base "$BEFORE"
 
       - name: Tests (offline)
         run: uv run pytest -q -rs
