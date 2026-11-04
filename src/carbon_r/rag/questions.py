@@ -14,6 +14,14 @@ Phrasing styles exist because questions drafted while reading a page tend to reu
 words, which flatters retrieval. `textbook` uses the standard's own vocabulary; `user` is how
 an SME finance or operations person would ask; `singlish` is the same kind of question as a
 Singaporean user might type it. Results are reported per style.
+
+Two corpora share this format (Tier 2 Block 4 Part B, 2b). `methodology` is the GHG
+Protocol set above; `peer` (`data/evals/peer_questions.json`) is drafted the same way from
+the 12 companies' reports, which are not redistributable either, so its anchors are local
+too. A peer question may name the `company` filter the agent would pass to
+`search_peer_disclosures`; its expected pages must then be that company's. A set declares
+its corpus, and every page it labels must be from that corpus. A file without the field is
+a methodology set, so the methodology file loads unchanged.
 """
 
 from __future__ import annotations
@@ -26,26 +34,30 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from carbon_r.config import PROJECT_ROOT
+from carbon_r.sources import METHODOLOGY_IDS, PEER_IDS, PEERS
 
 QUESTIONS_PATH = PROJECT_ROOT / "data" / "evals" / "methodology_questions.json"
 LOCAL_ANCHORS_PATH = PROJECT_ROOT / "data" / "evals" / "local" / "methodology_anchors.json"
+PEER_QUESTIONS_PATH = PROJECT_ROOT / "data" / "evals" / "peer_questions.json"
+PEER_LOCAL_ANCHORS_PATH = PROJECT_ROOT / "data" / "evals" / "local" / "peer_anchors.json"
 
 Phrasing = Literal["textbook", "user", "singlish"]
 Split = Literal["dev", "test"]
-MethodologySource = Literal["ghgp_corporate", "ghgp_scope2", "ghgp_scope3"]
+Corpus = Literal["methodology", "peer"]
+CORPUS_IDS: dict[str, tuple[str, ...]] = {"methodology": METHODOLOGY_IDS, "peer": PEER_IDS}
 
 
 class ExpectedPage(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    source_id: MethodologySource
+    source_id: str
     pdf_page: int = Field(ge=1)
 
 
 class Anchor(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    source_id: MethodologySource
+    source_id: str
     pdf_page: int = Field(ge=1)
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$", description="Of the normalised anchor text")
 
@@ -61,9 +73,11 @@ class Question(BaseModel):
     # Any of these pages answers the question. Empty for an unanswerable question.
     expected: list[ExpectedPage]
     anchor: Anchor | None
-    # Why an unanswerable question is unanswerable: off_corpus (not GHG Protocol material
-    # at all) or near_topic (on a topic the standards cover, but not stated in them).
+    # Why an unanswerable question is unanswerable: off_corpus (not material from the corpus
+    # at all) or near_topic (on a topic the documents cover, but not stated in them).
     unanswerable_kind: Literal["off_corpus", "near_topic"] | None = None
+    # Peer sets only: the company filter the agent would pass, or None for no filter.
+    company: str | None = None
     note: str | None = None
 
     @model_validator(mode="after")
@@ -91,6 +105,7 @@ class QuestionSet(BaseModel):
     version: int
     drafted: str
     review_status: Literal["draft", "reviewed"]
+    corpus: Corpus = "methodology"
     questions: list[Question]
 
     @model_validator(mode="after")
@@ -99,6 +114,26 @@ class QuestionSet(BaseModel):
         duplicates = [i for i, n in ids.items() if n > 1]
         if duplicates:
             raise ValueError(f"duplicate question ids: {duplicates}")
+        return self
+
+    @model_validator(mode="after")
+    def _one_corpus(self) -> QuestionSet:
+        allowed = CORPUS_IDS[self.corpus]
+        companies = {p.company for p in PEERS.values()}
+        for q in self.questions:
+            pages = [*q.expected, *([q.anchor] if q.anchor else [])]
+            stray = sorted({p.source_id for p in pages} - set(allowed))
+            if stray:
+                raise ValueError(f"{q.id}: {stray} not in the {self.corpus} corpus")
+            if q.company is None:
+                continue
+            if self.corpus != "peer" or q.company not in companies:
+                raise ValueError(f"{q.id}: company filter {q.company!r} is not a peer company")
+            elsewhere = sorted(
+                {p.source_id for p in pages if PEERS[p.source_id].company != q.company}
+            )
+            if elsewhere:
+                raise ValueError(f"{q.id}: filtered to {q.company}, but expects {elsewhere}")
         return self
 
     def split(self, name: Split) -> list[Question]:

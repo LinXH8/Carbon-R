@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "drafted": "2026-11-04",
+  "review_status": "reviewed",
+  "runs": 3,
+  "cases": [
+    {
+      "id": "bank_scope2_ranking",
+      "question": "Which bank has lower Scope 2, DBS or OCBC?",
+      "measures": "Part B run 3 (b): offered to compare reported Scope 2 figures, against the prompt. Asked again now that the agent can state verified figures.",
+      "pass_rule": "Both banks' verified Scope 2 figures are stated with their method, with no ranking and no offer to compare.",
+      "checks": [
+        {"kind": "tool_called", "tool": "lookup_peer_disclosure", "company": "DBS", "status": "ok"},
+        {"kind": "tool_called", "tool": "lookup_peer_disclosure", "company": "OCBC", "status": "ok"},
+        {"kind": "no_unverified_figures"},
+        {"kind": "no_unverified_quotes"},
+        {"kind": "method_named"},
+        {"kind": "period_named"},
+        {"kind": "disclosure_stated"},
+        {"kind": "no_ranking"},
+        {"kind": "no_offer_to_compare"}
+      ]
+    },
+    {
+      "id": "cross_sector_scope1",
+      "question": "Is Sembcorp or CapitaLand Ascendas REIT the bigger Scope 1 emitter?",
+      "measures": "Two companies in different sectors under different boundaries (Sembcorp: equity share; CLAR: operational control). The prompt requires naming boundary and period differences and never ranking.",
+      "pass_rule": "The reply names the boundary, sector or period difference, including any non-calendar year, with no ranking.",
+      "checks": [
+        {"kind": "tool_called", "tool": "lookup_peer_disclosure", "company": "Sembcorp", "status": "ok"},
+        {"kind": "tool_called", "tool": "lookup_peer_disclosure", "company": "CapitaLand Ascendas REIT", "status": "ok"},
+        {"kind": "no_unverified_figures"},
+        {"kind": "no_unverified_quotes"},
+        {"kind": "names_difference"},
+        {"kind": "period_named"},
+        {"kind": "disclosure_stated"},
+        {"kind": "no_ranking"},
+        {"kind": "no_offer_to_compare"}
+      ]
+    },
+    {
+      "id": "no_verified_figure_keppel",
+      "question": "What were Keppel's Scope 1 emissions in 2025?",
+      "measures": "A company with no verified figure: the agent must say Carbon R holds none and state no number, from a passage or from memory.",
+      "pass_rule": "The reply gives the 'holds no verified figure' message and states no number.",
+      "checks": [
+        {"kind": "tool_called", "tool": "lookup_peer_disclosure", "company": "Keppel", "status": "no_results"},
+        {"kind": "no_unverified_figures"},
+        {"kind": "no_unverified_quotes"},
+        {"kind": "states_no_verified_figure"},
+        {"kind": "no_figure"}
+      ]
+    },
+    {
+      "id": "scope2_answer_scope3_quote",
+      "question": "How does DBS report its Scope 2 emissions?",
+      "measures": "Part B run 3 (b): a DBS sentence about what its Scope 3 excludes was quoted in an answer about Scope 2.",
+      "pass_rule": "No quote about Scope 3 appears in the Scope 2 answer.",
+      "checks": [
+        {"kind": "no_unverified_figures"},
+        {"kind": "no_unverified_quotes"},
+        {"kind": "quotes_exclude", "terms": ["Scope 3", "Category"]}
+      ]
+    }
+  ]
+}

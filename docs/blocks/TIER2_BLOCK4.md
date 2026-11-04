@@ -792,7 +792,7 @@ for verified rows only:
 
 ---
 
-# Part B, pass 2b — agent access, completeness, OCBC and UOB (in progress: Steps 1-2 done)
+# Part B, pass 2b — agent access, completeness, OCBC and UOB (in progress: Steps 1-2 done, Step 3 keys frozen)
 
 Recorded as it happens; counts are final only where marked.
 
@@ -963,4 +963,57 @@ entries, all `120`: `llm.py`, `tests/test_llm.py`, and a comment in the drafter.
   checked by the author: a cell both missed would not show.
 - UOB p.189 is the assurance statement's selected GHG information. Its year is declared by
   the author, not printed in a column.
+
+## Eval 5b: the answer keys, frozen before any run
+
+Two files, both committed before the first run so each run records their sha256:
+
+- `data/evals/peer_questions.json`: 30 retrieval questions, 21 answerable (at least one per
+  company, 7 per phrasing style) and 9 unanswerable (6 `near_topic`, 3 `off_corpus`), split
+  15 dev / 15 test, stratified by style and answerability, each kind split evenly. Anchors
+  are stored as sha256 only; their text stays in git-ignored `data/evals/local/`, as for
+  methodology, because the reports are not redistributable.
+- `data/evals/peer_agent_questions.json`: 4 agent cases, each run 3 times, with checks fixed
+  in advance from a closed vocabulary (`models/peer_agent_case.py`).
+
+**How the key was made.** Claude drafted each question and its expected pages by reading
+the report pages directly (a full-text search of every page of the extracted text, then the
+passages in context), never from `search_peer_disclosures` output. Every anchor was checked
+mechanically to be verbatim on its labelled page. All 30 retrieval questions were then
+checked against the source PDFs by Lin Xiang Hong, using Claude for a full-text search of
+every page, not only the expected ones, and reviewed. 28 were confirmed as drafted. Two
+changed:
+
+- `uob_uoi`: PDF p.139 added as an expected page. Footnote 32 states that UOI is included
+  for Scope 2 only. The draft missed it: its search looked for the company's full name and
+  exclusion wording, and the footnote says "UOI, for which...".
+- `u_home_loan_rate`: changed from `off_corpus` to `near_topic`. DBS p.53 mentions
+  preferential rates on its Green Home Loan and DBS pp.5-6 and UOB p.72 give green home
+  loan amounts; no page states a rate or compares banks, so it stays unanswerable. To keep
+  each kind split evenly it moved to test, and `u_laksa_katong` (same style) moved to dev.
+
+The author's decisions at review:
+
+- **The Keppel probe** ("Does Keppel set targets for its Scope 3 emissions?", asked
+  verbatim) is answerable, expected PDF pp.30, 34, 46: pp.30 and 34 state the Real Estate
+  Division's Scope 3 target, p.46 both the Real Estate Division's and M1's. The demo's
+  citations (printed pp.33, 39, 46, which are PDF pp.32, 38, 45) state only tracking and
+  reporting, and p.10 shows the company-wide target covers Scope 1 and 2 only. A "yes"
+  citing only those pages therefore cites no expected page.
+- **ST Engineering's and Seatrium's Scope 3 targets** stay unanswerable: no page states one,
+  and a "No" cannot cite a page.
+- **The agent checks** are accepted as written.
+- **The cross-sector case** is Sembcorp vs CLAR.
+
+## Known limits of eval 5b
+
+- All 21 answerable retrieval questions name a company filter, so unfiltered retrieval
+  across the 12 companies is not tested.
+- The Keppel probe is in the test split, so dev holds no judge false-positive probe of that
+  kind.
+- The ranking check passes a negated comparison ("X is not higher than Y"), which still
+  ranks: a sentence with a negation is exempt by design, so an honest refusal that restates
+  the question is not failed.
+- The cross-sector case's pass rule includes "any non-calendar year", but that part is
+  untested: no non-calendar company (MPACT, MLT, FLCT) has verified figures to compare.
 

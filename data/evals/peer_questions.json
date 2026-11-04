@@ -1,0 +1,637 @@
+{
+  "version": 1,
+  "drafted": "2026-11-04",
+  "review_status": "reviewed",
+  "corpus": "peer",
+  "questions": [
+    {
+      "id": "dbs_boundary",
+      "question": "What approach does DBS use to set the organisational boundary of its greenhouse gas inventory?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_dbs_2025",
+          "pdf_page": 79
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_dbs_2025",
+        "pdf_page": 79,
+        "sha256": "0d778803d6b531021f7ec5f4e944f89d7f526470952730dab5e90137d69093d7"
+      },
+      "unanswerable_kind": null,
+      "company": "DBS",
+      "note": null
+    },
+    {
+      "id": "dbs_facilitated",
+      "question": "For the emissions from deals DBS helps to arrange, whose guidance does it follow to count them?",
+      "answerable": true,
+      "phrasing": "user",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_dbs_2025",
+          "pdf_page": 40
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_dbs_2025",
+        "pdf_page": 40,
+        "sha256": "0e15473ac80b0144b257c4d8a7658c86e8dd587fc61906205ee34c54bd62ef18"
+      },
+      "unanswerable_kind": null,
+      "company": "DBS",
+      "note": null
+    },
+    {
+      "id": "ocbc_branches",
+      "question": "Why doesn't OCBC include its overseas branches in its operational emissions?",
+      "answerable": true,
+      "phrasing": "user",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_ocbc_2025",
+          "pdf_page": 58
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_ocbc_2025",
+        "pdf_page": 58,
+        "sha256": "bd3296bae11b05f3f16b3c9643332208e598fe62b325b16722e198592969a643"
+      },
+      "unanswerable_kind": null,
+      "company": "OCBC",
+      "note": null
+    },
+    {
+      "id": "ocbc_assurance",
+      "question": "What level of external assurance did OCBC obtain on its greenhouse gas emissions?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_ocbc_2025",
+          "pdf_page": 141
+        },
+        {
+          "source_id": "peer_ocbc_2025",
+          "pdf_page": 142
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_ocbc_2025",
+        "pdf_page": 141,
+        "sha256": "8d36a9e6a0a4c3be81e945567032c6fbe50eef2f702735cdcbc31ce827edc96a"
+      },
+      "unanswerable_kind": null,
+      "company": "OCBC",
+      "note": "p.142 continues the same limited assurance report."
+    },
+    {
+      "id": "uob_uoi",
+      "question": "For United Overseas Insurance, which emissions does UOB's sustainability report include?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 2
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 139
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_uob_2025",
+        "pdf_page": 2,
+        "sha256": "7a2b83fbb657f578b47df219be612b6a179367151d3957e9dc6b07686694135d"
+      },
+      "unanswerable_kind": null,
+      "company": "UOB",
+      "note": "p.139 footnote 32 also states UOI is included for Scope 2 only (added at review; the draft missed it). pp.185 and 189 say the assurance scope excludes UOI, but not which emissions the report includes."
+    },
+    {
+      "id": "uob_icp",
+      "question": "UOB got put internal carbon price on the emissions from its loans or not?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 14
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_uob_2025",
+        "pdf_page": 14,
+        "sha256": "14181655844d8e8ca5afaa5954443603d4cd601181cf8c7e927380d39da1daef"
+      },
+      "unanswerable_kind": null,
+      "company": "UOB",
+      "note": null
+    },
+    {
+      "id": "clar_boundary",
+      "question": "CLAR count carbon emissions for which properties ah, based on what approach?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_clar_2025",
+          "pdf_page": 3
+        },
+        {
+          "source_id": "peer_clar_2025",
+          "pdf_page": 24
+        },
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 2
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_clar_2025",
+        "pdf_page": 24,
+        "sha256": "cebe52838ddb176c6ee83bc742e8df6382f69b1db1d4a203b05ee56c42eafc9a"
+      },
+      "unanswerable_kind": null,
+      "company": "CapitaLand Ascendas REIT",
+      "note": "p.20 mentions operational control only for a data-centre allocation review: not expected."
+    },
+    {
+      "id": "clar_icp",
+      "question": "How does CLAR use an internal carbon price in its investment decisions?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_clar_2025",
+          "pdf_page": 24
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_clar_2025",
+        "pdf_page": 24,
+        "sha256": "aff7cc5d4a8b0ec57c044ff6686bfccb5bbfddaca05df328e46f21e36b92abbc"
+      },
+      "unanswerable_kind": null,
+      "company": "CapitaLand Ascendas REIT",
+      "note": "Data pack p.61 is an IFRS S2 index row naming the requirement: not expected."
+    },
+    {
+      "id": "mpact_assurance",
+      "question": "Was MPACT's latest sustainability report checked by an outside assurance provider?",
+      "answerable": true,
+      "phrasing": "user",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_mpact_2026",
+          "pdf_page": 3
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_mpact_2026",
+        "pdf_page": 3,
+        "sha256": "7e957d0e47ff9b69307669b954ec0f3c2b075f8b2d3cd772dbcb8278e0aca2cc"
+      },
+      "unanswerable_kind": null,
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "note": "p.3 also says Mapletree Group assured selected Group-level data that included MPACT's portfolio. p.29 points to p.3 without stating it; p.2 mentions group-level assurance of selected data and GRESB assurance, but not whether the SR itself was assured: neither expected."
+    },
+    {
+      "id": "mlt_icp",
+      "question": "MLT using internal carbon pricing already or not yet?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_mlt_2026",
+          "pdf_page": 27
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_mlt_2026",
+        "pdf_page": 27,
+        "sha256": "7e33673855095e40a877676511109cda273da125d9a46f309d4cb6989f40be9d"
+      },
+      "unanswerable_kind": null,
+      "company": "Mapletree Logistics Trust",
+      "note": "p.59 is an IFRS S2 index row: not expected."
+    },
+    {
+      "id": "mlt_recs",
+      "question": "In which countries does MLT use renewable energy certificates?",
+      "answerable": true,
+      "phrasing": "user",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_mlt_2026",
+          "pdf_page": 23
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_mlt_2026",
+        "pdf_page": 23,
+        "sha256": "ee3c6c07852fea8d8860fd577542f6fe628a6f8d2a0e1863f7f633068a8a0e0d"
+      },
+      "unanswerable_kind": null,
+      "company": "Mapletree Logistics Trust",
+      "note": "p.50 lists Malaysia, China and Singapore for excess landlord RECs in the market-based calculation (a narrower use, no Hong Kong): not expected; p.23 is the complete answer."
+    },
+    {
+      "id": "flct_baseline",
+      "question": "Why did FLCT choose FY2019 as the baseline for its emissions?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_flct_2025",
+          "pdf_page": 48
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_flct_2025",
+        "pdf_page": 48,
+        "sha256": "8cfa99cabdaf1762f4facf854fec587a779deb9988a61a3e746ddf6772c0cc84"
+      },
+      "unanswerable_kind": null,
+      "company": "Frasers Logistics & Commercial Trust",
+      "note": "pp.5, 16, 47 name FY2019 as the base year but not why: not expected."
+    },
+    {
+      "id": "cict_offsets",
+      "question": "How does CICT plan to deal with the emissions it cannot cut?",
+      "answerable": true,
+      "phrasing": "user",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_cict_2024",
+          "pdf_page": 7
+        },
+        {
+          "source_id": "peer_cict_2024",
+          "pdf_page": 16
+        },
+        {
+          "source_id": "peer_cict_2024",
+          "pdf_page": 20
+        },
+        {
+          "source_id": "peer_cict_2024",
+          "pdf_page": 23
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_cict_2024",
+        "pdf_page": 20,
+        "sha256": "5f20b981df76d83703e257b4f2fe63fb163eae46587c673c6308e3b3c3b11df3"
+      },
+      "unanswerable_kind": null,
+      "company": "CapitaLand Integrated Commercial Trust",
+      "note": null
+    },
+    {
+      "id": "cict_icp",
+      "question": "CICT got use internal carbon price when they assess new investments anot?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_cict_2024",
+          "pdf_page": 6
+        },
+        {
+          "source_id": "peer_cict_2024",
+          "pdf_page": 22
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_cict_2024",
+        "pdf_page": 22,
+        "sha256": "678ca7138f85718c1aaf85eccc0da576ee95aff75b5a995fcbc4258aa467443d"
+      },
+      "unanswerable_kind": null,
+      "company": "CapitaLand Integrated Commercial Trust",
+      "note": null
+    },
+    {
+      "id": "keppel_scope3_targets",
+      "question": "Does Keppel set targets for its Scope 3 emissions?",
+      "answerable": true,
+      "phrasing": "user",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 30
+        },
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 34
+        },
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 46
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_keppel_2025",
+        "pdf_page": 46,
+        "sha256": "8950292706b8506e199fe92a5b0777adade4f7f20db1f0e5e49703b51dc4e2a9"
+      },
+      "unanswerable_kind": null,
+      "company": "Keppel",
+      "note": "Verbatim from Part B's demo (judge false-positive probe). A correct answer: no Keppel-wide Scope 3 reduction target is stated; its Real Estate Division (PDF pp.30, 34, 46) and M1 (p.46) have SBTi-validated Scope 3 targets. PDF pp.32, 38, 45 (printed 33, 39, 46, the demo's citations) state tracking and reporting all relevant categories, not a target: not expected."
+    },
+    {
+      "id": "keppel_kmc",
+      "question": "The gas Keppel sell to the KMC power plant, they count under which Scope 3 category?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 46
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_keppel_2025",
+        "pdf_page": 46,
+        "sha256": "a5d29ecca9fc42ecccc71d60429a2aec5c01b8109b934cfa254918805cd43e6b"
+      },
+      "unanswerable_kind": null,
+      "company": "Keppel",
+      "note": "pp.27, 36, 48 mention KMC but not its Scope 3 category: not expected."
+    },
+    {
+      "id": "stengg_boundary",
+      "question": "Which consolidation approach does ST Engineering use for its emissions numbers?",
+      "answerable": true,
+      "phrasing": "user",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_stengg_2025",
+          "pdf_page": 4
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_stengg_2025",
+        "pdf_page": 4,
+        "sha256": "ef019235b8c33985c6bc26c7ef8db0a1a0df144a7f35803f4a407351ed022edb"
+      },
+      "unanswerable_kind": null,
+      "company": "ST Engineering",
+      "note": null
+    },
+    {
+      "id": "stengg_base_year",
+      "question": "ST Engineering's carbon reduction is measured from which base year?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_stengg_2025",
+          "pdf_page": 6
+        },
+        {
+          "source_id": "peer_stengg_2025",
+          "pdf_page": 8
+        },
+        {
+          "source_id": "peer_stengg_2025",
+          "pdf_page": 29
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_stengg_2025",
+        "pdf_page": 29,
+        "sha256": "22739f84fc40b6710df0f0e6af5c8b657f1f794cb0af9c335aa9383631bd332b"
+      },
+      "unanswerable_kind": null,
+      "company": "ST Engineering",
+      "note": null
+    },
+    {
+      "id": "seatrium_scope3_excluded",
+      "question": "Which Scope 3 categories does Seatrium consider not relevant, and why?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_seatrium_2025_databook",
+          "pdf_page": 14
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_seatrium_2025_databook",
+        "pdf_page": 14,
+        "sha256": "71b9fc62fa748fb053e2c6cfcf79fc0640b8180b375d9a7975fbbc8c3f9291bc"
+      },
+      "unanswerable_kind": null,
+      "company": "Seatrium",
+      "note": "Report p.118 and data book p.38 use 'not relevant' about GRI topics: not expected."
+    },
+    {
+      "id": "seatrium_boundary",
+      "question": "Seatrium draw their reporting boundary how ah?",
+      "answerable": true,
+      "phrasing": "singlish",
+      "split": "test",
+      "expected": [
+        {
+          "source_id": "peer_seatrium_2025",
+          "pdf_page": 3
+        },
+        {
+          "source_id": "peer_seatrium_2025",
+          "pdf_page": 71
+        },
+        {
+          "source_id": "peer_seatrium_2025_databook",
+          "pdf_page": 1
+        },
+        {
+          "source_id": "peer_seatrium_2025_databook",
+          "pdf_page": 13
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_seatrium_2025_databook",
+        "pdf_page": 1,
+        "sha256": "b49e815d5e4d42fcda7a1aa26c6ca6c637f364536912c68d9e2b752c2e41048e"
+      },
+      "unanswerable_kind": null,
+      "company": "Seatrium",
+      "note": null
+    },
+    {
+      "id": "sembcorp_equity_share",
+      "question": "Which consolidation approach does Sembcorp use for its greenhouse gas emissions?",
+      "answerable": true,
+      "phrasing": "textbook",
+      "split": "dev",
+      "expected": [
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 23
+        },
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 25
+        },
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 37
+        },
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 39
+        },
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 40
+        },
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 42
+        }
+      ],
+      "anchor": {
+        "source_id": "peer_sembcorp_2025",
+        "pdf_page": 40,
+        "sha256": "8e216ec5214850f147a27ff7bcd617644805bd42c527bbf9d008de2b56b74680"
+      },
+      "unanswerable_kind": null,
+      "company": "Sembcorp",
+      "note": null
+    },
+    {
+      "id": "u_stengg_scope3_target",
+      "question": "Does ST Engineering set a target to reduce its Scope 3 emissions?",
+      "answerable": false,
+      "phrasing": "textbook",
+      "split": "dev",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "company": "ST Engineering",
+      "note": "No reduction target is stated. p.29 lists goals to quantify and report more Scope 3 categories; pp.4, 9, 37, 74 report or describe Scope 3 data only."
+    },
+    {
+      "id": "u_stengg_purchased_goods",
+      "question": "How large are ST Engineering's Scope 3 emissions from purchased goods and services?",
+      "answerable": false,
+      "phrasing": "textbook",
+      "split": "test",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "company": "ST Engineering",
+      "note": "ST Engineering reports Scope 3 Categories 5, 6 and 7 only (p.4); no page mentions purchased goods or Category 1."
+    },
+    {
+      "id": "u_sora_rate",
+      "question": "What is the current three-month compounded SORA rate?",
+      "answerable": false,
+      "phrasing": "textbook",
+      "split": "test",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "company": null,
+      "note": "SORA appears in no peer report."
+    },
+    {
+      "id": "u_mpact_assurance_date",
+      "question": "When will MPACT get its sustainability report independently assured on its own?",
+      "answerable": false,
+      "phrasing": "user",
+      "split": "test",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "note": "p.3: the Manager 'will continue to assess the need' for dedicated external assurance; no date is stated."
+    },
+    {
+      "id": "u_seatrium_scope3_target",
+      "question": "What is Seatrium's target for cutting its Scope 3 emissions by 2030?",
+      "answerable": false,
+      "phrasing": "user",
+      "split": "dev",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "company": "Seatrium",
+      "note": "Seatrium's 2030 target is for Scope 1 and 2 (report pp.21, 65). p.58 'We target top emitters in Scope 3 Categories 1 and 3' is supplier engagement, not a reduction target."
+    },
+    {
+      "id": "u_cdc_vouchers",
+      "question": "How much are the CDC vouchers for each household in 2026?",
+      "answerable": false,
+      "phrasing": "user",
+      "split": "dev",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "company": null,
+      "note": "CDC vouchers appear in no peer report."
+    },
+    {
+      "id": "u_dbs_dividend",
+      "question": "DBS pay how much dividend per share for 2025 ah?",
+      "answerable": false,
+      "phrasing": "singlish",
+      "split": "dev",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "company": "DBS",
+      "note": "p.107 describes the dividend policy and p.118 the Capital Return dividend's treatment; no amount per share is stated."
+    },
+    {
+      "id": "u_laksa_katong",
+      "question": "Where got the best laksa in Katong?",
+      "answerable": false,
+      "phrasing": "singlish",
+      "split": "dev",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "off_corpus",
+      "company": null,
+      "note": "Laksa appears in no peer report."
+    },
+    {
+      "id": "u_home_loan_rate",
+      "question": "Which bank got the lowest home loan rate now?",
+      "answerable": false,
+      "phrasing": "singlish",
+      "split": "test",
+      "expected": [],
+      "anchor": null,
+      "unanswerable_kind": "near_topic",
+      "company": null,
+      "note": "Changed from off_corpus at review: DBS p.53 mentions preferential interest rates on its Green Home Loan, and DBS pp.5-6 and UOB p.72 give green home loan amounts. No page states a rate or compares banks."
+    }
+  ]
+}
