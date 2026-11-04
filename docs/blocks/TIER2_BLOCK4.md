@@ -9,7 +9,11 @@ career notes live in the local build log, not here.
 scored once (results below). Part B, first pass (peer ingestion and
 `search_peer_disclosures`): done 28 Oct - see the Part B section. Part B pass 2a
 (`peer_disclosures`, drafting from page images, the rule-4 amendment, verification): done for
-3 reports, 58 rows verified - see the last section.
+3 reports, 58 rows verified. Part B pass 2b: done 5 Nov - `lookup_peer_disclosure`, OCBC and
+UOB verified (87 rows from 5 reports), the completeness measure, eval 5b (peer retrieval and
+agent cases, with the agent fixes and a second set of cases) and eval 5a (extraction by
+representation). **Part B is done**; its open items are the known limits and follow-ups
+recorded in each section.
 
 ## What this block has to do
 

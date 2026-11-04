@@ -74,7 +74,7 @@ layout — and is kept for the record rather than as a current description.
 
 ## What works today, and what it measures
 
-Five tools, each returning `{status, data, message}`:
+Six tools, each returning `{status, data, message}`:
 
 | Tool | What it does |
 |---|---|
@@ -83,6 +83,7 @@ Five tools, each returning `{status, data, message}`:
 | `calculate_emissions` | Plain Python. Takes a list of (activity, factor) pairs and returns each line and the total, with every input used, the derivation written out, and structured disclosure flags. |
 | `search_methodology` | Similarity search over GHG Protocol methodology prose, never a factor. Returns verbatim quotes with document and page, or `no_results` — either because nothing is close (retrieval level) or because the closest passages do not answer the question (generation level, decided by a judging model whose quotes must be found verbatim in the passages). Nothing it returns can enter a calculation. |
 | `search_peer_disclosures` | Hybrid search (vector and keyword rankings fused, filtered by company, sector and report year) over 12 Singapore-listed companies' sustainability reports: how they draw boundaries, set targets, treat financed emissions. Returns verified verbatim quotes with company, report and page, or `no_results` (not ingested; a filter that matches nothing, with what does exist; or passages that do not answer). **Never a figure**: the reports' PDF text layers fuse footnote markers onto table numbers, so table-like quotes are withheld and cited by page, and the figure audit flags any peer number stated outside a verified quote. Peer disclosures are self-reported under differing boundaries and periods, and every result says so. |
+| `lookup_peer_disclosure` | Exact SQL (company, scope, optional method, Scope 3 category and report year) over the **hand-verified** peer figures only, never embeddings. Returns every matching row as printed (figure, unit, row label, column header, scope, method, period, PDF and printed page) with who verified it and when. Nothing is summed or converted. `no_results` says Carbon R holds no verified figure, never that the company did not disclose one, and lists what it does hold. |
 
 Rolling a year of documents up into a company total, and allocating a share of it to one
 customer, are **plain Python in `tools/company_year.py`** (`roll_up`, `allocate`). They are
@@ -122,6 +123,9 @@ What these figures do **not** cover is set out under [Limitations](#limitations)
 An agent chooses which tool to call; it does not compute. Two properties make that
 structural rather than a matter of prompt wording:
 
+- **The peer caveat is attached in code.** Whenever a turn used a peer tool, the reply ends
+  with the fixed sentence that peer figures are self-reported and not assured by Carbon R,
+  so that statement never depends on the model's wording.
 - **It passes handles, not values.** The calculation tool takes `activity_ref` and
   `factor_ref` handles into the session's stored tool results — never an amount, never a
   factor. A model that cannot write a digit into a calculation cannot mistype `0.402` as
@@ -359,6 +363,65 @@ by data mining, so no GHG Protocol text is committed: the anchors are stored as 
 the run files hold ids, pages and scores, and the PDFs and their chunks stay on the
 machine that ingested them.
 
+After the judge was changed to reason before deciding (Part B, pass 2b; it is shared with
+the peer search), the methodology **dev** split was re-run: answerable questions wrongly
+refused rose from 2 to 5 of 18, and judge false positives on answerable questions fell from
+5 to 2 of 18. The test split above was not re-run.
+
+### Peer retrieval and agent cases (eval 5b)
+
+`search_peer_disclosures` is scored against 30 questions drafted by reading the report
+pages, never from search output, and checked by the author against the PDFs: answerable
+questions across the 12 companies in three phrasings, plus questions the reports do not
+answer. Every question is run with the company filter. Commit `69f661b` for test, run once:
+
+| | Dev | Test |
+|---|---|---|
+| hit@1 | 5 of 10 | 5 of 11 |
+| hit@5 | 9 of 10 | 8 of 11 |
+| MRR | 0.65 | 0.589 |
+| Unanswerable refused | 5 of 5 | 4 of 4 |
+| Answerable wrongly refused | 2 of 10 | 2 of 11 |
+| Answered, quoting an expected page | 8 of 10 | 9 of 11 |
+| Judge false positives | 0 of 15 | 0 of 15 |
+
+The main weakness is retrieval: 3 of 21 answerable questions had no expected page among
+the passages, and each was correctly refused.
+
+**Agent cases** put peer questions to the whole agent through `/chat`, with checks fixed
+before any run, each case run 3 times. The first 4 cases are the recorded baseline; after
+three fixes (the caveat attached in code, a negation-aware offer check, a firmer no-offer
+rule in the prompt), 4 new cases with new company pairs and wording were frozen and run.
+Read by hand against each pass rule:
+
+| Behaviour | Baseline | New cases, after the fixes |
+|---|---|---|
+| Two banks, asked which is lower: both figures, no ranking, no offer to compare | 1 of 3 | 3 of 3 |
+| Two sectors: the difference named, no ranking | 3 of 3 | 3 of 3 |
+| A company with no verified figure: says so, states no number | 3 of 3 | 3 of 3 |
+| No Scope 3 quote in a Scope 2 answer | 3 of 3 | 2 of 3 |
+
+The new Scope 2 question drew a table-like passage, and the figure and quote audits flagged
+the replies: quotes reworded in 3 of 3, a figure taken from a passage in 2 of 3. A flagged
+reply still reaches the user today. Details and the automatic scoring are in
+[TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
+
+### Peer table extraction by representation (eval 5a)
+
+The same extractor model read the 9 verified table pages from 5 reports three ways, scored
+against the 87 verified rows, one run:
+
+| Of 87 rows | Page image | `pdftotext -layout` | pdfplumber |
+|---|---|---|---|
+| Present, label and header matched | 78 | 45 | 15 |
+| Present, matched by figure | 82 | 75 | 25 |
+| Identified (the reading still says which row) | 82 | 60 | 25 |
+
+Every figure returned was exactly as printed, in every arm, with no footnote marker fused
+onto one. The text layer's cost is table structure, not digits. The key's labels began as
+image drafts by a different model, which favours the image arm under label matching; the
+by-figure scoring removes that, and the image arm still leads.
+
 ### What CI runs, and what it does not
 
 CI runs lint and the offline tests — the chunker on hand-written text fixtures, the refusal
@@ -464,8 +527,8 @@ make seed-peer   # load the 87 rows into peer_disclosures (idempotent; no report
 Drafting and checking more pages needs the reports locally:
 `scripts/draft_peer_disclosures.py` (scan, draft, load, review, and `leak-check`, which
 compares every commit not yet on `origin/main`) and
-`scripts/verify_peer_disclosures.py` (worksheet, apply). The agent does not read this table
-yet.
+`scripts/verify_peer_disclosures.py` (worksheet, apply). The agent reads these rows only
+through `lookup_peer_disclosure`, which queries the verified view and nothing else.
 
 ### The page
 
@@ -586,11 +649,12 @@ Stated plainly, because they bound what any number here means:
   search never states a number. 87 figures from 5 reports have been verified separately
   (see [Verified peer figures](#verified-peer-figures)), as self-reported and not assured;
   the agent states them only through `lookup_peer_disclosure`. Whether drafting misses rows
-  has been measured for OCBC and UOB only.
-  Search's judge can accept quotes that are real
-  but do not answer (seen once in the demo questions), and there is no peer retrieval eval
-  yet — the checks so far are 8 demo questions and 3 adversarial agent runs, recorded in
+  has been measured for OCBC and UOB only. Peer retrieval is measured on 30 questions and
+  the agent on 8 cases of 3 runs each — small samples, recorded in
   [TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
+- **The figure and quote audits record, they do not stop.** A reply that states a number no
+  tool produced, or rewords a quote, is flagged on the response but still shown. On a
+  table-like peer passage the agent did both (agent cases, above).
 - Electricity figures are **location-based** (average grid intensity), not market-based.
 - **The fuel factors are not Singapore factors.** LPG, diesel and petrol use UK DESNZ
   values, flagged as non-Singapore on every affected result. That they are the closest
@@ -664,11 +728,11 @@ db/migrations/ schema, applied in filename order
 scripts/       factor loading, document and scenario generation, the extraction,
                scenario and retrieval evals, methodology and peer ingest, peer intake, the flow
                checks, the container entrypoint
-tests/         in a clean copy (no .env, data or database; what CI runs): 833 pass, 23 skip - the ones needing a
+tests/         in a clean copy (no .env, data or database; what CI runs): 961 pass, 26 skip - the ones needing a
                database, the workbooks, the corpus or the peer reports. With all of
-               those present locally: 855 pass, 1 skip
+               those present locally: 986 pass, 1 skip
 docs/          architecture diagram, ADRs, the GHG Protocol skim guide
-data/evals/    the retrieval key (hashes, no GHG Protocol text) and committed eval runs
+data/evals/    the retrieval keys (hashes or local anchors, no source text), the agent cases, committed runs
 data/peer_sources.json  provenance of the peer reports (the reports are local)
 data/peer_disclosures_verified.json  the verified peer figures, with citations and draft values
 data/uploads/  documents uploaded at runtime — git-ignored, never committed

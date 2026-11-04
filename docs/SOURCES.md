@@ -25,6 +25,7 @@ established until then.
 | 13 | Common Singapore LPG cylinder sizes and pricing basis | — | `synthgen` LPG invoice shape | — | **secondary only — VERIFY** |
 | 14 | How Singapore bills show credits, balances brought forward and GST-inclusive headlines; LPG per-delivery billing | — | `synthgen` v1 quirk shapes | — | **not claimed — fictional** |
 | 15 | Whether a Singapore tax invoice in a foreign currency must also show the GST amount in SGD (IRAS) | — | `usd_invoice` scenario pages | — | **not claimed — VERIFY** |
+| 16 | Peer sustainability reports, 12 STI companies (14 files; list in `data/peer_sources.json`) | Each issuer | `search_peer_disclosures` corpus (local only); the 87 figures served by `lookup_peer_disclosure` | Before 2026-10-23 | **87 figures verified from primary** (each against its cited page, as self-reported); the rest of the reports used as prose only |
 
 ---
 
@@ -203,6 +204,25 @@ real ones, and asks that the chosen format be verified as invalid. **ACRA's UEN 
 returns HTTP 403**, so no such verification is available. The vendor UEN is therefore
 self-evidently synthetic (`SYN-0000-0001`) rather than realistic-but-assumed-invalid: no
 verification is needed to know it is nobody's UEN.
+
+## 16. Peer sustainability reports — 87 figures verified from primary, prose otherwise
+
+The reports are the primary source for what each company says about itself, and nothing
+more: their figures are **self-reported, not independently assured**, under each company's
+own boundary and period. Carbon R treats them in two ways.
+
+- **Figures.** 87 table cells from 5 reports (DBS, OCBC, UOB, the CLAR ESG data pack,
+  Sembcorp) were drafted by a vision model from page images and each checked by the author
+  against the cited page of the issuer's PDF (DBS, CLAR and Sembcorp on 2026-10-29; OCBC and
+  UOB on 2026-11-02). Only these rows reach the agent, through `lookup_peer_disclosure`,
+  which reads the `peer_disclosures_verified` view. They are committed in
+  `data/peer_disclosures_verified.json` with their citations. Footnotes on OCBC and UOB
+  figures were not reviewed. Method and evidence: docs/blocks/TIER2_BLOCK4.md.
+- **Prose.** Everything else in the reports is searched as text by
+  `search_peer_disclosures`, quoted verbatim with a page, and never used as a figure.
+
+The 7 companies with no verified rows have no figures in Carbon R; the agent says it holds
+no verified figure for them rather than reading one from text.
 
 ## Still to obtain
 
