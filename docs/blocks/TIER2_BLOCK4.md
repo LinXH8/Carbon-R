@@ -1266,6 +1266,8 @@ check now reads only "verified by hand" / "hand-verified", and a sentence with n
 passes once a lookup was made. Replayed again, the two checks flag exactly one reply, v2
 Scope 2 run 2: its 2 "verified by hand" sentences about passage quotes, and the peer
 search's unstated `no_results`. Those are the defects recorded above for that run.
+The new checks were narrowed while looking at these 12 replies, so their result on them
+(1 flagged) is not an independent measure; the next fresh agent run is.
 
 Each check was broken on purpose (7 mutations: no warnings, each check off, the session's
 results instead of the turn's, any `no_results` call instead of the last, the old literal
