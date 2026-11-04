@@ -1017,3 +1017,58 @@ The author's decisions at review:
 - The cross-sector case's pass rule includes "any non-calendar year", but that part is
   untested: no non-calendar company (MPACT, MLT, FLCT) has verified figures to compare.
 
+## Eval 5b, retrieval: dev runs and the one change made on dev
+
+**Dev run 1** (commit `bfec436`, judge as of then; `peer_retrieval_dev_20261104T084631Z`):
+hit@1 5 of 10, hit@5 9 of 10, MRR 0.65; unanswerable refused 4 of 5, answerable refused
+1 of 10; answered from an expected page 8 of 10; judge false positives 1 of 5 unanswerable,
+1 of 10 answerable. The three failures:
+
+- `dbs_boundary`: a retrieval miss. DBS p.79 is not among the 8 passages (pp.114, 115, 126,
+  125, 75 are). The judge then rightly found no answer.
+- `uob_uoi`: the judge answered from p.189's assurance coverage rows, which do not say
+  what is included for UOI, though p.2 (which does) was retrieved at rank 3.
+- `u_seatrium_scope3_target`: the judge set `answered = true` while its own reason said
+  the passages "do not state a specific target for cutting Scope 3 emissions by 2030". The
+  quote check cannot catch this: the quoted words are real.
+
+**The change (author's decision, on dev only): reason first.** `AnswerabilityJudgement`'s
+fields are now `reason`, `citations`, `answered`, and the instruction says to reason before
+deciding. Structured output is written in field order, so the verdict had been generated
+before the reasoning, which fits the Seatrium contradiction. Nothing else changed. The judge
+is shared, so the methodology dev split was re-run too (commit `06dda6a`, fresh
+judgements):
+
+| Dev split | Peer, run 1 -> run 2 | Methodology, 23 Oct -> 4 Nov |
+|---|---|---|
+| hit@1 / hit@5 / MRR | 5 / 9 of 10, 0.65 (unchanged) | 4 / 12 of 18, 0.383 (unchanged) |
+| Unanswerable refused | 4 of 5 -> 5 of 5 | 6 of 6 -> 6 of 6 |
+| Answerable refused | 1 of 10 -> 2 of 10 | 2 of 18 -> 5 of 18 |
+| Answered from an expected page | 8 of 10 -> 8 of 10 | 11 of 18 -> 11 of 18 |
+| Judge false positives, unanswerable | 1 of 5 -> 0 of 5 | 0 of 6 -> 0 of 6 |
+| Judge false positives, answerable | 1 of 10 -> 0 of 10 | 5 of 18 -> 2 of 18 |
+
+Across both evals, false positives fell from 7 to 2 with the same counts answered from an
+expected page. The author kept the change: for this tool a wrong confident answer is worse
+than a cautious refusal. **Its measured costs, two new false refusals:**
+
+- `uob_uoi` (peer): p.2 was retrieved at ranks 3 and 4, but the judge read only the
+  exclusion and missed "only included the disclosure of their Scope 2 emissions".
+- `corp_scope1_kitchen` (methodology): the expected page was at rank 2 and the judge
+  quoted it, yet judged the question not answered.
+
+The other two methodology questions newly refused (`corp_scope2_grid`,
+`s3_inbound_courier`) had no expected page retrieved, so refusing them is correct.
+
+**A cache trap, fixed before the test split.** The evals' judgement cache was keyed on the
+judge model, the question and the passages, not on the instruction or the schema, so a
+re-run after this change would have silently reused the old judgements. The dev re-runs
+were made with `--no-cache` for that reason. The key now includes `judge_fingerprint()`, a
+hash of the instruction and the output schema with its field order. A test shows a changed
+instruction misses the cache; with the fingerprint left out of the key, that test fails.
+
+## Known limits of eval 5b, retrieval (continued)
+
+- `dbs_boundary` is a retrieval miss: the answer is a footnote under the DBS p.79 emissions
+  table, likely in a chunk dominated by the table's numbers. No chunking change in this pass.
+

@@ -1,0 +1,1160 @@
+{
+  "split": "dev",
+  "git": {
+    "commit": "06dda6a8103d1a1c8f348927f58485663c8ee0e1",
+    "dirty": false
+  },
+  "embedding_model": "text-embedding-3-small",
+  "judge_model": "gpt-5.4-mini-2026-03-17",
+  "chunker_version": "20927f94c1b4",
+  "top_k": 8,
+  "question_set": {
+    "version": 1,
+    "review_status": "reviewed",
+    "sha256": "763ee5a47cd51b4aac8e1ac9551cbce0dc043d3c76598796fec4ce94ac92926d"
+  },
+  "summary": {
+    "overall": {
+      "questions": 15,
+      "answerable": 10,
+      "unanswerable": 5,
+      "hit_at_1": 5,
+      "hit_at_5": 9,
+      "mrr": 0.65,
+      "judged": 15,
+      "refused_unanswerable": 5,
+      "refused_answerable": 2,
+      "refusal_levels_unanswerable": {
+        "generation": 5
+      },
+      "refusal_levels_answerable": {
+        "generation": 2
+      },
+      "answered_answerable": 8,
+      "answered_citing_expected_page": 8,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "textbook": {
+      "questions": 5,
+      "answerable": 4,
+      "unanswerable": 1,
+      "hit_at_1": 1,
+      "hit_at_5": 3,
+      "mrr": 0.458,
+      "judged": 5,
+      "refused_unanswerable": 1,
+      "refused_answerable": 2,
+      "refusal_levels_unanswerable": {
+        "generation": 1
+      },
+      "refusal_levels_answerable": {
+        "generation": 2
+      },
+      "answered_answerable": 2,
+      "answered_citing_expected_page": 2,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "user": {
+      "questions": 5,
+      "answerable": 3,
+      "unanswerable": 2,
+      "hit_at_1": 1,
+      "hit_at_5": 3,
+      "mrr": 0.556,
+      "judged": 5,
+      "refused_unanswerable": 2,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {
+        "generation": 2
+      },
+      "refusal_levels_answerable": {},
+      "answered_answerable": 3,
+      "answered_citing_expected_page": 3,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "singlish": {
+      "questions": 5,
+      "answerable": 3,
+      "unanswerable": 2,
+      "hit_at_1": 3,
+      "hit_at_5": 3,
+      "mrr": 1.0,
+      "judged": 5,
+      "refused_unanswerable": 2,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {
+        "generation": 2
+      },
+      "refusal_levels_answerable": {},
+      "answered_answerable": 3,
+      "answered_citing_expected_page": 3,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "CapitaLand Ascendas REIT": {
+      "questions": 1,
+      "answerable": 1,
+      "unanswerable": 0,
+      "hit_at_1": 1,
+      "hit_at_5": 1,
+      "mrr": 1.0,
+      "judged": 1,
+      "refused_unanswerable": 0,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {},
+      "refusal_levels_answerable": {},
+      "answered_answerable": 1,
+      "answered_citing_expected_page": 1,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "CapitaLand Integrated Commercial Trust": {
+      "questions": 1,
+      "answerable": 1,
+      "unanswerable": 0,
+      "hit_at_1": 1,
+      "hit_at_5": 1,
+      "mrr": 1.0,
+      "judged": 1,
+      "refused_unanswerable": 0,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {},
+      "refusal_levels_answerable": {},
+      "answered_answerable": 1,
+      "answered_citing_expected_page": 1,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "DBS": {
+      "questions": 2,
+      "answerable": 1,
+      "unanswerable": 1,
+      "hit_at_1": 0,
+      "hit_at_5": 0,
+      "mrr": 0.0,
+      "judged": 2,
+      "refused_unanswerable": 1,
+      "refused_answerable": 1,
+      "refusal_levels_unanswerable": {
+        "generation": 1
+      },
+      "refusal_levels_answerable": {
+        "generation": 1
+      },
+      "answered_answerable": 0,
+      "answered_citing_expected_page": 0,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "Frasers Logistics & Commercial Trust": {
+      "questions": 1,
+      "answerable": 1,
+      "unanswerable": 0,
+      "hit_at_1": 0,
+      "hit_at_5": 1,
+      "mrr": 0.5,
+      "judged": 1,
+      "refused_unanswerable": 0,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {},
+      "refusal_levels_answerable": {},
+      "answered_answerable": 1,
+      "answered_citing_expected_page": 1,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "Keppel": {
+      "questions": 1,
+      "answerable": 1,
+      "unanswerable": 0,
+      "hit_at_1": 1,
+      "hit_at_5": 1,
+      "mrr": 1.0,
+      "judged": 1,
+      "refused_unanswerable": 0,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {},
+      "refusal_levels_answerable": {},
+      "answered_answerable": 1,
+      "answered_citing_expected_page": 1,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "Mapletree Logistics Trust": {
+      "questions": 1,
+      "answerable": 1,
+      "unanswerable": 0,
+      "hit_at_1": 1,
+      "hit_at_5": 1,
+      "mrr": 1.0,
+      "judged": 1,
+      "refused_unanswerable": 0,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {},
+      "refusal_levels_answerable": {},
+      "answered_answerable": 1,
+      "answered_citing_expected_page": 1,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "OCBC": {
+      "questions": 1,
+      "answerable": 1,
+      "unanswerable": 0,
+      "hit_at_1": 0,
+      "hit_at_5": 1,
+      "mrr": 0.333,
+      "judged": 1,
+      "refused_unanswerable": 0,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {},
+      "refusal_levels_answerable": {},
+      "answered_answerable": 1,
+      "answered_citing_expected_page": 1,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "ST Engineering": {
+      "questions": 2,
+      "answerable": 1,
+      "unanswerable": 1,
+      "hit_at_1": 0,
+      "hit_at_5": 1,
+      "mrr": 0.333,
+      "judged": 2,
+      "refused_unanswerable": 1,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {
+        "generation": 1
+      },
+      "refusal_levels_answerable": {},
+      "answered_answerable": 1,
+      "answered_citing_expected_page": 1,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "Seatrium": {
+      "questions": 1,
+      "answerable": 0,
+      "unanswerable": 1,
+      "hit_at_1": 0,
+      "hit_at_5": 0,
+      "mrr": null,
+      "judged": 1,
+      "refused_unanswerable": 1,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {
+        "generation": 1
+      },
+      "refusal_levels_answerable": {},
+      "answered_answerable": 0,
+      "answered_citing_expected_page": 0,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "Sembcorp": {
+      "questions": 1,
+      "answerable": 1,
+      "unanswerable": 0,
+      "hit_at_1": 1,
+      "hit_at_5": 1,
+      "mrr": 1.0,
+      "judged": 1,
+      "refused_unanswerable": 0,
+      "refused_answerable": 0,
+      "refusal_levels_unanswerable": {},
+      "refusal_levels_answerable": {},
+      "answered_answerable": 1,
+      "answered_citing_expected_page": 1,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    },
+    "UOB": {
+      "questions": 1,
+      "answerable": 1,
+      "unanswerable": 0,
+      "hit_at_1": 0,
+      "hit_at_5": 1,
+      "mrr": 0.333,
+      "judged": 1,
+      "refused_unanswerable": 0,
+      "refused_answerable": 1,
+      "refusal_levels_unanswerable": {},
+      "refusal_levels_answerable": {
+        "generation": 1
+      },
+      "answered_answerable": 0,
+      "answered_citing_expected_page": 0,
+      "judge_false_positive_unanswerable": 0,
+      "judge_false_positive_answerable": 0,
+      "quotes_dropped": 0
+    }
+  },
+  "usage_tokens": 59609,
+  "rows": [
+    {
+      "id": "dbs_boundary",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "DBS",
+      "ranked": [
+        [
+          "peer_dbs_2025",
+          114
+        ],
+        [
+          "peer_dbs_2025",
+          115
+        ],
+        [
+          "peer_dbs_2025",
+          126
+        ],
+        [
+          "peer_dbs_2025",
+          125
+        ],
+        [
+          "peer_dbs_2025",
+          75
+        ],
+        [
+          "peer_dbs_2025",
+          126
+        ],
+        [
+          "peer_dbs_2025",
+          114
+        ],
+        [
+          "peer_dbs_2025",
+          115
+        ]
+      ],
+      "first_hit_rank": null,
+      "judged": true,
+      "status": "no_results",
+      "refusal_level": "generation",
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "cited_expected_page": false,
+      "judge_false_positive": false
+    },
+    {
+      "id": "ocbc_branches",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "OCBC",
+      "ranked": [
+        [
+          "peer_ocbc_2025",
+          8
+        ],
+        [
+          "peer_ocbc_2025",
+          62
+        ],
+        [
+          "peer_ocbc_2025",
+          58
+        ],
+        [
+          "peer_ocbc_2025",
+          3
+        ],
+        [
+          "peer_ocbc_2025",
+          140
+        ],
+        [
+          "peer_ocbc_2025",
+          139
+        ],
+        [
+          "peer_ocbc_2025",
+          58
+        ],
+        [
+          "peer_ocbc_2025",
+          58
+        ]
+      ],
+      "first_hit_rank": 3,
+      "judged": true,
+      "status": "ok",
+      "refusal_level": null,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "peer_ocbc_2025",
+          58
+        ]
+      ],
+      "cited_expected_page": true,
+      "judge_false_positive": false
+    },
+    {
+      "id": "uob_uoi",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "UOB",
+      "ranked": [
+        [
+          "peer_uob_2025",
+          189
+        ],
+        [
+          "peer_uob_2025",
+          184
+        ],
+        [
+          "peer_uob_2025",
+          2
+        ],
+        [
+          "peer_uob_2025",
+          2
+        ],
+        [
+          "peer_uob_2025",
+          4
+        ],
+        [
+          "peer_uob_2025",
+          157
+        ],
+        [
+          "peer_uob_2025",
+          12
+        ],
+        [
+          "peer_uob_2025",
+          149
+        ]
+      ],
+      "first_hit_rank": 3,
+      "judged": true,
+      "status": "no_results",
+      "refusal_level": "generation",
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "cited_expected_page": false,
+      "judge_false_positive": false
+    },
+    {
+      "id": "clar_boundary",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "CapitaLand Ascendas REIT",
+      "ranked": [
+        [
+          "peer_clar_2025_datapack",
+          2
+        ],
+        [
+          "peer_clar_2025_datapack",
+          3
+        ],
+        [
+          "peer_clar_2025",
+          24
+        ],
+        [
+          "peer_clar_2025_datapack",
+          6
+        ],
+        [
+          "peer_clar_2025_datapack",
+          4
+        ],
+        [
+          "peer_clar_2025",
+          20
+        ],
+        [
+          "peer_clar_2025",
+          21
+        ],
+        [
+          "peer_clar_2025_datapack",
+          5
+        ]
+      ],
+      "first_hit_rank": 1,
+      "judged": true,
+      "status": "ok",
+      "refusal_level": null,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "peer_clar_2025_datapack",
+          2
+        ],
+        [
+          "peer_clar_2025_datapack",
+          6
+        ]
+      ],
+      "cited_expected_page": true,
+      "judge_false_positive": false
+    },
+    {
+      "id": "mlt_recs",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "Mapletree Logistics Trust",
+      "ranked": [
+        [
+          "peer_mlt_2026",
+          23
+        ],
+        [
+          "peer_mlt_2026",
+          23
+        ],
+        [
+          "peer_mlt_2026",
+          18
+        ],
+        [
+          "peer_mlt_2026",
+          29
+        ],
+        [
+          "peer_mlt_2026",
+          22
+        ],
+        [
+          "peer_mlt_2026",
+          27
+        ],
+        [
+          "peer_mlt_2026",
+          24
+        ],
+        [
+          "peer_mlt_2026",
+          24
+        ]
+      ],
+      "first_hit_rank": 1,
+      "judged": true,
+      "status": "ok",
+      "refusal_level": null,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "peer_mlt_2026",
+          23
+        ]
+      ],
+      "cited_expected_page": true,
+      "judge_false_positive": false
+    },
+    {
+      "id": "flct_baseline",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "Frasers Logistics & Commercial Trust",
+      "ranked": [
+        [
+          "peer_flct_2025",
+          16
+        ],
+        [
+          "peer_flct_2025",
+          48
+        ],
+        [
+          "peer_flct_2025",
+          14
+        ],
+        [
+          "peer_flct_2025",
+          32
+        ],
+        [
+          "peer_flct_2025",
+          6
+        ],
+        [
+          "peer_flct_2025",
+          12
+        ],
+        [
+          "peer_flct_2025",
+          15
+        ],
+        [
+          "peer_flct_2025",
+          27
+        ]
+      ],
+      "first_hit_rank": 2,
+      "judged": true,
+      "status": "ok",
+      "refusal_level": null,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "peer_flct_2025",
+          48
+        ]
+      ],
+      "cited_expected_page": true,
+      "judge_false_positive": false
+    },
+    {
+      "id": "cict_icp",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "CapitaLand Integrated Commercial Trust",
+      "ranked": [
+        [
+          "peer_cict_2024",
+          22
+        ],
+        [
+          "peer_cict_2024",
+          56
+        ],
+        [
+          "peer_cict_2024",
+          20
+        ],
+        [
+          "peer_cict_2024",
+          55
+        ],
+        [
+          "peer_cict_2024",
+          18
+        ],
+        [
+          "peer_cict_2024",
+          12
+        ],
+        [
+          "peer_cict_2024",
+          22
+        ],
+        [
+          "peer_cict_2024",
+          19
+        ]
+      ],
+      "first_hit_rank": 1,
+      "judged": true,
+      "status": "ok",
+      "refusal_level": null,
+      "judge_answered": true,
+      "quotes_kept": 3,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "peer_cict_2024",
+          18
+        ],
+        [
+          "peer_cict_2024",
+          22
+        ]
+      ],
+      "cited_expected_page": true,
+      "judge_false_positive": false
+    },
+    {
+      "id": "keppel_kmc",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "Keppel",
+      "ranked": [
+        [
+          "peer_keppel_2025",
+          46
+        ],
+        [
+          "peer_keppel_2025",
+          100
+        ],
+        [
+          "peer_keppel_2025",
+          46
+        ],
+        [
+          "peer_keppel_2025",
+          46
+        ],
+        [
+          "peer_keppel_2025",
+          100
+        ],
+        [
+          "peer_keppel_2025",
+          38
+        ],
+        [
+          "peer_keppel_2025",
+          46
+        ],
+        [
+          "peer_keppel_2025",
+          45
+        ]
+      ],
+      "first_hit_rank": 1,
+      "judged": true,
+      "status": "ok",
+      "refusal_level": null,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "peer_keppel_2025",
+          46
+        ]
+      ],
+      "cited_expected_page": true,
+      "judge_false_positive": false
+    },
+    {
+      "id": "stengg_boundary",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "ST Engineering",
+      "ranked": [
+        [
+          "peer_stengg_2025",
+          77
+        ],
+        [
+          "peer_stengg_2025",
+          78
+        ],
+        [
+          "peer_stengg_2025",
+          4
+        ],
+        [
+          "peer_stengg_2025",
+          74
+        ],
+        [
+          "peer_stengg_2025",
+          4
+        ],
+        [
+          "peer_stengg_2025",
+          29
+        ],
+        [
+          "peer_stengg_2025",
+          12
+        ],
+        [
+          "peer_stengg_2025",
+          71
+        ]
+      ],
+      "first_hit_rank": 3,
+      "judged": true,
+      "status": "ok",
+      "refusal_level": null,
+      "judge_answered": true,
+      "quotes_kept": 1,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "peer_stengg_2025",
+          4
+        ]
+      ],
+      "cited_expected_page": true,
+      "judge_false_positive": false
+    },
+    {
+      "id": "sembcorp_equity_share",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": true,
+      "unanswerable_kind": null,
+      "company": "Sembcorp",
+      "ranked": [
+        [
+          "peer_sembcorp_2025",
+          25
+        ],
+        [
+          "peer_sembcorp_2025",
+          23
+        ],
+        [
+          "peer_sembcorp_2025",
+          37
+        ],
+        [
+          "peer_sembcorp_2025",
+          115
+        ],
+        [
+          "peer_sembcorp_2025",
+          38
+        ],
+        [
+          "peer_sembcorp_2025",
+          25
+        ],
+        [
+          "peer_sembcorp_2025",
+          40
+        ],
+        [
+          "peer_sembcorp_2025",
+          42
+        ]
+      ],
+      "first_hit_rank": 1,
+      "judged": true,
+      "status": "ok",
+      "refusal_level": null,
+      "judge_answered": true,
+      "quotes_kept": 2,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [
+        [
+          "peer_sembcorp_2025",
+          23
+        ],
+        [
+          "peer_sembcorp_2025",
+          42
+        ]
+      ],
+      "cited_expected_page": true,
+      "judge_false_positive": false
+    },
+    {
+      "id": "u_stengg_scope3_target",
+      "phrasing": "textbook",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "company": "ST Engineering",
+      "ranked": [
+        [
+          "peer_stengg_2025",
+          29
+        ],
+        [
+          "peer_stengg_2025",
+          29
+        ],
+        [
+          "peer_stengg_2025",
+          74
+        ],
+        [
+          "peer_stengg_2025",
+          4
+        ],
+        [
+          "peer_stengg_2025",
+          71
+        ],
+        [
+          "peer_stengg_2025",
+          78
+        ],
+        [
+          "peer_stengg_2025",
+          4
+        ],
+        [
+          "peer_stengg_2025",
+          7
+        ]
+      ],
+      "first_hit_rank": null,
+      "judged": true,
+      "status": "no_results",
+      "refusal_level": "generation",
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "cited_expected_page": false,
+      "judge_false_positive": false
+    },
+    {
+      "id": "u_seatrium_scope3_target",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "company": "Seatrium",
+      "ranked": [
+        [
+          "peer_seatrium_2025",
+          10
+        ],
+        [
+          "peer_seatrium_2025",
+          58
+        ],
+        [
+          "peer_seatrium_2025",
+          21
+        ],
+        [
+          "peer_seatrium_2025",
+          64
+        ],
+        [
+          "peer_seatrium_2025",
+          27
+        ],
+        [
+          "peer_seatrium_2025",
+          12
+        ],
+        [
+          "peer_seatrium_2025",
+          56
+        ],
+        [
+          "peer_seatrium_2025_databook",
+          4
+        ]
+      ],
+      "first_hit_rank": null,
+      "judged": true,
+      "status": "no_results",
+      "refusal_level": "generation",
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "cited_expected_page": false,
+      "judge_false_positive": false
+    },
+    {
+      "id": "u_cdc_vouchers",
+      "phrasing": "user",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "off_corpus",
+      "company": null,
+      "ranked": [
+        [
+          "peer_mpact_2026",
+          37
+        ],
+        [
+          "peer_sembcorp_2025",
+          52
+        ],
+        [
+          "peer_sembcorp_2025",
+          51
+        ],
+        [
+          "peer_mpact_2026",
+          37
+        ],
+        [
+          "peer_dbs_2025",
+          102
+        ],
+        [
+          "peer_ocbc_2025",
+          83
+        ],
+        [
+          "peer_clar_2025_datapack",
+          17
+        ],
+        [
+          "peer_cict_2024",
+          26
+        ]
+      ],
+      "first_hit_rank": null,
+      "judged": true,
+      "status": "no_results",
+      "refusal_level": "generation",
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "cited_expected_page": false,
+      "judge_false_positive": false
+    },
+    {
+      "id": "u_dbs_dividend",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "near_topic",
+      "company": "DBS",
+      "ranked": [
+        [
+          "peer_dbs_2025",
+          69
+        ],
+        [
+          "peer_dbs_2025",
+          124
+        ],
+        [
+          "peer_dbs_2025",
+          84
+        ],
+        [
+          "peer_dbs_2025",
+          110
+        ],
+        [
+          "peer_dbs_2025",
+          117
+        ],
+        [
+          "peer_dbs_2025",
+          102
+        ],
+        [
+          "peer_dbs_2025",
+          64
+        ],
+        [
+          "peer_dbs_2025",
+          8
+        ]
+      ],
+      "first_hit_rank": null,
+      "judged": true,
+      "status": "no_results",
+      "refusal_level": "generation",
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "cited_expected_page": false,
+      "judge_false_positive": false
+    },
+    {
+      "id": "u_laksa_katong",
+      "phrasing": "singlish",
+      "split": "dev",
+      "answerable": false,
+      "unanswerable_kind": "off_corpus",
+      "company": null,
+      "ranked": [
+        [
+          "peer_keppel_2025",
+          69
+        ],
+        [
+          "peer_dbs_2025",
+          128
+        ],
+        [
+          "peer_keppel_2025",
+          11
+        ],
+        [
+          "peer_dbs_2025",
+          124
+        ],
+        [
+          "peer_cict_2024",
+          39
+        ],
+        [
+          "peer_ocbc_2025",
+          10
+        ],
+        [
+          "peer_cict_2024",
+          39
+        ],
+        [
+          "peer_ocbc_2025",
+          10
+        ]
+      ],
+      "first_hit_rank": null,
+      "judged": true,
+      "status": "no_results",
+      "refusal_level": "generation",
+      "judge_answered": false,
+      "quotes_kept": 0,
+      "quotes_withheld": 0,
+      "quotes_dropped": 0,
+      "cited_pages": [],
+      "cited_expected_page": false,
+      "judge_false_positive": false
+    }
+  ]
+}

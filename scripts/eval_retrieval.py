@@ -52,6 +52,7 @@ from carbon_r.tools.methodology import (
     TOP_K,
     AnswerabilityJudgement,
     Passage,
+    judge_fingerprint,
     openai_judge,
     retrieve,
     verified_citations,
@@ -99,7 +100,9 @@ def score_question(
     if row["retrieval_refused"] or not use_judge:
         return row
 
-    jkey = digest(judge_model, q.question, *(str(p.chunk_id) for p in passages))
+    jkey = digest(
+        judge_model, judge_fingerprint(), q.question, *(str(p.chunk_id) for p in passages)
+    )
     cached = cache.get("judgement", jkey)
     if cached is None:
         judgement = judge(q.question, passages)

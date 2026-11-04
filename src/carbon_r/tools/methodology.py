@@ -26,6 +26,8 @@ from a retired chunker version are not the text a citation would point to.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Callable, Sequence
 from typing import Any, Literal
 
@@ -163,6 +165,16 @@ Question: {question}
 Passages:
 {passages}
 """
+
+
+def judge_fingerprint() -> str:
+    """What determines a judgement besides its model and inputs: the instruction and the
+    output schema, field order included (the order is the order the model writes in). The
+    evals put it in their cache keys, so a changed prompt or schema never reuses an old
+    judgement. Read at call time, so it follows the module's current instruction."""
+    schema = json.dumps(AnswerabilityJudgement.model_json_schema())  # keeps field order
+    return hashlib.sha256(f"{JUDGE_INSTRUCTION}\x1f{schema}".encode()).hexdigest()[:16]
+
 
 Fetcher = Callable[[list[float], str | None, int], list[dict[str, Any]]]
 Counter = Callable[[str | None], int]
@@ -374,4 +386,5 @@ __all__ = [
     "Passage",
     "retrieve",
     "search_methodology",
+    "judge_fingerprint",
 ]

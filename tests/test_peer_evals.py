@@ -180,3 +180,61 @@ def test_audit_lists_must_be_empty():
         "no_unverified_figures": False,
         "no_unverified_quotes": True,
     }
+
+
+# --- the judgement cache follows the judge's instruction and schema ------------------------
+
+
+def _judged_twice(tmp_path, change) -> int:
+    """Score one question twice through one cache, applying `change` in between; return how
+    many times the judge was actually called."""
+    calls = []
+
+    def judge(*_):
+        calls.append(1)
+        return _says(2, ANSWER)
+
+    def once():
+        score_question(
+            _question(True),
+            embed=lambda _: [[0.0]],
+            judge=judge,
+            cache=Cache(tmp_path, enabled=True),
+            model="m",
+            judge_model="j",
+            use_judge=True,
+            fetch=lambda *_: [_row(1, 12, OTHER), _row(2, 79, ANSWER)],
+        )
+
+    once()
+    change()
+    once()
+    return len(calls)
+
+
+def test_an_unchanged_judge_reuses_its_cached_judgement(tmp_path):
+    assert _judged_twice(tmp_path, lambda: None) == 1
+
+
+def test_a_changed_judge_instruction_misses_the_cache(tmp_path, monkeypatch):
+    from carbon_r.tools import methodology
+
+    changed = methodology.JUDGE_INSTRUCTION + "\n- One more rule."
+    assert (
+        _judged_twice(
+            tmp_path, lambda: monkeypatch.setattr(methodology, "JUDGE_INSTRUCTION", changed)
+        )
+        == 2
+    )
+
+
+def test_a_changed_field_order_changes_the_fingerprint(monkeypatch):
+    from carbon_r.tools import methodology
+
+    before = methodology.judge_fingerprint()
+    schema = methodology.AnswerabilityJudgement.model_json_schema()
+    reordered = schema | {"properties": dict(reversed(list(schema["properties"].items())))}
+    monkeypatch.setattr(
+        methodology.AnswerabilityJudgement, "model_json_schema", classmethod(lambda cls: reordered)
+    )
+    assert methodology.judge_fingerprint() != before

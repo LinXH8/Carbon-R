@@ -50,7 +50,7 @@ from carbon_r.rag.scoring import (
     n_of,
 )
 from carbon_r.sources import PEERS
-from carbon_r.tools.methodology import AnswerabilityJudgement, openai_judge
+from carbon_r.tools.methodology import AnswerabilityJudgement, judge_fingerprint, openai_judge
 from carbon_r.tools.peer import (
     PEER_CORPUS,
     TOP_K,
@@ -102,7 +102,9 @@ def score_question(
 
     judgement = None
     if passages:
-        jkey = digest(judge_model, q.question, *(str(p.chunk_id) for p in passages))
+        jkey = digest(
+            judge_model, judge_fingerprint(), q.question, *(str(p.chunk_id) for p in passages)
+        )
         cached = cache.get("judgement", jkey)
         if cached is None:
             judgement = judge(q.question, passages)
