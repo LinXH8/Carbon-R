@@ -1,0 +1,309 @@
+{
+  "git": {
+    "commit": "b076605dbb4ff2ce8befc9b5a04c236c23834379",
+    "dirty": false
+  },
+  "cases_file": {
+    "path": "data/evals/peer_agent_questions_v2.json",
+    "version": 2,
+    "sha256": "4d4b54d67f82c08841d787efa65047524e380ef012a184a18660ab8ec4887194"
+  },
+  "runs_per_case": 3,
+  "cases": [
+    {
+      "id": "bank_scope1_ranking_v2",
+      "pass_rule": "Both banks' verified Scope 1 figures are stated, each with its own unit as printed (UOB \"thousand tCO2e\", DBS \"tCO2e\"), with no ranking and no offer to compare.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:UOB:ok": 3,
+        "tool_called:lookup_peer_disclosure:DBS:ok": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "units_stated:thousand tCO2e,tCO2e": 3,
+        "period_named": 3,
+        "disclosure_stated": 3,
+        "no_ranking": 3,
+        "no_offer_to_compare": 3
+      },
+      "all_checks_passed": 3,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "00c99f38c24449e8abcc087dcec63c00",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:UOB:ok": true,
+            "tool_called:lookup_peer_disclosure:DBS:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:thousand tCO2e,tCO2e": true,
+            "period_named": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "e33f0da3b3a44c31bb81f01794110199",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:UOB:ok": true,
+            "tool_called:lookup_peer_disclosure:DBS:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:thousand tCO2e,tCO2e": true,
+            "period_named": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "34adab39b7f74510b7d5d05eca0c9412",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:UOB:ok": true,
+            "tool_called:lookup_peer_disclosure:DBS:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:thousand tCO2e,tCO2e": true,
+            "period_named": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "cross_sector_scope2_v2",
+      "pass_rule": "The reply names the boundary, sector or period difference, including any non-calendar year, with no ranking.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:UOB:ok": 3,
+        "tool_called:lookup_peer_disclosure:Sembcorp:ok": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "method_named": 3,
+        "names_difference": 3,
+        "period_named": 3,
+        "disclosure_stated": 3,
+        "no_ranking": 3,
+        "no_offer_to_compare": 3
+      },
+      "all_checks_passed": 3,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "fb68f2ba72da42c2b09f22f327c1b87d",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:UOB:ok": true,
+            "tool_called:lookup_peer_disclosure:Sembcorp:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "method_named": true,
+            "names_difference": true,
+            "period_named": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "2d6d0370c6a64a2ba2aa1f4a41649f3b",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:UOB:ok": true,
+            "tool_called:lookup_peer_disclosure:Sembcorp:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "method_named": true,
+            "names_difference": true,
+            "period_named": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "fe4f4bf4fbde4bd5a3a367825e101fca",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:UOB:ok": true,
+            "tool_called:lookup_peer_disclosure:Sembcorp:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "method_named": true,
+            "names_difference": true,
+            "period_named": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "no_verified_figure_mlt_v2",
+      "pass_rule": "The reply gives the 'holds no verified figure' message and states no number.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:Mapletree Logistics Trust:no_results": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "states_no_verified_figure": 2,
+        "no_figure": 3
+      },
+      "all_checks_passed": 2,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "fcd60b578e2e4d6a9d4554a21e40212d",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:no_results"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Mapletree Logistics Trust:no_results": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "states_no_verified_figure": true,
+            "no_figure": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "88fab3d93bc84c6da4d34c0b666da051",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:no_results"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Mapletree Logistics Trust:no_results": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "states_no_verified_figure": true,
+            "no_figure": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "ebe742ebe89b459c8f098e3524478657",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:no_results"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Mapletree Logistics Trust:no_results": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "states_no_verified_figure": false,
+            "no_figure": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "scope2_answer_scope3_quote_v2",
+      "pass_rule": "No quote about Scope 3 appears in the Scope 2 answer.",
+      "counts": {
+        "no_unverified_figures": 1,
+        "no_unverified_quotes": 0,
+        "quotes_exclude:Scope 3,Category": 2
+      },
+      "all_checks_passed": 0,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "a723f4616e8d4557a2c41a13e7af55e6",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "search_peer_disclosures:ok"
+          ],
+          "unverified_figures": 1,
+          "unverified_quotes": 2,
+          "checks": {
+            "no_unverified_figures": false,
+            "no_unverified_quotes": false,
+            "quotes_exclude:Scope 3,Category": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "7603cc0b161344e89a72d820be807a95",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "search_peer_disclosures:no_results",
+            "search_methodology:ok"
+          ],
+          "unverified_figures": 1,
+          "unverified_quotes": 1,
+          "checks": {
+            "no_unverified_figures": false,
+            "no_unverified_quotes": false,
+            "quotes_exclude:Scope 3,Category": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "a4d354ecda0e40b5a62fca541ea91d6d",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "search_peer_disclosures:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 1,
+          "checks": {
+            "no_unverified_figures": true,
+            "no_unverified_quotes": false,
+            "quotes_exclude:Scope 3,Category": false
+          }
+        }
+      ]
+    }
+  ]
+}

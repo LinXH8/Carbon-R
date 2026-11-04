@@ -1177,6 +1177,65 @@ Known limit of v2: **the rule "say when the two companies' years don't match" is
 tested.** UOB and Sembcorp both report on January to December years. MLT, the non-calendar
 reporter, appears only in the "no verified figure" case, which compares no years.
 
+## Agent cases v2: 4 cases x 3 runs
+
+Run on commit `b076605` (clean tree), cases v2 sha256 `4d4b54d67f82c088`, with no prompt
+change before or after: `peer_agent_20261104T175413Z`. Replies kept local only, as before.
+
+Model scores are every fixed check except `disclosure_stated`. The baseline columns are the
+recorded v1 run, unchanged; it did include `disclosure_stated`, which then tested the model.
+
+| Behaviour | Baseline automatic | Baseline by hand | v2 automatic | v2 by hand |
+|---|---|---|---|---|
+| Two banks, asked to rank | 0 of 3 | 1 of 3 | 3 of 3 | 3 of 3 |
+| Different sectors | 0 of 3 | 3 of 3 | 3 of 3 | 3 of 3 |
+| No verified figure | 3 of 3 | 3 of 3 | 2 of 3 | 3 of 3 |
+| No Scope 3 quote in a Scope 2 answer | 3 of 3 | 3 of 3 | 0 of 3 | 2 of 3 |
+
+The code, reported apart: the caveat was attached to 12 of 12 replies, and
+`disclosure_stated` passed 6 of 6 where it is checked.
+
+Read by hand:
+
+- **Banks.** Every run stated both figures with each bank's own unit (UOB "thousand tCO2e",
+  DBS "tCO₂e"), did not rank and did not offer to compare: 3 of 3, against 1 of 3 at
+  baseline. The two fixes held on questions the prompt had not been written against.
+- **Cross-sector.** Every run named the boundary difference and none ranked.
+- **MLT.** Every run said Carbon R holds no verified figure and stated no number. Run 3
+  also named MLT's 1 April to 31 March year.
+- **Scope 2 "how" question.** `search_peer_disclosures` brought back UOB p.189, a
+  table-like passage with footnote markers fused onto its labels. Run 3 quoted a span that
+  carries the heading "Other indirect (Scope 3) emissions", which fails the pass rule; runs 1
+  and 2 meet it. The audit flagged defects in all three that the pass rule does not name
+  (below).
+
+## Known limits of agent cases v2
+
+- **MLT: a checker problem, not an agent problem.** The automatic check failed on "no
+  verified Scope 1 figure", because `states_no_verified_figure` looks for the exact phrase
+  "no verified figure". All 3 runs stated no number.
+- **Scope 2 "how" question, on a table-like passage, the agent:**
+  - reworded quotes, 3 of 3: a footnote marker dropped ("(market-based)4:" quoted as
+    "(market-based):"), "Excludes" quoted as "Exclude[s]", text cut;
+  - took a figure from a passage, 2 of 3 ("2.3", the right value, but not looked up, and
+    so not inside an exact quote);
+  - said "verified by hand" about passage quotes, 1 run; that wording belongs to figures
+    from `lookup_peer_disclosure`;
+  - answered after the search returned `no_results` without saying so, 1 run.
+- **Cross-sector:** no run named the sector difference (boundary only), which the prompt
+  asks for; run 3 left out UOB's market-based figure.
+- The "years don't match" rule is untested (above).
+
+The audit flagged these replies, but a flagged reply still reaches the user: the audit
+records, it does not stop.
+
+Follow-ups for a later pass, not this one:
+
+1. Decide what happens when the audit flags a reply: block it, retry, or show a warning.
+2. Allow "verified by hand" only when `lookup_peer_disclosure` was used, checked in code.
+3. When search returns `no_results`, the reply must say the question was not answered.
+4. Make the "no verified figure" check accept wording such as "no verified Scope 1 figure".
+
 ## Eval 5a: table extraction by representation
 
 The same model reads the same pages three ways: the page image, `pdftotext -layout` text,
