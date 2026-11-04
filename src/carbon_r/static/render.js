@@ -144,7 +144,9 @@ export function renderActivity(final) {
       h('span', {}, [h('strong', { text: title }), document.createTextNode(` ${detail}`)]),
     ]))));
   }
-  if (!final.figures?.length && final.stopped_reason === 'completed') {
+  // Only where a figure could be expected: a document was uploaded, or the agent went down
+  // the calculation path. A plain question (methodology, a peer report) needs no number.
+  if (final.figure_expected && !final.figures?.length && final.stopped_reason === 'completed') {
     nodes.push(h('p', { class: 'activity-note', text: 'No figure was calculated. The agent answered without producing a number, which is expected when a question needs none, or when a document or factor is missing.' }));
   }
   if (calls.length) nodes.push(auditTrail(calls));

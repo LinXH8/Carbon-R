@@ -122,6 +122,7 @@ def test_the_final_event_is_the_chat_response(configured, monkeypatch):
         "unsupported_hand_verification",
         "no_results_unstated",
         "warnings",
+        "figure_expected",
         "figures",
     }
     assert final["reply"] == ANSWERED.reply

@@ -56,6 +56,14 @@ log = logging.getLogger("carbon_r.agent")
 # the prompt asks for it. The audits read the model's words only; the caveat is the code's.
 PEER_TOOLS = frozenset({"search_peer_disclosures", "lookup_peer_disclosure"})
 
+# The tools on the path to an emissions figure. A turn that called one, or a session holding
+# an uploaded document, was a turn where a figure could be expected; only then does the page
+# say "No figure was calculated" when none came back. A plain question (methodology, a
+# peer's report) gets no such note: there was never a figure to calculate.
+CALCULATION_TOOLS = frozenset(
+    {"extract_from_document", "lookup_emission_factor", "calculate_emissions"}
+)
+
 
 class SupportsResponses(Protocol):  # pragma: no cover - a shape, not behaviour
     """The slice of the OpenAI client this loop uses."""
@@ -89,6 +97,7 @@ class AgentRun:
     unsupported_hand_verification: list[str] = field(default_factory=list)
     no_results_unstated: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    figure_expected: bool = False
 
     # The `calculate_emissions` payloads produced by THIS run, in order. Collected here
     # rather than read from `session.calculations` because that dict accumulates across
@@ -257,5 +266,6 @@ def run_agent(
         unsupported_hand_verification=hand,
         no_results_unstated=unstated,
         warnings=warnings,
+        figure_expected=bool(session.documents) or any(c.tool in CALCULATION_TOOLS for c in calls),
         figures=figures,
     )

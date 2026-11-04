@@ -316,3 +316,36 @@ def test_an_answer_after_a_failed_search_must_say_so(session):
         toolkit=kit,
     )
     assert said.no_results_unstated == [] and said.warnings == []
+
+
+# --- whether a figure was expected: the page's "No figure was calculated" note -------------
+
+
+def test_a_plain_question_expects_no_figure(toolkit):
+    from carbon_r.agent.session import Session
+
+    empty = Session(session_id="sess_plain")  # nothing uploaded
+    run = run_agent(empty, "What is Scope 2?", client=fake_client("Scope 2 is ..."), model="m",
+                    toolkit=toolkit)  # fmt: skip
+    assert run.figure_expected is False and run.figures == []
+
+
+def test_an_uploaded_document_expects_a_figure_even_when_none_came_back(session, toolkit):
+    run = run_agent(session, "Hello?", client=fake_client("Hello."), model="m", toolkit=toolkit)
+    assert run.figure_expected is True and run.figures == []
+
+
+def test_a_turn_on_the_calculation_path_expects_a_figure(toolkit):
+    from carbon_r.agent.session import Session
+
+    empty = Session(session_id="sess_factor")
+    run = run_agent(
+        empty, "What is the 2025 grid factor?",
+        client=fake_client(FULL_SEQUENCE[1], "No factor."), model="m", toolkit=toolkit,
+    )  # fmt: skip
+    assert run.figure_expected is True
+
+
+def test_a_full_calculation_expects_a_figure_and_has_one(session, toolkit):
+    run = run_agent(session, "q", client=fake_client(*FULL_SEQUENCE), model="m", toolkit=toolkit)
+    assert run.figure_expected is True and run.figures

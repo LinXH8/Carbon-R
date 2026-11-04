@@ -56,10 +56,20 @@ Verified peer figures are committed in exactly one file, `data/peer_disclosures_
 (exported from `peer_disclosures_verified`, seeded back by `make seed-peer`). Its `draft`
 fields keep what the model read, labelled as such. A real peer figure anywhere else in a
 tracked file is a defect, and an unverified or garbled one (a draft never verified, a figure
-read from a PDF text layer) is a defect everywhere. Run `scripts/draft_peer_disclosures.py
-leak-check` (it checks every commit since `origin/main`, and the working tree) before every
-push that touches peer data; the author's verification
+read from a PDF text layer) is a defect everywhere. The leak check
+(`scripts/draft_peer_disclosures.py leak-check`, or `make leak-check`) enforces this, and
+does not depend on anyone remembering it: the pre-push hook in `.githooks/` (installed by
+`make hooks` or `make install`) blocks a push that adds a verified figure outside that file,
+short decimals included, and CI runs the same check on every push and fails the build. A
+number that only happens to equal a peer figure is allowed by a reviewed entry in
+`data/leak_check_coincidences.json`, never by bypassing the hook. The author's verification
 worksheets (`data/generated/peer_verification/`) stay git-ignored.
+
+**Example figures are obviously illustrative.** A figure written as an example in a doc,
+a note, a docstring, a test or a commit message is invented (a company called "Bank A", a
+value like 6.6 or 3,456) and is checked against the verified figures before it is written:
+it must never match one. Real peer figures are not borrowed as examples, even with the
+company renamed.
 
 ### 5. Anything marked VERIFY is checked against the primary source before it is used
 

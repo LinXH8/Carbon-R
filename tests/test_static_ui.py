@@ -117,3 +117,57 @@ def test_a_flagged_reply_is_shown_with_its_warning_above_it():
     assert "final.warnings" in answer
     assert answer.index("final.warnings") < answer.index("class: 'reply'")
     assert "unsupported_hand_verification" in renderer and "no_results_unstated" in renderer
+
+
+def test_the_no_figure_note_shows_only_where_a_figure_was_expected():
+    renderer = client.get("/static/render.js").text
+    activity = renderer.split("export function renderActivity")[1].split("export function")[0]
+    note = activity.index("No figure was calculated")
+    condition = activity.rindex("if (", 0, note)
+    assert "final.figure_expected" in activity[condition:note]
+
+
+# The same two cases, run: the page's own renderActivity in Node with a minimal DOM, so the
+# condition is exercised and not only read. Skipped where Node is not installed.
+_DOM_SHIM = """
+class Node { constructor(tag) { this.tag = tag; this.children = []; this.textContent = ''; }
+  append(c) { this.children.push(c); } setAttribute() {} set className(v) {} }
+globalThis.document = { createElement: (t) => new Node(t),
+  createTextNode: (t) => Object.assign(new Node('#text'), { textContent: t }) };
+const text = (n) => (n.textContent || '') + n.children.map(text).join('');
+const { renderActivity } = await import(process.argv[1]);
+const final = JSON.parse(process.argv[2]);
+console.log(JSON.stringify(renderActivity(final).nodes.map(text)));
+"""
+
+
+def _activity_text(final: dict) -> str:
+    import json
+    import shutil
+    import subprocess
+
+    import pytest
+
+    from carbon_r.config import PROJECT_ROOT
+
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("needs node")
+    script = PROJECT_ROOT / "src" / "carbon_r" / "static" / "render.js"
+    result = subprocess.run(
+        [node, "--input-type=module", "-e", _DOM_SHIM, "--", script.as_uri(), json.dumps(final)],
+        capture_output=True, text=True, check=True,
+    )  # fmt: skip
+    return " ".join(json.loads(result.stdout.splitlines()[-1]))
+
+
+_PLAIN = {"figures": [], "stopped_reason": "completed", "tool_calls": [],
+          "unverified_figures": [], "unverified_quotes": []}  # fmt: skip
+
+
+def test_a_plain_question_shows_no_no_figure_note():
+    assert "No figure was calculated" not in _activity_text(_PLAIN | {"figure_expected": False})
+
+
+def test_a_question_that_expected_a_figure_shows_the_note():
+    assert "No figure was calculated" in _activity_text(_PLAIN | {"figure_expected": True})

@@ -19,7 +19,7 @@ measure](#what-the-evals-measure).
 git clone https://github.com/LinXH8/Carbon-R.git && cd Carbon-R
 echo "OPENAI_API_KEY=sk-..." > .env      # the only thing you need to supply
 docker compose up --build
-open http://localhost:8000
+open http://localhost:8000/app    # the tool; http://localhost:8000 is the landing page
 ```
 
 Compose runs its own Postgres (with pgvector), applies the migrations and seeds the
@@ -442,7 +442,7 @@ uv sync
 
 cp .env.example .env     # then fill in OPENAI_API_KEY and DATABASE_URL
 uv run uvicorn carbon_r.main:app --reload   # or: make run
-open http://localhost:8000
+open http://localhost:8000/app    # the tool; / is the landing page
 ```
 
 `/health` reports whether the database and the model provider are configured, so a partly
@@ -538,19 +538,28 @@ check. A number that only happens to equal a peer figure is allowed by a reviewe
 
 ### The page
 
-`http://localhost:8000` is a single page with no build step: drop a bill on it, ask a
-question, and watch the tool calls arrive as they happen — the steps on screen are the
-real tool transcript being built, not a progress bar on a timer.
+`http://localhost:8000` is a landing page; **Start** opens the tool at
+`http://localhost:8000/app`. Both are plain HTML with no build step.
 
-The answer panel shows the figure in kg and tonnes, the arithmetic written out, and the
-factor with its publisher, both years, source document and page or table, followed by the
-disclosures the result must carry. **Those numbers are read from the structured output of
-`calculate_emissions`, never parsed out of the agent's prose** — the agent's wording is
-shown separately and nothing is extracted from it. Pull up the audit sheet to see every
-tool call with its arguments and its result.
+`/app` is a conversation. Ask a question on its own (methodology, or how a peer company
+reports) or attach a bill first; attaching is optional. While the agent works, the steps
+arrive as they happen: the real tool transcript being built, not a progress bar on a
+timer. Each answer then folds that working into one collapsible row whose summary names
+what was done and, when the audit found anything, how many flags it raised, so a failed
+audit is visible even with the row closed. Open it to see every tool call with its
+arguments and its result.
 
-If the figure audit ever finds a number in the reply that no tool produced, the page says
-so above the figure rather than below it.
+For a bill, the answer shows the figure in kg and tonnes, the arithmetic written out, and
+the factor with its publisher, both years, source document and page or table, followed by
+the disclosures the result must carry. **Those numbers are read from the structured output
+of `calculate_emissions`, never parsed out of the agent's prose**: the agent's wording is
+shown separately and nothing is extracted from it. When a figure was expected (a document
+was attached, or the agent went down the calculation path) and none came back, the row
+says so; a plain question carries no such note.
+
+If an audit flags the reply (a number no tool produced, a quote no source contains, "verified
+by hand" without a looked-up figure, or a search that found nothing and was not admitted),
+a red warning naming each finding sits directly above the reply. The reply is still shown.
 
 ### Asking a question about a bill from the shell
 
@@ -687,9 +696,9 @@ Stated plainly, because they bound what any number here means:
   but a steady account's monthly invoices still often share a kg figure.
 - **The classifier's confidence threshold (0.7) was chosen by eye**, with no labelled set of
   ambiguous documents behind it.
-- **The interface has no automated interaction coverage.** The page's figure panel and
-  streamed steps are tested against the shape of the response; the drag behaviour of the
-  audit sheet has been reviewed and used by hand, not instrumented.
+- **The interface has no automated interaction coverage.** The page's rendering is tested
+  against the shape of the response (and two of its conditions are run in Node); attaching,
+  sending and folding the working have been used by hand, not driven by a scripted browser.
 - **Sessions and uploads accumulate** with no eviction, and a restart loses every session.
 - **The holdout showed the normaliser overfits its layouts.** On layout `d`, every emissions
   figure was right, but 24 field failures came from two printed labels that layouts a–c do

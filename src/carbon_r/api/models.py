@@ -249,6 +249,12 @@ class ChatResponse(BaseModel):
         description="The audit findings in words, rendered server-side. A client that shows "
         "the reply shows these with it.",
     )
+    figure_expected: bool = Field(
+        default=False,
+        description="A document was uploaded in this session, or this turn called a tool on "
+        "the path to an emissions figure. When true and `figures` is empty, say that no "
+        "figure was calculated; a plain question carries no such note.",
+    )
     figures: list[FigureOut] = Field(
         default_factory=list,
         description="Every figure `calculate_emissions` produced in this turn, with the "
@@ -269,5 +275,6 @@ class ChatResponse(BaseModel):
             unsupported_hand_verification=run.unsupported_hand_verification,
             no_results_unstated=run.no_results_unstated,
             warnings=run.warnings,
+            figure_expected=run.figure_expected,
             figures=[FigureOut.from_payload(payload) for payload in run.figures],
         )
