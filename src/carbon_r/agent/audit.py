@@ -79,7 +79,7 @@ eval 5b's v2 agent cases), against the tool results of the same turn only:
   held") - is flagged only if no lookup was made in this turn at all
   (`unsupported_hand_verification`). A v2 reply had said it about passage quotes when no
   lookup had been made. Known limits: the claim is tied to a number in its own sentence, so
-  "4.2 thousand tCO2e (p. 134). Verified by hand." is flagged; and a summary line after a
+  "7.7 thousand tCO2e (p. 134). Verified by hand." is flagged; and a summary line after a
   lookup that found nothing passes. "Checked by hand" is not read: the lookup's own
   no_results message uses it to explain what is held, and replies repeat it (all 3 v2 MLT
   replies).

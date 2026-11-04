@@ -959,6 +959,17 @@ reason, the reviewer and the date. The same figure anywhere else still fails. Ev
 exemption is printed on every run, and an entry that matches nothing is reported. Three
 entries, all `120`: `llm.py`, `tests/test_llm.py`, and a comment in the drafter.
 
+**A real leak, 5 Nov, pushed before it was caught.** While writing tests for the audit
+follow-ups, Claude copied four verified DBS and UOB figures into test strings, an `audit.py`
+docstring and this record (two of them only 2 digits); an earlier unit test (`b076605`) had
+one of the short ones too. The leak check
+failed on the follow-up commit, but the push command did not stop on its exit code, so the
+commit reached `origin/main`. Fixed forward in `8e7d5fe` with invented figures (each checked
+against the verified set) and invented wording for a report sentence; the earlier commits
+still hold the values in history. The check only scans figures of 3 or more digits, so the
+2-digit ones were found by a separate scan of every tracked file for the verified decimal
+figures. Known limit: the leak check does not see short figures such as "4.2".
+
 ## Known limits (OCBC and UOB)
 
 - Footnotes on OCBC and UOB figures were not reviewed; boundary, period or method caveats in
@@ -1221,8 +1232,8 @@ Read by hand:
 - **Scope 2 "how" question, on a table-like passage, the agent:**
   - reworded quotes, 3 of 3: a footnote marker dropped ("(market-based)4:" quoted as
     "(market-based):"), "Excludes" quoted as "Exclude[s]", text cut;
-  - took a figure from a passage, 2 of 3 ("2.3", the right value, but not looked up, and
-    so not inside an exact quote);
+  - took a figure from a passage, 2 of 3 (UOB's market-based Scope 2: the right value, but
+    not looked up, and so not inside an exact quote);
   - said "verified by hand" about passage quotes, 1 run; that wording belongs to figures
     from `lookup_peer_disclosure`;
   - answered after the search returned `no_results` without saying so, 1 run.

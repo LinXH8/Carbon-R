@@ -291,17 +291,17 @@ def _units(reply: str) -> bool:
 
 
 def test_both_units_as_printed_pass_with_either_subscript():
-    assert _units("UOB: 2.3 thousand tCO2e (p.135). DBS: 1,234 tCO₂e (p.79).")
-    assert _units("UOB: 2.3 thousand tCO₂e. DBS: 1,234 TCO2E.")
+    assert _units("UOB: 6.6 thousand tCO2e (p.135). DBS: 1,234 tCO₂e (p.79).")
+    assert _units("UOB: 6.6 thousand tCO₂e. DBS: 1,234 TCO2E.")
 
 
 def test_one_unit_for_both_companies_fails():
-    assert not _units("UOB: 2.3 thousand tCO2e. DBS: 1,234 thousand tCO2e.")
-    assert not _units("UOB: 2,300 tCO2e. DBS: 1,234 tCO2e.")  # UOB's unit converted
+    assert not _units("UOB: 6.6 thousand tCO2e. DBS: 1,234 thousand tCO2e.")
+    assert not _units("UOB: 6,600 tCO2e. DBS: 1,234 tCO2e.")  # UOB's unit converted
 
 
 def test_a_respelled_unit_is_not_the_unit_as_printed():
-    assert not _units("UOB: 2.3 '000 tCO2e. DBS: 1,234 tCO2e.")
+    assert not _units("UOB: 6.6 '000 tCO2e. DBS: 1,234 tCO2e.")
 
 
 def test_no_verified_figure_accepts_words_between():

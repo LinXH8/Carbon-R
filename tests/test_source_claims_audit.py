@@ -20,20 +20,21 @@ def _search(tool: str, status: str) -> dict:
 
 # --- "verified by hand" ---------------------------------------------------------------------
 
+# The figures and wording here are invented: real peer figures are committed in one file
+# only (CLAUDE.md rule 4). The shapes are the v2 replies'.
 BANK = (
-    "UOB’s Scope 1 total is 4.2 thousand tCO2e, row label “Scope 1 > Total,” for 1 Jan 2025 "
+    "Bank A’s Scope 1 total is 7.7 thousand tCO2e, row label “Scope 1 > Total,” for 1 Jan 2025 "
     "to 31 Dec 2025, on p. 134 (PDF p. 135), verified by hand against that page."
 )
 PASSAGE = (
-    "It also says “Scope 2 emissions (market-based) are residual emissions left after the "
-    "offset by RECs.” UOB Sustainability Report, p. 188 (PDF p. 189), verified by hand "
-    "against that page."
+    "It also says “its market-based figure is what remains once certificates are applied.” "
+    "Bank A Sustainability Report, p. 188 (PDF p. 189), verified by hand against that page."
 )
 
 
 def test_a_claim_beside_a_looked_up_figure_passes():
     # "p. 134" must not split the sentence away from its figure.
-    assert unsupported_hand_verification(BANK, [_lookup("4.2")]) == []
+    assert unsupported_hand_verification(BANK, [_lookup("7.7")]) == []
 
 
 def test_a_claim_with_no_lookup_this_turn_is_flagged():
@@ -41,19 +42,19 @@ def test_a_claim_with_no_lookup_this_turn_is_flagged():
 
 
 def test_a_claim_about_a_passage_is_flagged_even_after_a_lookup():
-    # The lookup returned 4.2; this sentence states only page numbers.
-    flagged = unsupported_hand_verification(PASSAGE, [_lookup("4.2")])
-    assert len(flagged) == 1 and "residual emissions" in flagged[0]
+    # The lookup returned 7.7; this sentence states only page numbers.
+    flagged = unsupported_hand_verification(PASSAGE, [_lookup("7.7")])
+    assert len(flagged) == 1 and "certificates" in flagged[0]
 
 
 def test_a_figure_the_lookup_did_not_return_is_flagged():
-    reply = "UOB's location-based Scope 2 is 70.2 thousand tCO2e, verified by hand."
-    assert unsupported_hand_verification(reply, [_lookup("4.2")]) != []
+    reply = "Bank A's location-based Scope 2 is 55.5 thousand tCO2e, verified by hand."
+    assert unsupported_hand_verification(reply, [_lookup("7.7")]) != []
 
 
 def test_a_claim_with_no_number_passes_only_after_a_lookup_call():
     reply = "Both figures above were verified by hand against the cited pages."
-    assert unsupported_hand_verification(reply, [_lookup("1,148")]) == []
+    assert unsupported_hand_verification(reply, [_lookup("3,456")]) == []
     assert unsupported_hand_verification(reply, []) == [reply]
 
 
@@ -68,20 +69,20 @@ def test_explaining_a_lookup_that_found_nothing_is_not_a_claim():
 
 
 def test_thousands_separators_and_other_wordings_are_read():
-    reply = "DBS's total is 1148 tCO₂e (hand-verified)."
-    assert unsupported_hand_verification(reply, [_lookup("1,148")]) == []
+    reply = "Bank B's total is 3456 tCO₂e (hand-verified)."
+    assert unsupported_hand_verification(reply, [_lookup("3,456")]) == []
     assert unsupported_hand_verification("Verified by hand: 9.9 t.", []) != []
 
 
 def test_a_reply_making_no_claim_is_not_read():
-    assert unsupported_hand_verification("UOB reports 4.2 thousand tCO2e.", []) == []
+    assert unsupported_hand_verification("Bank A reports 7.7 thousand tCO2e.", []) == []
 
 
 # --- no_results must be said ----------------------------------------------------------------
 
 
 def test_an_answer_after_no_results_is_flagged():
-    reply = "UOB reports both location-based and market-based Scope 2."
+    reply = "Bank A reports both location-based and market-based Scope 2."
     payloads = [_search("search_peer_disclosures", "no_results")]
     assert no_results_unstated(reply, payloads) == ["search_peer_disclosures"]
 
@@ -120,9 +121,9 @@ def test_no_findings_no_warnings():
 
 
 def test_one_warning_per_kind_in_a_fixed_order():
-    warnings = audit_warnings(["2.3"], ["Exclude[s] Scope 2"], ["s"], ["search_peer_disclosures"])
+    warnings = audit_warnings(["6.6"], ["Exclude[s] Scope 2"], ["s"], ["search_peer_disclosures"])
     assert len(warnings) == 4
-    assert "2.3" in warnings[0] and "Exclude[s] Scope 2" in warnings[1]
+    assert "6.6" in warnings[0] and "Exclude[s] Scope 2" in warnings[1]
     assert "verified by hand" in warnings[2] and "not answered" in warnings[3]
 
 

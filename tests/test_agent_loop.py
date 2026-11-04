@@ -266,10 +266,10 @@ def test_verified_by_hand_needs_this_turns_lookup(session):
 
     def lookup(*_, **__):
         return ok(
-            {"figures": [{"figure_printed": "4.2", "printed_page": 134}]}, "1 verified figure."
+            {"figures": [{"figure_printed": "7.7", "printed_page": 134}]}, "1 verified figure."
         )
 
-    claim = "UOB's Scope 1 is 4.2 thousand tCO2e, on p. 134, verified by hand against that page."
+    claim = "Bank A's Scope 1 is 7.7 thousand tCO2e, on p. 134, verified by hand against that page."
     kit = Toolkit(session, lookup_peers=lookup)
     first = run_agent(
         session,
