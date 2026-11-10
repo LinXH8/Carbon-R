@@ -175,6 +175,30 @@ TABLE_PAGES: dict[str, list[int]] = {
     # statement's selected GHG information) prints Scope 1, 2, 3 and totals inline, with no
     # year column: its year is declared in PAGE_YEARS.
     "peer_uob_2025": [135, 136, 189],
+    # Confirmed by the author, 2026-11-10. Appendix 1 Environmental Data (printed p.45): Scope 1,
+    # Scope 2 both methods, Scope 3 categories 1, 2, 5, 13. Not drafted: p.24 repeats the
+    # Scope 3 categories as a smaller table; p.23 and p.29 are prose and charts.
+    "peer_mlt_2026": [46],
+    # Confirmed by the author, 2026-11-10. Two printed pages per PDF page. p.34 (printed 65)
+    # Scope 1 by country; p.35 (printed 66) Scope 2 both methods by country and Scope 3
+    # categories. No group totals in the table: they are printed only in prose (p.16). p.33
+    # is methodology prose.
+    "peer_mpact_2026": [34, 35],
+    # Confirmed by the author, 2026-11-10. p.45 (printed 46) Scope 1 and 2 table and the Scope 3
+    # table by category; p.50 (printed 51) Environmental Data, which repeats the totals.
+    # Not drafted: p.47, emissions of Keppel-managed REITs and funds (a different boundary);
+    # the scan's other hits are prose and charts.
+    "peer_keppel_2025": [45, 50],
+    # Confirmed by the author, 2026-11-10. "Our Environmental Metrics".
+    # The unit ('000 tCO2e) is printed in the section heading only.
+    # Footnote 1: the last three months of 2025 are estimates. p.29 is a chart.
+    "peer_stengg_2025": [37],
+    # Confirmed by the author, 2026-11-10. Scope 1 and 2 by country with totals. Scope 3 is an
+    # infographic only (p.58), not drafted; p.104 is the SGX core metrics index.
+    "peer_seatrium_2025": [70],
+    # Confirmed by the author, 2026-11-10. The group GHG table: Scope 1, Scope 2 both methods,
+    # totals, Scope 3 categories 1-15. p.30 is the SGX core metrics index.
+    "peer_seatrium_2025_databook": [13],
 }
 
 # Table pages the author has checked continue the table on the page before, as
@@ -195,6 +219,10 @@ PAGE_YEARS: dict[str, dict[int, int]] = {
     # The assurance statement's selected GHG information: 2025 Scope 1, 2, 3 and totals,
     # inline. Declared by the author, 31 Oct.
     "peer_uob_2025": {189: 2025},
+    # The Scope 3 table by category prints no year column; the prose beside it gives the same
+    # total for 2025. The page's Scope 1 and 2 table has year columns and is unaffected.
+    # Declared by the author, 2026-11-10.
+    "peer_keppel_2025": {45: 2025},
 }
 
 

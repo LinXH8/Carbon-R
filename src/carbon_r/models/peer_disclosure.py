@@ -137,6 +137,10 @@ no emissions table, return page_has_ghg_table false and no cells."""
 _FY = re.compile(r"\bFY\s?'?(\d{4}|\d{2})(?:\s?[/\-–]\s?(\d{4}|\d{2}))?\b", re.IGNORECASE)
 _SPAN = re.compile(r"\b((?:19|20)\d{2})\s?[/\-–]\s?(\d{4}|\d{2})\b")
 _YEAR = re.compile(r"\b(?:19|20)\d{2}\b")
+# A footnote marker printed on a header ("2025¹"). Superscript digits are word characters to
+# `re`, so left in they would hide the year from every `\b` above. Removed, not replaced by a
+# space: "2025¹" is the year 2025, not "2025 1".
+_SUPERSCRIPT_DIGITS = re.compile("[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]")
 
 
 def _full_year(digits: str) -> int:
@@ -162,7 +166,7 @@ def cell_year(header: str, declared_year: int | None = None) -> int | None:
 
 def _years_named(header: str) -> list[int]:
     years: list[int] = []
-    rest = header
+    rest = _SUPERSCRIPT_DIGITS.sub("", header)
     for pattern in (_FY, _SPAN):
         for match in pattern.finditer(rest):
             start, end = match.group(1), match.group(2)

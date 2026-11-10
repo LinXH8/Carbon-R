@@ -382,6 +382,21 @@ def _label_forms(drafted_label: str) -> set[str]:
     return {normalise_label(drafted_label), normalise_label(drafted_label.split(">")[-1])}
 
 
+def header_matches(listed: str, drafted: str) -> bool:
+    """The listed column header names the drafted one, or the end of its heading path. The
+    drafter writes a nested header as "Spanning heading > Column header" (DRAFT_INSTRUCTION);
+    the author may list only its last part(s): "2025" and "Scope 1 > 2025" both match
+    "SCOPE 1 & 2 > Scope 1 > 2025*" (markers ignored, as in `normalise_label`). A listed header
+    longer than the drafted one never matches: it names a heading the drafter did not read.
+
+    Known limit: a bare "2025" cannot tell apart two tables on one page that differ only by a
+    spanning heading; the row label and scope must. Added 2026-11-11, after the Seatrium p.70
+    draft (TIER3_BLOCK1.md)."""
+    want = [normalise_label(part) for part in listed.split(">")]
+    have = [normalise_label(part) for part in drafted.split(">")]
+    return len(want) <= len(have) and have[len(have) - len(want) :] == want
+
+
 def _same_cell(entry: InventoryEntry, cell: DraftedCellRef, *, method: bool = True) -> bool:
     if (entry.pdf_page, entry.scope) != (cell.pdf_page, cell.scope):
         return False
@@ -390,7 +405,7 @@ def _same_cell(entry: InventoryEntry, cell: DraftedCellRef, *, method: bool = Tr
     if entry.column_header == NO_YEAR_COLUMN:
         if cell_year(cell.column_header) is not None:
             return False
-    elif normalise_label(entry.column_header) != normalise_label(cell.column_header):
+    elif not header_matches(entry.column_header, cell.column_header):
         return False
     if entry.paired_draft_label is not None:
         return cell.drafted_row_label == entry.paired_draft_label
@@ -491,6 +506,7 @@ __all__ = [
     "VerificationPlan",
     "VerificationUpdate",
     "WorksheetEntry",
+    "header_matches",
     "inventory_digest",
     "match_cells",
     "normalise_label",

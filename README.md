@@ -495,9 +495,11 @@ are 2026.
 
 #### Verified peer figures
 
-[`data/peer_disclosures_verified.json`](data/peer_disclosures_verified.json) holds **87
-emissions figures from 5 reports** (DBS, OCBC, UOB, CapitaLand Ascendas REIT's ESG data
-pack, Sembcorp), one per table cell, for each report's own period. Each was drafted by a vision
+[`data/peer_disclosures_verified.json`](data/peer_disclosures_verified.json) holds **170
+emissions figures from 11 reports of ten companies**
+(DBS, OCBC, UOB, CapitaLand Ascendas REIT's ESG data pack, Sembcorp, Mapletree Logistics
+Trust, Mapletree Pan Asia Commercial Trust, Keppel, ST Engineering, Seatrium's report and
+databook), one per table cell, for each report's own period. Each was drafted by a vision
 model (`gpt-5.5-2026-04-23`) from an image of the cited page, then **checked by the author
 against that page** on the date the row gives. They are figures **as self-reported by each
 company**, under its own boundary and period: **not independently assured**, by Carbon R or
@@ -505,23 +507,31 @@ by anyone it can vouch for, and not comparable like-for-like across companies.
 
 Every row carries its citation (report, PDF page, printed page where known, the row label and
 column header as printed), who checked it and when, and what the model originally read,
-labelled `draft`. Of the 87, **85 were correct as drafted and 2 were corrected**: a footnote
-marker in a row label (DBS), and a method the page does not state (OCBC's total, drafted as
-market-based, verified as method not stated). Every figure was read correctly. In seeded
-blind samples the author's own readings, made before seeing the draft, matched it **18 of
-18** (12 for the first three reports, 6 for OCBC and UOB).
+labelled `draft`. Of the 170, **167 were correct as drafted and 3 were corrected**, none of
+them in the figure: a footnote marker in a row label (DBS), a method the page does not state
+(OCBC's total, drafted as market-based, verified as method not stated), and a misspelt row
+label the drafter had silently corrected (Seatrium's databook, restored as printed). Every
+figure was read correctly. In seeded blind samples the author's own readings, made before
+seeing the draft, matched it **33 of 34**: 18 of 18 for the first five reports, 15 of 16 for
+the next six. In the one mismatch the author's blind reading came from the neighbouring
+location-based row; the draft was right.
 
-For OCBC and UOB, coverage was measured too. Before drafting, the author listed every
-report-year cell on their table pages (a list Claude drafted from the author's screenshots
-and the author checked, so not independent of a model). Of **29 listed cells, the drafter
-skipped 0**: 22 matched exactly, 6 matched under different wording (paired by hand), and 1
-differed only in method. Coverage was not measured for the first three reports. Footnotes on
-OCBC and UOB figures were not reviewed, so boundary, period or method caveats printed in
-footnotes are not captured in their notes. Details in
-[TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
+Coverage was measured for eight of the reports. Before drafting, the author listed every
+report-year cell on their table pages. For OCBC and UOB, the list was drafted by Claude from
+the author's screenshots and checked by the author, so it is not independent of a model; for
+the next six reports the author listed the cells from the PDFs. Of **29 listed cells for
+OCBC and UOB, the drafter skipped 0**.
+Of **83 for the next six reports, every cell was read**; the matcher counts 1 as skipped,
+a cell the drafter read under a corrected spelling. Two matching fixes made after drafting
+are part of that count (both recorded in [TIER3_BLOCK1.md](docs/blocks/TIER3_BLOCK1.md)). Coverage was not measured for the first three
+reports. Footnotes on figures were not reviewed, so boundary, period, method or estimate
+caveats printed in footnotes are not captured in the notes: ST Engineering's footnote that
+the last three months of 2025 are estimates is one. Details in
+[TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md) and
+[TIER3_BLOCK1.md](docs/blocks/TIER3_BLOCK1.md).
 
 ```bash
-make seed-peer   # load the 87 rows into peer_disclosures (idempotent; no reports needed)
+make seed-peer   # load the 170 rows into peer_disclosures (idempotent; no reports needed)
 ```
 
 Drafting and checking more pages needs the reports locally:
@@ -661,10 +671,10 @@ Stated plainly, because they bound what any number here means:
 - All documents processed so far are **synthetic**. None are real customer documents.
 - Emission estimates produced here are **not assured** by any third party.
 - **Peer search returns prose, not figures.** The reports' text layers misread tables, so
-  search never states a number. 87 figures from 5 reports have been verified separately
+  search never states a number. 170 figures from 11 reports have been verified separately
   (see [Verified peer figures](#verified-peer-figures)), as self-reported and not assured;
   the agent states them only through `lookup_peer_disclosure`. Whether drafting misses rows
-  has been measured for OCBC and UOB only. Peer retrieval is measured on 30 questions and
+  has been measured for eight of the eleven reports. Peer retrieval is measured on 30 questions and
   the agent on 8 cases of 3 runs each — small samples, recorded in
   [TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
 - **The audits warn, they do not stop.** A reply that states a number no tool produced,

@@ -81,6 +81,9 @@ def _reading(*cells: DraftedCell) -> PeerTableReading:
         ("2025/26", 2026),
         ("Singapore > 2025", 2025),
         ("Total Portfolio > FY2025", 2025),
+        ("2025\u00b9", 2025),  # a footnote marker on the header (ST Engineering p.37)
+        ("FY2025/26\u00b2\u00b3", 2026),
+        ("2025*", 2025),
         ("2025 vs 2024", None),
         ("2019-2025", None),  # a range is two years, not a split year
         ("% change", None),

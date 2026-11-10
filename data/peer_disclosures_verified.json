@@ -1686,6 +1686,1616 @@
         "author_value": null,
         "in_sample": false
       },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2,789",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Business travel"
+      },
+      "figure": "2789",
+      "figure_printed": "2,789",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Business travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "57,897",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Capital goods"
+      },
+      "figure": "57897",
+      "figure_printed": "57,897",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Capital goods",
+      "scope": "3",
+      "scope3_category": 2,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "107,492",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Downstream leased assets"
+      },
+      "figure": "107492",
+      "figure_printed": "107,492",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Downstream leased assets",
+      "scope": "3",
+      "scope3_category": 13,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "3,730",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Employee commuting"
+      },
+      "figure": "3730",
+      "figure_printed": "3,730",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Employee commuting",
+      "scope": "3",
+      "scope3_category": 7,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2,059",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "End-of-life treatment of sold products"
+      },
+      "figure": "2059",
+      "figure_printed": "2,059",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "End-of-life treatment of sold products",
+      "scope": "3",
+      "scope3_category": 12,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "60,253",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Fuel- and energy-related activities"
+      },
+      "figure": "60253",
+      "figure_printed": "60,253",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Fuel- and energy-related activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "388,884",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Investments"
+      },
+      "figure": "388884",
+      "figure_printed": "388,884",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Investments",
+      "scope": "3",
+      "scope3_category": 15,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "904,481",
+        "in_sample": true
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "904,481",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Purchased goods and services"
+      },
+      "figure": "904481",
+      "figure_printed": "904,481",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Purchased goods and services",
+      "scope": "3",
+      "scope3_category": 1,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,229",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Scope 1 (Direct) Emissions"
+      },
+      "figure": "1229",
+      "figure_printed": "1,229",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'a'",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Scope 1 (Direct) Emissions",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "20,083",
+        "method": "market",
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Scope 2 (Indirect) Emissions"
+      },
+      "figure": "20083",
+      "figure_printed": "20,083",
+      "method": "market",
+      "notes": "method stated as: 'the figure reported here uses a market-based method'; footnote marker(s) printed: 'b'",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Scope 2 (Indirect) Emissions",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "6,705,927",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Total"
+      },
+      "figure": "6705927",
+      "figure_printed": "6,705,927",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Total",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "21,312",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "21,312",
+        "method": "market",
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Total Scope 1 and Scope 2 Emissions"
+      },
+      "figure": "21312",
+      "figure_printed": "21,312",
+      "method": "market",
+      "notes": "method stated as: 'the figure reported here uses a market-based method'",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Total Scope 1 and Scope 2 Emissions",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,113",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Upstream leased assets"
+      },
+      "figure": "1113",
+      "figure_printed": "1,113",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Upstream leased assets",
+      "scope": "3",
+      "scope3_category": 8,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "21,241",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Upstream transportation and distribution"
+      },
+      "figure": "21241",
+      "figure_printed": "21,241",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Upstream transportation and distribution",
+      "scope": "3",
+      "scope3_category": 4,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "5,153,205",
+        "in_sample": true
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "5,153,205",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Use of sold products"
+      },
+      "figure": "5153205",
+      "figure_printed": "5,153,205",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Use of sold products",
+      "scope": "3",
+      "scope3_category": 11,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "Emissions (tCO₂e)",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:00+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2,783",
+        "method": null,
+        "page_image_sha256": "731ac4fdf00baee12a1560629947385c0120fef23617a8a22ac4005e1bc07aa8",
+        "row_label": "Waste generated in operations"
+      },
+      "figure": "2783",
+      "figure_printed": "2,783",
+      "method": null,
+      "notes": "no year column printed: year 2025 declared by the author for this page",
+      "pdf_page": 45,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 46,
+      "row_label": "Waste generated in operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:27+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,229",
+        "method": null,
+        "page_image_sha256": "0c37d785a24b965ada8518a6ab3d3985c6e74aa720e9e9a7ec8236509e240c8e",
+        "row_label": "Direct (Scope 1) GHG emissions (tCO₂e)"
+      },
+      "figure": "1229",
+      "figure_printed": "1,229",
+      "method": null,
+      "notes": null,
+      "pdf_page": 50,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 51,
+      "row_label": "Direct (Scope 1) GHG emissions (tCO₂e)",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "20,083",
+        "in_sample": true
+      },
+      "column_header": "2025",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:27+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "20,083",
+        "method": "market",
+        "page_image_sha256": "0c37d785a24b965ada8518a6ab3d3985c6e74aa720e9e9a7ec8236509e240c8e",
+        "row_label": "Indirect (Scope 2) GHG emissionsᵇ (tCO₂e)"
+      },
+      "figure": "20083",
+      "figure_printed": "20,083",
+      "method": "market",
+      "notes": "method stated as: 'using the market-based method'; footnote marker(s) printed: 'b'",
+      "pdf_page": 50,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 51,
+      "row_label": "Indirect (Scope 2) GHG emissionsᵇ (tCO₂e)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:27+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "6,705,927",
+        "method": null,
+        "page_image_sha256": "0c37d785a24b965ada8518a6ab3d3985c6e74aa720e9e9a7ec8236509e240c8e",
+        "row_label": "Other indirect (Scope 3) emissions (tCO₂e)"
+      },
+      "figure": "6705927",
+      "figure_printed": "6,705,927",
+      "method": null,
+      "notes": null,
+      "pdf_page": 50,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 51,
+      "row_label": "Other indirect (Scope 3) emissions (tCO₂e)",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025",
+      "company": "Keppel",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:46:27+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "21,312",
+        "method": null,
+        "page_image_sha256": "0c37d785a24b965ada8518a6ab3d3985c6e74aa720e9e9a7ec8236509e240c8e",
+        "row_label": "Total Scope 1 and Scope 2 GHG emissionsᵃ"
+      },
+      "figure": "21312",
+      "figure_printed": "21,312",
+      "method": null,
+      "notes": "footnote marker(s) printed: 'a'",
+      "pdf_page": 50,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 51,
+      "row_label": "Total Scope 1 and Scope 2 GHG emissionsᵃ",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_keppel_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:00.136429+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Logistics Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:43:58+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,099",
+        "method": null,
+        "page_image_sha256": "d4291a5c0960796e770a9e9f12792db55d091eb6ffc08a528da23b78f032e327",
+        "row_label": "Scope 1"
+      },
+      "figure": "1099",
+      "figure_printed": "1,099",
+      "method": null,
+      "notes": null,
+      "pdf_page": 46,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": 45,
+      "row_label": "Scope 1",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_mlt_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:55.177811+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Logistics Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:43:58+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "9,191",
+        "method": "location",
+        "page_image_sha256": "d4291a5c0960796e770a9e9f12792db55d091eb6ffc08a528da23b78f032e327",
+        "row_label": "Scope 2 (Location-Based)"
+      },
+      "figure": "9191",
+      "figure_printed": "9,191",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 (Location-Based)'",
+      "pdf_page": 46,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": 45,
+      "row_label": "Scope 2 (Location-Based)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mlt_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:55.177811+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Logistics Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:43:58+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4,589",
+        "method": "market",
+        "page_image_sha256": "d4291a5c0960796e770a9e9f12792db55d091eb6ffc08a528da23b78f032e327",
+        "row_label": "Scope 2 (Market-Based)"
+      },
+      "figure": "4589",
+      "figure_printed": "4,589",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 (Market-Based)'",
+      "pdf_page": 46,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": 45,
+      "row_label": "Scope 2 (Market-Based)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mlt_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:55.177811+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Logistics Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:43:58+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "22,441",
+        "method": null,
+        "page_image_sha256": "d4291a5c0960796e770a9e9f12792db55d091eb6ffc08a528da23b78f032e327",
+        "row_label": "Scope 3 Category 1"
+      },
+      "figure": "22441",
+      "figure_printed": "22,441",
+      "method": null,
+      "notes": null,
+      "pdf_page": 46,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": 45,
+      "row_label": "Scope 3 Category 1",
+      "scope": "3",
+      "scope3_category": 1,
+      "source_id": "peer_mlt_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:55.177811+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "255,780",
+        "in_sample": true
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Logistics Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:43:58+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "255,780",
+        "method": null,
+        "page_image_sha256": "d4291a5c0960796e770a9e9f12792db55d091eb6ffc08a528da23b78f032e327",
+        "row_label": "Scope 3 Category 13"
+      },
+      "figure": "255780",
+      "figure_printed": "255,780",
+      "method": null,
+      "notes": null,
+      "pdf_page": 46,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": 45,
+      "row_label": "Scope 3 Category 13",
+      "scope": "3",
+      "scope3_category": 13,
+      "source_id": "peer_mlt_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:55.177811+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Logistics Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:43:58+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "86,466",
+        "method": null,
+        "page_image_sha256": "d4291a5c0960796e770a9e9f12792db55d091eb6ffc08a528da23b78f032e327",
+        "row_label": "Scope 3 Category 2"
+      },
+      "figure": "86466",
+      "figure_printed": "86,466",
+      "method": null,
+      "notes": "footnote marker(s) printed: '3'",
+      "pdf_page": 46,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": 45,
+      "row_label": "Scope 3 Category 2",
+      "scope": "3",
+      "scope3_category": 2,
+      "source_id": "peer_mlt_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:55.177811+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Logistics Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:43:58+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,833",
+        "method": null,
+        "page_image_sha256": "d4291a5c0960796e770a9e9f12792db55d091eb6ffc08a528da23b78f032e327",
+        "row_label": "Scope 3 Category 5"
+      },
+      "figure": "1833",
+      "figure_printed": "1,833",
+      "method": null,
+      "notes": null,
+      "pdf_page": 46,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": 45,
+      "row_label": "Scope 3 Category 5",
+      "scope": "3",
+      "scope3_category": 5,
+      "source_id": "peer_mlt_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:55.177811+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:19+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "5.1",
+        "method": null,
+        "page_image_sha256": "1d35905f4eb779a75b32b4f159978ef8154834287cfd6960144b7f85a2c543c4",
+        "row_label": "Scope 1 GHG Emissions > China"
+      },
+      "figure": "5.1",
+      "figure_printed": "5.1",
+      "method": null,
+      "notes": null,
+      "pdf_page": 34,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 1 GHG Emissions > China",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:19+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "11.0",
+        "method": null,
+        "page_image_sha256": "1d35905f4eb779a75b32b4f159978ef8154834287cfd6960144b7f85a2c543c4",
+        "row_label": "Scope 1 GHG Emissions > Hong Kong"
+      },
+      "figure": "11.0",
+      "figure_printed": "11.0",
+      "method": null,
+      "notes": null,
+      "pdf_page": 34,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 1 GHG Emissions > Hong Kong",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:19+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "16.1",
+        "method": null,
+        "page_image_sha256": "1d35905f4eb779a75b32b4f159978ef8154834287cfd6960144b7f85a2c543c4",
+        "row_label": "Scope 1 GHG Emissions > Japan"
+      },
+      "figure": "16.1",
+      "figure_printed": "16.1",
+      "method": null,
+      "notes": null,
+      "pdf_page": 34,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 1 GHG Emissions > Japan",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:19+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "14.7",
+        "method": null,
+        "page_image_sha256": "1d35905f4eb779a75b32b4f159978ef8154834287cfd6960144b7f85a2c543c4",
+        "row_label": "Scope 1 GHG Emissions > Singapore"
+      },
+      "figure": "14.7",
+      "figure_printed": "14.7",
+      "method": null,
+      "notes": null,
+      "pdf_page": 34,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 1 GHG Emissions > Singapore",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:19+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "675.1",
+        "method": null,
+        "page_image_sha256": "1d35905f4eb779a75b32b4f159978ef8154834287cfd6960144b7f85a2c543c4",
+        "row_label": "Scope 1 GHG Emissions > South Korea"
+      },
+      "figure": "675.1",
+      "figure_printed": "675.1",
+      "method": null,
+      "notes": null,
+      "pdf_page": 34,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 1 GHG Emissions > South Korea",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "20,404",
+        "method": null,
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Category 1"
+      },
+      "figure": "20404",
+      "figure_printed": "20,404",
+      "method": null,
+      "notes": null,
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Category 1",
+      "scope": "3",
+      "scope3_category": 1,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "59,201",
+        "method": null,
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Category 13"
+      },
+      "figure": "59201",
+      "figure_printed": "59,201",
+      "method": null,
+      "notes": null,
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Category 13",
+      "scope": "3",
+      "scope3_category": 13,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "12,590",
+        "in_sample": true
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "12,590",
+        "method": null,
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Category 2"
+      },
+      "figure": "12590",
+      "figure_printed": "12,590",
+      "method": null,
+      "notes": null,
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Category 2",
+      "scope": "3",
+      "scope3_category": 2,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,544",
+        "method": null,
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Category 5"
+      },
+      "figure": "1544",
+      "figure_printed": "1,544",
+      "method": null,
+      "notes": null,
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Category 5",
+      "scope": "3",
+      "scope3_category": 5,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "9,171",
+        "method": "location",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Location-based) > China"
+      },
+      "figure": "9171",
+      "figure_printed": "9,171",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Location-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Location-based) > China",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "6,099",
+        "method": "location",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Location-based) > Hong Kong"
+      },
+      "figure": "6099",
+      "figure_printed": "6,099",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Location-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Location-based) > Hong Kong",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "4,583",
+        "in_sample": true
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4,583",
+        "method": "location",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Location-based) > Japan"
+      },
+      "figure": "4583",
+      "figure_printed": "4,583",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Location-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Location-based) > Japan",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "21,954",
+        "method": "location",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Location-based) > Singapore"
+      },
+      "figure": "21954",
+      "figure_printed": "21,954",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Location-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Location-based) > Singapore",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,560",
+        "method": "location",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Location-based) > South Korea"
+      },
+      "figure": "1560",
+      "figure_printed": "1,560",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Location-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Location-based) > South Korea",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "9,171",
+        "in_sample": true
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "7,412",
+        "method": "market",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Market-based) > China"
+      },
+      "figure": "7412",
+      "figure_printed": "7,412",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Market-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Market-based) > China",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "6,099",
+        "method": "market",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Market-based) > Hong Kong"
+      },
+      "figure": "6099",
+      "figure_printed": "6,099",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Market-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Market-based) > Hong Kong",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "878",
+        "method": "market",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Market-based) > Japan"
+      },
+      "figure": "878",
+      "figure_printed": "878",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Market-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Market-based) > Japan",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "21,954",
+        "in_sample": true
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "21,954",
+        "method": "market",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Market-based) > Singapore"
+      },
+      "figure": "21954",
+      "figure_printed": "21,954",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Market-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Market-based) > Singapore",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY25/26",
+      "company": "Mapletree Pan Asia Commercial Trust",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:44:53+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,560",
+        "method": "market",
+        "page_image_sha256": "26387d888bd9db9e904136ae499cdd470baffe37a6eaa8e809a8a297b8af95c0",
+        "row_label": "Scope 2 GHG Emissions (Market-based) > South Korea"
+      },
+      "figure": "1560",
+      "figure_printed": "1,560",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 GHG Emissions (Market-based)'",
+      "pdf_page": 35,
+      "period_end": "2026-03-31",
+      "period_start": "2025-04-01",
+      "printed_page": null,
+      "row_label": "Scope 2 GHG Emissions (Market-based) > South Korea",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_mpact_2026",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:26:57.223303+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
       "column_header": "2025",
       "company": "OCBC",
       "draft": {
@@ -1853,6 +3463,1056 @@
       "verification": {
         "outcome": "corrected",
         "verified_at": "2026-11-01T17:28:49.750610+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 1 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10,996",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Brazil"
+      },
+      "figure": "10996",
+      "figure_printed": "10,996",
+      "method": null,
+      "notes": "footnote marker(s) printed: '6'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Brazil",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 2 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "27",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Brazil"
+      },
+      "figure": "27",
+      "figure_printed": "27",
+      "method": null,
+      "notes": "footnote marker(s) printed: '7,8'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Brazil",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 1 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,265",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "China"
+      },
+      "figure": "1265",
+      "figure_printed": "1,265",
+      "method": null,
+      "notes": "footnote marker(s) printed: '6'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "China",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "9,429",
+        "in_sample": true
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 2 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "9,429",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "China"
+      },
+      "figure": "9429",
+      "figure_printed": "9,429",
+      "method": null,
+      "notes": "footnote marker(s) printed: '7,8'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "China",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 1 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "4,882",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Indonesia"
+      },
+      "figure": "4882",
+      "figure_printed": "4,882",
+      "method": null,
+      "notes": "footnote marker(s) printed: '6'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Indonesia",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 2 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "5,907",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Indonesia"
+      },
+      "figure": "5907",
+      "figure_printed": "5,907",
+      "method": null,
+      "notes": "footnote marker(s) printed: '7,8'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Indonesia",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 1 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "898",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Philippines"
+      },
+      "figure": "898",
+      "figure_printed": "898",
+      "method": null,
+      "notes": "footnote marker(s) printed: '6'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Philippines",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "5,821",
+        "in_sample": true
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 2 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "5,821",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Philippines"
+      },
+      "figure": "5821",
+      "figure_printed": "5,821",
+      "method": null,
+      "notes": "footnote marker(s) printed: '7,8'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Philippines",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "1,134",
+        "in_sample": true
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 1 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,134",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Rest of the World"
+      },
+      "figure": "1134",
+      "figure_printed": "1,134",
+      "method": null,
+      "notes": "footnote marker(s) printed: '3,6'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Rest of the World",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 2 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "2,969",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Rest of the World"
+      },
+      "figure": "2969",
+      "figure_printed": "2,969",
+      "method": null,
+      "notes": "footnote marker(s) printed: '3,7,8'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Rest of the World",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 1 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "63,321",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Singapore"
+      },
+      "figure": "63321",
+      "figure_printed": "63,321",
+      "method": null,
+      "notes": "footnote marker(s) printed: '6'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Singapore",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 2 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "72,397",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Singapore"
+      },
+      "figure": "72397",
+      "figure_printed": "72,397",
+      "method": null,
+      "notes": "footnote marker(s) printed: '7,8'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Singapore",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 1 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "82,496",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Total"
+      },
+      "figure": "82496",
+      "figure_printed": "82,496",
+      "method": null,
+      "notes": "footnote marker(s) printed: '6'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Total",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "SCOPE 1 & 2 > Scope 2 > 2025*",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:46+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "96,550",
+        "method": null,
+        "page_image_sha256": "04341a4c9aa7a752ce8de7312b1773e76a39c1f4fab987f22034fc9f303cf13c",
+        "row_label": "Total"
+      },
+      "figure": "96550",
+      "figure_printed": "96,550",
+      "method": null,
+      "notes": "footnote marker(s) printed: '7,8'",
+      "pdf_page": 70,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 68,
+      "row_label": "Total",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025",
+      "unit": "tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:05.258671+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "425,050",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Category 1: Purchased goods and services"
+      },
+      "figure": "425050",
+      "figure_printed": "425,050",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 1: Purchased goods and services",
+      "scope": "3",
+      "scope3_category": 1,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "14,522",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Category 2: Capital Goods"
+      },
+      "figure": "14522",
+      "figure_printed": "14,522",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 2: Capital Goods",
+      "scope": "3",
+      "scope3_category": 2,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "80,137",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Category 3: Fuel and Energy-related Activities"
+      },
+      "figure": "80137",
+      "figure_printed": "80,137",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 3: Fuel and Energy-related Activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "34,004",
+        "in_sample": true
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "34,004",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Category 4: Upstream Transportation and Distribution"
+      },
+      "figure": "34004",
+      "figure_printed": "34,004",
+      "method": null,
+      "notes": "verified (corrected): Label as printed (the page misspells 'Transporation'); the drafter corrected the spelling.",
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 4: Upstream Transporation and Distribution",
+      "scope": "3",
+      "scope3_category": 4,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "corrected",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "6,568",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Category 5: Waste generated in operations"
+      },
+      "figure": "6568",
+      "figure_printed": "6,568",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 5: Waste generated in operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10,939",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Category 6: Business Travel"
+      },
+      "figure": "10939",
+      "figure_printed": "10,939",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 6: Business Travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "1,043",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Category 7: Employee commuting"
+      },
+      "figure": "1043",
+      "figure_printed": "1,043",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 7: Employee commuting",
+      "scope": "3",
+      "scope3_category": 7,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "127,458",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Category 9: Downstream Transportation and Distribution"
+      },
+      "figure": "127458",
+      "figure_printed": "127,458",
+      "method": null,
+      "notes": "footnote marker(s) printed: '4'",
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Category 9: Downstream Transportation and Distribution",
+      "scope": "3",
+      "scope3_category": 9,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "223",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Emissions attributed to I-RECs redeemed for Singapore Operations"
+      },
+      "figure": "223",
+      "figure_printed": "223",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Emissions attributed to I-RECs redeemed for Singapore Operations",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "181,084",
+        "method": "location",
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Gross Scope 1 & Scope 2 location-based GHG emissions"
+      },
+      "figure": "181084",
+      "figure_printed": "181,084",
+      "method": "location",
+      "notes": "method stated as: 'Gross Scope 1 & Scope 2 location-based GHG emissions'; footnote marker(s) printed: '*'",
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Gross Scope 1 & Scope 2 location-based GHG emissions",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "179,046",
+        "in_sample": true
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "179,046",
+        "method": "market",
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Gross Scope 1 & Scope 2 market-based GHG emissions"
+      },
+      "figure": "179046",
+      "figure_printed": "179,046",
+      "method": "market",
+      "notes": "method stated as: 'Gross Scope 1 & Scope 2 market-based GHG emissions'; footnote marker(s) printed: '*'",
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Gross Scope 1 & Scope 2 market-based GHG emissions",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "82,496",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Gross direct (Scope 1) GHG emissions"
+      },
+      "figure": "82496",
+      "figure_printed": "82,496",
+      "method": null,
+      "notes": "footnote marker(s) printed: '*'",
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Gross direct (Scope 1) GHG emissions",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "98,588",
+        "method": "location",
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Gross location-based energy indirect (Scope 2) GHG emissions"
+      },
+      "figure": "98588",
+      "figure_printed": "98,588",
+      "method": "location",
+      "notes": "method stated as: 'Gross location-based energy indirect (Scope 2) GHG emissions'; footnote marker(s) printed: '*'",
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Gross location-based energy indirect (Scope 2) GHG emissions",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "96,550",
+        "method": "market",
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Gross market-based energy indirect (Scope 2) GHG emissions"
+      },
+      "figure": "96550",
+      "figure_printed": "96,550",
+      "method": "market",
+      "notes": "method stated as: 'Gross market-based energy indirect (Scope 2) GHG emissions'; footnote marker(s) printed: '*'",
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Gross market-based energy indirect (Scope 2) GHG emissions",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "699,721",
+        "in_sample": true
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "699,721",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Gross other indirect (Scope 3) GHG emissions"
+      },
+      "figure": "699721",
+      "figure_printed": "699,721",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Gross other indirect (Scope 3) GHG emissions",
+      "scope": "3",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "FY2025",
+      "company": "Seatrium",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:48:39+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "178,823",
+        "method": null,
+        "page_image_sha256": "4476ebb13715964041c0639023954cb6a15b5e09528a4362c3e9d7c5fd0529b0",
+        "row_label": "Net Scope 1 & Scope 2 GHG emissions"
+      },
+      "figure": "178823",
+      "figure_printed": "178,823",
+      "method": null,
+      "notes": null,
+      "pdf_page": 13,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Net Scope 1 & Scope 2 GHG emissions",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_seatrium_2025_databook",
+      "unit": "metric tons of CO₂ equivalent",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:07.794782+00:00",
         "verified_by": "Lin Xiang Hong"
       }
     },
@@ -2203,6 +4863,251 @@
       "verification": {
         "outcome": "confirmed",
         "verified_at": "2026-10-29T10:15:35.960714+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025¹",
+      "company": "ST Engineering",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:02+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "10",
+        "method": null,
+        "page_image_sha256": "e059140a63bc32f365c093bdb8a9f879d0d5c0742b8339c1556dc5278685fa3a",
+        "row_label": "Category 5: Waste Generated in Operations"
+      },
+      "figure": "10",
+      "figure_printed": "10",
+      "method": null,
+      "notes": null,
+      "pdf_page": 37,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 37,
+      "row_label": "Category 5: Waste Generated in Operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "source_id": "peer_stengg_2025",
+      "unit": "'000 tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:03.196055+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025¹",
+      "company": "ST Engineering",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:02+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "16",
+        "method": null,
+        "page_image_sha256": "e059140a63bc32f365c093bdb8a9f879d0d5c0742b8339c1556dc5278685fa3a",
+        "row_label": "Category 6: Business Travel"
+      },
+      "figure": "16",
+      "figure_printed": "16",
+      "method": null,
+      "notes": "footnote marker(s) printed: '3'",
+      "pdf_page": 37,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 37,
+      "row_label": "Category 6: Business Travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "source_id": "peer_stengg_2025",
+      "unit": "'000 tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:03.196055+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025¹",
+      "company": "ST Engineering",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:02+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "26",
+        "method": null,
+        "page_image_sha256": "e059140a63bc32f365c093bdb8a9f879d0d5c0742b8339c1556dc5278685fa3a",
+        "row_label": "Category 7: Employee Commuting"
+      },
+      "figure": "26",
+      "figure_printed": "26",
+      "method": null,
+      "notes": null,
+      "pdf_page": 37,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 37,
+      "row_label": "Category 7: Employee Commuting",
+      "scope": "3",
+      "scope3_category": 7,
+      "source_id": "peer_stengg_2025",
+      "unit": "'000 tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:03.196055+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025¹",
+      "company": "ST Engineering",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:02+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "48",
+        "method": null,
+        "page_image_sha256": "e059140a63bc32f365c093bdb8a9f879d0d5c0742b8339c1556dc5278685fa3a",
+        "row_label": "Scope 1"
+      },
+      "figure": "48",
+      "figure_printed": "48",
+      "method": null,
+      "notes": null,
+      "pdf_page": 37,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 37,
+      "row_label": "Scope 1",
+      "scope": "1",
+      "scope3_category": null,
+      "source_id": "peer_stengg_2025",
+      "unit": "'000 tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:03.196055+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "118",
+        "in_sample": true
+      },
+      "column_header": "2025¹",
+      "company": "ST Engineering",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:02+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "118",
+        "method": "market",
+        "page_image_sha256": "e059140a63bc32f365c093bdb8a9f879d0d5c0742b8339c1556dc5278685fa3a",
+        "row_label": "Scope 1 and Scope 2 (market-based) Emissions"
+      },
+      "figure": "118",
+      "figure_printed": "118",
+      "method": "market",
+      "notes": "method stated as: 'Scope 1 and Scope 2 (market-based) Emissions'",
+      "pdf_page": 37,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 37,
+      "row_label": "Scope 1 and Scope 2 (market-based) Emissions",
+      "scope": "1+2",
+      "scope3_category": null,
+      "source_id": "peer_stengg_2025",
+      "unit": "'000 tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:03.196055+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025¹",
+      "company": "ST Engineering",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:02+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "83",
+        "method": "location",
+        "page_image_sha256": "e059140a63bc32f365c093bdb8a9f879d0d5c0742b8339c1556dc5278685fa3a",
+        "row_label": "Scope 2 (location-based)"
+      },
+      "figure": "83",
+      "figure_printed": "83",
+      "method": "location",
+      "notes": "method stated as: 'Scope 2 (location-based)'",
+      "pdf_page": 37,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 37,
+      "row_label": "Scope 2 (location-based)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_stengg_2025",
+      "unit": "'000 tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:03.196055+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "column_header": "2025¹",
+      "company": "ST Engineering",
+      "draft": {
+        "draft_request_hash": "fb134cb6",
+        "drafted_at": "2026-11-10T15:47:02+00:00",
+        "drafted_by": "gpt-5.5-2026-04-23",
+        "figure_printed": "70",
+        "method": "market",
+        "page_image_sha256": "e059140a63bc32f365c093bdb8a9f879d0d5c0742b8339c1556dc5278685fa3a",
+        "row_label": "Scope 2 (market-based)"
+      },
+      "figure": "70",
+      "figure_printed": "70",
+      "method": "market",
+      "notes": "method stated as: 'Scope 2 (market-based)'",
+      "pdf_page": 37,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": 37,
+      "row_label": "Scope 2 (market-based)",
+      "scope": "2",
+      "scope3_category": null,
+      "source_id": "peer_stengg_2025",
+      "unit": "'000 tCO₂e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-10T16:27:03.196055+00:00",
         "verified_by": "Lin Xiang Hong"
       }
     },

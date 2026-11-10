@@ -12,6 +12,7 @@ from carbon_r.models.peer_verification import (
     DraftRow,
     InventoryEntry,
     WorksheetEntry,
+    header_matches,
     inventory_digest,
     match_cells,
     normalise_label,
@@ -217,6 +218,16 @@ def test_page_scope_and_column_must_agree_too():
     ):
         result = match_cells([entry], [cell], pages=[5, 6])
         assert result.matched == [] and result.method_differs == []
+
+
+def test_a_listed_year_matches_the_end_of_a_drafted_heading_path():
+    # Seatrium p.70: the drafter wrote the nested header in full, the author listed the year.
+    cell = drafted("Total", header="SCOPE 1 & 2 > Scope 1 > 2025*")
+    for header in ("2025", "2025*", "Scope 1 > 2025", "scope 1 & 2 > scope 1 > 2025"):
+        assert len(match_cells([listed("Total", header=header)], [cell], [5]).matched) == 1
+    for header in ("2024", "Scope 2 > 2025", "Group > SCOPE 1 & 2 > Scope 1 > 2025"):
+        assert match_cells([listed("Total", header=header)], [cell], [5]).matched == []
+    assert header_matches("2025", "2025\u00b9")  # ST Engineering p.37's footnote marker
 
 
 def test_one_drafted_cell_pairs_with_only_one_listed_cell():
