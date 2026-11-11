@@ -408,22 +408,42 @@ reply still reaches the user today. Details and the automatic scoring are in
 
 ### Peer table extraction by representation (eval 5a)
 
-The same extractor model read the 9 verified table pages from 5 reports three ways, scored
-against the 87 rows verified at the time, one run. It has not been re-run on the 83 rows
-verified since, so it says nothing yet about those reports. Rows read by code from an
+The same extractor model (`gpt-5.4-mini`, never the drafter) reads each verified table page
+three ways, and the reading is scored against the verified rows. Rows read by code from an
 issuer's workbook (FLCT, CICT) are never eval rows: the eval measures extraction from PDF
-pages, and the script excludes and counts any row without a page:
+pages, and the script excludes and counts any row without a page (53 in the second run).
 
-| Of 87 rows | Page image | `pdftotext -layout` | pdfplumber |
+Two runs. The first scored the 87 rows verified at the time (9 pages, 5 reports). The second,
+`peer_extraction_20261111T155045Z` on a clean tree at `ab096bb`, scored all 170 PDF rows
+(17 pages, 11 reports). Its replies for the first 9 pages came from the cache, so its 87-row
+line repeats the first run exactly; it is a replay, not a second measurement. The 83 rows
+verified since are the new measurement (8 pages, 24 model calls).
+
+| Rows identified (the reading still says which row) | Page image | `pdftotext -layout` | pdfplumber |
 |---|---|---|---|
-| Present, label and header matched | 78 | 45 | 15 |
-| Present, matched by figure | 82 | 75 | 25 |
-| Identified (the reading still says which row) | 82 | 60 | 25 |
+| First run, 87 rows | 82 | 60 | 25 |
+| Second run, the same 87 rows (replayed from cache) | 82 | 60 | 25 |
+| Second run, the 83 new rows | 59 | 67 | 23 |
+| Second run, all 170 rows | 141 | 127 | 48 |
 
-Every figure returned was exactly as printed, in every arm, with no footnote marker fused
-onto one. The text layer's cost is table structure, not digits. The key's labels began as
+| The 83 new rows | Page image | `pdftotext -layout` | pdfplumber |
+|---|---|---|---|
+| Present, label and header matched | 48 | 41 | 22 |
+| Present, matched by figure | 59 | 81 | 26 |
+| Not present either way | 24 | 2 | 57 |
+
+In both runs every figure returned was exactly as printed, in every arm, with no footnote
+marker fused onto one. The text layer's cost is table structure, not digits.
+
+**On the 83 new rows the page image did not lead.** Its misses come from two pages, where
+the extractor chose to read totals only. On Keppel p.45 it read the Scope 3 total and not
+the categories, and said why in its notes: it took the instruction to ask for totals. On
+Seatrium p.70 it read the two Total rows and none of the six countries. On the other six
+new pages it found all 53 rows by figure, and `pdftotext -layout` found 51. So the gap is
+which rows the model chose to read, not how well it read the image. The instruction was
+not changed in response, which would have tuned it on the eval. The key's labels began as
 image drafts by a different model, which favours the image arm under label matching; the
-by-figure scoring removes that, and the image arm still leads.
+by-figure line removes that.
 
 ### What CI runs, and what it does not
 

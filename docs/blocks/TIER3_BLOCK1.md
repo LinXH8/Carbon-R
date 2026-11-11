@@ -274,6 +274,43 @@ The lookup's disclosure text said every figure was drafted by a model from a pag
 which was no longer true. It now names both routes, and the instruction to state the page
 says "page (or sheet and cell)".
 
+## Eval 5a, re-run on every verified PDF row
+
+Run `peer_extraction_20261111T155045Z`, clean tree at `ab096bb`, extractor
+`gpt-5.4-mini-2026-03-17`, labels drafted by `gpt-5.5-2026-04-23`. 17 pages, 170 PDF rows;
+the 53 workbook rows were excluded and counted by the script. The 9 pages of the first run
+came from the reply cache, so the 87-row line repeats the recorded run exactly (image 82,
+layout 60, pdfplumber 25 identified). It is a replay, not a second measurement. The 8 new
+pages took 24 model calls.
+
+| The 83 new rows | Image | Layout | pdfplumber |
+|---|---|---|---|
+| Present, label and header matched | 48 | 41 | 22 |
+| Present by figure | 59 | 81 | 26 |
+| By figure only: cosmetic / substantive | 11 / 0 | 26 / 14 | 1 / 3 |
+| Identified (strict + cosmetic) | 59 | 67 | 23 |
+| Not present either way | 24 | 2 | 57 |
+
+Every figure returned was exactly as printed, with no marker fused on, in every arm.
+
+**The image arm's misses are row selection, not reading.** They come from two pages:
+
+| Page | Image, present by figure | Layout, present by figure |
+|---|---|---|
+| `peer_keppel_2025` p.45 | 4 of 16 | 16 of 16 |
+| `peer_seatrium_2025` p.70 | 2 of 14 | 14 of 14 |
+
+The cached image readings show why:
+- **Keppel p.45:** the extractor read the Scope 1 and 2 table and only the Scope 3 total.
+  Its notes say it took the instruction to ask for the totals the page prints, not the
+  category breakdown.
+- **Seatrium p.70:** it read the two Total rows and none of the countries.
+
+On the other six new pages the image arm found 53 of 53 by figure and layout 51 of 53. The
+drafter, `gpt-5.5`, read every row of both pages from the same instruction. The
+instruction was not changed after this result: a change made now would be tuned on the
+eval, and the next measurement would not be independent.
+
 ## Known limits
 
 - **Footnotes were not reviewed**, as for OCBC and UOB. ST Engineering's footnote 1 says the

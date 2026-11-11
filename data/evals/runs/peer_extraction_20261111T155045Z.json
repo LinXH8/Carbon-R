@@ -1,0 +1,2808 @@
+{
+  "git": {
+    "commit": "ab096bbddd161fced6e8db9594a175425bcb5a1b",
+    "dirty": false
+  },
+  "model": "gpt-5.4-mini-2026-03-17",
+  "labels_drafted_by": [
+    "gpt-5.5-2026-04-23"
+  ],
+  "workbook_rows_excluded": 53,
+  "dpi": 200,
+  "detail": "original",
+  "pdfplumber_version": "0.11.10",
+  "pdftotext": "pdftotext version 26.10.0",
+  "instruction_sha256": {
+    "vision": "b0c9f850bb86c93c13517ab1c3a4f08d6086d640a0b77ee5c4eedd456a7c2aa2",
+    "layout": "431455f752ff5512f100dfb4ad62499b473feb40ec59e76e8b2628095fbdc2e8",
+    "pdfplumber": "fda76ceb51c5a15db63047f0dcb587d64f9b3e0ac205aaf4415652f8ba9b6ca9"
+  },
+  "model_calls": 24,
+  "usage_tokens": {
+    "input_tokens": 187834,
+    "output_tokens": 95668,
+    "total_tokens": 283502
+  },
+  "arms": {
+    "vision": {
+      "total": {
+        "verified": 170,
+        "matched_exactly": 123,
+        "method_differs": 3,
+        "missed": 44,
+        "missed_read_under_another_year": 0,
+        "extra_kept": 21,
+        "extra_dropped": 8,
+        "present": 126,
+        "figure_exact": 126,
+        "figure_fused_marker": 0,
+        "unit_exact": 112,
+        "method_exact": 123,
+        "by_figure_present": 141,
+        "by_figure_only": 15,
+        "by_figure_only_cosmetic": 15,
+        "by_figure_only_substantive": 0,
+        "by_figure_missed_wrong_year": 0
+      },
+      "pages_no_table_found": 0,
+      "pages": [
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 7,
+          "from_cache": true,
+          "verified": 8,
+          "matched_exactly": 8,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 8,
+          "figure_exact": 8,
+          "figure_fused_marker": 0,
+          "unit_exact": 8,
+          "method_exact": 8,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 8,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 8,
+          "from_cache": true,
+          "verified": 7,
+          "matched_exactly": 7,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 7,
+          "figure_exact": 7,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 7,
+          "dropped_by_rule": {
+            "unit_not_ghg": 7
+          },
+          "missed_rows": [],
+          "by_figure_present": 7,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 20,
+          "from_cache": true,
+          "verified": 15,
+          "matched_exactly": 15,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 15,
+          "figure_exact": 15,
+          "figure_fused_marker": 0,
+          "unit_exact": 15,
+          "method_exact": 15,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 15,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_dbs_2025",
+          "pdf_page": 79,
+          "from_cache": true,
+          "verified": 18,
+          "matched_exactly": 9,
+          "method_differs": 0,
+          "missed": 9,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 4,
+          "extra_dropped": 0,
+          "present": 9,
+          "figure_exact": 9,
+          "figure_fused_marker": 0,
+          "unit_exact": 9,
+          "method_exact": 9,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "a) Total scope 1\u2079",
+            "Backup generators",
+            "Owned vehicle transport",
+            "Refrigerants and fire retardants",
+            "b(i) Total scope 2 (location-based)\u00b9\u00b9",
+            "b(ii) Total scope 2 (market-based)\u00b9\u00b2",
+            "Purchased electricity\u00b9\u00b3",
+            "Purchased cooling",
+            "c) Total operational scope 3"
+          ],
+          "by_figure_present": 13,
+          "by_figure_only": 4,
+          "by_figure_only_cosmetic": 4,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "a) Total scope 1\u2079",
+                "2025"
+              ],
+              "read": [
+                "Scope 1 (tCO\u2082e)",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "b(i) Total scope 2 (location-based)\u00b9\u00b9",
+                "2025"
+              ],
+              "read": [
+                "Scope 2 (tCO\u2082e)",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "b(ii) Total scope 2 (market-based)\u00b9\u00b2",
+                "2025"
+              ],
+              "read": [
+                "Scope 2 (tCO\u2082e)",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "c) Total operational scope 3",
+                "2025"
+              ],
+              "read": [
+                "Scope 3 (tCO\u2082e)",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 45,
+          "from_cache": false,
+          "verified": 16,
+          "matched_exactly": 1,
+          "method_differs": 0,
+          "missed": 15,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 3,
+          "extra_dropped": 0,
+          "present": 1,
+          "figure_exact": 1,
+          "figure_fused_marker": 0,
+          "unit_exact": 1,
+          "method_exact": 1,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Scope 1 (Direct) Emissions",
+            "Scope 2 (Indirect) Emissions",
+            "Total Scope 1 and Scope 2 Emissions",
+            "Purchased goods and services",
+            "Capital goods",
+            "Fuel- and energy-related activities",
+            "Upstream transportation and distribution",
+            "Waste generated in operations",
+            "Business travel",
+            "Employee commuting",
+            "Upstream leased assets",
+            "Use of sold products",
+            "End-of-life treatment of sold products",
+            "Downstream leased assets",
+            "Investments"
+          ],
+          "by_figure_present": 4,
+          "by_figure_only": 3,
+          "by_figure_only_cosmetic": 3,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Scope 1 (Direct) Emissions",
+                "2025"
+              ],
+              "read": [
+                "Scope 1 (Direct) Emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 2 (Indirect) Emissions",
+                "2025"
+              ],
+              "read": [
+                "Scope 2 (Indirect) Emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Total Scope 1 and Scope 2 Emissions",
+                "2025"
+              ],
+              "read": [
+                "Total Scope 1 and Scope 2 Emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 50,
+          "from_cache": false,
+          "verified": 4,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 4,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 4,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Total Scope 1 and Scope 2 GHG emissions\u1d43",
+            "Direct (Scope 1) GHG emissions (tCO\u2082e)",
+            "Indirect (Scope 2) GHG emissions\u1d47 (tCO\u2082e)",
+            "Other indirect (Scope 3) emissions (tCO\u2082e)"
+          ],
+          "by_figure_present": 4,
+          "by_figure_only": 4,
+          "by_figure_only_cosmetic": 4,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Total Scope 1 and Scope 2 GHG emissions\u1d43",
+                "2025"
+              ],
+              "read": [
+                "Total Scope 1 and Scope 2 GHG emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Direct (Scope 1) GHG emissions (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Direct (Scope 1) GHG emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Indirect (Scope 2) GHG emissions\u1d47 (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Indirect (Scope 2) GHG emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Other indirect (Scope 3) emissions (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Other indirect (Scope 3) emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_mlt_2026",
+          "pdf_page": 46,
+          "from_cache": false,
+          "verified": 7,
+          "matched_exactly": 7,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 7,
+          "figure_exact": 7,
+          "figure_fused_marker": 0,
+          "unit_exact": 7,
+          "method_exact": 7,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 7,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_mpact_2026",
+          "pdf_page": 34,
+          "from_cache": false,
+          "verified": 5,
+          "matched_exactly": 5,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 5,
+          "figure_exact": 5,
+          "figure_fused_marker": 0,
+          "unit_exact": 5,
+          "method_exact": 5,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 5,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_mpact_2026",
+          "pdf_page": 35,
+          "from_cache": false,
+          "verified": 14,
+          "matched_exactly": 14,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 14,
+          "figure_exact": 14,
+          "figure_fused_marker": 0,
+          "unit_exact": 14,
+          "method_exact": 14,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 14,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_ocbc_2025",
+          "pdf_page": 58,
+          "from_cache": true,
+          "verified": 5,
+          "matched_exactly": 5,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 5,
+          "figure_exact": 5,
+          "figure_fused_marker": 0,
+          "unit_exact": 5,
+          "method_exact": 5,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 5,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_seatrium_2025",
+          "pdf_page": 70,
+          "from_cache": false,
+          "verified": 14,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 14,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 2,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Singapore",
+            "Brazil",
+            "China",
+            "Indonesia",
+            "Philippines",
+            "Rest of the World",
+            "Total",
+            "Singapore",
+            "Brazil",
+            "China",
+            "Indonesia",
+            "Philippines",
+            "Rest of the World",
+            "Total"
+          ],
+          "by_figure_present": 2,
+          "by_figure_only": 2,
+          "by_figure_only_cosmetic": 2,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Total",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "Scope 1",
+                "SCOPE 1 & 2 > 2025*"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Total",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "Scope 2",
+                "SCOPE 1 & 2 > 2025*"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_seatrium_2025_databook",
+          "pdf_page": 13,
+          "from_cache": false,
+          "verified": 16,
+          "matched_exactly": 14,
+          "method_differs": 0,
+          "missed": 2,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 2,
+          "extra_dropped": 7,
+          "present": 14,
+          "figure_exact": 14,
+          "figure_fused_marker": 0,
+          "unit_exact": 14,
+          "method_exact": 14,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Emissions attributed to I-RECs redeemed for Singapore Operations",
+            "Category 4: Upstream Transporation and Distribution"
+          ],
+          "by_figure_present": 16,
+          "by_figure_only": 2,
+          "by_figure_only_cosmetic": 2,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Emissions attributed to I-RECs redeemed for Singapore Operations",
+                "FY2025"
+              ],
+              "read": [
+                "Emissions attributed to I-RECs redeemed for Singapore Operations",
+                "FY2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 4: Upstream Transporation and Distribution",
+                "FY2025"
+              ],
+              "read": [
+                "Category 4: Upstream Transportation and Distribution",
+                "FY2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 40,
+          "from_cache": true,
+          "verified": 10,
+          "matched_exactly": 7,
+          "method_differs": 3,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 2,
+          "extra_dropped": 1,
+          "present": 10,
+          "figure_exact": 10,
+          "figure_fused_marker": 0,
+          "unit_exact": 10,
+          "method_exact": 7,
+          "dropped_by_rule": {
+            "duplicate_cell_key": 2
+          },
+          "missed_rows": [],
+          "by_figure_present": 10,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_stengg_2025",
+          "pdf_page": 37,
+          "from_cache": false,
+          "verified": 7,
+          "matched_exactly": 7,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 7,
+          "figure_exact": 7,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 7,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 7,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 135,
+          "from_cache": true,
+          "verified": 4,
+          "matched_exactly": 4,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 4,
+          "figure_exact": 4,
+          "figure_fused_marker": 0,
+          "unit_exact": 4,
+          "method_exact": 4,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 4,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 136,
+          "from_cache": true,
+          "verified": 14,
+          "matched_exactly": 14,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 4,
+          "extra_dropped": 0,
+          "present": 14,
+          "figure_exact": 14,
+          "figure_fused_marker": 0,
+          "unit_exact": 14,
+          "method_exact": 14,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 14,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 189,
+          "from_cache": true,
+          "verified": 6,
+          "matched_exactly": 6,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 6,
+          "figure_exact": 6,
+          "figure_fused_marker": 0,
+          "unit_exact": 6,
+          "method_exact": 6,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 6,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        }
+      ]
+    },
+    "layout": {
+      "total": {
+        "verified": 170,
+        "matched_exactly": 86,
+        "method_differs": 0,
+        "missed": 84,
+        "missed_read_under_another_year": 0,
+        "extra_kept": 71,
+        "extra_dropped": 8,
+        "present": 86,
+        "figure_exact": 86,
+        "figure_fused_marker": 0,
+        "unit_exact": 79,
+        "method_exact": 86,
+        "by_figure_present": 156,
+        "by_figure_only": 70,
+        "by_figure_only_cosmetic": 41,
+        "by_figure_only_substantive": 29,
+        "by_figure_missed_wrong_year": 0
+      },
+      "pages_no_table_found": 0,
+      "pages": [
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 7,
+          "from_cache": true,
+          "verified": 8,
+          "matched_exactly": 5,
+          "method_differs": 0,
+          "missed": 3,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 3,
+          "extra_dropped": 0,
+          "present": 5,
+          "figure_exact": 5,
+          "figure_fused_marker": 0,
+          "unit_exact": 5,
+          "method_exact": 5,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Category 1: Purchased Goods and Services",
+            "Category 2:Capital Goods",
+            "Category 4: Upstream Transportation and Distribution"
+          ],
+          "by_figure_present": 8,
+          "by_figure_only": 3,
+          "by_figure_only_cosmetic": 3,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Category 1: Purchased Goods and Services",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Category 1: Purchased Goods and Servicesiii, iv",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 2:Capital Goods",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Category 2:Capital Goodsiii, iv",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 4: Upstream Transportation and Distribution",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Category 4: Upstream Transportation and Distributioniii, iv",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 8,
+          "from_cache": true,
+          "verified": 7,
+          "matched_exactly": 5,
+          "method_differs": 0,
+          "missed": 2,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 2,
+          "extra_dropped": 0,
+          "present": 5,
+          "figure_exact": 5,
+          "figure_fused_marker": 0,
+          "unit_exact": 5,
+          "method_exact": 5,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Category 13: Electric Vehicle",
+            "Category 15: Investment"
+          ],
+          "by_figure_present": 7,
+          "by_figure_only": 2,
+          "by_figure_only_cosmetic": 2,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Category 13: Electric Vehicle",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Category 13: Electric Vehicleiii, iv",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 15: Investment",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Category 15: Investmentiii, iv",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 20,
+          "from_cache": true,
+          "verified": 15,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 15,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 15,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Scope 1",
+            "Scope 2 (Location-based)",
+            "Scope 2 (Market-based)",
+            "Scope 3 comprising of the following:",
+            "Category 1: Purchased Goods and Services",
+            "Category 2:Capital Goods",
+            "Category 3: Fuel- and energy-related activities",
+            "Category 4: Upstream Transportation and Distribution",
+            "Category 5: Waste generated in own operations",
+            "Category 6: Corporate air travel and land travel",
+            "Category 13: Tenants\u2019 energy consumption",
+            "Category 13: Electric Vehicle",
+            "Category 15: Investment",
+            "Total Carbon Emission (Scope 1 and 2) Location-based",
+            "Total Carbon Emission (Scope 1 and 2) Market-based"
+          ],
+          "by_figure_present": 15,
+          "by_figure_only": 15,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 15,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Scope 1",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Scope 1",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Scope 2 (Location-based)",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Scope 2 (Location-based)",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Scope 2 (Market-based)",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Scope 2 (Market-based)",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Scope 3 comprising of the following:",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Scope 3 comprising of the following:",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 1: Purchased Goods and Services",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 1: Purchased Goods and Servicesiii, iv",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 2:Capital Goods",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 2:Capital Goodsiii, iv",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 3: Fuel- and energy-related activities",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 3: Fuel- and energy-related activities",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 4: Upstream Transportation and Distribution",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 4: Upstream Transportation and Distributioniii, iv",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 5: Waste generated in own operations",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 5: Waste generated in own operations",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 6: Corporate air travel and land travel",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 6: Corporate air travel and land travel",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 13: Tenants\u2019 energy consumption",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 13: Tenants\u2019 energy consumption",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 13: Electric Vehicle",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 13: Electric Vehicle",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Category 15: Investment",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 15: Investment",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Total Carbon Emission (Scope 1 and 2) Location-based",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Total Carbon Emission (Scope 1 and 2) Location-based",
+                "2025"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Total Carbon Emission (Scope 1 and 2) Market-based",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Total Carbon Emission (Scope 1 and 2) Market-based",
+                "2025"
+              ],
+              "kind": "substantive"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_dbs_2025",
+          "pdf_page": 79,
+          "from_cache": true,
+          "verified": 18,
+          "matched_exactly": 13,
+          "method_differs": 0,
+          "missed": 5,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 13,
+          "figure_exact": 13,
+          "figure_fused_marker": 0,
+          "unit_exact": 13,
+          "method_exact": 13,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Backup generators",
+            "Owned vehicle transport",
+            "Refrigerants and fire retardants",
+            "Purchased electricity\u00b9\u00b3",
+            "Purchased cooling"
+          ],
+          "by_figure_present": 13,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 45,
+          "from_cache": false,
+          "verified": 16,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 16,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 16,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Scope 1 (Direct) Emissions",
+            "Scope 2 (Indirect) Emissions",
+            "Total Scope 1 and Scope 2 Emissions",
+            "Purchased goods and services",
+            "Capital goods",
+            "Fuel- and energy-related activities",
+            "Upstream transportation and distribution",
+            "Waste generated in operations",
+            "Business travel",
+            "Employee commuting",
+            "Upstream leased assets",
+            "Use of sold products",
+            "End-of-life treatment of sold products",
+            "Downstream leased assets",
+            "Investments",
+            "Total"
+          ],
+          "by_figure_present": 16,
+          "by_figure_only": 16,
+          "by_figure_only_cosmetic": 16,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Scope 1 (Direct) Emissions",
+                "2025"
+              ],
+              "read": [
+                "Scope 1 (Direct) Emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 2 (Indirect) Emissions",
+                "2025"
+              ],
+              "read": [
+                "Scope 2 (Indirect) Emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Total Scope 1 and Scope 2 Emissions",
+                "2025"
+              ],
+              "read": [
+                "Total Scope 1 and Scope 2 Emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Purchased goods and services",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 1: Purchased goods and services",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Capital goods",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 2: Capital goods",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Fuel- and energy-related activities",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 3: Fuel- and energy-related activities",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Upstream transportation and distribution",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 4: Upstream transportation and distribution",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Waste generated in operations",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 5: Waste generated in operations",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Business travel",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 6: Business travel",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Employee commuting",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 7: Employee commuting",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Upstream leased assets",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 8: Upstream leased assets",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Use of sold products",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 11: Use of sold products",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "End-of-life treatment of sold products",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 12: End-of-life treatment of sold products",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Downstream leased assets",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 13: Downstream leased assets",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Investments",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Category 15: Investments",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Total",
+                "Emissions (tCO\u2082e)"
+              ],
+              "read": [
+                "Total",
+                "Emissions (tCO2e)"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 50,
+          "from_cache": false,
+          "verified": 4,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 4,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 3,
+          "extra_dropped": 1,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Total Scope 1 and Scope 2 GHG emissions\u1d43",
+            "Direct (Scope 1) GHG emissions (tCO\u2082e)",
+            "Indirect (Scope 2) GHG emissions\u1d47 (tCO\u2082e)",
+            "Other indirect (Scope 3) emissions (tCO\u2082e)"
+          ],
+          "by_figure_present": 4,
+          "by_figure_only": 4,
+          "by_figure_only_cosmetic": 4,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Total Scope 1 and Scope 2 GHG emissions\u1d43",
+                "2025"
+              ],
+              "read": [
+                "Total Scope 1 and Scope 2 GHG emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Direct (Scope 1) GHG emissions (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Direct (Scope 1) GHG emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Indirect (Scope 2) GHG emissions\u1d47 (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Indirect (Scope 2) GHG emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Other indirect (Scope 3) emissions (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Other indirect (Scope 3) emissions",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_mlt_2026",
+          "pdf_page": 46,
+          "from_cache": false,
+          "verified": 7,
+          "matched_exactly": 7,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 7,
+          "figure_exact": 7,
+          "figure_fused_marker": 0,
+          "unit_exact": 7,
+          "method_exact": 7,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 7,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_mpact_2026",
+          "pdf_page": 34,
+          "from_cache": false,
+          "verified": 5,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 5,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 5,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Singapore",
+            "China",
+            "Hong Kong",
+            "Japan",
+            "South Korea"
+          ],
+          "by_figure_present": 5,
+          "by_figure_only": 5,
+          "by_figure_only_cosmetic": 5,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Scope 1 GHG Emissions > Singapore",
+                "FY25/26"
+              ],
+              "read": [
+                "Scope 1 GHG Emissions",
+                "Singapore > FY25/26"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 1 GHG Emissions > China",
+                "FY25/26"
+              ],
+              "read": [
+                "Scope 1 GHG Emissions",
+                "China > FY25/26"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 1 GHG Emissions > Hong Kong",
+                "FY25/26"
+              ],
+              "read": [
+                "Scope 1 GHG Emissions",
+                "Hong Kong > FY25/26"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 1 GHG Emissions > Japan",
+                "FY25/26"
+              ],
+              "read": [
+                "Scope 1 GHG Emissions",
+                "Japan > FY25/26"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 1 GHG Emissions > South Korea",
+                "FY25/26"
+              ],
+              "read": [
+                "Scope 1 GHG Emissions",
+                "South Korea > FY25/26"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_mpact_2026",
+          "pdf_page": 35,
+          "from_cache": false,
+          "verified": 14,
+          "matched_exactly": 14,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 14,
+          "figure_exact": 14,
+          "figure_fused_marker": 0,
+          "unit_exact": 14,
+          "method_exact": 14,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 14,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_ocbc_2025",
+          "pdf_page": 58,
+          "from_cache": true,
+          "verified": 5,
+          "matched_exactly": 1,
+          "method_differs": 0,
+          "missed": 4,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 4,
+          "extra_dropped": 0,
+          "present": 1,
+          "figure_exact": 1,
+          "figure_fused_marker": 0,
+          "unit_exact": 1,
+          "method_exact": 1,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Total emissions (tCO\u2082e)",
+            "Scope 1 (tCO\u2082e)",
+            "Scope 2 (location-based) (tCO\u2082e)",
+            "Scope 3 (tCO\u2082e)"
+          ],
+          "by_figure_present": 5,
+          "by_figure_only": 4,
+          "by_figure_only_cosmetic": 4,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Total emissions (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Total emissions (tCO2e)(33)",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 1 (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Scope 1 (tCO2e)(34)",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 2 (location-based) (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Scope 2 (location-based) (tCO2e)(35)",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 3 (tCO\u2082e)",
+                "2025"
+              ],
+              "read": [
+                "Scope 3 (tCO2e)(37)",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_seatrium_2025",
+          "pdf_page": 70,
+          "from_cache": false,
+          "verified": 14,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 14,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 14,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Singapore",
+            "Brazil",
+            "China",
+            "Indonesia",
+            "Philippines",
+            "Rest of the World",
+            "Total",
+            "Singapore",
+            "Brazil",
+            "China",
+            "Indonesia",
+            "Philippines",
+            "Rest of the World",
+            "Total"
+          ],
+          "by_figure_present": 14,
+          "by_figure_only": 14,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 14,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Singapore",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "Singapore",
+                "Scope 1 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Brazil",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "Brazil",
+                "Scope 1 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "China",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "China",
+                "Scope 1 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Indonesia",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "Indonesia",
+                "Scope 1 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Philippines",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "Philippines",
+                "Scope 1 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Rest of the World",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "Rest of the\n     World3",
+                "Scope 1 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Total",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "Total",
+                "Scope 1 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Singapore",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "Singapore",
+                "Scope 2,7,8 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Brazil",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "Brazil",
+                "Scope 2,7,8 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "China",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "China",
+                "Scope 2,7,8 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Indonesia",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "Indonesia",
+                "Scope 2,7,8 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Philippines",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "Philippines",
+                "Scope 2,7,8 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Rest of the World",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "Rest of the\n     World3",
+                "Scope 2,7,8 > 2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Total",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "Total",
+                "Scope 2,7,8 > 2025*"
+              ],
+              "kind": "substantive"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_seatrium_2025_databook",
+          "pdf_page": 13,
+          "from_cache": false,
+          "verified": 16,
+          "matched_exactly": 13,
+          "method_differs": 0,
+          "missed": 3,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 1,
+          "extra_dropped": 7,
+          "present": 13,
+          "figure_exact": 13,
+          "figure_fused_marker": 0,
+          "unit_exact": 13,
+          "method_exact": 13,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Emissions attributed to I-RECs redeemed for Singapore Operations",
+            "Net Scope 1 & Scope 2 GHG emissions",
+            "Category 9: Downstream Transportation and Distribution"
+          ],
+          "by_figure_present": 14,
+          "by_figure_only": 1,
+          "by_figure_only_cosmetic": 1,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Category 9: Downstream Transportation and Distribution",
+                "FY2025"
+              ],
+              "read": [
+                "Category 9: Downstream Transportation and Distribution4",
+                "FY2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 40,
+          "from_cache": true,
+          "verified": 10,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 10,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 5,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Scope 1 emissions",
+            "Subsidiaries",
+            "Joint ventures & associates",
+            "Scope 2 emissions",
+            "Subsidiaries",
+            "Joint ventures & associates",
+            "Scope 3 emissions",
+            "Category 3 \u2013 Fuel- and energy-related activities",
+            "Category 11 \u2013 Use of sold products",
+            "Category 15 \u2013 Investments"
+          ],
+          "by_figure_present": 3,
+          "by_figure_only": 3,
+          "by_figure_only_cosmetic": 3,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Scope 1 emissions",
+                "2025"
+              ],
+              "read": [
+                "Scope 1 emissions2",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 2 emissions",
+                "2025"
+              ],
+              "read": [
+                "Scope 2 emissions3",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 3 emissions",
+                "2025"
+              ],
+              "read": [
+                "Scope 3 emissions4",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_stengg_2025",
+          "pdf_page": 37,
+          "from_cache": false,
+          "verified": 7,
+          "matched_exactly": 7,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 7,
+          "figure_exact": 7,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 7,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 7,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 135,
+          "from_cache": true,
+          "verified": 4,
+          "matched_exactly": 4,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 4,
+          "figure_exact": 4,
+          "figure_fused_marker": 0,
+          "unit_exact": 4,
+          "method_exact": 4,
+          "dropped_by_rule": {},
+          "missed_rows": [],
+          "by_figure_present": 4,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 136,
+          "from_cache": true,
+          "verified": 14,
+          "matched_exactly": 12,
+          "method_differs": 0,
+          "missed": 2,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 2,
+          "extra_dropped": 0,
+          "present": 12,
+          "figure_exact": 12,
+          "figure_fused_marker": 0,
+          "unit_exact": 12,
+          "method_exact": 12,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Waste generated in operations",
+            "Business travel"
+          ],
+          "by_figure_present": 14,
+          "by_figure_only": 2,
+          "by_figure_only_cosmetic": 2,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Scope 3 non-financed > Waste generated in operations",
+                "2025"
+              ],
+              "read": [
+                "Scope 3 non-financed > Waste generated in operations42",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Scope 3 non-financed > Business travel",
+                "2025"
+              ],
+              "read": [
+                "Scope 3 non-financed > Business travel43",
+                "2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 189,
+          "from_cache": true,
+          "verified": 6,
+          "matched_exactly": 5,
+          "method_differs": 0,
+          "missed": 1,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 1,
+          "extra_dropped": 0,
+          "present": 5,
+          "figure_exact": 5,
+          "figure_fused_marker": 0,
+          "unit_exact": 5,
+          "method_exact": 5,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Other indirect (Scope 3) emissions"
+          ],
+          "by_figure_present": 6,
+          "by_figure_only": 1,
+          "by_figure_only_cosmetic": 1,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Other indirect (Scope 3) emissions",
+                "Coverage"
+              ],
+              "read": [
+                "Other indirect (Scope 3) emissions5",
+                "No"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        }
+      ]
+    },
+    "pdfplumber": {
+      "total": {
+        "verified": 170,
+        "matched_exactly": 37,
+        "method_differs": 0,
+        "missed": 133,
+        "missed_read_under_another_year": 0,
+        "extra_kept": 5,
+        "extra_dropped": 21,
+        "present": 37,
+        "figure_exact": 37,
+        "figure_fused_marker": 0,
+        "unit_exact": 15,
+        "method_exact": 37,
+        "by_figure_present": 51,
+        "by_figure_only": 14,
+        "by_figure_only_cosmetic": 11,
+        "by_figure_only_substantive": 3,
+        "by_figure_missed_wrong_year": 10
+      },
+      "pages_no_table_found": 1,
+      "pages": [
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 7,
+          "tables_found": 1,
+          "from_cache": true,
+          "verified": 8,
+          "matched_exactly": 5,
+          "method_differs": 0,
+          "missed": 3,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 3,
+          "present": 5,
+          "figure_exact": 5,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 5,
+          "dropped_by_rule": {
+            "unit_not_ghg": 5
+          },
+          "missed_rows": [
+            "Category 1: Purchased Goods and Services",
+            "Category 2:Capital Goods",
+            "Category 4: Upstream Transportation and Distribution"
+          ],
+          "by_figure_present": 8,
+          "by_figure_only": 3,
+          "by_figure_only_cosmetic": 3,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Category 1: Purchased Goods and Services",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Category 1: Purchased Goods and Servicesiii, iv",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 2:Capital Goods",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Category 2:Capital Goodsiii, iv",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 4: Upstream Transportation and Distribution",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Category 4: Upstream Transportation and Distributioniii, iv",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 8,
+          "tables_found": 1,
+          "from_cache": true,
+          "verified": 7,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 7,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 2,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Category 5: Waste generated in own operations",
+            "Category 6: Corporate air travel and land travel",
+            "Category 13: Tenants\u2019 energy consumption",
+            "Category 13: Electric Vehicle",
+            "Category 15: Investment",
+            "Total Carbon Emission (Scope 1 and 2) Location-based",
+            "Total Carbon Emission (Scope 1 and 2) Market-based"
+          ],
+          "by_figure_present": 2,
+          "by_figure_only": 2,
+          "by_figure_only_cosmetic": 2,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Total Carbon Emission (Scope 1 and 2) Location-based",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Total Carbon Emission (Scope 1 and 2)",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Total Carbon Emission (Scope 1 and 2) Market-based",
+                "Singapore > 2025"
+              ],
+              "read": [
+                "Total Carbon Emission (Scope 1 and 2)",
+                "Singapore > 2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_clar_2025_datapack",
+          "pdf_page": 20,
+          "tables_found": 1,
+          "from_cache": true,
+          "verified": 15,
+          "matched_exactly": 10,
+          "method_differs": 0,
+          "missed": 5,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 5,
+          "present": 10,
+          "figure_exact": 10,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 10,
+          "dropped_by_rule": {
+            "unit_not_ghg": 10
+          },
+          "missed_rows": [
+            "Category 1: Purchased Goods and Services",
+            "Category 2:Capital Goods",
+            "Category 4: Upstream Transportation and Distribution",
+            "Category 13: Electric Vehicle",
+            "Category 15: Investment"
+          ],
+          "by_figure_present": 15,
+          "by_figure_only": 5,
+          "by_figure_only_cosmetic": 5,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Category 1: Purchased Goods and Services",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 1: Purchased Goods and Servicesiii, iv",
+                "Total Portfolio > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 2:Capital Goods",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 2:Capital Goodsiii, iv",
+                "Total Portfolio > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 4: Upstream Transportation and Distribution",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 4: Upstream Transportation and Distributioniii, iv",
+                "Total Portfolio > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 13: Electric Vehicle",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 13: Electric Vehicleiii, iv",
+                "Total Portfolio > 2025"
+              ],
+              "kind": "cosmetic"
+            },
+            {
+              "verified": [
+                "Category 15: Investment",
+                "Total Portfolio > 2025"
+              ],
+              "read": [
+                "Category 15: Investmentiii, iv",
+                "Total Portfolio > 2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_dbs_2025",
+          "pdf_page": 79,
+          "tables_found": 3,
+          "from_cache": true,
+          "verified": 18,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 18,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Total GHG emissions, location-based (tCO\u2082e) = a + b(i) + c",
+            "Total GHG emissions, market-based (tCO\u2082e) = a + b(ii) + c",
+            "a) Total scope 1\u2079",
+            "Backup generators",
+            "Owned vehicle transport",
+            "Refrigerants and fire retardants",
+            "b(i) Total scope 2 (location-based)\u00b9\u00b9",
+            "b(ii) Total scope 2 (market-based)\u00b9\u00b2",
+            "Purchased electricity\u00b9\u00b3",
+            "Purchased cooling",
+            "c) Total operational scope 3",
+            "Category 3: Fuel-and-energy-related activities\u00b9\u2075",
+            "Category 4: Upstream transportation and distribution\u00b9\u2076",
+            "Category 5: Waste generated in operations\u00b9\u2077",
+            "Category 6: Business travel\u00b9\u2078",
+            "Category 7: Employee commuting\u00b9\u2079",
+            "Category 8: Upstream leased assets\u00b2\u2070",
+            "Category 13: Downstream leased assets\u00b2\u00b9"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 45,
+          "tables_found": 1,
+          "from_cache": false,
+          "verified": 16,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 16,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Scope 1 (Direct) Emissions",
+            "Scope 2 (Indirect) Emissions",
+            "Total Scope 1 and Scope 2 Emissions",
+            "Purchased goods and services",
+            "Capital goods",
+            "Fuel- and energy-related activities",
+            "Upstream transportation and distribution",
+            "Waste generated in operations",
+            "Business travel",
+            "Employee commuting",
+            "Upstream leased assets",
+            "Use of sold products",
+            "End-of-life treatment of sold products",
+            "Downstream leased assets",
+            "Investments",
+            "Total"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_keppel_2025",
+          "pdf_page": 50,
+          "tables_found": 1,
+          "from_cache": false,
+          "verified": 4,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 4,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Total Scope 1 and Scope 2 GHG emissions\u1d43",
+            "Direct (Scope 1) GHG emissions (tCO\u2082e)",
+            "Indirect (Scope 2) GHG emissions\u1d47 (tCO\u2082e)",
+            "Other indirect (Scope 3) emissions (tCO\u2082e)"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 4,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_mlt_2026",
+          "pdf_page": 46,
+          "tables_found": 3,
+          "from_cache": false,
+          "verified": 7,
+          "matched_exactly": 7,
+          "method_differs": 0,
+          "missed": 0,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 7,
+          "figure_exact": 7,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 7,
+          "dropped_by_rule": {
+            "unit_not_ghg": 7
+          },
+          "missed_rows": [],
+          "by_figure_present": 7,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_mpact_2026",
+          "pdf_page": 34,
+          "tables_found": 11,
+          "from_cache": false,
+          "verified": 5,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 5,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Singapore",
+            "China",
+            "Hong Kong",
+            "Japan",
+            "South Korea"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_mpact_2026",
+          "pdf_page": 35,
+          "tables_found": 18,
+          "from_cache": false,
+          "verified": 14,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 14,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 3,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Singapore",
+            "China",
+            "Hong Kong",
+            "Japan",
+            "South Korea",
+            "Singapore",
+            "China",
+            "Hong Kong",
+            "Japan",
+            "South Korea",
+            "Category 1",
+            "Category 2",
+            "Category 5",
+            "Category 13"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_ocbc_2025",
+          "pdf_page": 58,
+          "tables_found": 1,
+          "from_cache": true,
+          "verified": 5,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 5,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Total emissions (tCO\u2082e)",
+            "Scope 1 (tCO\u2082e)",
+            "Scope 2 (location-based) (tCO\u2082e)",
+            "Scope 2 (market-based) (tCO\u2082e)",
+            "Scope 3 (tCO\u2082e)"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 5,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_seatrium_2025",
+          "pdf_page": 70,
+          "tables_found": 3,
+          "from_cache": false,
+          "verified": 14,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 14,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 3,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Singapore",
+            "Brazil",
+            "China",
+            "Indonesia",
+            "Philippines",
+            "Rest of the World",
+            "Total",
+            "Singapore",
+            "Brazil",
+            "China",
+            "Indonesia",
+            "Philippines",
+            "Rest of the World",
+            "Total"
+          ],
+          "by_figure_present": 3,
+          "by_figure_only": 3,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 3,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Singapore",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "Scope 1",
+                "2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Total",
+                "SCOPE 1 & 2 > Scope 1 > 2025*"
+              ],
+              "read": [
+                "SCOPE 1 & 2 > Total",
+                "2025*"
+              ],
+              "kind": "substantive"
+            },
+            {
+              "verified": [
+                "Singapore",
+                "SCOPE 1 & 2 > Scope 2 > 2025*"
+              ],
+              "read": [
+                "Scope 2",
+                "2025*"
+              ],
+              "kind": "substantive"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_seatrium_2025_databook",
+          "pdf_page": 13,
+          "tables_found": 1,
+          "from_cache": false,
+          "verified": 16,
+          "matched_exactly": 15,
+          "method_differs": 0,
+          "missed": 1,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 1,
+          "extra_dropped": 7,
+          "present": 15,
+          "figure_exact": 15,
+          "figure_fused_marker": 0,
+          "unit_exact": 15,
+          "method_exact": 15,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Emissions attributed to I-RECs redeemed for Singapore Operations"
+          ],
+          "by_figure_present": 16,
+          "by_figure_only": 1,
+          "by_figure_only_cosmetic": 1,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": [
+            {
+              "verified": [
+                "Emissions attributed to I-RECs redeemed for Singapore Operations",
+                "FY2025"
+              ],
+              "read": [
+                "Emissions attributed to I-RECs redeemed for Singapore Operations",
+                "FY2025"
+              ],
+              "kind": "cosmetic"
+            }
+          ]
+        },
+        {
+          "source_id": "peer_sembcorp_2025",
+          "pdf_page": 40,
+          "tables_found": 0,
+          "from_cache": true,
+          "verified": 10,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 10,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Scope 1 emissions",
+            "Subsidiaries",
+            "Joint ventures & associates",
+            "Scope 2 emissions",
+            "Subsidiaries",
+            "Joint ventures & associates",
+            "Scope 3 emissions",
+            "Category 3 \u2013 Fuel- and energy-related activities",
+            "Category 11 \u2013 Use of sold products",
+            "Category 15 \u2013 Investments"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_stengg_2025",
+          "pdf_page": 37,
+          "tables_found": 10,
+          "from_cache": false,
+          "verified": 7,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 7,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Scope 1 and Scope 2 (market-based) Emissions",
+            "Scope 1",
+            "Scope 2 (location-based)",
+            "Scope 2 (market-based)",
+            "Category 5: Waste Generated in Operations",
+            "Category 6: Business Travel",
+            "Category 7: Employee Commuting"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 1,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 135,
+          "tables_found": 2,
+          "from_cache": true,
+          "verified": 4,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 4,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 1,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Refrigerants",
+            "Fuel combustion",
+            "Owned/leased vehicles",
+            "Total"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 136,
+          "tables_found": 1,
+          "from_cache": true,
+          "verified": 14,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 14,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 1,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Singapore",
+            "Indonesia",
+            "Malaysia",
+            "Thailand",
+            "Vietnam",
+            "Greater China",
+            "Overseas branches and other subsidiaries",
+            "Total",
+            "UOI",
+            "Total",
+            "Waste generated in operations",
+            "Business travel",
+            "Total Scope 1, Scope 2 location-based and Scope 3",
+            "Total Scope 1, Scope 2 market-based and Scope 3"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        },
+        {
+          "source_id": "peer_uob_2025",
+          "pdf_page": 189,
+          "tables_found": 1,
+          "from_cache": true,
+          "verified": 6,
+          "matched_exactly": 0,
+          "method_differs": 0,
+          "missed": 6,
+          "missed_read_under_another_year": 0,
+          "extra_kept": 0,
+          "extra_dropped": 0,
+          "present": 0,
+          "figure_exact": 0,
+          "figure_fused_marker": 0,
+          "unit_exact": 0,
+          "method_exact": 0,
+          "dropped_by_rule": {},
+          "missed_rows": [
+            "Direct (Scope 1) GHG emissions",
+            "Energy indirect (Scope 2) GHG emissions",
+            "Energy indirect (Scope 2) GHG emissions",
+            "Other indirect (Scope 3) emissions",
+            "Total GHG emissions",
+            "Total GHG emissions"
+          ],
+          "by_figure_present": 0,
+          "by_figure_only": 0,
+          "by_figure_only_cosmetic": 0,
+          "by_figure_only_substantive": 0,
+          "by_figure_missed_wrong_year": 0,
+          "by_figure_examples": []
+        }
+      ]
+    }
+  }
+}
