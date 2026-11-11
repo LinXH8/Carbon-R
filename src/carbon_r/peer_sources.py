@@ -14,6 +14,12 @@ rather than display them.
 on 1 April to 31 March, so their FY2025/26 reports are 2026; FLCT's year ends 30 September,
 so its FY2025 is 2025. A search filtered on a year therefore matches on that convention, and
 every passage also carries the period's own dates so a reply can state the real period.
+
+Two entries (Tier 3 Block 1) are issuers' workbooks, not reports: FLCT's ESG Databook and
+CICT's data pack, where those companies' GHG figures are printed - their reports print none
+as a table. A workbook entry cites a sheet and cell where a report cites a page
+(`period_cell` for its period, `WORKBOOK_TABLES` for its tables), has no page count, and is
+not part of the prose corpus.
 """
 
 from __future__ import annotations
@@ -43,23 +49,39 @@ class PeerSource(BaseModel):
     period_start: date
     period_end: date
     # stated: both dates read from the report. from_companion: taken from the companion
-    # report named in `notes`. start_assumed: only the end date is stated.
-    period_basis: Literal["stated", "from_companion", "start_assumed"]
-    period_pdf_page: int = Field(ge=1)
+    # report named in `notes`. start_assumed: only the end date is stated. dates_assumed:
+    # only the year is named; both dates follow the issuer's practice, as `notes` says.
+    period_basis: Literal["stated", "from_companion", "start_assumed", "dates_assumed"]
+    # Where the period is stated: a PDF page, or for a workbook "Sheet!A1".
+    period_pdf_page: int | None = Field(ge=1)
+    period_cell: str | None = Field(default=None, pattern=r"^.+![A-Z]{1,3}[1-9][0-9]*$")
     period_printed_page: int | None
     url: str
     url_note: str | None
-    local_filename: str = Field(pattern=r"^peer/.+\.pdf$")
+    local_filename: str = Field(pattern=r"^peer/.+\.(pdf|xlsx)$")
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    page_count: int = Field(ge=1)
+    page_count: int | None = Field(ge=1)
     licence_note: str
     notes: str
+    # Set for files added after B0 (2026-10-23), which recorded none per file.
+    retrieved_on: date | None = None
 
     @model_validator(mode="after")
     def _period(self) -> PeerSource:
         if self.period_end <= self.period_start:
             raise ValueError(f"{self.local_filename}: period ends before it starts")
+        if self.is_workbook:
+            if self.period_cell is None or self.period_pdf_page is not None:
+                raise ValueError(f"{self.local_filename}: a workbook states its period in a cell")
+            if self.page_count is not None or self.period_printed_page is not None:
+                raise ValueError(f"{self.local_filename}: a workbook has no pages")
+        elif self.period_pdf_page is None or self.page_count is None or self.period_cell:
+            raise ValueError(f"{self.local_filename}: a PDF states its period on a page")
         return self
+
+    @property
+    def is_workbook(self) -> bool:
+        return self.local_filename.endswith(".xlsx")
 
     @property
     def report_year(self) -> int:
@@ -78,6 +100,48 @@ class PeerSource(BaseModel):
             f"{self.company} {_KIND_TITLE[self.document_kind]} "
             f"({start.day} {start:%b %Y} to {end.day} {end:%b %Y})"
         )
+
+
+_COLUMN = r"^[A-Z]{1,3}$"
+_CELL_REF = r"^[A-Z]{1,3}[1-9][0-9]*$"
+
+
+class WorkbookTable(BaseModel):
+    """One table on one sheet, as the author declares it: where its labels and year headers
+    are, which rows it spans, and where its unit is printed - in a column beside each row,
+    or once in a title cell (FLCT prints "ktCO2e" in the table title only)."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    sheet: str
+    label_column: str = Field(pattern=_COLUMN)
+    header_row: int = Field(ge=1)
+    first_row: int = Field(ge=1)
+    last_row: int = Field(ge=1)
+    # A heading that names the table (FLCT's region, e.g. "Singapore (including corporate
+    # office)"), recorded as "Heading > Row label", the page drafter's convention, so rows
+    # with one label in several tables say which table they are from.
+    heading_cell: str | None = Field(default=None, pattern=_CELL_REF)
+    unit_column: str | None = Field(default=None, pattern=_COLUMN)
+    unit_printed: str | None = None
+    unit_cell: str | None = Field(default=None, pattern=_CELL_REF)
+
+    @model_validator(mode="after")
+    def _shape(self) -> WorkbookTable:
+        if not self.header_row < self.first_row <= self.last_row:
+            raise ValueError(f"{self.sheet}: rows must run header < first <= last")
+        by_column = self.unit_column is not None
+        by_title = self.unit_printed is not None and self.unit_cell is not None
+        if by_column == by_title or (not by_title and (self.unit_printed or self.unit_cell)):
+            raise ValueError(
+                f"{self.sheet}: declare the unit by a unit column, or by unit_printed and the "
+                "unit_cell it is printed in - one, not both"
+            )
+        return self
+
+    def holds(self, sheet: str, cell_ref: str) -> bool:
+        row = int("".join(ch for ch in cell_ref if ch.isdigit()))
+        return sheet == self.sheet and self.first_row <= row <= self.last_row
 
 
 class PeerSources(BaseModel):
@@ -212,6 +276,56 @@ TABLE_CONTINUES: dict[str, dict[int, int]] = {
 }
 
 
+# The tables read by code from a workbook source (`carbon_r.peer_workbook`), as
+# {source_id: [WorkbookTable, ...]}: the sheet, its label column and year-header row, the
+# rows the table spans, and where its unit is printed. Declared by the author before any
+# cell is read; the author's inventory then lists each report-year cell.
+#
+# Proposed by Claude on 2026-11-11 from the workbooks' labels and headers (values not read);
+# AWAITING THE AUTHOR'S CHECK of sheet, rows and units before any inventory is filled.
+_FLCT_S3 = "Climate Action - Scope 3"
+WORKBOOK_TABLES: dict[str, list[WorkbookTable]] = {
+    # ENVIRONMENTAL, "GREENHOUSE GAS EMISSIONS": Scope 1, Scope 2 both methods, Scope 3 and
+    # its categories, in rows 7-17, with each row's unit in column B. Row 18 is intensity
+    # (kgCO2e/m2/month) and is left out. Years are column headers in row 6; 2025 is column I.
+    "peer_cict_2025_datapack": [
+        WorkbookTable(
+            sheet="ENVIRONMENTAL", label_column="A", header_row=6, first_row=7, last_row=17,
+            unit_column="B",
+        ),
+    ],
+    "peer_flct_2025_databook": [
+        # Scopes 1 and 2 and their totals, rows 9-13; row 14 is intensity. The unit is printed
+        # once, in the title (B7). Not proposed: the by-source tables (rows 19-22 and 25-28),
+        # a split by energy source rather than by scope.
+        WorkbookTable(
+            sheet="Climate Action - Scopes 1 & 2", label_column="B", header_row=8,
+            first_row=9, last_row=13, unit_printed="ktCO2e", unit_cell="B7",
+        ),
+        # Scope 3 by category, one table per region, each headed by its region (the heading
+        # shares the year-header row). Unit in the sheet title (B7). Not proposed: the "FLCT
+        # (all regions)" table (rows 56-58), whose total row prints "(tCO2e)" against the
+        # title's ktCO2e and whose category row prints no unit.
+        WorkbookTable(
+            sheet=_FLCT_S3, label_column="B", header_row=8, first_row=9, last_row=18,
+            heading_cell="B8", unit_printed="ktCO2e", unit_cell="B7",
+        ),
+        WorkbookTable(
+            sheet=_FLCT_S3, label_column="B", header_row=20, first_row=21, last_row=30,
+            heading_cell="B20", unit_printed="ktCO2e", unit_cell="B7",
+        ),
+        WorkbookTable(
+            sheet=_FLCT_S3, label_column="B", header_row=32, first_row=33, last_row=42,
+            heading_cell="B32", unit_printed="ktCO2e", unit_cell="B7",
+        ),
+        WorkbookTable(
+            sheet=_FLCT_S3, label_column="B", header_row=44, first_row=45, last_row=54,
+            heading_cell="B44", unit_printed="ktCO2e", unit_cell="B7",
+        ),
+    ],
+}  # fmt: skip
+
+
 # Table pages with no year column whose year the author has read from the page's text, as
 # {source_id: {page: year}}. `to_disclosures` gives that year only to a cell whose header names
 # no year at all (`peer_disclosure.cell_year`), and each such row says so in its notes.
@@ -233,6 +347,8 @@ __all__ = [
     "PRINTED_PAGE_OFFSETS",
     "TABLE_CONTINUES",
     "TABLE_PAGES",
+    "WORKBOOK_TABLES",
+    "WorkbookTable",
     "DocumentKind",
     "PeerSource",
     "PeerSources",

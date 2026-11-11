@@ -13,6 +13,11 @@ the list with the draft (`peer_verification.match_cells`): cells the drafter ski
 cells it drafted that nobody listed. The draft records the inventory's digest, so a list
 changed after drafting is reported.
 
+For a workbook source (FLCT, CICT; read by code, `scripts/read_peer_workbook.py`),
+`inventory` writes the workbook form (sheet, cell, label and header as printed, scope, Scope 3
+category, method): there the list is the classification itself, and completeness is checked
+in both directions when the cells are read, so `completeness` reports that check.
+
 `worksheet` writes `data/generated/peer_verification/<source_id>.csv` (git-ignored) with one
 line per unverified draft, blind-sample figures masked as [blind]. It never overwrites a
 worksheet that exists: that file holds the author's decisions.
@@ -54,7 +59,8 @@ from carbon_r.models.peer_verification import (
     plan_verification,
     report_year_cells,
 )
-from carbon_r.peer_sources import TABLE_PAGES
+from carbon_r.peer_sources import TABLE_PAGES, WORKBOOK_TABLES
+from carbon_r.peer_workbook import WORKBOOK_INVENTORY_COLUMNS
 from carbon_r.sources import PEERS
 
 WORKSHEET_DIR = PROJECT_ROOT / "data" / "generated" / "peer_verification"
@@ -77,6 +83,8 @@ def read_inventory(source_id: str) -> list[InventoryEntry] | None:
 
 def inventory(source_id: str) -> int:
     path = inventory_path(source_id)
+    if source_id in PEERS and PEERS[source_id].is_workbook:
+        return _workbook_inventory(source_id)
     if source_id not in TABLE_PAGES:
         print(f"{source_id} has no TABLE_PAGES entry; register its pages first.")
         return 1
@@ -96,7 +104,40 @@ def inventory(source_id: str) -> int:
     return 0
 
 
+def _workbook_inventory(source_id: str) -> int:
+    path = inventory_path(source_id)
+    if not WORKBOOK_TABLES.get(source_id):
+        print(f"{source_id} has no WORKBOOK_TABLES entry; declare its tables first.")
+        return 1
+    if (DRAFT_DIR / f"{source_id}.json").exists():
+        print(f"{source_id} is already read; an inventory taken now could lean on the read.")
+        return 1
+    if path.exists():
+        print(f"{path.relative_to(PROJECT_ROOT)} exists; not overwritten (it holds your list).")
+        return 1
+    WORKSHEET_DIR.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="") as f:
+        csv.writer(f).writerow(WORKBOOK_INVENTORY_COLUMNS)
+    tables = "; ".join(
+        f"{t.sheet!r} rows {t.first_row}-{t.last_row}" for t in WORKBOOK_TABLES[source_id]
+    )
+    print(f"{path.relative_to(PROJECT_ROOT)}: empty. List every report-year cell of: {tables}")
+    print("  one line per cell: sheet_name, cell_ref (e.g. I7), row label and column header as")
+    print("  printed, scope (1, 2, 3, 1+2, 1+2+3), scope3_category (1-15, Scope 3 only), method")
+    print("  (location, market or blank). No figures.")
+    return 0
+
+
 def completeness(source_id: str) -> int:
+    if source_id in PEERS and PEERS[source_id].is_workbook:
+        draft_file = DRAFT_DIR / f"{source_id}.json"
+        if not draft_file.exists():
+            print(f"{source_id}: not read yet (scripts/read_peer_workbook.py read {source_id}).")
+            return 1
+        c = json.loads(draft_file.read_text())["completeness"]
+        print(f"== {source_id}: checked when read - listed {c['listed']}, read {c['read']}, "
+              f"report-year cells not listed {c['unlisted']}")  # fmt: skip
+        return 0
     try:
         listed = read_inventory(source_id)
     except ValueError as exc:
@@ -154,10 +195,10 @@ def completeness(source_id: str) -> int:
 
 _DRAFTS = """
 select id, pdf_page, drafted_row_label, column_header, drafted_figure_printed, blind_sample,
-       notes, unit, scope, scope3_category, drafted_method
+       notes, unit, scope, scope3_category, drafted_method, sheet_name, cell_ref
 from peer_disclosures
 where source_id = %(source_id)s and verified_at is null
-order by pdf_page, id
+order by pdf_page, sheet_name, cell_ref, id
 """
 
 
@@ -177,10 +218,12 @@ def worksheet(source_id: str) -> int:
     with path.open("w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(WORKSHEET_COLUMNS)
-        for _id, page, label, header, figure, blind, _notes, unit, scope, category, method in rows:
+        for (_id, page, label, header, figure, blind, _notes, unit, scope, category, method,
+             sheet, cell) in rows:  # fmt: skip
             writer.writerow(
-                [page, label, header, "[blind]" if blind else figure, unit, scope,
-                 category or "", method or "", "yes" if blind else "", "", "", "", "", "", ""]
+                [page or "", sheet or "", cell or "", label, header,
+                 "[blind]" if blind else figure, unit, scope, category or "", method or "",
+                 "yes" if blind else "", "", "", "", "", "", ""]
             )  # fmt: skip
     blind = sum(1 for r in rows if r[5])
     print(f"{path.relative_to(PROJECT_ROOT)}: {len(rows)} rows, {blind} blind")
@@ -211,6 +254,8 @@ def apply(source_id: str, verified_by: str) -> int:
                 drafted_figure_printed=r[4],
                 blind_sample=r[5],
                 notes=r[6],
+                sheet_name=r[11],
+                cell_ref=r[12],
             )
             for r in conn.execute(_DRAFTS, {"source_id": source_id}).fetchall()
         ]

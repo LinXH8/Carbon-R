@@ -22,7 +22,7 @@ def test_each_file_appears_once():
 def test_an_assumed_start_is_never_labelled_stated():
     for s in SOURCES.sources:
         if "assumed" in s.notes.lower():
-            assert s.period_basis == "start_assumed", s.local_filename
+            assert s.period_basis in ("start_assumed", "dates_assumed"), s.local_filename
 
 
 @pytest.mark.skipif(
@@ -50,3 +50,15 @@ def test_every_declared_page_year_is_a_table_page_of_the_reports_own_year():
         for page, year in pages.items():
             assert page in TABLE_PAGES[source_id], (source_id, page)
             assert year == PEERS[source_id].report_year, (source_id, page)
+
+
+def test_workbook_tables_name_only_workbook_sources_and_do_not_overlap():
+    from carbon_r.peer_sources import WORKBOOK_TABLES
+    from carbon_r.sources import PEERS
+
+    for source_id, tables in WORKBOOK_TABLES.items():
+        assert PEERS[source_id].is_workbook, source_id
+        for i, a in enumerate(tables):
+            for b in tables[i + 1 :]:
+                if a.sheet == b.sheet:
+                    assert a.last_row < b.first_row or b.last_row < a.first_row, source_id

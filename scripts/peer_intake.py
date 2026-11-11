@@ -131,7 +131,7 @@ def check() -> int:
             continue
         if sha256(path) != entry.sha256:
             problems.append(f"{entry.local_filename}: sha256 differs from the recorded one")
-        if page_count(path) != entry.page_count:
+        if not entry.is_workbook and page_count(path) != entry.page_count:
             problems.append(f"{entry.local_filename}: page count differs")
     unlisted = {p.relative_to(RAW).as_posix() for p in peer_pdfs()} - {
         e.local_filename for e in entries

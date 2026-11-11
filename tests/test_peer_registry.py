@@ -1,14 +1,14 @@
 """The peer reports in the source registry: built from data/peer_sources.json, no PDFs needed."""
 
 from carbon_r.peer_sources import COMPANY_SLUGS, PRINTED_PAGE_OFFSETS, load_peer_sources
-from carbon_r.sources import BY_ID, METHODOLOGY_IDS, PEER_IDS, PEERS
+from carbon_r.sources import BY_ID, METHODOLOGY_IDS, PEER_CORPUS_IDS, PEER_IDS, PEERS
 
 ENTRIES = load_peer_sources().sources
 
 
 def test_every_peer_file_is_registered_once_with_its_recorded_bytes():
-    assert len(PEER_IDS) == len(ENTRIES) == 14
-    assert len(set(PEER_IDS)) == 14
+    assert len(PEER_IDS) == len(ENTRIES) == 16
+    assert len(set(PEER_IDS)) == 16
     by_sha = {BY_ID[i].sha256: BY_ID[i] for i in PEER_IDS}
     for entry in ENTRIES:
         record = by_sha[entry.sha256]
@@ -38,3 +38,13 @@ def test_offsets_name_only_registered_reports():
 
 def test_methodology_sources_are_unchanged():
     assert METHODOLOGY_IDS == ("ghgp_corporate", "ghgp_scope2", "ghgp_scope3")
+
+
+def test_the_two_workbooks_are_peer_sources_but_not_prose_corpus():
+    """FLCT's databook and CICT's data pack hold figures only (Tier 3 Block 1): read by code,
+    never chunked or searched as prose."""
+    workbooks = {i for i in PEER_IDS if PEERS[i].is_workbook}
+    assert workbooks == {"peer_flct_2025_databook", "peer_cict_2025_datapack"}
+    assert set(PEER_CORPUS_IDS) == set(PEER_IDS) - workbooks and len(PEER_CORPUS_IDS) == 14
+    for source_id in workbooks:
+        assert PEERS[source_id].page_count is None and PEERS[source_id].period_cell

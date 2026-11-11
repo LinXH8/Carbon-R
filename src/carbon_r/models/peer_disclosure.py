@@ -216,7 +216,10 @@ def _is_ghg_unit(unit: str) -> bool:
 
 
 class PeerDisclosure(BaseModel):
-    """One `peer_disclosures` row (db/migrations/0006). A draft until verified by hand."""
+    """One `peer_disclosures` row (db/migrations/0006-0008). A draft until verified by hand.
+
+    It cites a PDF page (drafted by a model from the page image) or a workbook cell (read by
+    code, `carbon_r.peer_workbook`): never both, never neither."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -231,8 +234,11 @@ class PeerDisclosure(BaseModel):
     drafted_figure_printed: str
     unit: str
     method: Method | None
-    pdf_page: int = Field(ge=1)
+    pdf_page: int | None = Field(ge=1)
     printed_page: int | None
+    # A workbook row's citation (migration 0008), in place of the page.
+    sheet_name: str | None = None
+    cell_ref: str | None = Field(default=None, pattern=r"^[A-Z]{1,3}[1-9][0-9]*$")
     row_label: str
     # The label as the model read it. Never corrected, so it identifies the row when
     # `row_label` is fixed by the author (and a re-load cannot re-insert the misread).
@@ -249,14 +255,24 @@ class PeerDisclosure(BaseModel):
             raise ValueError("method is only meaningful for a row that includes Scope 2")
         if self.scope3_category is not None and self.scope != "3":
             raise ValueError("scope3_category is only meaningful for Scope 3")
+        page, cell = self.pdf_page is not None, (self.sheet_name, self.cell_ref) != (None, None)
+        if page == cell or (cell and None in (self.sheet_name, self.cell_ref)):
+            raise ValueError("a row cites a PDF page or a workbook sheet and cell, not both")
+        if cell and self.printed_page is not None:
+            raise ValueError("a workbook row has no printed page")
         return self
 
     @property
-    def key(self) -> tuple[str, int, str, str, str]:
-        """What makes a cell distinct (migration 0007): the drafted method too, "" when none."""
+    def key(self) -> tuple[str, int, str, str, str, str, str]:
+        """What makes a cell distinct (migrations 0007, 0008): the drafted method, "" when
+        none, and for a workbook row its sheet and cell. A PDF row's sheet and cell are "",
+        a constant within its report, so its rows sort - and its seeded blind sample is
+        drawn - exactly as before the sheet and cell were added."""
         return (
             self.source_id,
-            self.pdf_page,
+            self.pdf_page or 0,
+            self.sheet_name or "",
+            self.cell_ref or "",
             self.drafted_row_label,
             self.column_header,
             self.drafted_method or "",
@@ -277,6 +293,8 @@ _COLUMNS = [
     "method",
     "pdf_page",
     "printed_page",
+    "sheet_name",
+    "cell_ref",
     "row_label",
     "drafted_row_label",
     "column_header",
@@ -288,7 +306,15 @@ _COLUMNS = [
     "page_image_sha256",
     "blind_sample",
 ]
-_KEY = ("source_id", "pdf_page", "drafted_row_label", "column_header", "drafted_method")
+_KEY = (
+    "source_id",
+    "pdf_page",
+    "sheet_name",
+    "cell_ref",
+    "drafted_row_label",
+    "column_header",
+    "drafted_method",
+)
 _UPDATABLE = [c for c in _COLUMNS if c not in _KEY]
 
 # The loader's upsert. A verified row is never touched; an unchanged draft is not

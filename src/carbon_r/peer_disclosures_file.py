@@ -1,9 +1,10 @@
 """`data/peer_disclosures_verified.json`: the verified peer figures, committed.
 
 The one tracked file allowed to hold real peer emissions figures (CLAUDE.md). Every row in
-it was drafted by a vision model from a page image and then checked by the author against
-that page (CLAUDE.md rule 4, the peer exception); unverified drafts and rejected rows never
-reach it. It exists so a fresh clone - which has no reports and no database - can seed
+it was drafted by a vision model from a page image, or read by code from a cell of the
+issuer's own workbook (Tier 3 Block 1), and then checked by the author against that page or
+cell (CLAUDE.md rule 4, the peer exception); unverified drafts and rejected rows never reach
+it. It exists so a fresh clone - which has no reports and no database - can seed
 `peer_disclosures` with exactly the verified rows, the same reason the factor loaders carry
 their values as literals.
 
@@ -11,9 +12,11 @@ Each row keeps what was checked and how:
 
 - the figure as printed and as parsed (`figure` is re-derived by `parse_figure` on load and
   must agree, so the file cannot carry a number Python did not compute - rule 1);
-- its citation: report, PDF and printed page, row label and column header as printed;
+- its citation: report, PDF and printed page - or, for a workbook row, sheet and cell - and
+  the row label and column header as printed;
 - `verification`: who checked it, when, and the outcome (confirmed / corrected);
-- `draft`: what the model read, labelled as such - including a value the author corrected;
+- `draft`: what the model (or the workbook reader) read, labelled as such - including a value
+  the author corrected;
 - `blind`: whether the row was in the blind sample, and the author's blind reading.
 
 Figures are as self-reported by each company, checked against the cited page on the stated
@@ -43,12 +46,14 @@ from carbon_r.models.peer_disclosure import Method, Scope, parse_figure
 VERIFIED_FILE = PROJECT_ROOT / "data" / "peer_disclosures_verified.json"
 
 FILE_NOTE = (
-    "Peer emissions figures as self-reported by each company in its own report, drafted by a "
-    "vision model from the cited page and checked by hand against that page on the date in "
-    "`verification.verified_at`. Not independently assured. Each company reports under its "
-    "own boundary, consolidation approach and period; figures are not comparable "
-    "like-for-like. `draft` holds what the model read, kept for measurement; it is not a "
-    "verified value. The reports themselves are not redistributed."
+    "Peer emissions figures as self-reported by each company, either drafted by a vision model "
+    "from the cited page of its report, or read by code from the cited sheet and cell of its "
+    "own workbook (`sheet_name`, `cell_ref`), and checked by hand against that page or cell on "
+    "the date in `verification.verified_at`. Not independently assured. Each company reports "
+    "under its own boundary, consolidation approach and period; figures are not comparable "
+    "like-for-like. `draft` holds what the model or the workbook reader read, kept for "
+    "measurement; it is not a verified value. The reports and workbooks themselves are not "
+    "redistributed."
 )
 
 
@@ -100,8 +105,12 @@ class VerifiedRow(BaseModel):
     figure: Decimal
     unit: str
     method: Method | None
-    pdf_page: int = Field(ge=1)
+    pdf_page: int | None = Field(ge=1)
     printed_page: int | None
+    # A workbook row's citation (migration 0008). Left out of the JSON when null, so a PDF
+    # row is written exactly as it was before workbook rows existed.
+    sheet_name: str | None = Field(default=None, exclude_if=lambda v: v is None)
+    cell_ref: str | None = Field(default=None, exclude_if=lambda v: v is None)
     row_label: str
     column_header: str
     notes: str | None
@@ -111,19 +120,29 @@ class VerifiedRow(BaseModel):
 
     @model_validator(mode="after")
     def _figure_is_the_parse(self) -> VerifiedRow:
+        cell = (self.sheet_name, self.cell_ref)
+        if (self.pdf_page is None) != (None not in cell) or cell.count(None) == 1:
+            raise ValueError(f"{self.source_id}: a row cites a PDF page or a sheet and cell")
         if parse_figure(self.figure_printed) != self.figure:
             raise ValueError(
-                f"{self.source_id} p.{self.pdf_page} {self.row_label!r}: figure does not equal "
+                f"{self.source_id} {self.where} {self.row_label!r}: figure does not equal "
                 "parse_figure(figure_printed)"
             )
         return self
 
     @property
-    def key(self) -> tuple[str, int, str, str, str]:
-        """The table's cell key (migration 0007): the drafted method, "" for none."""
+    def where(self) -> str:
+        """The row's citation in short: "p.79" or "sheet!L9"."""
+        return f"p.{self.pdf_page}" if self.pdf_page else f"{self.sheet_name}!{self.cell_ref}"
+
+    @property
+    def key(self) -> tuple[str, int, str, str, str, str, str]:
+        """The table's cell key (migrations 0007, 0008), as `PeerDisclosure.key`."""
         return (
             self.source_id,
-            self.pdf_page,
+            self.pdf_page or 0,
+            self.sheet_name or "",
+            self.cell_ref or "",
             self.draft.row_label,
             self.column_header,
             self.draft.method or "",
@@ -153,10 +172,10 @@ class VerifiedFile(BaseModel):
 
 _SELECT = """
 select source_id, company, period_start, period_end, scope, scope3_category, figure_printed,
-       figure, unit, method, pdf_page, printed_page, row_label, column_header, notes,
-       verified_by, verified_at, verification, drafted_figure_printed, drafted_row_label,
-       drafted_method, drafted_by, drafted_at, draft_request_hash, page_image_sha256, blind_sample,
-       blind_figure_printed
+       figure, unit, method, pdf_page, printed_page, sheet_name, cell_ref, row_label,
+       column_header, notes, verified_by, verified_at, verification, drafted_figure_printed,
+       drafted_row_label, drafted_method, drafted_by, drafted_at, draft_request_hash,
+       page_image_sha256, blind_sample, blind_figure_printed
 from peer_disclosures_verified
 """
 
@@ -171,9 +190,9 @@ def export_rows(conn: psycopg.Connection, source_ids: list[str] | None = None) -
     sql = _SELECT + (" where source_id = any(%(ids)s)" if source_ids is not None else "")
     rows = []
     for r in conn.execute(sql, {"ids": source_ids}).fetchall():
-        (sid, company, start, end, scope, cat, fig_p, fig, unit, method, page, printed, label,
-         header, notes, by, at, outcome, d_fig, d_label, d_method, d_by, d_at, d_hash, d_img,
-         in_blind, blind_value) = r  # fmt: skip
+        (sid, company, start, end, scope, cat, fig_p, fig, unit, method, page, printed, sheet,
+         cell, label, header, notes, by, at, outcome, d_fig, d_label, d_method, d_by, d_at,
+         d_hash, d_img, in_blind, blind_value) = r  # fmt: skip
         rows.append(
             VerifiedRow(
                 source_id=sid,
@@ -188,6 +207,8 @@ def export_rows(conn: psycopg.Connection, source_ids: list[str] | None = None) -
                 method=method,
                 pdf_page=page,
                 printed_page=printed,
+                sheet_name=sheet,
+                cell_ref=cell,
                 row_label=label,
                 column_header=header,
                 notes=notes,
@@ -237,6 +258,8 @@ def _db_row(row: VerifiedRow) -> dict:
         "method": row.method,
         "pdf_page": row.pdf_page,
         "printed_page": row.printed_page,
+        "sheet_name": row.sheet_name,
+        "cell_ref": row.cell_ref,
         "row_label": row.row_label,
         "drafted_row_label": row.draft.row_label,
         "drafted_method": row.draft.method,
@@ -257,7 +280,8 @@ def _db_row(row: VerifiedRow) -> dict:
 _COLUMNS = [
     "source_id", "company", "period_start", "period_end", "scope", "scope3_category",
     "figure_printed", "figure", "drafted_figure_printed", "unit", "method", "pdf_page",
-    "printed_page", "row_label", "drafted_row_label", "drafted_method", "column_header", "notes",
+    "printed_page", "sheet_name", "cell_ref", "row_label", "drafted_row_label", "drafted_method",
+    "column_header", "notes",
     "drafted_by",
     "drafted_at", "draft_request_hash", "page_image_sha256", "blind_sample",
     "blind_figure_printed", "verified_by", "verified_at", "verification",
@@ -265,7 +289,9 @@ _COLUMNS = [
 
 _FIND = f"""
 select {", ".join(_COLUMNS)} from peer_disclosures
-where source_id = %(source_id)s and pdf_page = %(pdf_page)s
+where source_id = %(source_id)s and pdf_page is not distinct from %(pdf_page)s
+  and sheet_name is not distinct from %(sheet_name)s
+  and cell_ref is not distinct from %(cell_ref)s
   and drafted_row_label = %(drafted_row_label)s and column_header = %(column_header)s
   and drafted_method is not distinct from %(drafted_method)s
 """
@@ -298,7 +324,7 @@ def load_rows(conn: psycopg.Connection, verified: VerifiedFile) -> LoadResult:
         differ = [c for c, value in zip(_COLUMNS, have, strict=True) if value != want[c]]
         if differ:
             conflicts.append(
-                f"{row.source_id} p.{row.pdf_page} {row.draft.row_label!r} | "
+                f"{row.source_id} {row.where} {row.draft.row_label!r} | "
                 f"{row.column_header!r}: differs in {', '.join(differ)}"
             )
         else:

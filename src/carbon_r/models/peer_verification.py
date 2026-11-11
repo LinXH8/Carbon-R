@@ -12,8 +12,9 @@ make "verified" mean "verified, apart from the ones nobody looked at".
   read, so "n of N drafts needed correcting" stays measurable.
 - `rejected` -> kept, marked, and left out of `peer_disclosures_verified`.
 
-Rows are matched by (PDF page, row label as drafted, column header), never by database id:
-ids change if the table is rebuilt from the drafts, and the worksheet must still apply.
+Rows are matched by (PDF page - or, for a row read from a workbook, sheet and cell - row
+label as drafted, column header, method), never by database id: ids change if the table is
+rebuilt from the drafts, and the worksheet must still apply.
 
 A blind value is the author's reading of a blind-sample row, made before the draft value was
 seen (the review and the worksheet both mask it). It is stored with the row and compared with
@@ -38,6 +39,8 @@ _VERIFICATION = {"ok": "confirmed", "corrected": "corrected", "rejected": "rejec
 # The worksheet's columns, in order. `draft_figure` shows "[blind]" for a blind-sample row.
 WORKSHEET_COLUMNS = [
     "pdf_page",
+    "sheet_name",
+    "cell_ref",
     "row_label",
     "column_header",
     "draft_figure",
@@ -59,6 +62,16 @@ def _blank(value: str | None) -> str | None:
     return value.strip() or None if value is not None else None
 
 
+def _cell_key(
+    page: int | None, sheet: str | None, cell: str | None, label: str, header: str, method
+) -> tuple[int, str, str, str, str, str | None]:
+    return (page or 0, sheet or "", cell or "", label, header, method)
+
+
+def _where(page: int | None, sheet: str | None, cell: str | None) -> str:
+    return f"PDF p.{page}" if page is not None else f"{sheet}!{cell}"
+
+
 class WorksheetEntry(BaseModel):
     """One filled-in worksheet line. `row_label` and `method` are AS DRAFTED (they identify
     the row); a corrected label goes in `correct_row_label`, a corrected method in
@@ -66,7 +79,7 @@ class WorksheetEntry(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    pdf_page: int
+    pdf_page: int | None
     row_label: str
     column_header: str
     method: Literal["location", "market"] | None
@@ -77,6 +90,9 @@ class WorksheetEntry(BaseModel):
     # "none" sets the method to not stated; blank leaves the drafted method.
     correct_method: Literal["location", "market", "none"] | None
     note: str | None
+    # A workbook row's citation, in place of the page (migration 0008).
+    sheet_name: str | None = None
+    cell_ref: str | None = None
 
     @model_validator(mode="after")
     def _corrections_match_outcome(self) -> WorksheetEntry:
@@ -93,13 +109,18 @@ class WorksheetEntry(BaseModel):
         return self
 
     @property
-    def key(self) -> tuple[int, str, str, str | None]:
-        return (self.pdf_page, self.row_label, self.column_header, self.method)
+    def key(self) -> tuple[int, str, str, str, str, str | None]:
+        return _cell_key(self.pdf_page, self.sheet_name, self.cell_ref, self.row_label,
+                         self.column_header, self.method)  # fmt: skip
 
     @classmethod
     def from_csv_row(cls, row: dict[str, str]) -> WorksheetEntry:
+        page = _blank(row.get("pdf_page"))
         return cls(
-            pdf_page=int(row["pdf_page"]),
+            pdf_page=int(page) if page else None,
+            # Absent from worksheets written before migration 0008.
+            sheet_name=_blank(row.get("sheet_name")),
+            cell_ref=_blank(row.get("cell_ref")),
             row_label=row["row_label"],
             column_header=row["column_header"],
             method=_blank(row["method"]),
@@ -119,18 +140,26 @@ class DraftRow(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     id: int
-    pdf_page: int
+    pdf_page: int | None
     drafted_row_label: str
     column_header: str
     method: str | None  # as drafted
     drafted_figure_printed: str
     blind_sample: bool
     notes: str | None
+    sheet_name: str | None = None
+    cell_ref: str | None = None
 
     @property
-    def key(self) -> tuple[int, str, str, str | None]:
-        """Page, label as drafted, column and method: what makes a cell distinct (0007)."""
-        return (self.pdf_page, self.drafted_row_label, self.column_header, self.method)
+    def key(self) -> tuple[int, str, str, str, str, str | None]:
+        """Page or sheet and cell, label as drafted, column and method: what makes a cell
+        distinct (0007, 0008)."""
+        return _cell_key(self.pdf_page, self.sheet_name, self.cell_ref, self.drafted_row_label,
+                         self.column_header, self.method)  # fmt: skip
+
+    @property
+    def where(self) -> str:
+        return _where(self.pdf_page, self.sheet_name, self.cell_ref)
 
 
 class VerificationUpdate(BaseModel):
@@ -160,19 +189,19 @@ def plan_verification(drafts: list[DraftRow], entries: list[WorksheetEntry]) -> 
     draft; otherwise `problems` is non-empty and `updates` is empty - apply nothing."""
     problems: list[str] = []
     by_key = {draft.key: draft for draft in drafts}
-    seen: set[tuple[int, str, str, str | None]] = set()
+    seen: set[tuple[int, str, str, str, str, str | None]] = set()
     updates: list[VerificationUpdate] = []
     blind_checked = blind_matched = 0
 
     for entry in entries:
         where = (
-            f"PDF p.{entry.pdf_page} {entry.row_label!r} | {entry.column_header!r}"
-            f"{f' | {entry.method}' if entry.method else ''}"
+            f"{_where(entry.pdf_page, entry.sheet_name, entry.cell_ref)} {entry.row_label!r} | "
+            f"{entry.column_header!r}{f' | {entry.method}' if entry.method else ''}"
         )
         draft = by_key.get(entry.key)
         if draft is None:
             problems.append(
-                f"{where}: no unverified draft with this page, label, column and method"
+                f"{where}: no unverified draft with this page or cell, label, column and method"
             )
             continue
         if entry.key in seen:
@@ -213,7 +242,7 @@ def plan_verification(drafts: list[DraftRow], entries: list[WorksheetEntry]) -> 
     for draft in drafts:
         if draft.key not in seen:
             problems.append(
-                f"PDF p.{draft.pdf_page} {draft.drafted_row_label!r} | {draft.column_header!r}"
+                f"{draft.where} {draft.drafted_row_label!r} | {draft.column_header!r}"
                 f"{f' | {draft.method}' if draft.method else ''}: not in the worksheet"
             )
     return VerificationPlan(

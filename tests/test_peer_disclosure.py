@@ -294,7 +294,11 @@ def test_the_table_keeps_drafts_out_of_the_verified_view_and_never_overwrites_a_
     }
     with connect() as conn:
         try:
-            for name in ("0006_peer_disclosures.sql", "0007_peer_cell_key_method.sql"):
+            for name in (
+                "0006_peer_disclosures.sql",
+                "0007_peer_cell_key_method.sql",
+                "0008_peer_workbook_cells.sql",
+            ):
                 conn.execute((MIGRATIONS_DIR / name).read_text())
             conn.execute(
                 "insert into sources (id, title, publisher, year, url, retrieved_at, sha256, "
@@ -543,7 +547,11 @@ def test_the_table_key_includes_the_method_and_treats_no_method_as_one_value():
     rows = [r.model_dump() | extra for r in [*pair.rows, scope1]]
     with connect() as conn:
         try:
-            for name in ("0006_peer_disclosures.sql", "0007_peer_cell_key_method.sql"):
+            for name in (
+                "0006_peer_disclosures.sql",
+                "0007_peer_cell_key_method.sql",
+                "0008_peer_workbook_cells.sql",
+            ):
                 conn.execute((MIGRATIONS_DIR / name).read_text())
             conn.execute(
                 "insert into sources (id, title, publisher, year, url, retrieved_at, sha256, "

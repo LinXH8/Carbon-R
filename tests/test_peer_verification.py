@@ -451,3 +451,40 @@ def test_a_worksheet_without_the_correct_method_column_still_reads():
     corrected = row | {"outcome (ok/corrected/rejected)": "corrected",
                        "correct_method (location/market/none)": "none"}  # fmt: skip
     assert WorksheetEntry.from_csv_row(corrected).correct_method == "none"
+
+
+def _cell_draft(i: int, cell: str, label: str = "Total (ktCO2e)") -> DraftRow:
+    return DraftRow(
+        id=i, pdf_page=None, sheet_name="Climate Action - Scope 3", cell_ref=cell,
+        drafted_row_label=label, column_header="FY2025", method=None,
+        drafted_figure_printed="1.2", blind_sample=False, notes=None,
+    )  # fmt: skip
+
+
+def _cell_entry(cell: str, label: str = "Total (ktCO2e)", **kw) -> WorksheetEntry:
+    return _entry(label, pdf_page=None, sheet_name="Climate Action - Scope 3", cell_ref=cell,
+                  column_header="FY2025", **kw)  # fmt: skip
+
+
+def test_a_workbook_line_reaches_its_draft_by_sheet_and_cell():
+    """FLCT prints "Total (ktCO2e)" for each region under FY2025: the cell tells them apart."""
+    drafts = [_cell_draft(1, "L18"), _cell_draft(2, "L30")]
+    plan = plan_verification(
+        drafts, [_cell_entry("L30", outcome="corrected", correct_figure="1.3"), _cell_entry("L18")]
+    )
+    assert plan.problems == []
+    assert {u.id: u.figure_printed for u in plan.updates} == {1: "1.2", 2: "1.3"}
+    missing = plan_verification(drafts, [_cell_entry("L18")])
+    assert any("Climate Action - Scope 3!L30" in p for p in missing.problems)
+
+
+def test_a_worksheet_line_reads_its_sheet_and_cell_and_an_old_worksheet_still_reads():
+    line = dict.fromkeys(WORKSHEET_COLUMNS, "") | {
+        "pdf_page": "", "sheet_name": "GHG", "cell_ref": "I7", "row_label": "Scope 11",
+        "column_header": "2025", "outcome (ok/corrected/rejected)": "ok",
+    }  # fmt: skip
+    entry = WorksheetEntry.from_csv_row(line)
+    assert (entry.pdf_page, entry.sheet_name, entry.cell_ref) == (None, "GHG", "I7")
+    old = {k: v for k, v in (line | {"pdf_page": "9"}).items()
+           if k not in ("sheet_name", "cell_ref")}  # fmt: skip
+    assert WorksheetEntry.from_csv_row(old).pdf_page == 9

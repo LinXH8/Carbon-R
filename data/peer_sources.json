@@ -1,7 +1,7 @@
 {
   "version": 1,
   "drafted": "2026-10-23",
-  "note": "period_printed_page is null throughout: each report's footer offset is established in Part B, not in B0. period_basis: stated = start and end read from the report; from_companion = taken from the companion report named in notes; start_assumed = only the end date is stated.",
+  "note": "period_printed_page is null throughout: each report's footer offset is established in Part B, not in B0. period_basis: stated = start and end read from the report; from_companion = taken from the companion report named in notes; start_assumed = only the end date is stated. dates_assumed = only the year is named; both dates follow the issuer's practice, as notes says.",
   "sources": [
     {
       "company": "DBS",
@@ -240,6 +240,44 @@
       "page_count": 135,
       "licence_note": "company report, copyright of the issuer; local use only, not redistributed",
       "notes": "Annual Report, not a standalone sustainability report. Period from the sustainability assurance statement, 'calendar year 1 January 2025 to 31 December 2025' (PDF p.44). GHG figures appear in the AR (e.g. PDF p.37-40); whether a separate SR exists is not checked - VERIFY."
+    },
+    {
+      "company": "Frasers Logistics & Commercial Trust",
+      "sector": "reit",
+      "document_kind": "databook",
+      "period_start": "2024-10-01",
+      "period_end": "2025-09-30",
+      "period_basis": "from_companion",
+      "period_pdf_page": null,
+      "period_cell": "Climate Action - Scopes 1 & 2!L8",
+      "period_printed_page": null,
+      "url": "not recorded",
+      "url_note": "Downloaded by the author on 2026-11-10; the download URL is still to be recorded.",
+      "local_filename": "peer/FLCT_Databook_FY25_Original file.xlsx",
+      "sha256": "b494da3dcb840a6765b209faa87160d7eaa23756d08da380835a6c5d90c9f79f",
+      "page_count": null,
+      "licence_note": "company workbook, copyright of the issuer; local use only, not redistributed",
+      "notes": "ESG Databook 2025 (title, sheet 'Overview ' C6), the companion the FY2025 ESG report points to for its figures; that report prints none as a table. The workbook names the year only ('FY2025', e.g. L8); the dates are FLCT's financial year, 1 October to 30 September, as its FY2025 report states.",
+      "retrieved_on": "2026-11-10"
+    },
+    {
+      "company": "CapitaLand Integrated Commercial Trust",
+      "sector": "reit",
+      "document_kind": "data_pack",
+      "period_start": "2025-01-01",
+      "period_end": "2025-12-31",
+      "period_basis": "dates_assumed",
+      "period_pdf_page": null,
+      "period_cell": "ENVIRONMENTAL!I6",
+      "period_printed_page": null,
+      "url": "not recorded",
+      "url_note": "Downloaded by the author on 2026-11-10; the download URL is still to be recorded.",
+      "local_filename": "peer/CICT_SR_2025_Data_Pack.xlsx",
+      "sha256": "cb4b48660980d42f4f0bd6bab5c55bb8d3b726684ac6081fcc21d2669c3b3f99",
+      "page_count": null,
+      "licence_note": "company workbook, copyright of the issuer; local use only, not redistributed",
+      "notes": "SR 2025 data pack ('KEY ESG DATA SUMMARY', sheet ENVIRONMENTAL). The workbook names the year only ('2025', I6). The calendar-year dates are ASSUMED from CICT's practice in its FY2024 report (the only CICT report held), not read for 2025 - VERIFY against the FY2025 report. CICT's searchable prose stays the FY2024 report, one year behind these figures.",
+      "retrieved_on": "2026-11-10"
     }
   ]
 }

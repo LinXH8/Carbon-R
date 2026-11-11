@@ -126,14 +126,19 @@ def test_export_then_load_round_trips_and_a_second_load_changes_nothing():
         "period_end": "2025-12-31", "scope": "2", "scope3_category": None,
         "figure_printed": "1,234", "figure": Decimal("1234"), "drafted_figure_printed": "1,234",
         "unit": "tCO2e", "method": "market", "pdf_page": 9, "printed_page": None,
-        "row_label": "Scope 2¹", "drafted_row_label": "Scope 2¹", "column_header": "2025",
+        "sheet_name": None, "cell_ref": None, "row_label": "Scope 2¹",
+        "drafted_row_label": "Scope 2¹", "column_header": "2025",
         "notes": None, "drafted_by": "zz-model", "drafted_at": "2026-10-29T01:02:03.456+00:00",
         "draft_request_hash": "zz", "page_image_sha256": "0" * 64, "blind_sample": True,
         "drafted_method": "market",
     }  # fmt: skip
     with connect() as conn:
         try:
-            for name in ("0006_peer_disclosures.sql", "0007_peer_cell_key_method.sql"):
+            for name in (
+                "0006_peer_disclosures.sql",
+                "0007_peer_cell_key_method.sql",
+                "0008_peer_workbook_cells.sql",
+            ):
                 conn.execute((MIGRATIONS_DIR / name).read_text())
             conn.execute(
                 "insert into sources (id, title, publisher, year, url, retrieved_at, sha256, "

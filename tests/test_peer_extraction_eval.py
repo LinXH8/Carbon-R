@@ -112,3 +112,16 @@ def test_a_row_read_in_its_year_under_a_lost_heading_is_not_a_wrong_year_read():
     v = _verified(header="Total Portfolio > 2025")
     s = _score([v], [_cell(header="2025"), _cell(header="2024", figure="999")])
     assert s["missed"] == 1 and s["missed_read_under_another_year"] == 0
+
+
+def test_workbook_rows_are_not_eval_rows():
+    """Eval 5a measures extraction from PDF pages. A row read by code from a workbook (no
+    page) is excluded, and counted, never scored."""
+    from eval_peer_extraction import pdf_page_rows
+
+    rows = [
+        ("peer_dbs_2025", 79, "Scope 1", "2025", "1", None, "1,234", "tCO2e", "m"),
+        ("peer_cict_2025_datapack", None, "Scope 11", "2025", "1", None, "3,456", "t", "code"),
+    ]
+    kept, excluded = pdf_page_rows(rows)
+    assert [r[0] for r in kept] == ["peer_dbs_2025"] and excluded == 1

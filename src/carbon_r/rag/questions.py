@@ -34,7 +34,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from carbon_r.config import PROJECT_ROOT
-from carbon_r.sources import METHODOLOGY_IDS, PEER_IDS, PEERS
+from carbon_r.sources import METHODOLOGY_IDS, PEER_CORPUS_IDS, PEERS
 
 QUESTIONS_PATH = PROJECT_ROOT / "data" / "evals" / "methodology_questions.json"
 LOCAL_ANCHORS_PATH = PROJECT_ROOT / "data" / "evals" / "local" / "methodology_anchors.json"
@@ -44,7 +44,7 @@ PEER_LOCAL_ANCHORS_PATH = PROJECT_ROOT / "data" / "evals" / "local" / "peer_anch
 Phrasing = Literal["textbook", "user", "singlish"]
 Split = Literal["dev", "test"]
 Corpus = Literal["methodology", "peer"]
-CORPUS_IDS: dict[str, tuple[str, ...]] = {"methodology": METHODOLOGY_IDS, "peer": PEER_IDS}
+CORPUS_IDS: dict[str, tuple[str, ...]] = {"methodology": METHODOLOGY_IDS, "peer": PEER_CORPUS_IDS}
 
 
 class ExpectedPage(BaseModel):

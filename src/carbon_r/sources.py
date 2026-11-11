@@ -176,13 +176,18 @@ def peer_record(peer: PeerSource) -> SourceRecord:
         year=peer.report_year,
         url=peer.url,
         licence=peer.licence_note,
-        # B0 recorded the files as downloaded by the author before it ran on this date.
-        retrieved_at=date(2026, 10, 23),
+        # B0 recorded the reports as downloaded by the author before it ran on 2026-10-23;
+        # a later file (the Tier 3 workbooks) records its own date.
+        retrieved_at=peer.retrieved_on or date(2026, 10, 23),
         sha256=peer.sha256,
         kind="peer_report",
         verification_status="verified from primary",
         printed_page_offset=PRINTED_PAGE_OFFSETS.get(peer.source_id),
-        notes=f"Downloaded on or before 2026-10-23. {peer.notes}",
+        notes=(
+            f"Downloaded on {peer.retrieved_on.isoformat()}. {peer.notes}"
+            if peer.retrieved_on
+            else f"Downloaded on or before 2026-10-23. {peer.notes}"
+        ),
         local_path=f"data/raw/{peer.local_filename}",
     )
 
@@ -195,6 +200,8 @@ BY_ID: dict[str, SourceRecord] = {record.id: record for record in REGISTRY}
 
 METHODOLOGY_IDS: tuple[str, ...] = tuple(r.id for r in REGISTRY if r.kind == "methodology")
 PEER_IDS: tuple[str, ...] = tuple(r.id for r in REGISTRY if r.kind == "peer_report")
+# The peer prose corpus: the PDF reports. A workbook holds figures only and is never chunked.
+PEER_CORPUS_IDS: tuple[str, ...] = tuple(i for i in PEER_IDS if not PEERS[i].is_workbook)
 
 
 def file_sha256(record: SourceRecord) -> str:
@@ -239,6 +246,7 @@ __all__ = [
     "BY_ID",
     "METHODOLOGY_IDS",
     "PEERS",
+    "PEER_CORPUS_IDS",
     "PEER_IDS",
     "REGISTRY",
     "UPSERT",

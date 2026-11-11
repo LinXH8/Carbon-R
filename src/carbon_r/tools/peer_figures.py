@@ -2,9 +2,10 @@
 
 The figure-shaped counterpart of `search_peer_disclosures`. That tool retrieves prose and
 never a figure, because a PDF text layer fuses footnote markers onto numbers. This one
-returns figures, and only figures that have been through Part B's pass 2a: drafted by a
-language model from an IMAGE of the table page, then checked by the author against that page
-(CLAUDE.md rule 4, the peer-disclosure exception). It reads `peer_disclosures_verified` and
+returns figures, and only figures that have been verified by hand: drafted by a language
+model from an IMAGE of the table page (Part B's pass 2a), or read by code from a cell of the
+company's own workbook (Tier 3 Block 1), then checked by the author against that page or
+cell (CLAUDE.md rule 4, the peer-disclosure exception). It reads `peer_disclosures_verified` and
 nothing else, so a draft nobody checked cannot reach the agent.
 
 Rule 3 holds: the lookup is exact SQL on company and scope, plus method, Scope 3 category
@@ -48,8 +49,9 @@ Method = Literal["location", "market"]
 
 DISCLOSURE = (
     f"{PEER_CAVEAT} Each figure was drafted by a language model from an image of the cited "
-    "page and then verified by hand against that page on the date given; it is stated as "
-    "printed, in the unit printed, and is never summed, converted or ranked by Carbon R."
+    "page, or read by code from the cited cell of the company's own workbook, and then "
+    "verified by hand against that page or cell on the date given; it is stated as printed, "
+    "in the unit printed, and is never summed, converted or ranked by Carbon R."
 )
 
 _YEAR_CONVENTION = (
@@ -61,8 +63,8 @@ _YEAR_CONVENTION = (
 _ROWS_SQL = """
 select d.source_id, s.title, d.company, d.period_start, d.period_end, d.scope,
        d.scope3_category, d.method, d.figure_printed, d.figure, d.unit, d.pdf_page,
-       d.printed_page, d.row_label, d.column_header, d.notes, d.verification,
-       d.verified_at, d.drafted_by
+       d.printed_page, d.sheet_name, d.cell_ref, d.row_label, d.column_header, d.notes,
+       d.verification, d.verified_at, d.drafted_by
 from peer_disclosures_verified d
 join sources s on s.id = d.source_id
 where d.company = %(company)s
@@ -71,7 +73,7 @@ where d.company = %(company)s
   and (%(scope3_category)s::smallint is null or d.scope3_category = %(scope3_category)s)
   and (%(report_year)s::integer is null
        or extract(year from d.period_end)::integer = %(report_year)s)
-order by d.source_id, d.pdf_page, d.id
+order by d.source_id, d.pdf_page, d.sheet_name, d.cell_ref, d.id
 """
 
 # What the company does have, for a miss.
@@ -123,8 +125,11 @@ class PeerFigure(BaseModel):
     figure_printed: str
     figure: Decimal | None
     unit: str
-    pdf_page: int
+    pdf_page: int | None
     printed_page: int | None
+    # A row read from the issuer's workbook cites a sheet and cell instead of a page.
+    sheet_name: str | None = None
+    cell_ref: str | None = None
     citation: str
     row_label: str
     column_header: str
@@ -134,7 +139,16 @@ class PeerFigure(BaseModel):
     drafted_by: str
 
 
-def _citation(report: str, printed_page: int | None, pdf_page: int) -> str:
+def citation_text(
+    report: str,
+    printed_page: int | None,
+    pdf_page: int | None,
+    sheet_name: str | None = None,
+    cell_ref: str | None = None,
+) -> str:
+    """Where a figure is printed: the page of a report, or the sheet and cell of a workbook."""
+    if pdf_page is None:
+        return f"{report}, sheet '{sheet_name}', cell {cell_ref}"
     page = (
         f"p. {printed_page} (PDF p. {pdf_page})"
         if printed_page is not None
@@ -160,7 +174,11 @@ def _figure(row: dict[str, Any]) -> PeerFigure:
         unit=row["unit"],
         pdf_page=row["pdf_page"],
         printed_page=row["printed_page"],
-        citation=_citation(report, row["printed_page"], row["pdf_page"]),
+        sheet_name=row.get("sheet_name"),
+        cell_ref=row.get("cell_ref"),
+        citation=citation_text(
+            report, row["printed_page"], row["pdf_page"], row.get("sheet_name"), row.get("cell_ref")
+        ),
         row_label=row["row_label"],
         column_header=row["column_header"],
         notes=row["notes"],
@@ -202,7 +220,8 @@ def _resolve(
             context | {"figures": [f.model_dump(mode="json") for f in figures]},
             f"{len(figures)} verified figure(s) for {q.describe()}:\n"
             + "\n".join(lines)
-            + "\nState each figure as printed, with its unit, row label, period and page, and "
+            + "\nState each figure as printed, with its unit, row label, period and page (or "
+            "sheet and cell), and "
             "its Scope 2 method where it has one (say 'method not stated' where it has none). "
             "Where several rows match, they are different rows of the report (parts and a "
             "total, or separate tables): name each by its label; never sum them or pick one "
@@ -297,4 +316,4 @@ if __name__ == "__main__":  # pragma: no cover
     _demo()
 
 
-__all__ = ["DISCLOSURE", "PeerFigure", "PeerQuery", "lookup_peer_disclosure"]
+__all__ = ["DISCLOSURE", "PeerFigure", "PeerQuery", "citation_text", "lookup_peer_disclosure"]

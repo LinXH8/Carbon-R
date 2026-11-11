@@ -19,7 +19,9 @@ and the same Python after the model - `continued_unit` with the declared continu
 `PAGE_YEARS`, and `to_disclosures`.
 
 Scored against `peer_disclosures_verified` only, on every page that holds a verified row,
-two ways:
+two ways. Only rows drafted from a PDF page are eval rows: a row read by code from an
+issuer's workbook (FLCT, CICT; no page) measures nothing about reading a page, and is
+excluded and counted (`pdf_page_rows`), never scored.
 
     strict          `match_cells`, as the completeness measure uses it: a row is present when
                     a report-year cell has its label and header. Matched exactly, matched
@@ -350,6 +352,13 @@ order by source_id, pdf_page, id
 """
 
 
+def pdf_page_rows(rows: list[tuple]) -> tuple[list[tuple], int]:
+    """The rows this eval may score - those with a PDF page (column 1) - and how many were
+    excluded: workbook rows, read by code from a cell, are not extraction from a page."""
+    kept = [r for r in rows if r[1] is not None]
+    return kept, len(rows) - len(kept)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--arm", action="append", choices=ARMS, help="default: all three")
@@ -358,7 +367,7 @@ def main(argv: list[str] | None = None) -> int:
 
     model = get_settings().openai_model
     with connect() as conn:
-        rows = conn.execute(_VERIFIED_SQL).fetchall()
+        rows, workbook_rows = pdf_page_rows(conn.execute(_VERIFIED_SQL).fetchall())
     drafters = {r[8] for r in rows}
     if model in drafters:
         print(f"Refusing: {model} drafted the labels; the scored model must differ.")
@@ -379,7 +388,8 @@ def main(argv: list[str] | None = None) -> int:
     git = git_state()
     dirty = " (DIRTY TREE - not a clean measurement)" if git["dirty"] else ""
     print(
-        f"peer extraction eval: {len(verified)} pages, {len(rows)} verified rows; model {model} "
+        f"peer extraction eval: {len(verified)} pages, {len(rows)} verified rows "
+        f"({workbook_rows} workbook rows excluded); model {model} "
         f"(labels drafted by {', '.join(sorted(drafters))}); commit {git['commit'][:7]}{dirty}\n"
     )
     client = openai_client(timeout_s=TIMEOUT_S)
@@ -452,6 +462,7 @@ def main(argv: list[str] | None = None) -> int:
                 "git": git,
                 "model": model,
                 "labels_drafted_by": sorted(drafters),
+                "workbook_rows_excluded": workbook_rows,
                 "dpi": DPI,
                 "detail": DETAIL,
                 "pdfplumber_version": version("pdfplumber"),

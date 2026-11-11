@@ -105,6 +105,9 @@ def _sha256(path: Path) -> str:
 
 
 def scan(source_id: str) -> int:
+    if source_id in PEERS and PEERS[source_id].is_workbook:
+        print(f"{source_id} is a workbook, not pages: declare its tables in WORKBOOK_TABLES.")
+        return 1
     problems = check_local_files((source_id,))
     if problems:
         print("Cannot scan:", *problems, sep="\n  ")
@@ -155,6 +158,9 @@ def _read_page(
 
 
 def draft(source_id: str, model: str) -> int:
+    if source_id in PEERS and PEERS[source_id].is_workbook:
+        print(f"{source_id} is a workbook: read it by code (scripts/read_peer_workbook.py).")
+        return 1
     if source_id not in TABLE_PAGES:
         print(f"{source_id} has no TABLE_PAGES entry; run `scan` and register its pages first.")
         return 1
@@ -311,6 +317,8 @@ def load() -> int:
             for d in drafts:
                 inserted = updated = 0
                 for row in d["rows"]:
+                    # Drafts written before migration 0008 carry no sheet or cell.
+                    row = {"sheet_name": None, "cell_ref": None} | row
                     PeerDisclosure.model_validate(
                         {k: v for k, v in row.items() if k in PeerDisclosure.model_fields}
                     )
@@ -357,6 +365,13 @@ def review(source_id: str | None) -> int:
     for d in drafts:
         record = BY_ID[d["source_id"]]
         print(f"\n=== {record.title}\n    data/raw/{PEERS[d['source_id']].local_filename}")
+        if "tables" in d:  # read by code from a workbook: no pages
+            print(f"    read by {d['model']}")
+            for r in d["rows"]:
+                value = "[blind]" if r["blind_sample"] else r["figure_printed"]
+                print(f"     {r['sheet_name']}!{r['cell_ref']:6} {r['row_label']!r:50} | "
+                      f"{r['column_header']!r:10} | {value:>14} {r['unit']}")  # fmt: skip
+            continue
         print(f"    drafted by {d['model']} ({d['dpi']} dpi, {d['detail']})")
         for page in d["pages"]:
             reading = page["reading"]

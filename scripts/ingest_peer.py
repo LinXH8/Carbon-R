@@ -42,7 +42,7 @@ from carbon_r.rag.chunking import (
 )
 from carbon_r.rag.embed import configured_model, openai_embedder
 from carbon_r.rag.ingest import PeerMetadata, PostgresChunkStore, ingest_source
-from carbon_r.sources import BY_ID, PEER_IDS, PEERS, REGISTRY, UPSERT, check_local_files
+from carbon_r.sources import BY_ID, PEER_CORPUS_IDS, PEERS, REGISTRY, UPSERT, check_local_files
 
 # A page a person would call a GHG table: it names Scope 1 and a CO2e unit.
 _SCOPE_1 = re.compile(r"\bscope\s*1\b", re.IGNORECASE)
@@ -163,9 +163,9 @@ def ingest(ids: tuple[str, ...]) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--preview", action="store_true", help="print evidence; no DB, no API")
-    parser.add_argument("--source", choices=PEER_IDS, action="append")
+    parser.add_argument("--source", choices=PEER_CORPUS_IDS, action="append")
     args = parser.parse_args(argv)
-    ids = tuple(args.source) if args.source else PEER_IDS
+    ids = tuple(args.source) if args.source else PEER_CORPUS_IDS
     return preview(ids) if args.preview else ingest(ids)
 
 
