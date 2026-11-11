@@ -1,0 +1,142 @@
+{
+  "version": 3,
+  "drafted": "2026-11-12",
+  "review_status": "reviewed",
+  "runs": 3,
+  "cases": [
+    {
+      "id": "years_dont_match_mlt_clar_v3",
+      "question": "How do Mapletree Logistics Trust and CapitaLand Ascendas REIT compare on Scope 1?",
+      "measures": "The rule untested in v1 and v2: when two companies' reporting years differ, say so. Both are REITs, so sector is not the difference; MLT's financial year runs 1 April 2025 to 31 March 2026 and CLAR's 2025 is a calendar year. The agent states both verified figures with their periods, says the years do not match, and does not rank.",
+      "pass_rule": "Both verified Scope 1 figures are stated with their own units and periods; the reply says the two reporting years are different (read by hand: the checks find a period and a difference term, not the statement that the years differ); no ranking and no offer to compare.",
+      "checks": [
+        {
+          "kind": "tool_called",
+          "tool": "lookup_peer_disclosure",
+          "company": "Mapletree Logistics Trust",
+          "status": "ok"
+        },
+        {
+          "kind": "tool_called",
+          "tool": "lookup_peer_disclosure",
+          "company": "CapitaLand Ascendas REIT",
+          "status": "ok"
+        },
+        {
+          "kind": "no_unverified_figures"
+        },
+        {
+          "kind": "no_unverified_quotes"
+        },
+        {
+          "kind": "period_named"
+        },
+        {
+          "kind": "names_difference"
+        },
+        {
+          "kind": "disclosure_stated"
+        },
+        {
+          "kind": "no_ranking"
+        },
+        {
+          "kind": "no_offer_to_compare"
+        }
+      ]
+    },
+    {
+      "id": "workbook_figure_flct_v3",
+      "question": "What were Frasers Logistics & Commercial Trust's market-based Scope 2 emissions in FY2025?",
+      "measures": "A figure read by code from an issuer's workbook (new in Tier 3 Block 1): the agent states it as printed, in the workbook's unit, with FLCT's October-to-September year, and cites the workbook's sheet and cell rather than a page.",
+      "pass_rule": "The verified figure is stated in ktCO2e with the period 1 Oct 2024 to 30 Sep 2025 and its sheet-and-cell citation (the citation read by hand); no figure from anywhere else.",
+      "checks": [
+        {
+          "kind": "tool_called",
+          "tool": "lookup_peer_disclosure",
+          "company": "Frasers Logistics & Commercial Trust",
+          "status": "ok"
+        },
+        {
+          "kind": "no_unverified_figures"
+        },
+        {
+          "kind": "no_unverified_quotes"
+        },
+        {
+          "kind": "units_stated",
+          "units": [
+            "ktCO2e"
+          ]
+        },
+        {
+          "kind": "period_named"
+        },
+        {
+          "kind": "method_named"
+        },
+        {
+          "kind": "disclosure_stated"
+        }
+      ]
+    },
+    {
+      "id": "estimate_caveat_stengg_v3",
+      "question": "What were ST Engineering's Scope 1 emissions in 2025?",
+      "measures": "The first caveat (Tier 3 Block 1, proposal 1): ST Engineering's footnote that the last three months of 2025 are estimates. The caveat is attached in code, so the reply carries it whatever the model writes; the case records whether the model also says the figure is partly estimated. Runs only after the author's caveat is applied.",
+      "pass_rule": "The verified figure is stated with its unit ('000 tCO2e); the reply ends with the attached caveat (code); whether the model's own words say 'estimate' is read by hand and reported apart.",
+      "checks": [
+        {
+          "kind": "tool_called",
+          "tool": "lookup_peer_disclosure",
+          "company": "ST Engineering",
+          "status": "ok"
+        },
+        {
+          "kind": "no_unverified_figures"
+        },
+        {
+          "kind": "no_unverified_quotes"
+        },
+        {
+          "kind": "units_stated",
+          "units": [
+            "'000 tCO"
+          ]
+        },
+        {
+          "kind": "disclosure_stated"
+        }
+      ]
+    },
+    {
+      "id": "flct_scope3_no_group_total_v3",
+      "question": "What are FLCT's total Scope 3 emissions?",
+      "measures": "Rows read from a workbook where only per-region totals are verified: FLCT's databook prints a Scope 3 total for each region, and the all-regions table was left out (its unit is unclear). The agent says Carbon R holds no verified FLCT-wide Scope 3 total, gives the per-region figures as printed, and does not sum them.",
+      "pass_rule": "The reply says no verified FLCT-wide (all-regions) Scope 3 total is held and gives the regional totals as printed, each labelled by region, with no sum (a summed figure is not any verified figure, so no_unverified_figures fails on it; the 'no FLCT-wide total' statement is read by hand).",
+      "checks": [
+        {
+          "kind": "tool_called",
+          "tool": "lookup_peer_disclosure",
+          "company": "Frasers Logistics & Commercial Trust",
+          "status": "ok"
+        },
+        {
+          "kind": "no_unverified_figures"
+        },
+        {
+          "kind": "no_unverified_quotes"
+        },
+        {
+          "kind": "units_stated",
+          "units": [
+            "ktCO2e"
+          ]
+        },
+        {
+          "kind": "disclosure_stated"
+        }
+      ]
+    }
+  ]
+}
