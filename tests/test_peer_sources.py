@@ -22,7 +22,7 @@ def test_each_file_appears_once():
 def test_an_assumed_start_is_never_labelled_stated():
     for s in SOURCES.sources:
         if "assumed" in s.notes.lower():
-            assert s.period_basis in ("start_assumed", "dates_assumed"), s.local_filename
+            assert s.period_basis == "start_assumed", s.local_filename
 
 
 @pytest.mark.skipif(

@@ -227,9 +227,9 @@ own boundary and period. Carbon R treats them in two ways.
   `search_peer_disclosures`, quoted verbatim with a page, and never used as a figure.
 
 The two workbooks are figures only: they are not part of the prose corpus. CICT's
-workbook names its year only, and its calendar-year dates are assumed (VERIFY against its
-FY2025 report); its searchable prose is still its FY2024 report. Neither workbook's
-download URL is recorded yet.
+workbook names its year only; its dates (1 January to 31 December 2025) are from its
+Sustainability Report 2025, confirmed by the author. Its searchable prose is still its
+FY2024 report. Each workbook's URL is the landing page it was downloaded from.
 
 ## 17. STI constituents — verified from primary
 

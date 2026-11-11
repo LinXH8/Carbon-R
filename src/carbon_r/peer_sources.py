@@ -49,9 +49,8 @@ class PeerSource(BaseModel):
     period_start: date
     period_end: date
     # stated: both dates read from the report. from_companion: taken from the companion
-    # report named in `notes`. start_assumed: only the end date is stated. dates_assumed:
-    # only the year is named; both dates follow the issuer's practice, as `notes` says.
-    period_basis: Literal["stated", "from_companion", "start_assumed", "dates_assumed"]
+    # report named in `notes`. start_assumed: only the end date is stated.
+    period_basis: Literal["stated", "from_companion", "start_assumed"]
     # Where the period is stated: a PDF page, or for a workbook "Sheet!A1".
     period_pdf_page: int | None = Field(ge=1)
     period_cell: str | None = Field(default=None, pattern=r"^.+![A-Z]{1,3}[1-9][0-9]*$")

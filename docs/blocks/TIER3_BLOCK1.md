@@ -222,12 +222,13 @@ issuer's own workbook, and every row is verified by hand.
   field. Those fields now default to empty.
 
 **Registration.** Both workbooks are in `data/peer_sources.json`, with sha256 and a download
-date of 2026-11-10. The URLs are not recorded yet. Neither workbook states its period's
+date of 2026-11-10. The URLs, recorded later, are the landing pages the files came from. Neither workbook states its period's
 dates, only the year:
 - FLCT's dates (1 October to 30 September) come from its FY2025 report, which states them
   (`from_companion`).
-- CICT's are a calendar year assumed from its FY2024 report (`dates_assumed`, a new basis
-  value), to be checked against its FY2025 report. CICT's searchable prose stays the FY2024
+- CICT's were first recorded as a calendar year assumed from its FY2024 report. The author
+  then confirmed them from CICT's Sustainability Report 2025, which states it covers 1
+  January to 31 December 2025, so they are `from_companion`, citing SR 2025 (2026-11-11). CICT's searchable prose stays the FY2024
   report, one year behind these figures.
 
 Workbooks are peer sources but not prose corpus (`PEER_CORPUS_IDS`): they are never chunked
@@ -284,8 +285,8 @@ says "page (or sheet and cell)".
 - Completeness was measured with two matching changes made after drafting (above).
 - CICT's labels keep their footnote digits as printed ("Scope 11" is Scope 1, "Scope 32" is
   Scope 3), and the lookup returns them so. The scope field is right; the label reads oddly.
-- CICT's dates are assumed (`dates_assumed`), and its download URL, like FLCT's, is not
-  recorded yet.
+- The two workbooks' URLs are the landing pages they were downloaded from, recorded as
+  such, not links to the files.
 
 ## Follow-ups
 
@@ -316,5 +317,5 @@ figure, which the leak check would rightly flag in a tracked file.
    One cell in FLCT's databook is zero, so the leak check now matches any bare zero on a
    line that names a peer or a tonnes unit. The test file was reworded to avoid it. Whether a zero,
    which reveals nothing, should be exempt is for the author to decide.
-5. **Record the two workbooks' download URLs, and check CICT's assumed dates** against its
-   FY2025 report.
+5. **Record the two workbooks' download URLs, and check CICT's dates.** Done 2026-11-11:
+   the landing pages are recorded, and CICT's dates are confirmed from its SR 2025.

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "drafted": "2026-10-23",
-  "note": "period_printed_page is null throughout: each report's footer offset is established in Part B, not in B0. period_basis: stated = start and end read from the report; from_companion = taken from the companion report named in notes; start_assumed = only the end date is stated. dates_assumed = only the year is named; both dates follow the issuer's practice, as notes says.",
+  "note": "period_printed_page is null throughout: each report's footer offset is established in Part B, not in B0. period_basis: stated = start and end read from the report; from_companion = taken from the companion report named in notes; start_assumed = only the end date is stated.",
   "sources": [
     {
       "company": "DBS",
@@ -251,8 +251,8 @@
       "period_pdf_page": null,
       "period_cell": "Climate Action - Scopes 1 & 2!L8",
       "period_printed_page": null,
-      "url": "not recorded",
-      "url_note": "Downloaded by the author on 2026-11-10; the download URL is still to be recorded.",
+      "url": "https://www.frasersproperty.com/reits/flct/who-we-are/sustainability",
+      "url_note": "landing page the workbook was downloaded from (by the author, 2026-11-10); the URL is the page, not the file",
       "local_filename": "peer/FLCT_Databook_FY25_Original file.xlsx",
       "sha256": "b494da3dcb840a6765b209faa87160d7eaa23756d08da380835a6c5d90c9f79f",
       "page_count": null,
@@ -266,17 +266,17 @@
       "document_kind": "data_pack",
       "period_start": "2025-01-01",
       "period_end": "2025-12-31",
-      "period_basis": "dates_assumed",
+      "period_basis": "from_companion",
       "period_pdf_page": null,
       "period_cell": "ENVIRONMENTAL!I6",
       "period_printed_page": null,
-      "url": "not recorded",
-      "url_note": "Downloaded by the author on 2026-11-10; the download URL is still to be recorded.",
+      "url": "https://www.cict.com.sg/sustainability-reports.html",
+      "url_note": "landing page the workbook was downloaded from (by the author, 2026-11-10); the URL is the page, not the file",
       "local_filename": "peer/CICT_SR_2025_Data_Pack.xlsx",
       "sha256": "cb4b48660980d42f4f0bd6bab5c55bb8d3b726684ac6081fcc21d2669c3b3f99",
       "page_count": null,
       "licence_note": "company workbook, copyright of the issuer; local use only, not redistributed",
-      "notes": "SR 2025 data pack ('KEY ESG DATA SUMMARY', sheet ENVIRONMENTAL). The workbook names the year only ('2025', I6). The calendar-year dates are ASSUMED from CICT's practice in its FY2024 report (the only CICT report held), not read for 2025 - VERIFY against the FY2025 report. CICT's searchable prose stays the FY2024 report, one year behind these figures.",
+      "notes": "SR 2025 data pack ('KEY ESG DATA SUMMARY', sheet ENVIRONMENTAL). The workbook names the year only ('2025', I6). The dates are from CICT's Sustainability Report 2025, which states it covers 1 January 2025 to 31 December 2025 (FY 2025); confirmed by the author, 2026-11-11 (page not recorded). CICT's searchable prose stays the FY2024 report, one year behind these figures.",
       "retrieved_on": "2026-11-10"
     }
   ]
