@@ -25,7 +25,7 @@ established until then.
 | 13 | Common Singapore LPG cylinder sizes and pricing basis | — | `synthgen` LPG invoice shape | — | **secondary only — VERIFY** |
 | 14 | How Singapore bills show credits, balances brought forward and GST-inclusive headlines; LPG per-delivery billing | — | `synthgen` v1 quirk shapes | — | **not claimed — fictional** |
 | 15 | Whether a Singapore tax invoice in a foreign currency must also show the GST amount in SGD (IRAS) | — | `usd_invoice` scenario pages | — | **not claimed — VERIFY** |
-| 16 | Peer sustainability reports, 12 STI companies (14 files; list in `data/peer_sources.json`) | Each issuer | `search_peer_disclosures` corpus (local only); the 170 figures served by `lookup_peer_disclosure` | Before 2026-10-23 | **170 figures verified from primary** (each against its cited page, as self-reported); the rest of the reports used as prose only |
+| 16 | Peer sustainability reports and two issuers' workbooks, 12 STI companies (16 files; list in `data/peer_sources.json`) | Each issuer | `search_peer_disclosures` corpus (local only); the 170 + 53 figures served by `lookup_peer_disclosure` | Before 2026-10-23; the two workbooks 2026-11-10 | **170 + 53 figures verified from primary** (each against its cited page or cell, as self-reported); the rest of the reports used as prose only |
 | 17 | [Straits Times Index constituents](https://www.sgx.com/indices/products/sti) | SGX | That the 12 peer companies are STI constituents | 2026-11-10 | **verified from primary** (all 12 listed) |
 
 ---
@@ -206,7 +206,7 @@ returns HTTP 403**, so no such verification is available. The vendor UEN is ther
 self-evidently synthetic (`SYN-0000-0001`) rather than realistic-but-assumed-invalid: no
 verification is needed to know it is nobody's UEN.
 
-## 16. Peer sustainability reports — 170 figures verified from primary, prose otherwise
+## 16. Peer sustainability reports — 170 + 53 figures verified from primary, prose otherwise
 
 The reports are the primary source for what each company says about itself, and nothing
 more: their figures are **self-reported, not independently assured**, under each company's
@@ -216,17 +216,20 @@ own boundary and period. Carbon R treats them in two ways.
   model from page images and each checked by the author against the cited page of the
   issuer's PDF: DBS, CLAR (ESG data pack) and Sembcorp on 2026-10-29; OCBC and UOB on
   2026-11-02; MLT, MPACT, Keppel, ST Engineering and Seatrium (report and databook) on
-  the date recorded on each row, in UTC. Only these rows reach the agent, through `lookup_peer_disclosure`,
-  which reads the `peer_disclosures_verified` view. They are committed in
+  the date recorded on each row, in UTC. A further 53 were read by code from the issuers'
+  own workbooks for FLCT (ESG Databook FY2025) and CICT (SR 2025 data pack), whose reports
+  print no GHG table, and each checked by the author against its cited cell. Only these
+  rows reach the agent, through `lookup_peer_disclosure`, which reads the `peer_disclosures_verified` view. They are committed in
   `data/peer_disclosures_verified.json` with their citations. Footnotes on OCBC and UOB
   figures were not reviewed, nor were footnotes from the later reports. Method and
   evidence: docs/blocks/TIER2_BLOCK4.md and docs/blocks/TIER3_BLOCK1.md.
 - **Prose.** Everything else in the reports is searched as text by
   `search_peer_disclosures`, quoted verbatim with a page, and never used as a figure.
 
-FLCT and CICT have no verified rows yet: neither report prints a GHG table, and their
-figures are in workbooks not yet read. The agent says it holds no verified figure for them
-rather than reading one from text.
+The two workbooks are figures only: they are not part of the prose corpus. CICT's
+workbook names its year only, and its calendar-year dates are assumed (VERIFY against its
+FY2025 report); its searchable prose is still its FY2024 report. Neither workbook's
+download URL is recorded yet.
 
 ## 17. STI constituents — verified from primary
 

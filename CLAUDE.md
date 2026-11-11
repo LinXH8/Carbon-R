@@ -49,8 +49,8 @@ cites and set `verified_by` / `verified_at`. Code reads peer figures only throug
 the row label and column header as printed. The drafted value is kept when a row is
 corrected, so draft accuracy stays measurable. The drafting model must differ from any model
 later scored against these rows. A recorded, seeded sample is checked blind (value hidden)
-before it is checked sighted. These rows are described as "LLM-drafted, verified by hand",
-never as hand-labelled.
+before it is checked sighted. Peer rows are either drafted by an LLM from report pages, or
+read by code from the issuer's own workbook. Every row is verified by hand.
 
 Verified peer figures are committed in exactly one file, `data/peer_disclosures_verified.json`
 (exported from `peer_disclosures_verified`, seeded back by `make seed-peer`). Its `draft`

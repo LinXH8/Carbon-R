@@ -1,6 +1,413 @@
 {
-  "note": "Peer emissions figures as self-reported by each company in its own report, drafted by a vision model from the cited page and checked by hand against that page on the date in `verification.verified_at`. Not independently assured. Each company reports under its own boundary, consolidation approach and period; figures are not comparable like-for-like. `draft` holds what the model read, kept for measurement; it is not a verified value. The reports themselves are not redistributed.",
+  "note": "Peer emissions figures as self-reported by each company, either drafted by a vision model from the cited page of its report, or read by code from the cited sheet and cell of its own workbook (`sheet_name`, `cell_ref`), and checked by hand against that page or cell on the date in `verification.verified_at`. Not independently assured. Each company reports under its own boundary, consolidation approach and period; figures are not comparable like-for-like. `draft` holds what the model or the workbook reader read, kept for measurement; it is not a verified value. The reports and workbooks themselves are not redistributed.",
   "rows": [
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I10",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "153,306",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Scope 32"
+      },
+      "figure": "153306",
+      "figure_printed": "153,306",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 32",
+      "scope": "3",
+      "scope3_category": null,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I11",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "15,133",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Cat 1 Purchased goods and services3"
+      },
+      "figure": "15133",
+      "figure_printed": "15,133",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Cat 1 Purchased goods and services3",
+      "scope": "3",
+      "scope3_category": 1,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I12",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "10,985",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Cat 2 Capital goods3,4"
+      },
+      "figure": "10985",
+      "figure_printed": "10,985",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Cat 2 Capital goods3,4",
+      "scope": "3",
+      "scope3_category": 2,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I13",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "17,008",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Cat 3 Fuel and energy-related activities"
+      },
+      "figure": "17008",
+      "figure_printed": "17,008",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Cat 3 Fuel and energy-related activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I14",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "15",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Cat 4 Upstream transportation and distribution3"
+      },
+      "figure": "15",
+      "figure_printed": "15",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Cat 4 Upstream transportation and distribution3",
+      "scope": "3",
+      "scope3_category": 4,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I15",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "12,611",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Cat 5 Waste generated in own operations"
+      },
+      "figure": "12611",
+      "figure_printed": "12,611",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Cat 5 Waste generated in own operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I16",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "154",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Cat 6 Business travel5"
+      },
+      "figure": "154",
+      "figure_printed": "154",
+      "method": null,
+      "notes": "Recorded as the workbook displays it (number format '#,##0'); the cell stores more decimals.",
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Cat 6 Business travel5",
+      "scope": "3",
+      "scope3_category": 6,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "97,400",
+        "in_sample": true
+      },
+      "cell_ref": "I17",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "97,400",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Cat 13 Downstream leased assets6,7"
+      },
+      "figure": "97400",
+      "figure_printed": "97,400",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Cat 13 Downstream leased assets6,7",
+      "scope": "3",
+      "scope3_category": 13,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "890",
+        "in_sample": true
+      },
+      "cell_ref": "I7",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "890",
+        "method": null,
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Scope 11"
+      },
+      "figure": "890",
+      "figure_printed": "890",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 11",
+      "scope": "1",
+      "scope3_category": null,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I8",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "61,257",
+        "method": "market",
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Scope 2 (Market-based)"
+      },
+      "figure": "61257",
+      "figure_printed": "61,257",
+      "method": "market",
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 (Market-based)",
+      "scope": "2",
+      "scope3_category": null,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "I9",
+      "column_header": "2025",
+      "company": "CapitaLand Integrated Commercial Trust",
+      "draft": {
+        "draft_request_hash": "f1e402ecf81e8630",
+        "drafted_at": "2026-11-11T14:24:23.562978+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "61,257",
+        "method": "location",
+        "page_image_sha256": "3702981e20bf98dba09d97e3442d783cab773f27958a4ebe22eb89c5d93c5eff",
+        "row_label": "Scope 2 (Location-based)"
+      },
+      "figure": "61257",
+      "figure_printed": "61,257",
+      "method": "location",
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-12-31",
+      "period_start": "2025-01-01",
+      "printed_page": null,
+      "row_label": "Scope 2 (Location-based)",
+      "scope": "2",
+      "scope3_category": null,
+      "sheet_name": "ENVIRONMENTAL",
+      "source_id": "peer_cict_2025_datapack",
+      "unit": "tonnes CO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:02:58.857680+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
     {
       "blind": {
         "author_value": null,
@@ -1678,6 +2085,1560 @@
       "verification": {
         "outcome": "confirmed",
         "verified_at": "2026-10-29T09:29:57.128808+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L10",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Category 2: Capital Goods"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Category 2: Capital Goods",
+      "scope": "3",
+      "scope3_category": 2,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L11",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.20",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Category 3: Fuel and Energy-Related Activities"
+      },
+      "figure": "0.20",
+      "figure_printed": "0.20",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Category 3: Fuel and Energy-Related Activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L13",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.13",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Category 5: Waste Generated in Operations"
+      },
+      "figure": "0.13",
+      "figure_printed": "0.13",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Category 5: Waste Generated in Operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L14",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Category 6: Business Travel"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Category 6: Business Travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L15",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Category 11: Use of Sold Products"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Category 11: Use of Sold Products",
+      "scope": "3",
+      "scope3_category": 11,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L16",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Category 12: End-of-Life Treatment of Sold Products"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Category 12: End-of-Life Treatment of Sold Products",
+      "scope": "3",
+      "scope3_category": 12,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L17",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "5.65",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Category 13: Downstream Leased Assets"
+      },
+      "figure": "5.65",
+      "figure_printed": "5.65",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Category 13: Downstream Leased Assets",
+      "scope": "3",
+      "scope3_category": 13,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L18",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "9.53",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Total (ktCO2e)"
+      },
+      "figure": "9.53",
+      "figure_printed": "9.53",
+      "method": null,
+      "notes": "Recorded as the workbook displays it (number format '#,##0.00'); the cell stores more decimals.",
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Total (ktCO2e)",
+      "scope": "3",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L21",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "9.93",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 1: Purchased Goods and Services"
+      },
+      "figure": "9.93",
+      "figure_printed": "9.93",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 1: Purchased Goods and Services",
+      "scope": "3",
+      "scope3_category": 1,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L22",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "3.21",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 2: Capital Goods"
+      },
+      "figure": "3.21",
+      "figure_printed": "3.21",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 2: Capital Goods",
+      "scope": "3",
+      "scope3_category": 2,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L23",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.36",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 3: Fuel and Energy-Related Activities"
+      },
+      "figure": "0.36",
+      "figure_printed": "0.36",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 3: Fuel and Energy-Related Activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "0.11",
+        "in_sample": true
+      },
+      "cell_ref": "L24",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.11",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 4: Upstream Transportation and Distribution"
+      },
+      "figure": "0.11",
+      "figure_printed": "0.11",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 4: Upstream Transportation and Distribution",
+      "scope": "3",
+      "scope3_category": 4,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L25",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.02",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 5: Waste Generated in Operations"
+      },
+      "figure": "0.02",
+      "figure_printed": "0.02",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 5: Waste Generated in Operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L26",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.01",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 6: Business Travel"
+      },
+      "figure": "0.01",
+      "figure_printed": "0.01",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 6: Business Travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "0",
+        "in_sample": true
+      },
+      "cell_ref": "L27",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 11: Use of Sold Products"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 11: Use of Sold Products",
+      "scope": "3",
+      "scope3_category": 11,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L28",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 12: End-of-Life Treatment of Sold Products"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 12: End-of-Life Treatment of Sold Products",
+      "scope": "3",
+      "scope3_category": 12,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L29",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "39.05",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Category 13: Downstream Leased Assets"
+      },
+      "figure": "39.05",
+      "figure_printed": "39.05",
+      "method": null,
+      "notes": "Recorded as the workbook displays it (number format '#,##0.00'); the cell stores more decimals.",
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Category 13: Downstream Leased Assets",
+      "scope": "3",
+      "scope3_category": 13,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L30",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "52.69",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Australia (including corporate office) > Total (ktCO2e)"
+      },
+      "figure": "52.69",
+      "figure_printed": "52.69",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Australia (including corporate office) > Total (ktCO2e)",
+      "scope": "3",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "1.98",
+        "in_sample": true
+      },
+      "cell_ref": "L33",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "1.98",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Category 1: Purchased Goods and Services"
+      },
+      "figure": "1.98",
+      "figure_printed": "1.98",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Category 1: Purchased Goods and Services",
+      "scope": "3",
+      "scope3_category": 1,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L34",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "1.40",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Category 2: Capital Goods"
+      },
+      "figure": "1.40",
+      "figure_printed": "1.40",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Category 2: Capital Goods",
+      "scope": "3",
+      "scope3_category": 2,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L35",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Category 3: Fuel and Energy-Related Activities"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Category 3: Fuel and Energy-Related Activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L37",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Category 5: Waste Generated in Operations"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Category 5: Waste Generated in Operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "0.02",
+        "in_sample": true
+      },
+      "cell_ref": "L38",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.02",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Category 6: Business Travel"
+      },
+      "figure": "0.02",
+      "figure_printed": "0.02",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Category 6: Business Travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L39",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Category 11: Use of Sold Products"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Category 11: Use of Sold Products",
+      "scope": "3",
+      "scope3_category": 11,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L40",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Category 12: End-of-Life Treatment of Sold Products"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Category 12: End-of-Life Treatment of Sold Products",
+      "scope": "3",
+      "scope3_category": 12,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L41",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "27.41",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Category 13: Downstream Leased Assets"
+      },
+      "figure": "27.41",
+      "figure_printed": "27.41",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Category 13: Downstream Leased Assets",
+      "scope": "3",
+      "scope3_category": 13,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L42",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "30.81",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Europe (including corporate offices) > Total (ktCO2e)"
+      },
+      "figure": "30.81",
+      "figure_printed": "30.81",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Europe (including corporate offices) > Total (ktCO2e)",
+      "scope": "3",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L45",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "1.14",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Category 1: Purchased Goods and Services"
+      },
+      "figure": "1.14",
+      "figure_printed": "1.14",
+      "method": null,
+      "notes": "Recorded as the workbook displays it (number format '#,##0.00'); the cell stores more decimals.",
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Category 1: Purchased Goods and Services",
+      "scope": "3",
+      "scope3_category": 1,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "1.95",
+        "in_sample": true
+      },
+      "cell_ref": "L46",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "1.95",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Category 2: Capital Goods"
+      },
+      "figure": "1.95",
+      "figure_printed": "1.95",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Category 2: Capital Goods",
+      "scope": "3",
+      "scope3_category": 2,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "0.70",
+        "in_sample": true
+      },
+      "cell_ref": "L47",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.70",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Category 3: Fuel and Energy-Related Activities"
+      },
+      "figure": "0.70",
+      "figure_printed": "0.70",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Category 3: Fuel and Energy-Related Activities",
+      "scope": "3",
+      "scope3_category": 3,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L49",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0.01",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Category 5: Waste Generated in Operations"
+      },
+      "figure": "0.01",
+      "figure_printed": "0.01",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Category 5: Waste Generated in Operations",
+      "scope": "3",
+      "scope3_category": 5,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L50",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Category 6: Business Travel"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Category 6: Business Travel",
+      "scope": "3",
+      "scope3_category": 6,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L51",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Category 11: Use of Sold Products"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Category 11: Use of Sold Products",
+      "scope": "3",
+      "scope3_category": 11,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L52",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "0",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Category 12: End-of-Life Treatment of Sold Products"
+      },
+      "figure": "0",
+      "figure_printed": "0",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Category 12: End-of-Life Treatment of Sold Products",
+      "scope": "3",
+      "scope3_category": 12,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "4.63",
+        "in_sample": true
+      },
+      "cell_ref": "L53",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "4.63",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Category 13: Downstream Leased Assets"
+      },
+      "figure": "4.63",
+      "figure_printed": "4.63",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Category 13: Downstream Leased Assets",
+      "scope": "3",
+      "scope3_category": 13,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L54",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "8.43",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "The UK (including corporate offices) > Total (ktCO2e)"
+      },
+      "figure": "8.43",
+      "figure_printed": "8.43",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "The UK (including corporate offices) > Total (ktCO2e)",
+      "scope": "3",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L9",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "3.55",
+        "method": null,
+        "page_image_sha256": "8ea0f2d39d194a513b12a9da5ca7df040d0cadb4481b549d421200cf99d9c02c",
+        "row_label": "Singapore (including corporate office) > Category 1: Purchased Goods and Services"
+      },
+      "figure": "3.55",
+      "figure_printed": "3.55",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Singapore (including corporate office) > Category 1: Purchased Goods and Services",
+      "scope": "3",
+      "scope3_category": 1,
+      "sheet_name": "Climate Action - Scope 3",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": "9.2",
+        "in_sample": true
+      },
+      "cell_ref": "L10",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "9.2",
+        "method": "location",
+        "page_image_sha256": "7bb4c858eaead162b6a97749d530c1d63bd74cefaa393b25949ce524a75ee4b3",
+        "row_label": "Scope 2 location-based emissions"
+      },
+      "figure": "9.2",
+      "figure_printed": "9.2",
+      "method": "location",
+      "notes": "Recorded as the workbook displays it (number format '#,##0.0'); the cell stores more decimals.",
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Scope 2 location-based emissions",
+      "scope": "2",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scopes 1 & 2",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L11",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "7.6",
+        "method": "market",
+        "page_image_sha256": "7bb4c858eaead162b6a97749d530c1d63bd74cefaa393b25949ce524a75ee4b3",
+        "row_label": "Scope 2 market-based emissions"
+      },
+      "figure": "7.6",
+      "figure_printed": "7.6",
+      "method": "market",
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Scope 2 market-based emissions",
+      "scope": "2",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scopes 1 & 2",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L12",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "10.7",
+        "method": "location",
+        "page_image_sha256": "7bb4c858eaead162b6a97749d530c1d63bd74cefaa393b25949ce524a75ee4b3",
+        "row_label": "Scopes 1 and 2 location-based emissions (ktCO2e)"
+      },
+      "figure": "10.7",
+      "figure_printed": "10.7",
+      "method": "location",
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Scopes 1 and 2 location-based emissions (ktCO2e)",
+      "scope": "1+2",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scopes 1 & 2",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L13",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "9.1",
+        "method": "market",
+        "page_image_sha256": "7bb4c858eaead162b6a97749d530c1d63bd74cefaa393b25949ce524a75ee4b3",
+        "row_label": "Scopes 1 and 2 market-based emissions (ktCO2e)"
+      },
+      "figure": "9.1",
+      "figure_printed": "9.1",
+      "method": "market",
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Scopes 1 and 2 market-based emissions (ktCO2e)",
+      "scope": "1+2",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scopes 1 & 2",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
+        "verified_by": "Lin Xiang Hong"
+      }
+    },
+    {
+      "blind": {
+        "author_value": null,
+        "in_sample": false
+      },
+      "cell_ref": "L9",
+      "column_header": "FY2025",
+      "company": "Frasers Logistics & Commercial Trust",
+      "draft": {
+        "draft_request_hash": "68013f362f628747",
+        "drafted_at": "2026-11-11T14:27:19.028483+00:00",
+        "drafted_by": "carbon_r.workbook_reader v1",
+        "figure_printed": "1.5",
+        "method": null,
+        "page_image_sha256": "7bb4c858eaead162b6a97749d530c1d63bd74cefaa393b25949ce524a75ee4b3",
+        "row_label": "Scope 1 emissions"
+      },
+      "figure": "1.5",
+      "figure_printed": "1.5",
+      "method": null,
+      "notes": null,
+      "pdf_page": null,
+      "period_end": "2025-09-30",
+      "period_start": "2024-10-01",
+      "printed_page": null,
+      "row_label": "Scope 1 emissions",
+      "scope": "1",
+      "scope3_category": null,
+      "sheet_name": "Climate Action - Scopes 1 & 2",
+      "source_id": "peer_flct_2025_databook",
+      "unit": "ktCO2e",
+      "verification": {
+        "outcome": "confirmed",
+        "verified_at": "2026-11-11T15:03:01.191350+00:00",
         "verified_by": "Lin Xiang Hong"
       }
     },

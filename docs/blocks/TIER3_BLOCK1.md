@@ -4,12 +4,10 @@ Written for someone who was not there: the design decisions and their reasons, t
 found and what caught them, and the evidence behind every number. Environment details and
 career notes live in the local build log, not here.
 
-**Status (2026-11-11):** the six PDF reports are verified, which brings the verified file
-to 170 rows from 11 reports of ten companies.
-The new rows come from MLT, MPACT, Keppel, ST Engineering and Seatrium (report and
-databook); the six reports' row counts are in the Verification table.
-The STI constituent check is done. FLCT and CICT are still open: their figures are only in the issuers' workbooks, and the cell reader the author
-chose is not built yet (below).
+**Status (2026-11-11):** all twelve peer companies now have verified rows. The verified file
+holds 170 + 53 rows from 13 files: 170 drafted from PDF pages, and 53 read by code from
+the two issuers' workbooks for FLCT and CICT, whose reports print no GHG table. The STI constituent
+check is done.
 
 ## What this block has to do
 
@@ -50,7 +48,7 @@ The figures are in the issuers' workbooks (FLCT ESG Databook FY2025, CICT SR 202
 which the author downloaded. The author's decision (2026-11-10): read those cells in Python,
 with no model, keeping the value Excel displays under the cell's number format rather than
 the stored float (some cells store 14-16 decimals behind a one-decimal display), and cite
-file, sheet and cell. Not yet built.
+file, sheet and cell. Built and done (below).
 
 ## The inventories, taken before drafting
 
@@ -173,6 +171,108 @@ unchanged. `make leak-check` found 0 new, `make check` and `make test` passed (1
 1 skipped), and `lookup_peer_disclosure` returned `ok` with the cited page for ST
 Engineering Scope 1, MLT Scope 2 market-based and Keppel Scope 3 category 11.
 
+## The workbook reader: why "no new tooling" changed
+
+The block's plan said the pass-2b pipeline would be used unchanged. That held for the six
+PDF reports. It could not hold for FLCT and CICT. Neither report prints a GHG table, and
+the companion files the author downloaded are Excel workbooks, not PDFs. The pipeline reads
+page images and cites a PDF page, and a workbook has neither. The author chose
+(2026-11-10) to read the cells by code, with no model, and approved the plan on 2026-11-11.
+
+What was built, tests first at each step:
+
+1. **The displayed value.** `xlsx.read_cells` reads each cell's number format, and
+   `xlsx.render_number` reproduces what the workbook shows: General for whole numbers,
+   `0`, `0.0`, `#,##0`, `#,##0.0` and the like, rounded half away from zero on the stored
+   decimal string, as Excel rounds. This matters because the workbooks store doubles behind
+   their formats: one FLCT cell stores sixteen decimals behind a one-decimal display. The
+   displayed value is the figure as printed. Any other format is refused, never
+   approximated: a percentage, a date, an accounting format, or General over a fraction.
+   Over both workbooks, every refused cell is outside the GHG report-year columns
+   (intensity, percentages, comparative years).
+2. **Migration 0008.** A row cites a PDF page or a sheet and cell, never both and never
+   neither. The cell key gains the sheet and cell, so cells that share a label and a column
+   stay distinct. For a PDF row the sheet and cell are empty, a constant within its report,
+   so the existing rows' sort order and seeded blind samples are unchanged. A test checks
+   this against every committed blind sample. The verified file writes the two fields only
+   when set, so the 170 existing rows serialise as before: the re-export is byte-identical.
+3. **The reader** (`carbon_r.peer_workbook`, `scripts/read_peer_workbook.py`). The author
+   declares each table (`WORKBOOK_TABLES`) and lists each report-year cell with its
+   classification; the inventory replaces the model's reading. Python checks each listed
+   cell against the workbook: label and header as printed, the header naming the report
+   year, the unit, and a non-blank value in a supported format. It also checks every table
+   against the list, so completeness holds in both directions by construction. Any problem
+   writes nothing. A table can name a heading cell, so FLCT's per-region rows are recorded
+   as "Region > Category ...", the page drafter's convention. Rows are tagged
+   `carbon_r.workbook_reader v1`, and each records the sha256 of its sheet in place of a
+   page image. Worksheets, `apply`, `export` and the leak check take these rows unchanged.
+4. **The citation** names the sheet and cell: "<report>, sheet '<sheet>', cell L9".
+
+The blind sample is kept for workbook rows (author's decision): no model is involved, but
+it would also catch a wrongly rendered number format. **Workbook rows are not eval 5a
+rows.** That eval measures extraction from PDF pages, so `eval_peer_extraction.py` excludes
+and counts any row without a page. A test fails if one gets through. CLAUDE.md rule 4 now
+reads: peer rows are either drafted by an LLM from report pages, or read by code from the
+issuer's own workbook, and every row is verified by hand.
+
+**Defects caught by the tests while building:**
+- A table's declared unit was first matched as a substring, so "tCO2e" was found inside a
+  title printing "ktCO2e". The unit must now be a whole token.
+- `load` would have failed on every draft written before 0008, which has no sheet or cell
+  field. Those fields now default to empty.
+
+**Registration.** Both workbooks are in `data/peer_sources.json`, with sha256 and a download
+date of 2026-11-10. The URLs are not recorded yet. Neither workbook states its period's
+dates, only the year:
+- FLCT's dates (1 October to 30 September) come from its FY2025 report, which states them
+  (`from_companion`).
+- CICT's are a calendar year assumed from its FY2024 report (`dates_assumed`, a new basis
+  value), to be checked against its FY2025 report. CICT's searchable prose stays the FY2024
+  report, one year behind these figures.
+
+Workbooks are peer sources but not prose corpus (`PEER_CORPUS_IDS`): they are never chunked
+or searched.
+
+**Noted by the author when listing the cells (2026-11-11).** CICT's market-based and
+location-based Scope 2 figures are identical in every year of the data pack. That is
+likely genuine, meaning no certificates were bought, but the data pack does not say so.
+It is recorded here, not inferred into a row.
+
+**Blind entries for the workbooks.** The author gave the first reading of FLCT's Scopes 1 &
+2 L10 as "8.7k". Asked which cell to check, without being shown the draft, the author read
+the cell again and gave 9.2, which is what was recorded. The first reading is kept here
+because it differed. CICT's two values were given without cell references, and their order
+was confirmed by the author before entry.
+
+## Verification of the workbook rows
+
+The author's tables were proposed by Claude from labels and headers only, checked by the
+author, and the inventories filled by the author: the classification (scope, category,
+method) is the author's. Claude pre-filled the copy-only columns (sheet, cell, label and
+header as the workbook shows them); the reader re-checks those against the workbook.
+
+The first FLCT read stopped with nothing written. The author had typed the region into the
+37 Scope 3 labels, where the reader adds it from the table heading itself. On the author's
+instruction Claude stripped the prefix (the original is kept locally), and the re-read
+matched. CICT matched on the first read.
+
+| Source id | Listed | Read | Problems | Unlisted | Shown other than stored | Blind matched | Outcome |
+|---|---|---|---|---|---|---|---|
+| `peer_cict_2025_datapack` | 11 | 11 | 0 | 0 | 1 | 2 of 2 | 11 confirmed |
+| `peer_flct_2025_databook` | 42 | 42 | 0 | 0 | 4 | 8 of 8 | 42 confirmed |
+
+The author checked every row against the workbook and confirmed all 53 as read: none
+corrected, none rejected. Verified by Lin Xiang Hong. `apply` was run twice per worksheet;
+the second run updated 0. The export was run twice and the files are byte-identical (all
+170 + 53 rows). The 170 PDF rows are unchanged in it: the diff adds the workbook rows and changes
+only the file's note. `make seed-peer` gave 0 inserted, all rows unchanged. The lookup returned
+`ok` with a sheet-and-cell citation for CICT Scope 2 market-based (one row) and for FLCT
+Scope 3 category 13 (four rows, one per region, each labelled with its region).
+
+The lookup's disclosure text said every figure was drafted by a model from a page image,
+which was no longer true. It now names both routes, and the instruction to state the page
+says "page (or sheet and cell)".
+
 ## Known limits
 
 - **Footnotes were not reviewed**, as for OCBC and UOB. ST Engineering's footnote 1 says the
@@ -182,8 +282,16 @@ Engineering Scope 1, MLT Scope 2 market-based and Keppel Scope 3 category 11.
 - Seatrium p.70's Scope 2 rows carry no method, though the report states market-based
   elsewhere (p.71).
 - Completeness was measured with two matching changes made after drafting (above).
+- CICT's labels keep their footnote digits as printed ("Scope 11" is Scope 1, "Scope 32" is
+  Scope 3), and the lookup returns them so. The scope field is right; the label reads oddly.
+- CICT's dates are assumed (`dates_assumed`), and its download URL, like FLCT's, is not
+  recorded yet.
 
 ## Follow-ups
+
+The total of verified rows is written as 170 + 53 throughout: the sum equals a verified peer
+figure, which the leak check would rightly flag in a tracked file.
+
 
 1. **Make the local leak check scan untracked files.** `make leak-check` scans commits since
    the base, the index and any paths passed, but not untracked files. A new document is
@@ -192,7 +300,21 @@ Engineering Scope 1, MLT Scope 2 market-based and Keppel Scope 3 category 11.
    names, all coincidences, and the record was reworded. The pre-push hook and CI still see
    the file once it is committed, so nothing can be pushed unchecked. The gap is in the local
    check only, before `git add`.
-2. **Carry footnote caveats onto peer rows.** At minimum, ST Engineering's statement that
-   the last three months of 2025 are estimates belongs on its 7 rows (rule 7). This needs
-   the author's decision on how a footnote enters a verified row.
-3. **Read the FLCT and CICT workbooks** (the author's decision above).
+2. **Carry footnote caveats onto peer rows** (proposal 1, left for later by the author on
+   2026-11-11). ST Engineering's statement that the last three months of 2025 are estimates
+   belongs on its 7 rows (rule 7). The proposal: three caveat fields entered by the author
+   (the footnote as printed, a kind such as `estimate`, and the page it is printed on). They
+   would be set by a separate command that touches only those fields on a verified row and
+   records who added the caveat and when. The lookup tool would show the caveat, and the
+   loop would attach it to the reply in code, as `PEER_CAVEAT` is. A caveat may not contain
+   an emissions figure. Not built; the rows are unchanged.
+   A second candidate, a method caveat (noted by the author, 2026-11-11): FLCT's notes say
+   its Singapore market-based Scope 2 uses the grid factor as a proxy, because no verified
+   residual-mix factor exists.
+3. **Read the FLCT and CICT workbooks.** Done (above).
+4. **A verified figure of exactly zero.**
+   One cell in FLCT's databook is zero, so the leak check now matches any bare zero on a
+   line that names a peer or a tonnes unit. The test file was reworded to avoid it. Whether a zero,
+   which reveals nothing, should be exempt is for the author to decide.
+5. **Record the two workbooks' download URLs, and check CICT's assumed dates** against its
+   FY2025 report.

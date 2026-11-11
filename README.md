@@ -409,7 +409,10 @@ reply still reaches the user today. Details and the automatic scoring are in
 ### Peer table extraction by representation (eval 5a)
 
 The same extractor model read the 9 verified table pages from 5 reports three ways, scored
-against the 87 verified rows, one run:
+against the 87 rows verified at the time, one run. It has not been re-run on the 83 rows
+verified since, so it says nothing yet about those reports. Rows read by code from an
+issuer's workbook (FLCT, CICT) are never eval rows: the eval measures extraction from PDF
+pages, and the script excludes and counts any row without a page:
 
 | Of 87 rows | Page image | `pdftotext -layout` | pdfplumber |
 |---|---|---|---|
@@ -495,18 +498,26 @@ are 2026.
 
 #### Verified peer figures
 
-[`data/peer_disclosures_verified.json`](data/peer_disclosures_verified.json) holds **170
-emissions figures from 11 reports of ten companies**
-(DBS, OCBC, UOB, CapitaLand Ascendas REIT's ESG data pack, Sembcorp, Mapletree Logistics
-Trust, Mapletree Pan Asia Commercial Trust, Keppel, ST Engineering, Seatrium's report and
-databook), one per table cell, for each report's own period. Each was drafted by a vision
-model (`gpt-5.5-2026-04-23`) from an image of the cited page, then **checked by the author
-against that page** on the date the row gives. They are figures **as self-reported by each
+[`data/peer_disclosures_verified.json`](data/peer_disclosures_verified.json) holds **170 + 53
+emissions figures from 13 files covering all twelve peer companies**, one per table cell, for
+each report's own period:
+
+- **170 drafted from report pages** (DBS, OCBC, UOB, CapitaLand Ascendas REIT's ESG data
+  pack, Sembcorp, Mapletree Logistics Trust, Mapletree Pan Asia Commercial Trust, Keppel,
+  ST Engineering, Seatrium's report and databook), each by a vision model
+  (`gpt-5.5-2026-04-23`) from an image of the cited page;
+- **53 read by code from the issuer's own workbook** (Frasers Logistics & Commercial
+  Trust's ESG Databook, CapitaLand Integrated Commercial Trust's data pack), whose reports
+  print no GHG table. No model is involved: each value is recorded as the workbook displays
+  it, and each row cites its sheet and cell.
+
+Every row was then **checked by the author against that page or cell** on the date the row
+gives. They are figures **as self-reported by each
 company**, under its own boundary and period: **not independently assured**, by Carbon R or
 by anyone it can vouch for, and not comparable like-for-like across companies.
 
-Every row carries its citation (report, PDF page, printed page where known, the row label and
-column header as printed), who checked it and when, and what the model originally read,
+Every row carries its citation (report, PDF page and printed page where known, or sheet and
+cell, and the row label and column header as printed), who checked it and when, and what the model originally read,
 labelled `draft`. Of the 170, **167 were correct as drafted and 3 were corrected**, none of
 them in the figure: a footnote marker in a row label (DBS), a method the page does not state
 (OCBC's total, drafted as market-based, verified as method not stated), and a misspelt row
@@ -514,7 +525,8 @@ label the drafter had silently corrected (Seatrium's databook, restored as print
 figure was read correctly. In seeded blind samples the author's own readings, made before
 seeing the draft, matched it **33 of 34**: 18 of 18 for the first five reports, 15 of 16 for
 the next six. In the one mismatch the author's blind reading came from the neighbouring
-location-based row; the draft was right.
+location-based row; the draft was right. The 53 workbook rows were all confirmed as read,
+with the blind sample matching 10 of 10.
 
 Coverage was measured for eight of the reports. Before drafting, the author listed every
 report-year cell on their table pages. For OCBC and UOB, the list was drafted by Claude from
@@ -531,7 +543,7 @@ the last three months of 2025 are estimates is one. Details in
 [TIER3_BLOCK1.md](docs/blocks/TIER3_BLOCK1.md).
 
 ```bash
-make seed-peer   # load the 170 rows into peer_disclosures (idempotent; no reports needed)
+make seed-peer   # load every verified row into peer_disclosures (idempotent; no reports needed)
 ```
 
 Drafting and checking more pages needs the reports locally:
@@ -671,7 +683,7 @@ Stated plainly, because they bound what any number here means:
 - All documents processed so far are **synthetic**. None are real customer documents.
 - Emission estimates produced here are **not assured** by any third party.
 - **Peer search returns prose, not figures.** The reports' text layers misread tables, so
-  search never states a number. 170 figures from 11 reports have been verified separately
+  search never states a number. 170 + 53 figures from 13 files have been verified separately
   (see [Verified peer figures](#verified-peer-figures)), as self-reported and not assured;
   the agent states them only through `lookup_peer_disclosure`. Whether drafting misses rows
   has been measured for eight of the eleven reports. Peer retrieval is measured on 30 questions and
