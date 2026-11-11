@@ -406,6 +406,26 @@ the replies: quotes reworded in 3 of 3, a figure taken from a passage in 2 of 3.
 reply still reaches the user today. Details and the automatic scoring are in
 [TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md).
 
+A third set (v3, Tier 3 Block 1) tests the newer parts. The 4 cases were frozen and reviewed
+by the author before the run, and each ran 3 times (`peer_agent_20261111T161732Z`, at
+`3fda85c`). Read by hand against each pass rule:
+
+| Behaviour | Read by hand |
+|---|---|
+| Two REITs on different years: both figures with periods, no ranking | 3 of 3 |
+| ... and the reply says the two years differ | 1 of 3 (2 say only "different reporting periods") |
+| A figure read from a workbook: unit, Oct-Sep period, sheet-and-cell citation | 3 of 3 |
+| ST Engineering's estimate caveat attached to the reply (code) | 3 of 3 |
+| ... and the model's own words say the figure is partly estimated | 3 of 3 |
+| FLCT's total Scope 3: says no FLCT-wide total, gives regional totals, no sum | 1 of 3 |
+
+In the 2 FLCT failures the agent added a year the question never named (`report_year` 2024,
+then 2026, where FLCT's FY2025 is 2025), got `no_results`, and offered to look again rather
+than answer. No run summed the regions, and none stated a figure that was not verified. The
+caveat case's unit check failed 0 of 3 because of an error in the case: its unit was written
+as "'000 tCO", which the check does not find inside "'000 tCO₂e". All 3 replies print
+"'000 tCO₂e" correctly. Details in [TIER3_BLOCK1.md](docs/blocks/TIER3_BLOCK1.md).
+
 ### Peer table extraction by representation (eval 5a)
 
 The same extractor model (`gpt-5.4-mini`, never the drafter) reads each verified table page

@@ -1,0 +1,301 @@
+{
+  "git": {
+    "commit": "3fda85c7335b3db13702e333616a490811f1f10d",
+    "dirty": false
+  },
+  "cases_file": {
+    "path": "data/evals/peer_agent_questions_v3.json",
+    "version": 3,
+    "sha256": "bd3b74e39c779c9a758ff3b0df61d7cbfa4105dca1aa1f2eef381109e6fc6bba"
+  },
+  "runs_per_case": 3,
+  "cases": [
+    {
+      "id": "years_dont_match_mlt_clar_v3",
+      "pass_rule": "Both verified Scope 1 figures are stated with their own units and periods; the reply says the two reporting years are different (read by hand: the checks find a period and a difference term, not the statement that the years differ); no ranking and no offer to compare.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:Mapletree Logistics Trust:ok": 3,
+        "tool_called:lookup_peer_disclosure:CapitaLand Ascendas REIT:ok": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "period_named": 2,
+        "names_difference": 3,
+        "disclosure_stated": 3,
+        "no_ranking": 3,
+        "no_offer_to_compare": 3
+      },
+      "all_checks_passed": 2,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "9d0a9389b09e48e0ac507e455a5546bf",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Mapletree Logistics Trust:ok": true,
+            "tool_called:lookup_peer_disclosure:CapitaLand Ascendas REIT:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "period_named": true,
+            "names_difference": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "9db32afad3924d749a6d394ce6c64c16",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Mapletree Logistics Trust:ok": true,
+            "tool_called:lookup_peer_disclosure:CapitaLand Ascendas REIT:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "period_named": false,
+            "names_difference": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "34ae4de787aa4d169f4689277a78b7b7",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok",
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Mapletree Logistics Trust:ok": true,
+            "tool_called:lookup_peer_disclosure:CapitaLand Ascendas REIT:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "period_named": true,
+            "names_difference": true,
+            "disclosure_stated": true,
+            "no_ranking": true,
+            "no_offer_to_compare": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "workbook_figure_flct_v3",
+      "pass_rule": "The verified figure is stated in ktCO2e with the period 1 Oct 2024 to 30 Sep 2025 and its sheet-and-cell citation (the citation read by hand); no figure from anywhere else.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:Frasers Logistics & Commercial Trust:ok": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "units_stated:ktCO2e": 3,
+        "period_named": 3,
+        "method_named": 3,
+        "disclosure_stated": 3
+      },
+      "all_checks_passed": 3,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "5f1b9bfe4f6147ad861d500c45db75d9",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Frasers Logistics & Commercial Trust:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:ktCO2e": true,
+            "period_named": true,
+            "method_named": true,
+            "disclosure_stated": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "54515213ab5a4eaeaa433b54465042f3",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Frasers Logistics & Commercial Trust:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:ktCO2e": true,
+            "period_named": true,
+            "method_named": true,
+            "disclosure_stated": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "017ee22b5d824aa496b00685d35ecda1",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Frasers Logistics & Commercial Trust:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:ktCO2e": true,
+            "period_named": true,
+            "method_named": true,
+            "disclosure_stated": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "estimate_caveat_stengg_v3",
+      "pass_rule": "The verified figure is stated with its unit ('000 tCO2e); the reply ends with the attached caveat (code); whether the model's own words say 'estimate' is read by hand and reported apart.",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:ST Engineering:ok": 3,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "units_stated:'000 tCO": 0,
+        "disclosure_stated": 3
+      },
+      "all_checks_passed": 0,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "a3b4d2fb9e304c339329ea86c88381fb",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:ST Engineering:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:'000 tCO": false,
+            "disclosure_stated": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "ce1cd1e747a14f9aa32efe2f342ace79",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:ST Engineering:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:'000 tCO": false,
+            "disclosure_stated": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "5a34bfb4df7b4421b4cfd93aaa504a3d",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:ST Engineering:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:'000 tCO": false,
+            "disclosure_stated": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "flct_scope3_no_group_total_v3",
+      "pass_rule": "The reply says no verified FLCT-wide (all-regions) Scope 3 total is held and gives the regional totals as printed, each labelled by region, with no sum (a summed figure is not any verified figure, so no_unverified_figures fails on it; the 'no FLCT-wide total' statement is read by hand).",
+      "counts": {
+        "tool_called:lookup_peer_disclosure:Frasers Logistics & Commercial Trust:ok": 1,
+        "no_unverified_figures": 3,
+        "no_unverified_quotes": 3,
+        "units_stated:ktCO2e": 1,
+        "disclosure_stated": 3
+      },
+      "all_checks_passed": 1,
+      "runs": [
+        {
+          "run": 1,
+          "run_id": "37e2817a3a9a47a1adb5a487609ba0eb",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:no_results"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Frasers Logistics & Commercial Trust:ok": false,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:ktCO2e": false,
+            "disclosure_stated": true
+          }
+        },
+        {
+          "run": 2,
+          "run_id": "ad6229600abb40d8b7be28049995a8cb",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:ok"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Frasers Logistics & Commercial Trust:ok": true,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:ktCO2e": true,
+            "disclosure_stated": true
+          }
+        },
+        {
+          "run": 3,
+          "run_id": "f41aa2f580674a08a695247440bd4191",
+          "stopped_reason": "completed",
+          "tool_calls": [
+            "lookup_peer_disclosure:no_results"
+          ],
+          "unverified_figures": 0,
+          "unverified_quotes": 0,
+          "checks": {
+            "tool_called:lookup_peer_disclosure:Frasers Logistics & Commercial Trust:ok": false,
+            "no_unverified_figures": true,
+            "no_unverified_quotes": true,
+            "units_stated:ktCO2e": false,
+            "disclosure_stated": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -346,12 +346,49 @@ byte-identical, the file diff only adds the 7 caveats, and `make seed-peer` gave
 inserted. The lookup for ST Engineering Scope 1 returns the figure with "partly estimated,
 as the report states" and the footnote, cited to PDF p. 37.
 
+## Agent cases v3: 4 cases x 3 runs
+
+Cases `data/evals/peer_agent_questions_v3.json`, sha256 `bd3b74e39c779c9a`. Cases 1-3 were
+drafted by Claude and reviewed by the author; case 4 was added by the author. The file was
+committed at `3fda85c` before the run, and the run is `peer_agent_20261111T161732Z`, on a
+clean tree. The replies are kept locally only. Nothing was changed after the run.
+
+| Case | Automatic, all checks | Read by hand |
+|---|---|---|
+| MLT vs CLAR, Scope 1 (years differ) | 2 of 3 | Both figures with periods, no ranking, no offer: 3 of 3. Says the years differ: 1 of 3 (run 2: "financial year ending # March" against "calendar year"); runs 1 and 3 say only "different reporting periods", with both periods' dates given |
+| FLCT market-based Scope 2 (workbook) | 3 of 3 | 3 of 3: ktCO2e, 1 Oct 2024 to 30 Sep 2025, "sheet ... cell L#" |
+| `peer_stengg_2025` Scope 1 (caveat) | none of 3 | Caveat attached in code 3 of 3; the model also says it is partly estimated 3 of 3; unit printed correctly 3 of 3 (see the case defect below) |
+| FLCT total Scope 3 | 1 of 3 | 1 of 3 (run 2: the four regional totals, "not one single company-wide total", no sum) |
+
+(Figures in the replies are masked here as "#".)
+
+**What failed, and why:**
+- **FLCT total Scope 3, runs 1 and 3.** The question names no year, but the agent passed
+  `report_year` 2024 in one run and 2026 in the other; FLCT's FY2025 is report_year 2025.
+  Both lookups returned `no_results`. The tool's message names the year that is held, and the
+  agent offered to look again instead of retrying. No figure was stated and nothing was
+  summed, so nothing wrong reached the user. The question went unanswered.
+- **The years-differ rule.** In 2 of 3 runs the reply gives both periods and says
+  "different reporting periods", which is true, but does not say outright that the years
+  do not match.
+- **A defect in the case, not the agent.** The caveat case's unit was written as "'000 tCO",
+  meant to match "'000 tCO₂e". The check requires the unit to end at a word boundary, and
+  the "2" of "tCO₂e" continues the word, so it failed in every run though all 3 replies print the
+  unit correctly. The case was frozen before the run and is left as it was. It should have
+  read "'000 tCO2e".
+- **"Verified by hand" flagged twice** (ST Engineering run 2, FLCT Scope 3 run 2). Both
+  flagged sentences cite a source and state no figure, but they carry page numbers, dates or
+  cell references, which the check counts as numbers. Both are false alarms. The check should
+  ignore numbers that are pages, dates or cells.
+
+The prompt was not changed in response (the cases are test-only).
+
 ## Known limits
 
-- **Footnotes were not reviewed**, as for OCBC and UOB. ST Engineering's footnote 1 says the
-  last three months of its 2025 environmental data are estimates. Its 7 rows do not say so,
-  although rule 7 asks for estimated readings to be flagged. The same applies to the
-  footnote markers on Seatrium's 2025 figures.
+- **Footnotes were reviewed for one report only.** ST Engineering's footnote 1 (the last
+  three months of 2025 are estimates) is carried on its 7 rows as a caveat (`1de4491`).
+  The other reports' footnotes, such as the markers on Seatrium's 2025 figures, are not
+  reviewed.
 - Seatrium p.70's Scope 2 rows carry no method, though the report states market-based
   elsewhere (p.71).
 - Completeness was measured with two matching changes made after drafting (above).
@@ -365,7 +402,6 @@ as the report states" and the footnote, cited to PDF p. 37.
 The total of verified rows is written as 170 + 53 throughout: the sum equals a verified peer
 figure, which the leak check would rightly flag in a tracked file.
 
-
 1. **Make the local leak check scan untracked files.** `make leak-check` scans commits since
    the base, the index and any paths passed, but not untracked files. A new document is
    therefore unchecked until it is staged. This block's record was only checked when its path
@@ -374,14 +410,19 @@ figure, which the leak check would rightly flag in a tracked file.
    the file once it is committed, so nothing can be pushed unchecked. The gap is in the local
    check only, before `git add`.
 2. **Carry footnote caveats onto peer rows.** Built, and the first case (ST Engineering's
-   footnote 1) applied (above). Footnotes on the other reports are still not reviewed. A second candidate, a
-   method caveat (noted by the author, 2026-11-11): FLCT's notes say its Singapore
+   footnote 1) applied (above). Footnotes on the other reports are still not reviewed. A
+   second candidate, a method caveat (noted by the author, 2026-11-11): FLCT's notes say its Singapore
    market-based Scope 2 uses the grid factor as a proxy, because no verified residual-mix
    factor exists.
 3. **Read the FLCT and CICT workbooks.** Done (above).
 4. **A verified figure of exactly zero.**
    One cell in FLCT's databook is zero, so the leak check now matches any bare zero on a
-   line that names a peer or a tonnes unit. The test file was reworded to avoid it. Whether a zero,
-   which reveals nothing, should be exempt is for the author to decide.
+   line that names a peer or a tonnes unit. The test file was reworded to avoid it. Whether
+   a zero, which reveals nothing, should be exempt is for the author to decide.
 5. **Record the two workbooks' download URLs, and check CICT's dates.** Done 2026-11-11:
    the landing pages are recorded, and CICT's dates are confirmed from its SR 2025.
+6. **The agent sets `report_year` unasked.** In 2 of 3 FLCT runs it filtered on a year the
+   question never named, and then offered to look again instead of answering. To decide:
+   whether the tool should ignore a year the user did not give, or the reply must retry.
+7. **The "verified by hand" check** should not count page numbers, dates or cell references
+   as figures (2 false alarms in v3).
