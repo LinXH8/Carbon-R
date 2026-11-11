@@ -338,9 +338,13 @@ accepted a caveat printed nowhere, and one with no kind. In SQL, a comparison wi
 neither true nor false, and a CHECK passes when it evaluates to NULL. Every condition now
 tests `is not null` explicitly, and the test covers both cases.
 
-**First case, waiting on the author:** ST Engineering p.37, footnote 1 on the "2025¹" header.
-The sheet `peer_stengg_2025.caveats.csv` lists the report's 7 verified rows. Applied blank,
-it changes 0 rows.
+**First case, applied 2026-11-12:** ST Engineering p.37, footnote 1 on the "2025¹" header.
+The sheet listed the report's 7 verified rows. Applied blank, it changed 0 rows. The author
+transcribed the footnote in full onto all 7 lines, with kind `estimate` and page 37. Applied
+by Lin Xiang Hong: set on 7 rows; a second run set 0 and left 7 unchanged. Two exports were
+byte-identical, the file diff only adds the 7 caveats, and `make seed-peer` gave 0
+inserted. The lookup for ST Engineering Scope 1 returns the figure with "partly estimated,
+as the report states" and the footnote, cited to PDF p. 37.
 
 ## Known limits
 
@@ -369,8 +373,8 @@ figure, which the leak check would rightly flag in a tracked file.
    names, all coincidences, and the record was reworded. The pre-push hook and CI still see
    the file once it is committed, so nothing can be pushed unchecked. The gap is in the local
    check only, before `git add`.
-2. **Carry footnote caveats onto peer rows.** Built (above). Waiting on the author's
-   transcription of ST Engineering's footnote 1, the first case. A second candidate, a
+2. **Carry footnote caveats onto peer rows.** Built, and the first case (ST Engineering's
+   footnote 1) applied (above). Footnotes on the other reports are still not reviewed. A second candidate, a
    method caveat (noted by the author, 2026-11-11): FLCT's notes say its Singapore
    market-based Scope 2 uses the grid factor as a proxy, because no verified residual-mix
    factor exists.

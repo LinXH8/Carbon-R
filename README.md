@@ -556,9 +556,12 @@ OCBC and UOB, the drafter skipped 0**.
 Of **83 for the next six reports, every cell was read**; the matcher counts 1 as skipped,
 a cell the drafter read under a corrected spelling. Two matching fixes made after drafting
 are part of that count (both recorded in [TIER3_BLOCK1.md](docs/blocks/TIER3_BLOCK1.md)). Coverage was not measured for the first three
-reports. Footnotes on figures were not reviewed, so boundary, period, method or estimate
-caveats printed in footnotes are not captured in the notes: ST Engineering's footnote that
-the last three months of 2025 are estimates is one. Details in
+reports. A footnote that qualifies a figure can be entered as a **caveat**: the text as
+printed, its kind and its page, added by the author after verification. The lookup shows it,
+and the agent's reply carries it in code. One is entered so far: ST Engineering's footnote
+that the last three months of 2025 are estimates, on its 7 rows. Footnotes on the other
+reports have not been reviewed, so their boundary, period, method or estimate caveats are
+not captured. Details in
 [TIER2_BLOCK4.md](docs/blocks/TIER2_BLOCK4.md) and
 [TIER3_BLOCK1.md](docs/blocks/TIER3_BLOCK1.md).
 
