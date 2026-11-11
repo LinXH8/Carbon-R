@@ -45,6 +45,7 @@ from carbon_r.agent.tools import Toolkit
 from carbon_r.agent.toolspec import tool_schemas
 from carbon_r.config import get_settings
 from carbon_r.llm import openai_client
+from carbon_r.models.peer_caveat import attached_caveats
 from carbon_r.tools.peer import PEER_CAVEAT
 
 # One line per tool call, keyed by the run, so a reply on screen can be matched to the calls
@@ -254,6 +255,11 @@ def run_agent(
         )
     if stopped == "completed" and any(c.tool in PEER_TOOLS for c in calls):
         reply = f"{reply}\n\n{PEER_CAVEAT}"
+        # A footnote printed with a figure this turn returned (an estimate, a restatement),
+        # attached in code like the caveat above (migration 0009).
+        caveats = attached_caveats(turn_payloads)
+        if caveats:
+            reply = "\n".join([reply, "", "Printed with these figures:", *caveats])
     return AgentRun(
         session_id=session.session_id,
         reply=reply,

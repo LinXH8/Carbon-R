@@ -41,6 +41,7 @@ from psycopg.rows import dict_row
 from pydantic import BaseModel, ConfigDict, Field
 
 from carbon_r.db import DatabaseNotConfiguredError, connect
+from carbon_r.models.peer_caveat import Caveat, caveat_phrase
 from carbon_r.tools.base import ToolResult, error, no_results, ok
 from carbon_r.tools.peer import PEER_CAVEAT, period_text
 
@@ -64,7 +65,8 @@ _ROWS_SQL = """
 select d.source_id, s.title, d.company, d.period_start, d.period_end, d.scope,
        d.scope3_category, d.method, d.figure_printed, d.figure, d.unit, d.pdf_page,
        d.printed_page, d.sheet_name, d.cell_ref, d.row_label, d.column_header, d.notes,
-       d.verification, d.verified_at, d.drafted_by
+       d.verification, d.verified_at, d.drafted_by, d.caveat_printed, d.caveat_kind,
+       d.caveat_pdf_page, d.caveat_cell
 from peer_disclosures_verified d
 join sources s on s.id = d.source_id
 where d.company = %(company)s
@@ -137,6 +139,11 @@ class PeerFigure(BaseModel):
     verification: Literal["confirmed", "corrected"]
     verified_on: date
     drafted_by: str
+    # A footnote printed with the figure, entered by the author after verification
+    # (migration 0009), and where it is printed.
+    caveat_printed: str | None = None
+    caveat_kind: str | None = None
+    caveat_citation: str | None = None
 
 
 def citation_text(
@@ -159,6 +166,14 @@ def citation_text(
 
 def _figure(row: dict[str, Any]) -> PeerFigure:
     report = row["title"]
+    caveat = (
+        Caveat(
+            printed=row["caveat_printed"], kind=row["caveat_kind"],
+            pdf_page=row.get("caveat_pdf_page"), cell=row.get("caveat_cell"),
+        )
+        if row.get("caveat_printed")
+        else None
+    )  # fmt: skip
     return PeerFigure(
         source_id=row["source_id"],
         report=report,
@@ -185,6 +200,9 @@ def _figure(row: dict[str, Any]) -> PeerFigure:
         verification=row["verification"],
         verified_on=row["verified_at"].date(),
         drafted_by=row["drafted_by"],
+        caveat_printed=caveat.printed if caveat else None,
+        caveat_kind=caveat.kind if caveat else None,
+        caveat_citation=caveat.where(report) if caveat else None,
     )
 
 
@@ -214,6 +232,12 @@ def _resolve(
         lines = [
             f"- {f.row_label} [{f.column_header}]: {f.figure_printed} {f.unit} "
             f"({f.citation}; verified {f.verified_on.isoformat()})"
+            + (
+                f"\n  {caveat_phrase(f.caveat_kind)} Printed with this figure "
+                f'({f.caveat_citation.removeprefix(f.report + ", ")}): "{f.caveat_printed}"'
+                if f.caveat_printed and f.caveat_citation
+                else ""
+            )
             for f in figures
         ]
         return ok(

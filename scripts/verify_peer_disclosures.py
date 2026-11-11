@@ -18,6 +18,17 @@ For a workbook source (FLCT, CICT; read by code, `scripts/read_peer_workbook.py`
 category, method): there the list is the classification itself, and completeness is checked
 in both directions when the cells are read, so `completeness` reports that check.
 
+Caveats (migration 0009) come after verification:
+
+    uv run python scripts/verify_peer_disclosures.py caveat-sheet SOURCE_ID
+    uv run python scripts/verify_peer_disclosures.py caveat SOURCE_ID --by "NAME"
+
+`caveat-sheet` writes `<source_id>.caveats.csv` beside the worksheets, one line per verified
+row, the caveat columns blank. The author transcribes a footnote that qualifies a figure onto
+each line it applies to (text as printed, kind, and the PDF page or "Sheet!A1" it is printed
+in), leaving the rest blank. `caveat` sets the caveat columns only, on verified rows only, in
+one transaction or not at all (`peer_caveat.plan_caveats`); a second run updates 0.
+
 `worksheet` writes `data/generated/peer_verification/<source_id>.csv` (git-ignored) with one
 line per unverified draft, blind-sample figures masked as [blind]. It never overwrites a
 worksheet that exists: that file holds the author's decisions.
@@ -47,6 +58,14 @@ from pathlib import Path
 
 from carbon_r.config import PROJECT_ROOT
 from carbon_r.db import DatabaseNotConfiguredError, connect
+from carbon_r.models.peer_caveat import (
+    APPLY_CAVEAT,
+    CAVEAT_COLUMNS,
+    Caveat,
+    CaveatEntry,
+    CaveatTarget,
+    plan_caveats,
+)
 from carbon_r.models.peer_verification import (
     APPLY_UPDATE,
     INVENTORY_COLUMNS,
@@ -296,6 +315,85 @@ def apply(source_id: str, verified_by: str) -> int:
     return 0
 
 
+_VERIFIED = """
+select id, pdf_page, sheet_name, cell_ref, drafted_row_label, column_header, drafted_method,
+       row_label, caveat_printed, caveat_kind, caveat_pdf_page, caveat_cell
+from peer_disclosures_verified
+where source_id = %(source_id)s
+order by pdf_page, sheet_name, cell_ref, id
+"""
+
+
+def _targets(conn, source_id: str) -> list[tuple[CaveatTarget, str]]:
+    out = []
+    for (i, page, sheet, cell, label, header, method, verified_label, c_text, c_kind, c_page,
+         c_cell) in conn.execute(_VERIFIED, {"source_id": source_id}).fetchall():  # fmt: skip
+        caveat = (
+            Caveat(printed=c_text, kind=c_kind, pdf_page=c_page, cell=c_cell) if c_text else None
+        )
+        target = CaveatTarget(id=i, pdf_page=page, sheet_name=sheet, cell_ref=cell,
+                              drafted_row_label=label, column_header=header, method=method,
+                              caveat=caveat)  # fmt: skip
+        out.append((target, verified_label))
+    return out
+
+
+def caveat_sheet(source_id: str) -> int:
+    path = WORKSHEET_DIR / f"{source_id}.caveats.csv"
+    if path.exists():
+        print(f"{path.relative_to(PROJECT_ROOT)} exists; not overwritten (it holds your caveats).")
+        return 1
+    with connect() as conn:
+        targets = _targets(conn, source_id)
+    if not targets:
+        print(f"No verified rows for {source_id}.")
+        return 1
+    WORKSHEET_DIR.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(CAVEAT_COLUMNS)
+        for t, verified_label in targets:
+            writer.writerow(
+                [t.pdf_page or "", t.sheet_name or "", t.cell_ref or "", t.drafted_row_label,
+                 t.column_header, t.method or "", verified_label, "", "", "", ""]
+            )  # fmt: skip
+    print(f"{path.relative_to(PROJECT_ROOT)}: {len(targets)} verified rows, caveat columns blank")
+    print("  for each row a footnote qualifies: caveat_printed (as printed, without its marker),")
+    print("  caveat_kind (estimate, restated, boundary, method, other), and caveat_pdf_page or")
+    print("  caveat_cell (Sheet!A1) where it is printed. Leave other rows blank. No figures.")
+    return 0
+
+
+def caveat(source_id: str, added_by: str) -> int:
+    path = WORKSHEET_DIR / f"{source_id}.caveats.csv"
+    if not path.exists():
+        print(f"No caveat sheet at {path.relative_to(PROJECT_ROOT)}; run `caveat-sheet` first.")
+        return 1
+    with path.open(newline="") as f:
+        lines = [row for row in csv.DictReader(f) if any((v or "").strip() for v in row.values())]
+    try:
+        entries = [CaveatEntry.from_csv_row(row) for row in lines]
+    except ValueError as exc:
+        print(f"Caveat sheet not applied: {exc}")
+        return 1
+    with connect() as conn:
+        plan = plan_caveats([t for t, _ in _targets(conn, source_id)], entries)
+        if plan.problems:
+            print("Caveat sheet not applied; nothing changed:", *plan.problems, sep="\n  ")
+            return 1
+        added_at = datetime.now(UTC)
+        updated = sum(
+            conn.execute(
+                APPLY_CAVEAT,
+                u.caveat.model_dump() | {"id": u.id, "caveat_by": added_by, "caveat_at": added_at},
+            ).rowcount
+            for u in plan.updates
+        )
+        conn.commit()
+    print(f"{source_id}: caveats set on {updated} rows by {added_by}; unchanged {plan.unchanged}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -305,6 +403,10 @@ def main() -> int:
     a = sub.add_parser("apply")
     a.add_argument("source_id")
     a.add_argument("--by", required=True, help="who checked the rows against the PDF")
+    sub.add_parser("caveat-sheet").add_argument("source_id")
+    c = sub.add_parser("caveat")
+    c.add_argument("source_id")
+    c.add_argument("--by", required=True, help="who transcribed the caveats from the page")
     args = parser.parse_args()
     try:
         if args.command == "inventory":
@@ -313,6 +415,10 @@ def main() -> int:
             return completeness(args.source_id)
         if args.command == "worksheet":
             return worksheet(args.source_id)
+        if args.command == "caveat-sheet":
+            return caveat_sheet(args.source_id)
+        if args.command == "caveat":
+            return caveat(args.source_id, args.by)
         return apply(args.source_id, args.by)
     except DatabaseNotConfiguredError as exc:
         print(exc)

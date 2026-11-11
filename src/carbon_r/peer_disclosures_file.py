@@ -17,7 +17,9 @@ Each row keeps what was checked and how:
 - `verification`: who checked it, when, and the outcome (confirmed / corrected);
 - `draft`: what the model (or the workbook reader) read, labelled as such - including a value
   the author corrected;
-- `blind`: whether the row was in the blind sample, and the author's blind reading.
+- `blind`: whether the row was in the blind sample, and the author's blind reading;
+- `caveat`, when there is one: a footnote printed with the figure, as printed, added by the
+  author after verification (migration 0009).
 
 Figures are as self-reported by each company, checked against the cited page on the stated
 date, and not independently assured. Rows are ordered by (source, PDF page, drafted row
@@ -41,6 +43,7 @@ import psycopg
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from carbon_r.config import PROJECT_ROOT
+from carbon_r.models.peer_caveat import Caveat, CaveatKind
 from carbon_r.models.peer_disclosure import Method, Scope, parse_figure
 
 VERIFIED_FILE = PROJECT_ROOT / "data" / "peer_disclosures_verified.json"
@@ -77,6 +80,25 @@ class Draft(BaseModel):
     drafted_at: str
     draft_request_hash: str
     page_image_sha256: str
+
+
+class CaveatRecord(BaseModel):
+    """A footnote printed with the figure (migration 0009): the text as printed, its kind,
+    where it is printed, and who added it when, after the row was verified."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    printed: str
+    kind: CaveatKind
+    pdf_page: int | None
+    cell: str | None
+    added_by: str
+    added_at: str  # ISO 8601, UTC
+
+    @model_validator(mode="after")
+    def _a_valid_caveat(self) -> CaveatRecord:
+        Caveat(printed=self.printed, kind=self.kind, pdf_page=self.pdf_page, cell=self.cell)
+        return self
 
 
 class Blind(BaseModel):
@@ -117,6 +139,8 @@ class VerifiedRow(BaseModel):
     verification: Verification
     draft: Draft
     blind: Blind
+    # Left out of the JSON when absent, so a row without one is written as before.
+    caveat: CaveatRecord | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _figure_is_the_parse(self) -> VerifiedRow:
@@ -175,7 +199,8 @@ select source_id, company, period_start, period_end, scope, scope3_category, fig
        figure, unit, method, pdf_page, printed_page, sheet_name, cell_ref, row_label,
        column_header, notes, verified_by, verified_at, verification, drafted_figure_printed,
        drafted_row_label, drafted_method, drafted_by, drafted_at, draft_request_hash,
-       page_image_sha256, blind_sample, blind_figure_printed
+       page_image_sha256, blind_sample, blind_figure_printed, caveat_printed, caveat_kind,
+       caveat_pdf_page, caveat_cell, caveat_by, caveat_at
 from peer_disclosures_verified
 """
 
@@ -192,7 +217,8 @@ def export_rows(conn: psycopg.Connection, source_ids: list[str] | None = None) -
     for r in conn.execute(sql, {"ids": source_ids}).fetchall():
         (sid, company, start, end, scope, cat, fig_p, fig, unit, method, page, printed, sheet,
          cell, label, header, notes, by, at, outcome, d_fig, d_label, d_method, d_by, d_at,
-         d_hash, d_img, in_blind, blind_value) = r  # fmt: skip
+         d_hash, d_img, in_blind, blind_value, c_text, c_kind, c_page, c_cell, c_by,
+         c_at) = r  # fmt: skip
         rows.append(
             VerifiedRow(
                 source_id=sid,
@@ -223,6 +249,16 @@ def export_rows(conn: psycopg.Connection, source_ids: list[str] | None = None) -
                     page_image_sha256=d_img,
                 ),
                 blind=Blind(in_sample=in_blind, author_value=blind_value),
+                caveat=CaveatRecord(
+                    printed=c_text,
+                    kind=c_kind,
+                    pdf_page=c_page,
+                    cell=c_cell,
+                    added_by=c_by,
+                    added_at=_iso(c_at),
+                )
+                if c_text is not None
+                else None,
             )
         )
     return VerifiedFile(version=1, note=FILE_NOTE, rows=sorted(rows, key=lambda row: row.key))
@@ -271,6 +307,12 @@ def _db_row(row: VerifiedRow) -> dict:
         "page_image_sha256": row.draft.page_image_sha256,
         "blind_sample": row.blind.in_sample,
         "blind_figure_printed": row.blind.author_value,
+        "caveat_printed": row.caveat.printed if row.caveat else None,
+        "caveat_kind": row.caveat.kind if row.caveat else None,
+        "caveat_pdf_page": row.caveat.pdf_page if row.caveat else None,
+        "caveat_cell": row.caveat.cell if row.caveat else None,
+        "caveat_by": row.caveat.added_by if row.caveat else None,
+        "caveat_at": datetime.fromisoformat(row.caveat.added_at) if row.caveat else None,
         "verified_by": row.verification.verified_by,
         "verified_at": datetime.fromisoformat(row.verification.verified_at),
         "verification": row.verification.outcome,
@@ -284,7 +326,8 @@ _COLUMNS = [
     "column_header", "notes",
     "drafted_by",
     "drafted_at", "draft_request_hash", "page_image_sha256", "blind_sample",
-    "blind_figure_printed", "verified_by", "verified_at", "verification",
+    "blind_figure_printed", "verified_by", "verified_at", "verification", "caveat_printed",
+    "caveat_kind", "caveat_pdf_page", "caveat_cell", "caveat_by", "caveat_at",
 ]  # fmt: skip
 
 _FIND = f"""

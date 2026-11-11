@@ -311,6 +311,37 @@ drafter, `gpt-5.5`, read every row of both pages from the same instruction. The
 instruction was not changed after this result: a change made now would be tuned on the
 eval, and the next measurement would not be independent.
 
+## Caveats on verified rows (proposal 1, approved 2026-11-11)
+
+A footnote that qualifies a figure enters the rows it qualifies, as the proposal described:
+
+- **Migration 0009** adds the caveat columns: the text as printed, its kind (`estimate`,
+  `restated`, `boundary`, `method`, `other`), where it is printed (a PDF page, or `Sheet!A1`
+  for a workbook), and who added it and when. A caveat is whole or absent, and only ever on
+  a verified row.
+- **`verify_peer_disclosures.py caveat-sheet` / `caveat`.** The first writes a sheet of the
+  source's verified rows with blank caveat columns. The author transcribes the footnote onto
+  the lines it applies to. `caveat` sets the caveat columns only, on verified rows only, in
+  one transaction or not at all. An identical caveat is left as it is, so a second run
+  updates 0, and a different one is refused, never overwritten.
+- **No emissions figure in a caveat** (`has_emissions_figure`): no decimal, no thousands
+  separator, no whole number of 100 or more that is not a year, and no number followed by a
+  CO2e or tonnage unit. A footnote that gives a figure should become a verified row.
+- **The lookup** shows the caveat under its figure, and **the loop attaches** the caveats of
+  the turn's figures to the reply in code, after `PEER_CAVEAT`. An estimate reads "partly
+  estimated, as the report states", followed by the footnote. It never depends on the model.
+- **The verified file** carries a caveat only on a row that has one, so every other row is
+  written as before.
+
+**A defect, caught by the migration's test before commit.** The first check constraint
+accepted a caveat printed nowhere, and one with no kind. In SQL, a comparison with NULL is
+neither true nor false, and a CHECK passes when it evaluates to NULL. Every condition now
+tests `is not null` explicitly, and the test covers both cases.
+
+**First case, waiting on the author:** ST Engineering p.37, footnote 1 on the "2025¹" header.
+The sheet `peer_stengg_2025.caveats.csv` lists the report's 7 verified rows. Applied blank,
+it changes 0 rows.
+
 ## Known limits
 
 - **Footnotes were not reviewed**, as for OCBC and UOB. ST Engineering's footnote 1 says the
@@ -338,17 +369,11 @@ figure, which the leak check would rightly flag in a tracked file.
    names, all coincidences, and the record was reworded. The pre-push hook and CI still see
    the file once it is committed, so nothing can be pushed unchecked. The gap is in the local
    check only, before `git add`.
-2. **Carry footnote caveats onto peer rows** (proposal 1, left for later by the author on
-   2026-11-11). ST Engineering's statement that the last three months of 2025 are estimates
-   belongs on its 7 rows (rule 7). The proposal: three caveat fields entered by the author
-   (the footnote as printed, a kind such as `estimate`, and the page it is printed on). They
-   would be set by a separate command that touches only those fields on a verified row and
-   records who added the caveat and when. The lookup tool would show the caveat, and the
-   loop would attach it to the reply in code, as `PEER_CAVEAT` is. A caveat may not contain
-   an emissions figure. Not built; the rows are unchanged.
-   A second candidate, a method caveat (noted by the author, 2026-11-11): FLCT's notes say
-   its Singapore market-based Scope 2 uses the grid factor as a proxy, because no verified
-   residual-mix factor exists.
+2. **Carry footnote caveats onto peer rows.** Built (above). Waiting on the author's
+   transcription of ST Engineering's footnote 1, the first case. A second candidate, a
+   method caveat (noted by the author, 2026-11-11): FLCT's notes say its Singapore
+   market-based Scope 2 uses the grid factor as a proxy, because no verified residual-mix
+   factor exists.
 3. **Read the FLCT and CICT workbooks.** Done (above).
 4. **A verified figure of exactly zero.**
    One cell in FLCT's databook is zero, so the leak check now matches any bare zero on a
