@@ -410,21 +410,29 @@ A third set (v3, Tier 3 Block 1) tests the newer parts. The 4 cases were frozen 
 by the author before the run, and each ran 3 times (`peer_agent_20261111T161732Z`, at
 `3fda85c`). Read by hand against each pass rule:
 
-| Behaviour | Read by hand |
-|---|---|
-| Two REITs on different years: both figures with periods, no ranking | 3 of 3 |
-| ... and the reply says the two years differ | 1 of 3 (2 say only "different reporting periods") |
-| A figure read from a workbook: unit, Oct-Sep period, sheet-and-cell citation | 3 of 3 |
-| ST Engineering's estimate caveat attached to the reply (code) | 3 of 3 |
-| ... and the model's own words say the figure is partly estimated | 3 of 3 |
-| FLCT's total Scope 3: says no FLCT-wide total, gives regional totals, no sum | 1 of 3 |
+| Behaviour, read by hand | v3 | v4, after two fixes |
+|---|---|---|
+| Two REITs on different years: both figures with periods, no ranking | 3 of 3 | 3 of 3 |
+| ... and the reply says the two years differ | 1 of 3 | 1 of 3 |
+| A figure read from a workbook: unit, Oct-Sep period, sheet-and-cell citation | 3 of 3 | 3 of 3 |
+| ST Engineering's estimate caveat attached to the reply (code) | 3 of 3 | 3 of 3 |
+| ... and the model's own words say the figure is partly estimated | 3 of 3 | 3 of 3 |
+| FLCT's total Scope 3: says no FLCT-wide total, gives regional totals, no sum | 1 of 3 | **none of 3** |
 
-In the 2 FLCT failures the agent added a year the question never named (`report_year` 2024,
-then 2026, where FLCT's FY2025 is 2025), got `no_results`, and offered to look again rather
-than answer. No run summed the regions, and none stated a figure that was not verified. The
-caveat case's unit check failed 0 of 3 because of an error in the case: its unit was written
-as "'000 tCO", which the check does not find inside "'000 tCO₂e". All 3 replies print
-"'000 tCO₂e" correctly. Details in [TIER3_BLOCK1.md](docs/blocks/TIER3_BLOCK1.md).
+In v3's 2 FLCT failures the agent added a year the question never named, got `no_results`,
+and offered to look again. Two fixes followed. First, a year the question does not name is
+now dropped in code. Second, the "verified by hand" check no longer counts the pages, cells
+and dates of the figures it was given, which removed v3's 2 false alarms. v4 is v3 with only
+the caveat case's unit check corrected (v3 wrote "'000 tCO", which the check does not find
+inside "'000 tCO₂e"; every reply printed the unit correctly).
+
+**After the fixes, the FLCT case got worse.** With the year no longer invented, the lookup returned all
+of FLCT's Scope 3 rows, and the model answered from the first "Total" row, Singapore's. In 2
+of 3 runs it presented that regional total as FLCT's Scope 3 total. In the third it implied
+an FLCT-wide total exists. No run summed the regions or stated an unverified figure, so
+every automatic check passed: they cannot see a verified figure presented under the wrong
+scope of company. This is open as a follow-up. Details in
+[TIER3_BLOCK1.md](docs/blocks/TIER3_BLOCK1.md).
 
 ### Peer table extraction by representation (eval 5a)
 

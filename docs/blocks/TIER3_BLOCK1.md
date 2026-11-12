@@ -383,6 +383,54 @@ clean tree. The replies are kept locally only. Nothing was changed after the run
 
 The prompt was not changed in response (the cases are test-only).
 
+## Fix pass after v3 (2026-11-12), and agent cases v4
+
+Two fixes, made on the author's instruction from v3's failures, at `47cac06`:
+
+- **Follow-up 6: no invented year.** When the question names no year, a `report_year` the
+  model adds is dropped in code before the peer lookup and the peer search. The tool's
+  message tells the model the year was not applied and to state each figure's own period.
+  A named year is kept, and so is the year after it, because a report_year is the year a
+  period ends: "2025" can mean a financial year ending in 2026. Recommended over "the latest
+  year, stated in the reply" because each figure already carries its period, and an
+  unfiltered lookup returns each year as its own row rather than choosing one.
+- **Follow-up 7: citations are not figures.** The "verified by hand" check now sets aside
+  dates, years, financial-year labels and the numbers in "Scope 3" or "Category 13".
+  Page and cell references are set aside only when a lookup this turn returned a figure from
+  that page or cell. The first version set every page reference aside, and an existing test
+  caught it: a sentence citing the pages of a quoted passage, which no lookup returned,
+  claims hand verification falsely and must still be flagged. Both v3 false alarms now pass.
+  Known limit: a figure printed as a bare four-digit number from 1900 to 2099, with no
+  thousands separator, is read as a year and set aside.
+
+**Cases v4** (`data/evals/peer_agent_questions_v4.json`, sha256 `1d3cb8c3d63a2c66`) are v3
+with only the ST Engineering unit corrected to "'000 tCO2e". v3 is unchanged. Run
+`peer_agent_20261112T050629Z` at `47cac06`, on a clean tree. Before the run, Claude's first
+commit of these changes carried three leak-check coincidences. The leak check's failure was
+hidden by a pipe through `tail`; the commit was amended before any push. Read by hand:
+
+| Case | v3 (`3fda85c`), by hand | v4 (`47cac06`), automatic | v4, by hand |
+|---|---|---|---|
+| MLT vs CLAR: both figures with periods, no ranking | 3 of 3 | 3 of 3 | 3 of 3 |
+| ... says the two years differ | 1 of 3 | - | 1 of 3 (run 1: financial year ending March against calendar year; runs 2-3: "different reporting periods") |
+| FLCT workbook figure: ktCO2e, Oct-Sep period, sheet and cell | 3 of 3 | 3 of 3 | 3 of 3 |
+| ST Engineering: caveat attached (code) / model says estimated | 3 / 3 of 3 | 3 of 3 (unit now checked) | 3 / 3 of 3 |
+| FLCT total Scope 3: no FLCT-wide total, regional figures, no sum | 1 of 3 | 3 of 3 | **none of 3** |
+| "Verified by hand" flagged | 2 (both false) | - | 0 |
+
+**FLCT total Scope 3 got worse, and the automatic checks missed it.** The year fix worked:
+all 3 runs looked up without a year and got every row. But with all of FLCT's Scope 3 rows
+in front of it, the model answered from the first "Total" row, Singapore's (cell L18):
+- Run 1 called it "FLCT's verified Scope 3 total" and named no region.
+- Run 2 called it FLCT's Scope 3 total "for Singapore (including corporate office) > Total".
+- Run 3 said the figures are "reported by region and a total", implying an FLCT-wide total
+  exists, and gave no figure.
+
+No run summed the regions or stated a figure that was not verified, so every automatic check
+passed. The checks cannot see a verified figure presented under the wrong scope of company.
+This is v3's 1 of 3 behaviour turned into a misstatement, not an improvement. The prompt was
+not changed (the cases are test-only).
+
 ## Known limits
 
 - **Footnotes were reviewed for one report only.** ST Engineering's footnote 1 (the last
@@ -421,8 +469,13 @@ figure, which the leak check would rightly flag in a tracked file.
    a zero, which reveals nothing, should be exempt is for the author to decide.
 5. **Record the two workbooks' download URLs, and check CICT's dates.** Done 2026-11-11:
    the landing pages are recorded, and CICT's dates are confirmed from its SR 2025.
-6. **The agent sets `report_year` unasked.** In 2 of 3 FLCT runs it filtered on a year the
-   question never named, and then offered to look again instead of answering. To decide:
-   whether the tool should ignore a year the user did not give, or the reply must retry.
-7. **The "verified by hand" check** should not count page numbers, dates or cell references
-   as figures (2 false alarms in v3).
+6. **The agent sets `report_year` unasked.** Fixed 2026-11-12 (`47cac06`): a year the
+   question does not name is dropped in code.
+7. **The "verified by hand" check** counted page numbers, dates and cell references as
+   figures. Fixed 2026-11-12 (`47cac06`).
+8. **A regional total presented as the company's.** In v4, given all of FLCT's Scope 3 rows,
+   the agent took Singapore's "Total" (L18) as FLCT's Scope 3 total in 2 of 3 runs, and in
+   the third implied an FLCT-wide total exists. The automatic checks cannot see this. To
+   decide: a code-side note when a lookup returns several "Total" rows for different
+   tables (e.g. "these are regional totals; there is no company-wide total"), or a check
+   that a reply's "total" names its table.
