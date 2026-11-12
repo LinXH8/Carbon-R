@@ -390,6 +390,8 @@ def test_the_toolkit_passes_the_filter_through_and_creates_no_handle(session):
         seen.append((question, kwargs))
         return ok({"quotes": []}, "fine")
 
+    # The question names the year; one it does not name is dropped (follow-up 6).
+    session.user_messages.append("How does DBS set its boundary for 2025?")
     toolkit = Toolkit(session, search_peers=search)
     result = toolkit.dispatch(
         "search_peer_disclosures",

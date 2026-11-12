@@ -215,6 +215,8 @@ def test_the_toolkit_passes_the_selectors_through_and_creates_no_handle(session)
         seen.append((company, scope, kwargs))
         return ok({"figures": []}, "fine")
 
+    # The question names the year; one it does not name is dropped (follow-up 6).
+    session.user_messages.append("What was DBS's market-based Scope 2 in 2025?")
     toolkit = Toolkit(session, lookup_peers=lookup)
     result = toolkit.dispatch(
         "lookup_peer_disclosure",

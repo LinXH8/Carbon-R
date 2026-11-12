@@ -31,6 +31,7 @@ reports print.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Sequence
 from datetime import date
 from decimal import Decimal
@@ -144,6 +145,29 @@ class PeerFigure(BaseModel):
     caveat_printed: str | None = None
     caveat_kind: str | None = None
     caveat_citation: str | None = None
+
+
+# A year the question names: "2025", "FY2025", "FY25", "FY2025/26", "FY25/26", "2025/26".
+_NAMED_YEAR = re.compile(
+    r"\bFY\s?'?(\d{4}|\d{2})(?:\s?[/\-–]\s?(\d{4}|\d{2}))?\b"
+    r"|\b((?:19|20)\d{2})(?:\s?[/\-–]\s?(\d{4}|\d{2}))?\b",
+    re.IGNORECASE,
+)
+
+
+def year_named_in(question: str, report_year: int) -> bool:
+    """Whether `report_year` is a year the question itself names (Tier 3 Block 1, follow-up 6).
+
+    In agent cases v3 the model filtered FLCT's figures on report_year 2024 and 2026 when the
+    question named no year, and got no_results. A year counts when the question names it, or
+    names the year before it: a report_year is the year a period ENDS, so "2025" can mean a
+    financial year ending in 2026, as an April-to-March reporter's does."""
+    named: set[int] = set()
+    for match in _NAMED_YEAR.finditer(question):
+        for digits in match.groups():
+            if digits:
+                named.add(int(digits) if len(digits) == 4 else 2000 + int(digits))
+    return report_year in named or report_year - 1 in named
 
 
 def citation_text(
@@ -340,4 +364,11 @@ if __name__ == "__main__":  # pragma: no cover
     _demo()
 
 
-__all__ = ["DISCLOSURE", "PeerFigure", "PeerQuery", "citation_text", "lookup_peer_disclosure"]
+__all__ = [
+    "DISCLOSURE",
+    "PeerFigure",
+    "PeerQuery",
+    "citation_text",
+    "lookup_peer_disclosure",
+    "year_named_in",
+]

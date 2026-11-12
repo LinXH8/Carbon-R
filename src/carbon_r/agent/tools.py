@@ -51,6 +51,7 @@ from carbon_r.tools.factors import lookup_emission_factor as _lookup_emission_fa
 from carbon_r.tools.methodology import search_methodology as _search_methodology
 from carbon_r.tools.peer import search_peer_disclosures as _search_peer_disclosures
 from carbon_r.tools.peer_figures import lookup_peer_disclosure as _lookup_peer_disclosure
+from carbon_r.tools.peer_figures import year_named_in
 
 
 def _reading_flags(readings: list[dict]) -> dict[str, bool]:
@@ -287,21 +288,39 @@ class Toolkit:
         """GHG Protocol passages, or an honest no_results. No handle: never an input."""
         return self._search(args.question, args.source_id)
 
+    def _asked_year(self, report_year: int | None) -> tuple[int | None, str]:
+        """The report_year to apply, and a note when the model's was dropped: a year the
+        user's question does not name is not applied (Tier 3 Block 1, follow-up 6), so the
+        lookup returns every year held, each figure with its own period."""
+        if report_year is None:
+            return None, ""
+        question = self.session.user_messages[-1] if self.session.user_messages else ""
+        if year_named_in(question, report_year):
+            return report_year, ""
+        return None, (
+            f"\n(report_year {report_year} was not applied: the question names no such year, "
+            "so every year held is returned; state each figure's own period.)"
+        )
+
     def search_peer_disclosures(self, args: SearchPeerDisclosuresArgs) -> ToolResult:
         """Peer-report passages, or an honest no_results. No handle: never an input."""
-        return self._search_peers(
+        report_year, note = self._asked_year(args.report_year)
+        result = self._search_peers(
             args.question,
             company=args.company,
             sector=args.sector,
-            report_year=args.report_year,
+            report_year=report_year,
         )
+        return result.model_copy(update={"message": result.message + note}) if note else result
 
     def lookup_peer_disclosure(self, args: LookupPeerDisclosureArgs) -> ToolResult:
         """Verified peer figures, as printed, or an honest no_results. No handle."""
-        return self._lookup_peers(
+        report_year, note = self._asked_year(args.report_year)
+        result = self._lookup_peers(
             args.company,
             args.scope,
             method=args.method,
             scope3_category=args.scope3_category,
-            report_year=args.report_year,
+            report_year=report_year,
         )
+        return result.model_copy(update={"message": result.message + note}) if note else result
